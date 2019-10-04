@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * IO class, generic kernel/vm communications point.
+ * IO class, generic kernel/vm communications point. DEPRECATED - redesign?
  *
 **/
 
@@ -60,7 +60,7 @@ static int io_4_equals(pvm_object_t me, struct data_area_4_thread *tc )
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
     pvm_object_t him = POP_ARG;
 
@@ -140,7 +140,7 @@ static int io_10_pre_get(pvm_object_t me, struct data_area_4_thread *tc )
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 0);
+    CHECK_PARAM_COUNT(0);
 
     //LOCKME(me);
 
@@ -168,7 +168,7 @@ static int io_8_get(pvm_object_t me, struct data_area_4_thread *tc )
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 0);
+    CHECK_PARAM_COUNT(0);
 
     LOCKME(meda);
 
@@ -263,7 +263,7 @@ static int io_11_pre_put(pvm_object_t me, struct data_area_4_thread *tc )
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 0);
+    CHECK_PARAM_COUNT(0);
 
     //LOCKME(me);
 
@@ -291,7 +291,7 @@ static int io_9_put(pvm_object_t me, struct data_area_4_thread *tc )
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
     pvm_object_t him = POP_ARG;
 
@@ -388,7 +388,7 @@ static int io_12_setvar(pvm_object_t me, struct data_area_4_thread *tc )
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
     pvm_object_t var = POP_ARG;
     pvm_object_t val = POP_ARG;
@@ -411,7 +411,7 @@ static int io_13_getvar(pvm_object_t me, struct data_area_4_thread *tc )
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
     pvm_object_t var = POP_ARG;
 
@@ -435,9 +435,9 @@ static int io_14_reset(pvm_object_t me, struct data_area_4_thread *tc )
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    int is_reset = POP_INT();
+    int is_reset = AS_INT(args[0]);
 
     //LOCKME(meda);
     meda->reset = is_reset;

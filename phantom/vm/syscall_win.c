@@ -26,7 +26,7 @@ static int debug_print = 0;
 // --------- window -------------------------------------------------------
 
 
-static int si_window_5_tostring(pvm_object_t o, struct data_area_4_thread *tc )
+static int si_window_5_tostring( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
     DEBUG_INFO;
@@ -35,28 +35,28 @@ static int si_window_5_tostring(pvm_object_t o, struct data_area_4_thread *tc )
 
 
 
-static int win_getXSize(pvm_object_t o, struct data_area_4_thread *tc )
+static int win_getXSize( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object( da->w.xsize ));
 }
 
-static int win_getYSize(pvm_object_t o, struct data_area_4_thread *tc )
+static int win_getYSize( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object( da->w.ysize ));
 }
 
-static int win_getX(pvm_object_t o, struct data_area_4_thread *tc )
+static int win_getX( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object( da->x ));
 }
 
-static int win_getY(pvm_object_t o, struct data_area_4_thread *tc )
+static int win_getY( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
     DEBUG_INFO;
@@ -67,7 +67,7 @@ static int win_getY(pvm_object_t o, struct data_area_4_thread *tc )
 
 
 
-static int win_clear_20(pvm_object_t me , struct data_area_4_thread *tc )
+static int win_clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
@@ -81,14 +81,13 @@ static int win_clear_20(pvm_object_t me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_fill_21(pvm_object_t me , struct data_area_4_thread *tc )
+static int win_fill_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
     DEBUG_INFO;
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
-    int color = POP_INT();
+    CHECK_PARAM_COUNT(1);
+    int color = AS_INT(args[0]);
 
     rgba_t c;
     INT32_TO_RGBA(c, color);
@@ -98,31 +97,29 @@ static int win_fill_21(pvm_object_t me , struct data_area_4_thread *tc )
 }
 
 
-static int win_setFGcolor_22(pvm_object_t me , struct data_area_4_thread *tc )
+static int win_setFGcolor_22( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    int color = POP_INT();
+    int color = AS_INT(args[0]);
     INT32_TO_RGBA(da->fg, color);
 
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_setBGcolor_23(pvm_object_t me , struct data_area_4_thread *tc )
+static int win_setBGcolor_23( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    int color = POP_INT();
+    int color = AS_INT(args[0]);
     INT32_TO_RGBA(da->bg, color);
 
     SYSCALL_RETURN_NOTHING;
@@ -133,20 +130,20 @@ static int win_setBGcolor_23(pvm_object_t me , struct data_area_4_thread *tc )
 #define tty_font &drv_video_8x16san_font
 
 
-static int win_putString_24(pvm_object_t me , struct data_area_4_thread *tc )
+static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
 
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 3);
+    
+    CHECK_PARAM_COUNT(3);
 
-    pvm_object_t _text = POP_ARG;
+    pvm_object_t _text = args[2];
     ASSERT_STRING(_text);
 
-    int y = POP_INT();
-    int x = POP_INT();
+    int y = AS_INT(args[1]);
+    int x = AS_INT(args[0]);
 
 
     int len = pvm_get_str_len( _text );
@@ -176,17 +173,16 @@ static int win_putString_24(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-static int win_putImage_25(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_putImage_25( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 3);
+    CHECK_PARAM_COUNT(3);
 
-    pvm_object_t _img = POP_ARG;
-    int y = POP_INT();
-    int x = POP_INT();
+    pvm_object_t _img = args[2];
+    int y = AS_INT(args[1]);
+    int x = AS_INT(args[0]);
 
     // TODO check class!
     struct data_area_4_bitmap *_bmp = pvm_object_da( _img, bitmap );
@@ -208,16 +204,15 @@ static int win_putImage_25(pvm_object_t me, struct data_area_4_thread *tc )
 }
 
 
-static int win_setSize_26(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_setSize_26( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
-    int y = POP_INT();
-    int x = POP_INT();
+    int y = AS_INT(args[1]);
+    int x = AS_INT(args[0]);
 
     if(x*y > PVM_MAX_WIN_PIXELS)
         SYSCALL_THROW_STRING( "new win size > PVM_MAX_WIN_PIXELS" );
@@ -227,34 +222,32 @@ static int win_setSize_26(pvm_object_t me, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_setPos_27(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_setPos_27( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
-    int y = POP_INT();
-    int x = POP_INT();
+    int y = AS_INT(args[1]);
+    int x = AS_INT(args[0]);
 
     w_move( &(da->w), x, y );
 
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_drawLine_28(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_drawLine_28( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 4);
+    CHECK_PARAM_COUNT(4);
 
-    int ys = POP_INT();
-    int xs = POP_INT();
-    int y = POP_INT();
-    int x = POP_INT();
+    int ys = AS_INT(args[3]);
+    int xs = AS_INT(args[2]);
+    int y  = AS_INT(args[1]);
+    int x  = AS_INT(args[0]);
 
     w_draw_line( &(da->w), x, y, x+xs, y+ys, da->fg );
 
@@ -264,18 +257,17 @@ static int win_drawLine_28(pvm_object_t me, struct data_area_4_thread *tc )
 
 // void	drawBox( var x : int, var y : int, var xsize : int, var ysize : int ) [26] {}
 
-static int win_drawBox_29(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_drawBox_29( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 4);
+    CHECK_PARAM_COUNT(4);
 
-    int ys = POP_INT();
-    int xs = POP_INT();
-    int y = POP_INT();
-    int x = POP_INT();
+    int ys = AS_INT(args[3]);
+    int xs = AS_INT(args[2]);
+    int y  = AS_INT(args[1]);
+    int x  = AS_INT(args[0]);
 
     w_draw_box( &(da->w), x, y, xs, ys, da->fg );
 
@@ -284,18 +276,17 @@ static int win_drawBox_29(pvm_object_t me, struct data_area_4_thread *tc )
 
 // void	fillBox( var x : int, var y : int, var xsize : int, var ysize : int ) [30] {}
 
-static int win_fillBox_30(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_fillBox_30( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 4);
+    CHECK_PARAM_COUNT(4);
 
-    int ys = POP_INT();
-    int xs = POP_INT();
-    int y = POP_INT();
-    int x = POP_INT();
+    int ys = AS_INT(args[3]);
+    int xs = AS_INT(args[2]);
+    int y  = AS_INT(args[1]);
+    int x  = AS_INT(args[0]);
 
     w_fill_box( &(da->w), x, y, xs, ys, da->fg );
 
@@ -305,18 +296,17 @@ static int win_fillBox_30(pvm_object_t me, struct data_area_4_thread *tc )
 
 // void	fillEllipse( var x : int, var y : int, var xsize : int, var ysize : int ) [31] {}
 
-static int win_fillEllipse_31(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_fillEllipse_31( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 4);
+    CHECK_PARAM_COUNT(4);
 
-    int ys = POP_INT();
-    int xs = POP_INT();
-    int y = POP_INT();
-    int x = POP_INT();
+    int ys = AS_INT(args[3]);
+    int xs = AS_INT(args[2]);
+    int y  = AS_INT(args[1]);
+    int x  = AS_INT(args[0]);
 
     w_fill_ellipse( &(da->w), x, y, xs, ys, da->fg );
 
@@ -325,15 +315,14 @@ static int win_fillEllipse_31(pvm_object_t me, struct data_area_4_thread *tc )
 
 // void	setEventHandler( var handler : .ru.dz.phantom.handler );
 
-static int win_setHandler_32(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_setHandler_32( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    pvm_object_t handler = POP_ARG;
+    pvm_object_t handler = args[0];
 
     // TODO check class!
 
@@ -351,16 +340,14 @@ static int win_setHandler_32(pvm_object_t me, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_setTitle_33(pvm_object_t me , struct data_area_4_thread *tc )
+static int win_setTitle_33( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
+    CHECK_PARAM_COUNT(1);
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
-
-    pvm_object_t _text = POP_ARG;
+    pvm_object_t _text = args[0];
     ASSERT_STRING(_text);
 
     int len = pvm_get_str_len( _text );
@@ -378,14 +365,14 @@ static int win_setTitle_33(pvm_object_t me , struct data_area_4_thread *tc )
 }
 
 
-static int win_update_34(pvm_object_t me , struct data_area_4_thread *tc )
+static int win_update_34( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 0);
+    
+    CHECK_PARAM_COUNT(0);
 
 
     w_update( &(da->w) );
@@ -395,45 +382,43 @@ static int win_update_34(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-static int win_scrollHor_35(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_scrollHor_35( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 5);
+    CHECK_PARAM_COUNT(5);
 
-    int s = POP_INT();
-    int ys = POP_INT();
-    int xs = POP_INT();
-    int y = POP_INT();
-    int x = POP_INT();
+    int s  = AS_INT(args[4]);
+    int ys = AS_INT(args[3]);
+    int xs = AS_INT(args[2]);
+    int y  = AS_INT(args[1]);
+    int x  = AS_INT(args[0]);
 
     errno_t err = w_scroll_hor( &(da->w), x, y, xs, ys, s );
 
-    //SYSCALL_RETURN_NOTHING;
     SYSCALL_RETURN(pvm_create_int_object( err ));
 }
 
 
 /// Drawe part of bitmap to window
 /// Same as usual putImage, but copies just subset
-static int win_drawImagePart_36(pvm_object_t me, struct data_area_4_thread *tc )
+static int win_drawImagePart_36( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 3);
+    
+    CHECK_PARAM_COUNT(7);
 
-    int ysize  = POP_INT();
-    int xsize  = POP_INT();
-    int ystart = POP_INT();
-    int xstart = POP_INT();
+    int ysize  = AS_INT(args[6]);
+    int xsize  = AS_INT(args[5]);
+    int ystart = AS_INT(args[4]);
+    int xstart = AS_INT(args[3]);
 
-    pvm_object_t _img = POP_ARG;
-    int y = POP_INT();
-    int x = POP_INT();
+    pvm_object_t _img = args[2];
+    int y = AS_INT(args[1]);
+    int x = AS_INT(args[0]);
 
     // TODO check class!
     struct data_area_4_bitmap *_bmp = pvm_object_da( _img, bitmap );

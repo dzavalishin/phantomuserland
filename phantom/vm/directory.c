@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "vm.dir"
 #include <debug_ext.h>
-#define debug_level_flow 11
+#define debug_level_flow 0
 #define debug_level_error 11
 #define debug_level_info 11
 
@@ -375,7 +375,7 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
         initial_size = DEFAULT_SIZE;
     }
 
-    printf("---- hdir init sz %d\n", initial_size );
+    //printf("---- hdir init sz %d\n", initial_size );
 
 #if DIR_MUTEX_O
     pvm_spin_init( &dir->pvm_lock );
@@ -432,7 +432,7 @@ void pvm_internal_init_directory(pvm_object_t  os)
     //da->nEntries = 0;
 
     //da->container = pvm_create_binary_object( da->elSize * da->capacity , 0 );
-    printf("---- hdir init obj\n" );
+    //printf("---- hdir init obj\n" );
 
     errno_t rc = hdir_init( da, 0 );
     if( rc ) panic("can't create directory"); // TODO do not panic? must return errno?

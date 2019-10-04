@@ -25,7 +25,7 @@ static int debug_print = 0;
 
 
 
-static int si_tcp_tostring_5(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_tostring_5( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
@@ -33,30 +33,30 @@ static int si_tcp_tostring_5(pvm_object_t me , struct data_area_4_thread *tc )
 }
 
 
-static int si_tcp_connect_16(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_connect_16( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
+    
 
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
     //SYSCALL_PUT_THIS_THREAD_ASLEEP()
 
     SYSCALL_THROW_STRING( "not implemented" );
 }
 
-static int si_tcp_disconnect_17(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_disconnect_17( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
+    
 
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
 
     SYSCALL_THROW_STRING( "not implemented" );
@@ -65,15 +65,15 @@ static int si_tcp_disconnect_17(pvm_object_t me , struct data_area_4_thread *tc 
 
 
 
-static int si_tcp_waitsend_18(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_waitsend_18( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
+    
 
-    CHECK_PARAM_COUNT(n_param, 0);
+    CHECK_PARAM_COUNT(0);
 
 //    if(!si_tcp_ready_to_send(da))
 //        SYSCALL_PUT_THIS_THREAD_ASLEEP();
@@ -88,15 +88,15 @@ static int si_tcp_waitsend_18(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-static int si_tcp_send_19(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_send_19( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
+    
 
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
 
     SYSCALL_THROW_STRING( "not implemented" );
@@ -107,15 +107,14 @@ static int si_tcp_send_19(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-static int si_tcp_waitrecv_20(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_waitrecv_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
 //    if(!si_tcp_ready_to_recv(da))
 //        SYSCALL_PUT_THIS_THREAD_ASLEEP();
@@ -128,16 +127,14 @@ static int si_tcp_waitrecv_20(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-static int si_tcp_recv_21(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_recv_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 2);
-
+    CHECK_PARAM_COUNT(2);
 
     SYSCALL_THROW_STRING( "not implemented" );
 }
@@ -148,16 +145,15 @@ static int si_tcp_recv_21(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-static int si_tcp_waitaccept_22(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_waitaccept_22( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 1);
-    int backlog = POP_INT();
+    CHECK_PARAM_COUNT(1);
+    int backlog = AS_INT(args[0]);
     (void) backlog;
 
     //SYSCALL_PUT_THIS_THREAD_ASLEEP()
@@ -166,16 +162,14 @@ static int si_tcp_waitaccept_22(pvm_object_t me , struct data_area_4_thread *tc 
 }
 
 
-static int si_tcp_accept_23(pvm_object_t me , struct data_area_4_thread *tc )
+static int si_tcp_accept_23( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
-
-    CHECK_PARAM_COUNT(n_param, 2);
-
+    
+    CHECK_PARAM_COUNT(2);
 
     SYSCALL_THROW_STRING( "not implemented" );
 }

@@ -17,6 +17,9 @@
 #include <sys/cdefs.h>
 #include <vm/internal_da.h>
 
+// Size of syscall instruction in bytes, to rewind IP on execution syscall
+#define VM_SYSCALL_INSTR_SIZE 2
+
 
 void pvm_exec(pvm_object_t current_thread);
 

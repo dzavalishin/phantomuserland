@@ -58,26 +58,24 @@ static int debug_print = 0;
 */
 
 
-static int tostring_5(pvm_object_t me , struct data_area_4_thread *tc )
+static int tostring_5( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
     SYSCALL_RETURN( pvm_create_string_object( "tty window" ));
 }
 
-static int putws_17(pvm_object_t me , struct data_area_4_thread *tc )
+static int putws_17( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
 
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
     //printf("putws font %d,%d\n", da->font_width, da->font_height );
+    
+    CHECK_PARAM_COUNT(1);
 
-
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
-
-    pvm_object_t _text = POP_ARG;
+    pvm_object_t _text = args[0];
     ASSERT_STRING(_text);
 
     int len = pvm_get_str_len( _text );
@@ -103,7 +101,7 @@ static int putws_17(pvm_object_t me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int getwc_16(pvm_object_t me , struct data_area_4_thread *tc )
+static int getwc_16( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
@@ -116,18 +114,16 @@ static int getwc_16(pvm_object_t me , struct data_area_4_thread *tc )
 }
 
 
-static int debug_18(pvm_object_t me , struct data_area_4_thread *tc )
+static int debug_18( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
 
     //struct data_area_4_tty      *da = pvm_data_area( me, tty );
+    
+    CHECK_PARAM_COUNT(1);
 
-
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
-
-    pvm_object_t o = POP_ARG;
+    pvm_object_t o = args[0];
 
     //pvm_object_print( o );
     printf("\n\nobj dump: ");
@@ -140,17 +136,16 @@ static int debug_18(pvm_object_t me , struct data_area_4_thread *tc )
 }
 
 
-static int gotoxy_19(pvm_object_t me , struct data_area_4_thread *tc )
+static int gotoxy_19( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
-    int goy = POP_INT();
-    int gox = POP_INT();
+    int goy = AS_INT(args[1]);
+    int gox = AS_INT(args[0]);
 
     da->x = da->font_width * gox;
     da->y = da->font_height * goy;
@@ -158,7 +153,7 @@ static int gotoxy_19(pvm_object_t me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int clear_20(pvm_object_t me , struct data_area_4_thread *tc )
+static int clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
@@ -172,17 +167,16 @@ static int clear_20(pvm_object_t me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int setcolor_21(pvm_object_t me , struct data_area_4_thread *tc )
+static int setcolor_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    int color = POP_INT();
+    int color = AS_INT(args[0]);
     (void) color;
     //int attr = (short)color;
 
@@ -192,14 +186,14 @@ static int setcolor_21(pvm_object_t me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int fill_22(pvm_object_t me , struct data_area_4_thread *tc )
+static int fill_22( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "not implemented" );
 }
 
-static int putblock_23(pvm_object_t me , struct data_area_4_thread *tc )
+static int putblock_23( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
@@ -208,32 +202,29 @@ static int putblock_23(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-static int tty_setWinPos_24(pvm_object_t me, struct data_area_4_thread *tc )
+static int tty_setWinPos_24( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
-    int y = POP_INT();
-    int x = POP_INT();
+    int y = AS_INT(args[1]);
+    int x = AS_INT(args[0]);
 
     w_move( &(da->w), x, y );
 
     SYSCALL_RETURN_NOTHING;
 }
 
-static int tty_setWinTitle_25(pvm_object_t me , struct data_area_4_thread *tc )
+static int tty_setWinTitle_25( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
+    CHECK_PARAM_COUNT(1);
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
-
-    pvm_object_t _text = POP_ARG;
+    pvm_object_t _text = args[0];
     ASSERT_STRING(_text);
 
     int len = pvm_get_str_len( _text );

@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "vm.sync"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -212,12 +212,51 @@ void phantom_snapper_reenable_threads( void )
 #define TMP_NO_UNLOCK 0
 //#define MAX_SYS_ARG 16
 
-#define VM_SYSCALL_INSTR_SIZE 2
+// SYS code does instruction undo/redo so that snap stores state with SYS instruction not executed
+#if 1
 
 
 // interlock code of VM blocking syscall (part of .internal.connection class) implementation
 // called from si_connection_13_blocking, calls passed syscall worker implemented in cn_*.c in kernel
-int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_object_t (*syscall_worker)( pvm_object_t , struct data_area_4_thread *, int nmethod, pvm_object_t arg ) )
+int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_object_t (*syscall_worker)( pvm_object_t , struct data_area_4_thread *, int nmethod, pvm_object_t arg ), pvm_object_t* ret, int n_args, pvm_object_t *args )
+{
+    (void) n_args;
+
+    ASSERT_INT(args[1]);
+    int nmethod = pvm_get_int(args[1]);
+    pvm_object_t arg = args[0];
+
+    SHOW_FLOW( 5, "method %d start", nmethod );
+
+    if(phantom_virtual_machine_stop_request)
+    {
+        SHOW_FLOW0( 5, "VM thread will die now");
+        hal_exit_kernel_thread();
+    }
+
+    vm_unlock_persistent_memory();
+
+    // now do syscall - can block
+    pvm_object_t oret = syscall_worker( this, tc, nmethod, arg );
+
+    vm_lock_persistent_memory();
+
+    ref_dec_o( arg ); // Ref will be lost if restart? - No, control will get here again.
+    *ret = oret;
+
+    SHOW_FLOW( 5, "method %d end", nmethod );
+    return 1; // Not throw
+}
+
+
+#else
+
+
+
+
+// interlock code of VM blocking syscall (part of .internal.connection class) implementation
+// called from si_connection_13_blocking, calls passed syscall worker implemented in cn_*.c in kernel
+int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_object_t (*syscall_worker)( pvm_object_t , struct data_area_4_thread *, int nmethod, pvm_object_t arg ), pvm_object_t* ret, int n_args, pvm_object_t *args )
 {
 
     // NB args must be popped before we push retcode
@@ -261,12 +300,12 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 // test if it is a cause for VM crash
 #if TMP_NO_UNLOCK
 #warning FIX ME
-    pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
+    pvm_object_t oret = syscall_worker( this, tc, nmethod, arg );
 #else
     vm_unlock_persistent_memory();
 
     // now do syscall - can block
-    pvm_object_t ret = syscall_worker( this, tc, nmethod, arg );
+    pvm_object_t oret = syscall_worker( this, tc, nmethod, arg );
 
     vm_lock_persistent_memory();
 #endif
@@ -285,10 +324,11 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
 #else
     pvm_ostack_pop( tc->_ostack );
 #endif
-    pvm_ostack_push( tc->_ostack, ret );
+    pvm_ostack_push( tc->_ostack, oret );
 
     return 1; // not throw
 }
+#endif
 
 
 
