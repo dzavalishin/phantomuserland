@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
+//#include <errno.h> // travis Ci fail
 #include <pthread.h>
 #include <unistd.h>
 
