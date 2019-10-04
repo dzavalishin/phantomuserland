@@ -254,7 +254,7 @@ void w_ttfont_draw_char(
     symb->height = bitmapGlyph->bitmap.rows;
     symb->glyph = glyph;
 
-    posX += glyph->advance.x >> 10;
+    //posX += glyph->advance.x >> 10;
 
     left = MIN(left, symb->posX);
 

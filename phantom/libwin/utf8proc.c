@@ -377,7 +377,6 @@ ssize_t utf8proc_decompose(
   {
     int32_t uc;
     ssize_t rpos = 0;
-    ssize_t decomp_result;
     int boundclass = UTF8PROC_BOUNDCLASS_START;
     while (1) {
       if (options & UTF8PROC_NULLTERM) {
@@ -392,6 +391,7 @@ ssize_t utf8proc_decompose(
         rpos += utf8proc_iterate(str + rpos, strlen - rpos, &uc);
         if (uc < 0) return UTF8PROC_ERROR_INVALIDUTF8;
       }
+      ssize_t decomp_result;
       decomp_result = utf8proc_decompose_char(
         uc, buffer + wpos, (bufsize > wpos) ? (bufsize - wpos) : 0, options,
         &boundclass
@@ -461,13 +461,13 @@ ssize_t utf8proc_reencode(int32_t *buffer, ssize_t length, int options) {
   }
   if (options & UTF8PROC_COMPOSE) {
     int32_t *starter = NULL;
-    int32_t current_char;
     const utf8proc_property_t *starter_property = NULL, *current_property;
     utf8proc_propval_t max_combining_class = -1;
     ssize_t rpos;
     ssize_t wpos = 0;
     int32_t composition;
     for (rpos = 0; rpos < length; rpos++) {
+      int32_t current_char;
       current_char = buffer[rpos];
       current_property = utf8proc_get_property(current_char);
       if (starter && current_property->combining_class > max_combining_class) {
@@ -530,8 +530,8 @@ ssize_t utf8proc_reencode(int32_t *buffer, ssize_t length, int options) {
   }
   {
     ssize_t rpos, wpos = 0;
-    int32_t uc;
     for (rpos = 0; rpos < length; rpos++) {
+      int32_t uc;
       uc = buffer[rpos];
       wpos += utf8proc_encode_char(uc, ((uint8_t *)buffer) + wpos);
     }

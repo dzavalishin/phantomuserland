@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 
     run_init_functions( INIT_LEVEL_LATE );
 
-#if 0
+#if 1
     videotest();
     //getchar();
     exit(0);

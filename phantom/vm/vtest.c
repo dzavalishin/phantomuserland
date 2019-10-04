@@ -55,7 +55,7 @@ void videotest(void)
                           10, 80 );
     */
 
-    font_handle_t font2 = w_get_system_font_ext( 100 );
+    font_handle_t font2 = w_get_system_font_ext( 50 );
 
     if( font2 == INVALID_POOL_HANDLE )
     {
@@ -64,7 +64,7 @@ void videotest(void)
     }
     else
         w_ttfont_draw_string( w, font2,
-                          "TrueType rulez рулит",
+                          "TrueType рулит",
                           COLOR_LIGHTRED, //COLOR_BLACK,
                           10, 50 );
 
