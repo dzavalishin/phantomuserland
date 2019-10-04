@@ -731,7 +731,8 @@ static int still_have_threads = 0;
 
 // TODO crashes strangely on 1000
 //#define TMANY_HOW_MUCH 1000
-#define TMANY_HOW_MUCH 200
+//#define TMANY_HOW_MUCH 200
+#define TMANY_HOW_MUCH 100
 
 static void simple_thread(void *a)
 {

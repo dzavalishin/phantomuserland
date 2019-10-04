@@ -900,6 +900,17 @@
     }
     else
     {
+#if 1 // dz fixed?
+      for ( i = 0;
+            i < num_coords && blend->normalizedcoords[i] == coords[i];
+            ++i )
+      {
+        if ( i == num_coords )
+          manageCvt = mcvt_retain;
+        else
+          manageCvt = mcvt_load;
+      }
+#else // dist code
       for ( i = 0;
             i < num_coords && blend->normalizedcoords[i] == coords[i];
             ++i );
@@ -907,7 +918,7 @@
           manageCvt = mcvt_retain;
         else
           manageCvt = mcvt_load;
-
+#endif
       /* If we don't change the blend coords then we don't need to do  */
       /* anything to the cvt table.  It will be correct.  Otherwise we */
       /* no longer have the original cvt (it was modified when we set  */

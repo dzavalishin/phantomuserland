@@ -5,9 +5,19 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * IO class, generic kernel/vm communications point.
+ * IO class, generic kernel/vm communications point. DEPRECATED - redesign?
+ * 
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
  *
 **/
+
+
+#define DEBUG_MSG_PREFIX "vm.sysc.io"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
 
 
 #include <phantom_libc.h>
@@ -25,7 +35,7 @@ static int debug_print = 0;
 
 
 
-static int io_0_construct(pvm_object_t o, struct data_area_4_thread *tc )
+static int io_0_construct( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
 
@@ -33,7 +43,7 @@ static int io_0_construct(pvm_object_t o, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int io_1_destruct(pvm_object_t o, struct data_area_4_thread *tc )
+static int io_1_destruct( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
 
@@ -41,26 +51,26 @@ static int io_1_destruct(pvm_object_t o, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int io_2_class(pvm_object_t this_obj, struct data_area_4_thread *tc )
+static int io_2_class( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     //ref_inc_o( this_obj->_class );  //increment if class is refcounted
     SYSCALL_RETURN(this_obj->_class);
 }
 
-static int io_3_clone(pvm_object_t o, struct data_area_4_thread *tc )
+static int io_3_clone( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "io clone called" );
 }
 
-static int io_4_equals(pvm_object_t me, struct data_area_4_thread *tc )
+static int io_4_equals( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
 
     int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
     pvm_object_t him = POP_ARG;
 
@@ -71,14 +81,14 @@ static int io_4_equals(pvm_object_t me, struct data_area_4_thread *tc )
     SYSCALL_RETURN(pvm_create_int_object( ret ) );
 }
 
-static int io_5_tostring(pvm_object_t o, struct data_area_4_thread *tc )
+static int io_5_tostring( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "(io)" ));
 }
 
-static int io_6_toXML(pvm_object_t o, struct data_area_4_thread *tc )
+static int io_6_toXML( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
     DEBUG_INFO;
@@ -134,13 +144,12 @@ static int io_15_hashcode(pvm_object_t me, struct data_area_4_thread *tc )
 
 // No param, no result, blocks if nothing to get
 // Please read comments to io_11_pre_put()
-static int io_10_pre_get(pvm_object_t me, struct data_area_4_thread *tc )
+static int io_10_pre_get( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 0);
+    CHECK_PARAM_COUNT(0);
 
     //LOCKME(me);
 
@@ -162,13 +171,12 @@ static int io_10_pre_get(pvm_object_t me, struct data_area_4_thread *tc )
 
 
 
-static int io_8_get(pvm_object_t me, struct data_area_4_thread *tc )
+static int io_8_get( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 0);
+    CHECK_PARAM_COUNT(0);
 
     LOCKME(meda);
 
@@ -257,13 +265,12 @@ errno_t io_object_put(pvm_object_t ioo, pvm_object_t data )
 
 
 // No param, no result, blocks if buffer full
-static int io_11_pre_put(pvm_object_t me, struct data_area_4_thread *tc )
+static int io_11_pre_put( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 0);
+    CHECK_PARAM_COUNT(0);
 
     //LOCKME(me);
 
@@ -285,15 +292,14 @@ static int io_11_pre_put(pvm_object_t me, struct data_area_4_thread *tc )
 
 
 
-static int io_9_put(pvm_object_t me, struct data_area_4_thread *tc )
+static int io_9_put( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    pvm_object_t him = POP_ARG;
+    pvm_object_t him = args[0];
 
     //SYS_FREE_O(him);
 
@@ -382,16 +388,15 @@ errno_t io_object_get(pvm_object_t ioo, pvm_object_t *data  )
 
 
 // set some var to some value - parameters control, like ioctl
-static int io_12_setvar(pvm_object_t me, struct data_area_4_thread *tc )
+static int io_12_setvar( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
-    pvm_object_t var = POP_ARG;
-    pvm_object_t val = POP_ARG;
+    pvm_object_t var = args[1];
+    pvm_object_t val = args[0];
 
     SYS_FREE_O(var);
     SYS_FREE_O(val);
@@ -405,15 +410,14 @@ static int io_12_setvar(pvm_object_t me, struct data_area_4_thread *tc )
 
 
 // get some var's value - parameters readout, like ioctl
-static int io_13_getvar(pvm_object_t me, struct data_area_4_thread *tc )
+static int io_13_getvar( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    pvm_object_t var = POP_ARG;
+    pvm_object_t var = args[0];
 
     SYS_FREE_O(var);
 
@@ -429,15 +433,14 @@ static int io_13_getvar(pvm_object_t me, struct data_area_4_thread *tc )
 // TODO need some way to destroy communications and unblock all the waiting parties
 
 
-static int io_14_reset(pvm_object_t me, struct data_area_4_thread *tc )
+static int io_14_reset( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_io *meda = pvm_object_da( me, io );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    int is_reset = POP_INT();
+    int is_reset = AS_INT(args[0]);
 
     //LOCKME(meda);
     meda->reset = is_reset;
@@ -453,7 +456,7 @@ static int io_14_reset(pvm_object_t me, struct data_area_4_thread *tc )
 
 
 
-syscall_func_t	syscall_table_4_io[16] =
+syscall_func_t  syscall_table_4_io[16] =
 {
     &io_0_construct,                &io_1_destruct,
     &io_2_class,                    &io_3_clone,

@@ -181,7 +181,7 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     vm_release_snap_lock( t->sub_from_pers_mem_lock_count );
 
 
-    errno_t rc = port_delete_owned_ports( tid, 0 );
+    errno_t rc = phantom_port_delete_owned_ports( tid, 0 );
     if( rc )
         SHOW_ERROR( 0, "Can't kill thread ports: %d", rc );
 

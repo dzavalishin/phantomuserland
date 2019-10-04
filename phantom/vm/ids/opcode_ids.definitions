@@ -28,8 +28,8 @@ id(opcode_os_load32,0x16)
 id(opcode_os_save32,0x17)
 id(opcode_new,0x18) // create new object, class must be on stack
 id(opcode_copy,0x19) // create new object, copy of stack top (just copy of data area as is) TODO do we need it?
-id(opcode_os_compose32,0x1A) // n objects from ostack combine into the object. topmost is a class
-id(opcode_os_decompose,0x1B) // decompose topmost object on stack
+id(opcode_os_compose32,0x1A) // n objects from ostack combine into the object. topmost is a class TODO UNUSED, KILL ME
+id(opcode_os_decompose,0x1B) // decompose topmost object on stack TODO UNUSED, KILL ME
 
 // deprecated? no, we use it
 id(opcode_os_pull32,0x1C) // copy opbject n steps down the ostack on top. pull 0 is dup;

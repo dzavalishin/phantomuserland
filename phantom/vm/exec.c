@@ -366,31 +366,76 @@ static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
 **/
 
 
+/**
+ *
+ * In progress - restartable SYS instruction.
+ *
+ * We restore VM state as it was before SYS is started to execute,
+ * then call kernel code to exec SYS, and if:
+ *
+ * - Kernel returned: we just complete SYS as usual.
+ *
+ * - OS is rebooted and restored from snap shot: SYS instruction is started again.
+ *
+**/
+
 // 
-static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_index )
+static void
+pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_index )
 {
     LISTIA("sys %d start", syscall_index );
 
-    //n_args = is_top();
-
-    // which object's syscall we'll call
-    pvm_object_t o = this_object();
+    da->code.IP -= VM_SYSCALL_INSTR_SIZE;
+    
+    pvm_object_t o = this_object(); // which object's syscall we'll call
 
     syscall_func_t func = pvm_exec_find_syscall( o->_class, syscall_index );
+
+    int n_param = is_top();
+
+    assert( n_param < 32 ); // TODO max 32 sys params - document?!
+
+    pvm_object_t args[n_param];
+    pvm_object_t ret = 0;
+
+    // first parameter is most deep one on stack
+    int i;
+    for( i = 0; i < n_param; i ++ )
+    {
+        args[i] = os_pull( n_param - 1 - i );
+    }
+
+    pvm_exec_save_fast_acc(da); // Before snap that can happen in func()
 
     if( func == 0 )
     {
         LISTIA("sys %d invalid! ", syscall_index );
         // TODO VM throw?
+        pvm_exec_do_throw_object( da, pvm_create_string_object("no syscall") );
+        return;
     }
     else
     {
         // TODO dec refcount for all the args after call?
         // OR! in syscall arg pop?
         // OR! in syscall code?
-        if( func( o, da ) == 0 )	// exec syscall
-            pvm_exec_do_throw_pop(da); // exception reported
+        if( 0 == func( o, &ret, da, n_param, args ) )	// exec syscall
+        {
+            //pvm_exec_do_throw_pop(da); // exception reported
+            pvm_exec_do_throw_object( da, ret ? ret : pvm_create_string_object("syscall thrown null") );
+            LISTIA("sys %d throw", syscall_index );
+            return;
+        }
     }
+
+    // Now really remove params from stack and move IP forward
+    da->code.IP += VM_SYSCALL_INSTR_SIZE;
+    is_pop(); // eat n_param
+
+    for( i = 0; i < n_param; i ++ )
+        os_pop(); // remove parameter
+
+    os_push( ret );
 
     LISTIA("sys %d end", syscall_index );
 }

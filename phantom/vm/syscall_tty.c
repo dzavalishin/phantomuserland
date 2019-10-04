@@ -2,12 +2,21 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * VM TTY window class implementation
+ * Internal (native) classes implementation: VM TTY window 
+ * 
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
  *
 **/
 
+
+#define DEBUG_MSG_PREFIX "vm.sysc.tty"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <phantom_libc.h>
 
@@ -58,26 +67,22 @@ static int debug_print = 0;
 */
 
 
-static int tostring_5(pvm_object_t me , struct data_area_4_thread *tc )
+static int tostring_5( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
     SYSCALL_RETURN( pvm_create_string_object( "tty window" ));
 }
 
-static int putws_17(pvm_object_t me , struct data_area_4_thread *tc )
+static int putws_17( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
 
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
-    //printf("putws font %d,%d\n", da->font_width, da->font_height );
+    CHECK_PARAM_COUNT(1);
 
-
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
-
-    pvm_object_t _text = POP_ARG;
+    pvm_object_t _text = args[0];
     ASSERT_STRING(_text);
 
     int len = pvm_get_str_len( _text );
@@ -97,39 +102,40 @@ static int putws_17(pvm_object_t me , struct data_area_4_thread *tc )
     struct rgba_t fg = da->fg;
     struct rgba_t bg = da->bg;
 
+    // TODO w_font_tty_string_n( &(da->w), tty_font, data, len, ...)
     w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &(da->x), &(da->y) );
     w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
 
-static int getwc_16(pvm_object_t me , struct data_area_4_thread *tc )
+static int getwc_16( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
     char c[1];
 
-    // TODO XXX syscall blocks!
-    c[0] = phantom_dev_keyboard_getc();
+    // wtty_t *tty;
+    // t_get_ctty( get_current_tid(), &tty );
+    // wtty_getc( tty );
+
+    vm_unlock_persistent_memory();
+    c[0] = phantom_dev_keyboard_getc(); // TODO need to read from local window? wtty?
+    vm_lock_persistent_memory();
 
     SYSCALL_RETURN( pvm_create_string_object_binary( c, 1 ));
 }
 
 
-static int debug_18(pvm_object_t me , struct data_area_4_thread *tc )
+static int debug_18( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
 
-    //struct data_area_4_tty      *da = pvm_data_area( me, tty );
+    CHECK_PARAM_COUNT(1);
 
+    pvm_object_t o = args[0];
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
-
-    pvm_object_t o = POP_ARG;
-
-    //pvm_object_print( o );
     printf("\n\nobj dump: ");
     dumpo((addr_t)(o));
     printf("\n\n");
@@ -140,17 +146,16 @@ static int debug_18(pvm_object_t me , struct data_area_4_thread *tc )
 }
 
 
-static int gotoxy_19(pvm_object_t me , struct data_area_4_thread *tc )
+static int gotoxy_19( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
-    int goy = POP_INT();
-    int gox = POP_INT();
+    int goy = AS_INT(args[1]);
+    int gox = AS_INT(args[0]);
 
     da->x = da->font_width * gox;
     da->y = da->font_height * goy;
@@ -158,7 +163,7 @@ static int gotoxy_19(pvm_object_t me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int clear_20(pvm_object_t me , struct data_area_4_thread *tc )
+static int clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
@@ -172,17 +177,16 @@ static int clear_20(pvm_object_t me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int setcolor_21(pvm_object_t me , struct data_area_4_thread *tc )
+static int setcolor_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
     DEBUG_INFO;
-    int n_param = POP_ISTACK;
 
-    CHECK_PARAM_COUNT(n_param, 1);
+    CHECK_PARAM_COUNT(1);
 
-    int color = POP_INT();
+    int color = AS_INT(args[0]);
     (void) color;
     //int attr = (short)color;
 
@@ -192,14 +196,14 @@ static int setcolor_21(pvm_object_t me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int fill_22(pvm_object_t me , struct data_area_4_thread *tc )
+static int fill_22( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
     SYSCALL_THROW_STRING( "not implemented" );
 }
 
-static int putblock_23(pvm_object_t me , struct data_area_4_thread *tc )
+static int putblock_23( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     DEBUG_INFO;
@@ -208,32 +212,29 @@ static int putblock_23(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-static int tty_setWinPos_24(pvm_object_t me, struct data_area_4_thread *tc )
+static int tty_setWinPos_24( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 2);
+    CHECK_PARAM_COUNT(2);
 
-    int y = POP_INT();
-    int x = POP_INT();
+    int y = AS_INT(args[1]);
+    int x = AS_INT(args[0]);
 
     w_move( &(da->w), x, y );
 
     SYSCALL_RETURN_NOTHING;
 }
 
-static int tty_setWinTitle_25(pvm_object_t me , struct data_area_4_thread *tc )
+static int tty_setWinTitle_25( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
 
+    CHECK_PARAM_COUNT(1);
 
-    int n_param = POP_ISTACK;
-    CHECK_PARAM_COUNT(n_param, 1);
-
-    pvm_object_t _text = POP_ARG;
+    pvm_object_t _text = args[0];
     ASSERT_STRING(_text);
 
     int len = pvm_get_str_len( _text );
@@ -252,27 +253,27 @@ static int tty_setWinTitle_25(pvm_object_t me , struct data_area_4_thread *tc )
 
 
 
-syscall_func_t	syscall_table_4_tty[32] =
+syscall_func_t  syscall_table_4_tty[32] =
 {
-    &si_void_0_construct,           	&si_void_1_destruct,
-    &si_void_2_class,               	&si_void_3_clone,
-    &si_void_4_equals,              	&tostring_5,
-    &si_void_6_toXML,               	&si_void_7_fromXML,
+    &si_void_0_construct,               &si_void_1_destruct,
+    &si_void_2_class,                   &si_void_3_clone,
+    &si_void_4_equals,                  &tostring_5,
+    &si_void_6_toXML,                   &si_void_7_fromXML,
     // 8
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&si_void_15_hashcode,
+    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &si_void_15_hashcode,
     // 16
-    &getwc_16,    			&putws_17,
-    &debug_18,               		&gotoxy_19,
-    &clear_20,    			&setcolor_21,
-    &fill_22,     			&putblock_23,
+    &getwc_16,                          &putws_17,
+    &debug_18,                          &gotoxy_19,
+    &clear_20,                          &setcolor_21,
+    &fill_22,                           &putblock_23,
     // 24
-    &tty_setWinPos_24,               	&tty_setWinTitle_25,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&invalid_syscall,
+    &tty_setWinPos_24,                  &tty_setWinTitle_25,
+    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &invalid_syscall,
 
 };
 DECLARE_SIZE(tty);
@@ -365,7 +366,7 @@ void pvm_restart_tty( pvm_object_t o )
 
     tty->w.title = tty->title; // need? must be correct in snap
 
-    // BUG! How do we fill owner? We must have object ref here
+    // TODO BUG! How do we fill owner? We must have object ref here
     //tty->w.owner = -1;
 
     //tty->w.buttons = 0; // ? TODO how do we resetup 'em?
