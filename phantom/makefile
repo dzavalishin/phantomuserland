@@ -4,6 +4,10 @@ default::
 	-@mkdir -p lib
 	@$(MAKE) all
 
+ifeq ($(ARCH),arm)
+EXCLUDED_SUBDIRS=apps
+endif
+
 # subdir offsets - turned off for seems to be bad idea :(
 
 SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS),  libc crypt gl dev libphantom threads newos libtuned libwin libkern libfreetype vm tmalloc user modules apps)
