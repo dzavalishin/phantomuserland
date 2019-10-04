@@ -187,7 +187,7 @@
 
     /* check that we have a valid TrueType file */
     error = sfnt->init_face( stream, face, face_index, num_params, params );
-	FT_TRACE1( ( "done---\n" ) );
+	//FT_TRACE1( ( "done---\n" ) );
     if ( error )
       goto Exit;
 

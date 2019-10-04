@@ -325,3 +325,20 @@ void free(void *address)
 }
 
 
+void *realloc(void *ptr, size_t size)
+{
+    // TODO poor man's realloc
+
+    void *newmem = malloc( size );
+    if( newmem == 0 ) return 0;
+
+    memcpy( newmem, ptr, size ); // XXX ERROR TODO if smaller we're busted!
+
+    free( ptr );
+
+    return newmem;
+}
+
+
+
+

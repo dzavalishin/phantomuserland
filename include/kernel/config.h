@@ -60,6 +60,10 @@
 // TODO killme
 #define NEW_WINDOWS 0
 
+
+#define CONF_TRUETYPE 1
+
+
 #define VM_UNMAP_UNUSED_OBJECTS 0
 
 #define ATA_32_PIO 1

@@ -59,7 +59,11 @@ LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
 
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
-PHANTOM_LIBS = $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libtuned.a $(PLIBDIR)/libnewos.a $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a  $(PLIBDIR)/libwin.a $(PLIBDIR)/libcrypt.a
+PHANTOM_LIBS = \
+    $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libtuned.a $(PLIBDIR)/libnewos.a \
+    $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a \
+    $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a  $(PLIBDIR)/libwin.a \
+    $(PLIBDIR)/libfreetype.a $(PLIBDIR)/libcrypt.a
 
 
 LD_ADDR=--script=$(ARCH)/ld.script

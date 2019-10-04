@@ -95,7 +95,7 @@ void scr_zbuf_reset_win( window_handle_t w )
 #if 1
     // TODO XXX HACK alert - hardcoded decorations size
     const int bw = 3;
-    scr_zbuf_reset_square( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 21 );
+    scr_zbuf_reset_square( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 31 );
 #else
     scr_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
 #endif
@@ -299,7 +299,7 @@ void scr_zbuf_paint()
 {
     int np = scr_get_xsize() * scr_get_ysize();
 
-#if 0
+#if 1
     if(scr_get_bpp() == 24)
     {
         zbuf_t *zbp = zbuf;

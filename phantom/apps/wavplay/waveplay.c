@@ -77,12 +77,14 @@ int main( int argc, char **argv )
     //static char arena[1024*1024];
     //init_malloc( arena, sizeof(arena) );
 
+    printf("wavplay started\n");
 
     if ( argc == 1 ) {
         //printf( "Usage: wavplay [WAVE-File]\n" );
         //return -1;
-        if( play( "/amnt0/siren.wav" ) ) return 1;
-        if( play( "/amnt1/siren.wav" ) ) return 1;
+        if( play( "/amnt0/siren.wav" ) ) 
+            if( play( "/amnt1/siren.wav" ) ) 
+                return 1;
         return 0;
 
     }

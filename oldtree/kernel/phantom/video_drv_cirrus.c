@@ -12,8 +12,8 @@
 
 #define DEBUG_MSG_PREFIX "cirrus"
 #include <debug_ext.h>
-#define debug_level_flow 9
-#define debug_level_error 10
+#define debug_level_flow 0
+#define debug_level_error 0
 
 #include <hal.h>
 //#include <video.h>
@@ -142,6 +142,20 @@ static int cirrus_probe()
 
     cir_device = cir_devices+cir_card;
 
+#if 1
+    {
+        memsize = 1*1024*1024;
+
+        // QEMU gives this, and it is unlikelyu that we'll get real Cirrus :)
+        int r15 = read_vga_register( 0x3C4, 0x15 );
+        switch( r15 )
+        {
+        case 3: 	memsize = 2*1024*1024; break;
+        case 4: 	memsize = 4*1024*1024; break;
+        }
+        SHOW_FLOW( 1, "Memsize r15=%x (%d Kb)", r15, memsize/1024 );
+    }
+#else
     {
         int dram = read_vga_register( 0x3C4, 0xF );
         int conf = read_vga_register( 0x3C4, 0x17 );
@@ -156,8 +170,14 @@ static int cirrus_probe()
         if( conf & CIRRUS_MEMSIZEEXT_DOUBLE )
             memsize *= 2;
 
+        // HACK on QEMU gives right mem size
+
         SHOW_FLOW( 1, "Memsize reg=%x (%d Kb) conf=%x", dram, memsize/1024, conf );
+
+        if( dram & CIRRUS_MEMFLAGS_BANKSWITCH )
+            SHOW_ERROR( 0, "Bank switch is active! memsize reg=%x", dram );
     }
+#endif
 
     cirrus_unlock();
 
@@ -177,16 +197,18 @@ static errno_t cirrus_accel_start(void)
 {
     if( cir_device == 0 )
         return ENXIO;
-#if 0 // doesn't work
+#if 1 // doesn't work
     SHOW_FLOW( 0, "Cirrus accelerator add on start, chip %s", cir_device->name );
 
     // Take over mouse
-    video_drv->redraw_mouse_cursor = currus_set_cursor_pos;
-    video_drv->set_mouse_cursor = cirrus_set_mouse_cursor;
+    video_drv->mouse_redraw_cursor = currus_set_cursor_pos;
+    video_drv->mouse_set_cursor = cirrus_set_mouse_cursor;
 
     // Turn off unused funcs
     video_drv->mouse_disable = vid_null;
     video_drv->mouse_enable = vid_null;
+#else
+    SHOW_FLOW( 0, "Cirrus accelerator disabled, chip %s", cir_device->name );
 #endif
 
     return 0;
@@ -310,16 +332,19 @@ static void cirrus_unlock(void)
 
 static void currus_set_cursor_pos(void)
 {
-#if 1
-    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
-
     unsigned x = video_drv->mouse_x;
     unsigned y = scr_get_ysize() - video_drv->mouse_y;
 
     SHOW_FLOW( 10, "%d * %d", x, y );
+#if 0
+    outb( 0x3C4, CIRRUS_CURSOR_SHOW );
+    outb( 0x3C4, 0x10 | ((x & 7) << 5) );
+    outb( 0x3C4, 0x11 | ((y & 7) << 5) );
+#else
+    write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
 
-    write_vga_register( 0x3C4, 0x10 + ((x & 7) << 5), x >> 3 );
-    write_vga_register( 0x3C4, 0x11 + ((y & 7) << 5), y >> 3 );
+    write_vga_register( 0x3C4, 0x10 | ((x & 7) << 5), x >> 3 );
+    write_vga_register( 0x3C4, 0x11 | ((y & 7) << 5), y >> 3 );
 #endif
 }
 
@@ -333,7 +358,14 @@ static void cirrus_load_cursol_palette(void)
 
     int i = 16*3; // 16 rgb
     while( i-- > 0 )
-        outb( 0x3C9, 0xFF );
+        outb( 0x3C9, 0x0 ); // BG
+
+    outb( 0x3C8, 0x0F );
+
+    i = 16*3; // 16 rgb
+    while( i-- > 0 )
+        outb( 0x3C9, 0xFF ); // FG
+
 
     write_vga_register( 0x3C4, 0x12, CIRRUS_CURSOR_SHOW );
 }
@@ -361,21 +393,78 @@ static void cirrus_dump_cursol_palette(void)
 
 static void cirrus_set_mouse_cursor( drv_video_bitmap_t *cursor )
 {
-    u_int8_t *src = (u_int8_t *) ((addr_t)video_drv->screen + memsize - 16 * 1024);
-    SHOW_FLOW( 0, "vram %p, src %p", video_drv->screen, src );
+    u_int8_t *dst = (u_int8_t *) ((addr_t)video_drv->screen + memsize - 16 * 1024);
+    SHOW_FLOW( 0, "vram %p, dst %p", video_drv->screen, dst );
 
     // optimal value is 48, it takes exact 4Kb from vram
     int r13 = read_vga_register( 0x3C4, 0x13 );
-    src += (r13 & 0x3f) * 256;
-    SHOW_FLOW( 0, "r13 %d, src %p", r13, src );
+    dst += (r13 & 0x3f) * 256;
+    SHOW_FLOW( 0, "r13 %d, dst %p", r13, dst );
 
     // We use 32x32 cursor
-    int cbytes = 32*32*4; // 4K
 
-    memmove( src, cursor->pixel, cbytes ); // TODO wrong - need conversion -- OVERWRITTEN BELOW
+    //memmove( dst, cursor->pixel, cbytes ); // TODO wrong - need conversion -- OVERWRITTEN BELOW
 
-    memset( src, 0xFF, cbytes );
+#if 0
+    int cbytes = 32*32*2/8; // 32 x 32 bits * 2 planes / 8 bits in byte
+    memset( dst, 0xFF, cbytes );
     //SHOW_ERROR0( 0, "not impl");
+#else
+    u_int32_t *p = (void *)dst;
+
+    int i, j;
+
+    const int shift_up = 32 - cursor->ysize;
+    const int shift_left = 32 - cursor->xsize;
+
+    rgba_t get_cp( int x, int y )
+    {
+        y = 31 - y;
+
+        y -= shift_up;
+        x -= shift_left;
+
+        if( x < 0 ) return (rgba_t) { 0, 0, 0, 0 };
+        if( y < 0 ) return (rgba_t) { 0, 0, 0, 0 };
+        if( x >= cursor->xsize ) return (rgba_t) { 0, 0, 0, 0 };
+        if( y >= cursor->ysize ) return (rgba_t) { 0, 0, 0, 0 };
+
+        return cursor->pixel[ (y*cursor->xsize) + x ];
+    }
+
+
+    for( i=0; i < 32; i++ )
+    {
+        u_int32_t andMask = 0;
+        u_int32_t xorMask = 0;
+
+
+        for ( j=0; j < 32; j++ )
+        {
+            rgba_t pixel = get_cp( 31-j, i );
+            if( pixel.a )
+            {
+                if( pixel.r || pixel.g || pixel.b )
+                {
+                    // temp use inverted here, need better cursor
+                    //andMask|= 1 << j;  //foreground
+                    //xorMask|= 1 << j;
+
+                    andMask|=(1<<j);     //inverted
+                }
+                else
+                    xorMask|= 1 << j;    //background
+            }
+
+        }
+
+
+        p[0]  = andMask;
+        p[32] = xorMask;
+        p++;
+    }
+#endif
+
 }
 
 

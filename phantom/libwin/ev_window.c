@@ -28,7 +28,7 @@
 #include <kernel/snap_sync.h>
 
 
-
+// TODO looses events?!
 static void w_do_deliver_event(window_handle_t w)
 {
     //if(w != 0 && w->eventDeliverSema)        hal_sem_release(w->eventDeliverSema);
@@ -160,6 +160,13 @@ static void select_event_target(struct ui_event *e)
     {
         if( w->flags & WFLAG_WIN_NOFOCUS )
             continue;
+
+        if( w->state & WSTATE_WIN_ROLLEDUP )
+            continue;
+
+        if( !(w->state & WSTATE_WIN_VISIBLE) )
+            continue;
+
         if( w->z < wz )
             continue;
 

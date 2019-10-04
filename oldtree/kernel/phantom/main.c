@@ -413,11 +413,12 @@ int main(int argc, char **argv, char **envp)
     printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
 
 #if 1
-    /*
-    printf("PRESS Q TO STOP PHANTOM");
-    while(getchar() != 'Q')
-    ;
-    */
+    {
+        hal_sleep_msec(60000*13);
+        printf("\nWILL CRASH ON PURPOSE\n\n" );
+        hal_sleep_msec(20000);
+        hal_cpu_reset_real();
+    }
 
     while(1)
         hal_sleep_msec(20000);
@@ -500,11 +501,12 @@ void phantom_shutdown(int flags)
             hal_sleep_msec(1000);
     }
 
-    SHOW_FLOW0( 0, "shutdown now" );
+    SHOW_FLOW0( 0, "shutdown in 5 seconds" );
+    hal_sleep_msec(5000);
 
     t_migrate_to_boot_CPU(); // Make sure other CPUs are stopped
 
-    phantom_finish_all_threads();
+    phantom_finish_all_threads(); // TODO all VM threads?
 
     run_stop_functions( STOP_LEVEL_EARLY );
 

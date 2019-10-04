@@ -43,3 +43,10 @@ atoi(const char *str)
 {
 	return((int)strtol(str, (char **)0, 10));
 }
+
+/*
+int  atoin(const char *str, size_t n)
+{
+    return (int)atoln(str, n); 
+}
+*/

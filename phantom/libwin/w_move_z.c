@@ -31,20 +31,47 @@ void w_to_bottom(drv_video_window_t *w)
 
     queue_remove(&allwindows, w, drv_video_window_t *, chain);
     queue_enter_first(&allwindows, w, drv_video_window_t *, chain);
+
+    if( w->w_decor )
+    {
+        queue_remove(&allwindows, w->w_decor, drv_video_window_t *, chain);
+        queue_enter_first(&allwindows, w->w_decor, drv_video_window_t *, chain);
+    }
+
+    if( w->w_title )
+    {
+        queue_remove(&allwindows, w->w_title, drv_video_window_t *, chain);
+        queue_enter_first(&allwindows, w->w_title, drv_video_window_t *, chain);
+    }
+
     drv_video_window_rezorder_all();
 
     w_unlock();
 
     //scr_repaint_all();
     scr_repaint_win( w );
-
 }
+
+
 
 void w_to_top(drv_video_window_t *w)
 {
     w_lock();
 
     w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
+
+    if( w->w_decor )
+    {
+        queue_remove(&allwindows, w->w_decor, drv_video_window_t *, chain);
+        //queue_enter_first(&allwindows, w->w_decor, drv_video_window_t *, chain);
+    }
+
+    if( w->w_title )
+    {
+        queue_remove(&allwindows, w->w_title, drv_video_window_t *, chain);
+        //queue_enter_first(&allwindows, w->w_title, drv_video_window_t *, chain);
+    }
+
 
     queue_remove(&allwindows, w, drv_video_window_t *, chain);
 #if 0
@@ -53,6 +80,8 @@ void w_to_top(drv_video_window_t *w)
     if( (w->flags & WFLAG_WIN_ONTOP) || (queue_empty(&allwindows)) )
     {
         // Trivial case - our window has 'ontop' flag too and can be topmost, or queue is empty
+        if( w->w_decor ) queue_enter(&allwindows, w->w_decor, drv_video_window_t *, chain);
+        if( w->w_title ) queue_enter(&allwindows, w->w_title, drv_video_window_t *, chain);
         queue_enter(&allwindows, w, drv_video_window_t *, chain);
     }
     else
@@ -65,6 +94,8 @@ void w_to_top(drv_video_window_t *w)
             {
                 // Found window with no WFLAG_WIN_ONTOP flag - come on top of it
                 queue_enter_after(&allwindows, iw, w, drv_video_window_t *, chain);
+                if( w->w_decor ) queue_enter_after(&allwindows, iw, w->w_decor, drv_video_window_t *, chain);
+                if( w->w_title ) queue_enter_after(&allwindows, iw, w->w_title, drv_video_window_t *, chain);
                 goto inserted;
             }
         }
@@ -72,6 +103,8 @@ void w_to_top(drv_video_window_t *w)
         // must go to most bottom pos?? near to unreal...
         SHOW_ERROR0( 0, "insert at bottom");
         queue_enter_first(&allwindows, w, drv_video_window_t *, chain);
+        if( w->w_decor ) queue_enter_first(&allwindows, w->w_decor, drv_video_window_t *, chain);
+        if( w->w_title ) queue_enter_first(&allwindows, w->w_title, drv_video_window_t *, chain);
     }
 inserted:
 #endif

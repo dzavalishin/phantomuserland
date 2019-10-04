@@ -192,7 +192,9 @@ void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, 
 #else
         // BUG don't update zbuf if alpha is zero?
 
-        if( !(*isrc>>24) || *zb > zpos ) { zb++; dest++; isrc++; continue; }
+        if( (!(*isrc & 0xFF000000)) || (*zb > zpos) ) { zb++; dest++; isrc++; continue; }
+        //if( (!(*isrc>>24)) || (*zb > zpos) ) { zb++; dest++; isrc++; continue; }
+        //if( !(*isrc>>24) || *zb > zpos ) { zb++; dest++; isrc++; continue; }
         *zb++ = zpos;
         //if( !(src->a) ) { dest++; src++; continue; }
 

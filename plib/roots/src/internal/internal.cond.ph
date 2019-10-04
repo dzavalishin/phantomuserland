@@ -11,6 +11,8 @@
 
 package .internal;
 
+import .internal.mutex;
+
 /**
  *
  * This class has internal implementation (as everything in
@@ -23,8 +25,8 @@ package .internal;
 class .internal.cond
 {
 
-	void wait( .internal.mutex toUnlock ) [8] {  }
-	void twait( .internal.mutex toUnlock, int waitTimeMsec ) [9] {  }
+	void wait( var toUnlock : .internal.mutex ) [8] {  }
+	void twait( var toUnlock : .internal.mutex, var waitTimeMsec : int ) [9] {  }
 
 	void broadcast() [10] {  }
 	void signal() [11] {  }

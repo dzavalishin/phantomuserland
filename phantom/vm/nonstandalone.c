@@ -4,6 +4,8 @@
 #  define NO_NETWORK
 #endif
 
+#  define NO_NETWORK
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
@@ -11,14 +13,16 @@
 
 #include <setjmp.h>
 
-#include <errno.h>
+//#include <errno.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #ifndef NO_NETWORK
-#  include <sys/socket.h>
+#  include <sys/socket.h> // breaks Travis CI compile
 #  include <netinet/in.h>
-#  include <arpa/inet.h>
+#  include <arpa/inet.h> 
 #endif
 
 #include <pthread.h>
@@ -235,3 +239,129 @@ int get_current_tid()
     //return -1;
 #endif
 }
+
+// TODO FIXME errno.h breaks compile on Linux :(
+// EPIPE
+#define errno 32
+
+int k_open( int *fd, const char *name, int flags, int mode )
+{
+    int rc = open( name, O_RDWR, 0666 );
+    if( rc < 0 )
+        return errno;
+
+    *fd = rc;
+    return 0;
+}
+
+
+int k_read( int *nread, int fd, void *addr, int count )
+{
+    int rc = read( fd, addr, count );
+    if( rc < 0 )
+        return errno;
+    if(nread) *nread = rc;
+    return 0;
+}
+
+
+int k_write( int *nwritten, int fd, const void *addr, int count )
+{
+    int rc = write( fd, addr, count );
+    if( rc < 0 )
+        return errno;
+    if(nwritten) *nwritten = rc;
+    return 0;
+}
+
+
+
+int k_seek( int *pos, int fd, int offset, int whence )
+{
+    off_t rc = lseek( fd, offset, whence );
+    if( rc < 0 )
+        return errno;
+    if( pos ) *pos = rc; // TODO var size?
+    return 0;
+}
+
+
+/*
+
+  can't be implemmnted here - we're unable to bring both Phantom and host OS struct stat in one C file
+  and move fields by hand.
+
+int k_stat( const char *path, struct stat *data, int statlink )
+{
+
+}
+*/
+
+int k_stat_size( const char *path, unsigned int *size ) // just get file size
+{
+    struct stat sb;
+    int rc = stat( path, &sb );
+    if( rc ) return rc;
+
+    *size = sb.st_size;
+
+    return 0;
+}
+
+
+int k_close( int fd )
+{
+    int rc = close( fd );
+    if( rc ) return errno;
+    return 0;
+}
+
+
+#if defined(__CYGWIN__)
+
+// for some reason .weak does not work in cygwin
+
+asm("\
+.globl _longjmp_machdep;\
+    _longjmp_machdep: jmp _longjmp \
+    ");
+
+asm("\
+.globl _setjmp_machdep;\
+    _setjmp_machdep: jmp _setjmp \
+    ");
+
+
+#else
+
+//void machdep_longjmp () __attribute__ ((weak, alias ("longjmp")));
+//void machdep_setjmp () __attribute__ ((weak, alias ("setjmp")));
+
+
+// freetype lib wants 'em in user mode too, provide hacks to call GCC libc ones
+
+//#warning untested
+
+asm("\
+.weak _longjmp_machdep;\
+.globl _longjmp_machdep;\
+    _longjmp_machdep: jmp _longjmp \
+    ");
+
+asm("\
+.weak _setjmp_machdep;\
+.globl _setjmp_machdep;\
+    _setjmp_machdep: jmp _setjmp \
+    ");
+
+
+//void longjmp_machdep ( void *jb, int a ){    __asm__("jmp __longjmp");}
+//int setjmp_machdep ( void *jb ) {    __asm__("jmp __setjmp");}
+
+
+#endif
+
+
+
+
+

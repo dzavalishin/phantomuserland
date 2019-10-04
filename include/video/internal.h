@@ -16,9 +16,15 @@
 #include <video/bitmap.h>
 #include <video/window.h>
 #include <video/zbuf.h>
+#include <video/font.h>
 
 void init_new_windows(void);
 
+#if CONF_TRUETYPE
+void init_truetype(void);
+
+extern font_handle_t decorations_title_font;
+#endif
 
 // -----------------------------------------------------------------------
 // windows lock - must be taken when manipulate all win q or on update
