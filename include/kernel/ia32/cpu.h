@@ -136,6 +136,7 @@ typedef struct cpu_ent {
 void i386_cpuid(unsigned int selector, unsigned int *data);
 void set_cr3(int cr3);
 u_int32_t get_cr2(void);
+u_int32_t get_cr3(void);
 
 // hack/shortcut
 //int boot_cpu_has_apic(void);

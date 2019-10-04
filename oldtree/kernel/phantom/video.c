@@ -42,6 +42,7 @@ extern struct drv_video_screen_t        video_driver_null;
 
 
 extern struct drv_video_screen_t        video_driver_vmware_svga;
+extern struct drv_video_screen_t        video_driver_parallels_svga;
 
 // TODO: panic must switch to text mode!
 
@@ -66,6 +67,9 @@ struct drv_video_screen_t *video_drivers[] =
 
     // test one. never reports success
     &video_driver_direct_vesa,
+
+    // Parallels paravirt video
+    &video_driver_parallels_svga,
 
     // General reg clone driver
 //    &video_driver_gen_clone,
@@ -164,7 +168,7 @@ static void select_accel_driver(void)
         }
 
         SHOW_FLOW( 2, "Probing %s video driver: ", drv->name);
-        if( !drv->probe() )
+        if( drv->probe() != VIDEO_PROBE_ACCEL )
         {
             SHOW_FLOW( 2, "Video driver %s : No", drv->name);
             continue;
@@ -200,8 +204,8 @@ static void video_post_start()
     drv_video_init_windows();
 
     // Have VESA driver, add companion accelerator if possible
-    if( was_enforced )
-        select_accel_driver();
+    //if( was_enforced )
+    select_accel_driver();
 
     SHOW_FLOW0( 3, "Video console init" );
     phantom_init_console_window();

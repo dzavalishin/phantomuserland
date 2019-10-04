@@ -6,6 +6,7 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.compiler.PhantomStackVar;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -25,7 +26,7 @@ public class ForeachNode extends BiNode {
 		this.ident = ident;
 	}
 	public String toString()  {    return "foreach " + ident;  }
-	public void find_out_my_type() { if( type == null ) type = new PhTypeVoid(); checkPresetType(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
 	public boolean is_const() { return false; }
 
 
@@ -81,6 +82,7 @@ public class ForeachNode extends BiNode {
 
 		// now use dup-ped value (iterator) - increment
 		c.emitCall(333,0); // BUG! don't know what Method to call for increment :(
+		c.emitOsDrop(); // call result
 
 		if( _r != null )
 			_r.generate_code(c,s);

@@ -16,7 +16,7 @@
 #include "vm/object_flags.h"
 #include "vm/exception.h"
 
-#define hal_printf printf
+//#define hal_printf printf
 
 #define int_size() 4
 #define long_size() 8
@@ -58,7 +58,7 @@ throw_bounds( int ip, int max_IP, char *where )
 {
     char errtext[200];
     snprintf(errtext, sizeof(errtext)-1, "%s: IP out of bounds (IP=%d, max=%d)", where, ip, max_IP );
-    pvm_exec_panic( errtext );
+    pvm_exec_panic0( errtext );
 }
 
 
@@ -113,7 +113,7 @@ unsigned int pvm_code_get_rel_IP_as_abs(struct pvm_code_handler *code)
     return here + (int)pvm_code_get_int32(code);
 }
 
-struct pvm_object pvm_code_get_string(struct pvm_code_handler *code)
+pvm_object_t pvm_code_get_string(struct pvm_code_handler *code)
 {
     int len = pvm_code_get_int32(code);
     const unsigned char *sp = code->code+code->IP;
@@ -131,12 +131,12 @@ struct pvm_object pvm_code_get_string(struct pvm_code_handler *code)
  *
  **/
 
-void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, struct pvm_object code)
+void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, pvm_object_t code)
 {
-    if( !(code.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) )
-        pvm_exec_panic("exec: not a code object");
+    if( !(code->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) )
+        pvm_exec_panic0("exec: not a code object");
 
-    struct data_area_4_code *da = (struct data_area_4_code *)&(code.data->da);
+    struct data_area_4_code *da = (struct data_area_4_code *)&(code->da);
 
     cf->code = da->code;
     cf->IP_max = da->code_size;

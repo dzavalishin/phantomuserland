@@ -10,6 +10,7 @@
 **/
 
 #include <windows.h>
+#include <unistd.h>
 
 
 
@@ -103,17 +104,18 @@ int win_hal_mutex_is_locked(void *_m)
     return impl->lock;
 }
 
-
+/*
 //extern int errno;
 #include <errno.h>
-errno_t k_write( int *nwritten, int fd, const void *addr, int count )
+//errno_t k_write( int *nwritten, int fd, const void *addr, int count )
+int k_write( int *nwritten, int fd, const void *addr, int count )
 {
 	int rc = write( fd, addr, count );
 	if( rc < 0 ) return errno;
 	*nwritten = rc;
 	return 0;
 }
-
+*/
 
 
 

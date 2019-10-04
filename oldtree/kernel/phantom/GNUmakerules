@@ -59,7 +59,11 @@ LIBGCC := `$(CC) $(PHANTOM_CFLAGS) --print-libgcc-file-name`
 
 PLIBDIR=$(realpath $(PHANTOM_HOME))/phantom/lib
 
-PHANTOM_LIBS = $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libtuned.a $(PLIBDIR)/libnewos.a $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a  $(PLIBDIR)/libwin.a $(PLIBDIR)/libcrypt.a
+PHANTOM_LIBS = \
+    $(PLIBDIR)/libphantom_vm.a $(PLIBDIR)/libtuned.a $(PLIBDIR)/libnewos.a \
+    $(PLIBDIR)/libphantom.a $(PLIBDIR)/libthreads.a $(PLIBDIR)/libkern.a \
+    $(PLIBDIR)/libdev.a $(PLIBDIR)/libTinyGL.a  $(PLIBDIR)/libwin.a \
+    $(PLIBDIR)/libfreetype.a $(PLIBDIR)/libcrypt.a
 
 
 LD_ADDR=--script=$(ARCH)/ld.script
@@ -77,11 +81,7 @@ ARCH_OBJS=cache_cpu.o driver_isa_mipsnet.o lowlevel_test.o
 endif
 
 
-ifneq "$(ARCH)" "e2k"
-LD_G_FLAG=-gstabs+
-else
-LD_G_FLAG=-g
-endif
+LD_G_FLAG:=$(PH_DBG)
 
 i386/libi386.a:
 	cd i386; make; cd ..
@@ -98,13 +98,13 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	$(USB_O) floppy.o ide_io.o vm_connect.o \
 	disk_cache.o properties.o mem_disk.o \
 	pci_ahci.o driver_pci_rtl8169.o intrdisp.o mem_pl181_mmc.o \
-	video_drv_i810.o video_drv_generic_regmap.o disk_pool.o \
+	video_drv_i810.o video_drv_generic_regmap.o video_drv_parallels.o disk_pool.o \
 	paging_mem.o user_trap.o mem_lanc111.o video_drv_icp_vga.o \
 	vm_load.o pci_es1370.o mem_pl011_uart.o \
 	ff.o stray_check.o sbrk.o mem_pl050_ps2.o \
 	test_switch.o test_mem.o test_disk.o test_net.o test_threads.o \
 	test_amap.o test_port.o test_userland.o test_pool.o test_video.o \
-	test_crypt.o test_wtty.o \
+	test_crypt.o test_wtty.o test_misc.o test_hdir.o \
 	events.o smp.o \
 	heap.o heap_pool.o sys.o boot_cmd_line.o \
 	multiboot.o stack.o disk.o disk_q.o tcp.o \
@@ -136,16 +136,20 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	svn_version.o profile.o trace.o $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
 
 	@echo "Linking $@ ---------------------------------------------"
+ifdef TARGET_OS_MAC
+	$(LD) $(LD_G_FLAG) $(LD_ADDR) -o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) crtn.o
+else
 	@$(CC) $(LD_G_FLAG) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) $(LIBGCC) crtn.o 
+endif
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
 	cat < $@ > $(TFTP_PATH)/$@
 	cat < $@ > ../../../run/fat/boot/$@
 	cat < $@ > ../../../run/fat/boot/$@.$(ARCH)
 	@echo --- kernel build finished
-	-@mv -t d *.d
-	-@mv -t d unix/*.d
-	-@mv -t d $(ARCH)/boards/*.d
+	-@mv  *.d d
+	-@mv  unix/*.d d
+	-@mv  $(ARCH)/boards/*.d d
 
 #	objdump -x $@.pe >$@.pe.sym
 #	gzip < $@ > $(TFTP_PATH)/$@.gz

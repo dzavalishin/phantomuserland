@@ -4,27 +4,20 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
- *
-**/
-
-package .phantom;
-import .phantom.os.time;
-
-/**
- *
  * Main OS services implementation.
  * Current implementation is temporary and lets everybody to 
  * replace OS servivce with own implementation. This will be changed.
  *
 **/
 
+
+package .phantom;
+import .phantom.os.time;
+
 class osimpl
 {
         .internal.object bootObject;
-	.phantom.os.time timeServer;
+        .phantom.os.time timeServer;
 
         void init(var _bootObject : .internal.object ) { bootObject = _bootObject; }
 
@@ -36,7 +29,7 @@ class osimpl
             var size : int;
             var i : int;
 
-            size = env.12(); // hack, of course
+            size = (int)env.12(); // hack, of course
             i = size;
 
             while( i > 0 )

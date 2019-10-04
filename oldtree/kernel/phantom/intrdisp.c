@@ -291,6 +291,7 @@ void hal_softirq_dispatcher(struct trap_state *ts)
         {
             if( !(softirq_requests & (1 << sirq)) )
                 continue;
+
             softirq_requests &= ~(1 << sirq);
 
             //hal_sti(); // TODO ERROR we have to come to scheduler thread switch without turning interrupts on! We keep spinlock locked!
@@ -299,9 +300,12 @@ void hal_softirq_dispatcher(struct trap_state *ts)
             STAT_INC_CNT(STAT_CNT_SOFTINT);
 
             hal_cli();
+
+            //if( 0 == softirq_requests ) goto final; // Usually we have just one
+            if( 0 == softirq_requests ) break; // Usually we have just one
         }
     }
-
+//final:
 #if USE_SOFTIRQ_DISABLE
     assert(IS_SOFT_IRQ_DISABLED());
 #endif

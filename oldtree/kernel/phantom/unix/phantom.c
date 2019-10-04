@@ -37,7 +37,7 @@ struct cb_parm
 static void run_class_thread(void *arg)
 {
     int nmethod;
-    struct pvm_object _this;
+    pvm_object_t _this;
 
     {
         struct cb_parm *p = arg;
@@ -86,7 +86,7 @@ static void run_class_thread(void *arg)
         free(p);
     }
 
-    struct pvm_object args[1];
+    pvm_object_t args[1];
 
     pvm_exec_run_method( _this, nmethod, 0, args );
     ref_dec_o(_this);

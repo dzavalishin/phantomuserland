@@ -2,7 +2,7 @@
  *
  * Phantom OS - Phantom language library
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Simple weater widget
  *
@@ -20,6 +20,8 @@ import .internal.connection;
 
 attribute const * ->!;
 
+// graph color: 180 R, 205 G, 147 B
+// ABGR hex = 0xFF93CDB4
 
 class weather
 {
@@ -31,15 +33,15 @@ class weather
     var curl : .internal.connection;
 
 	var temperature : .internal.string;
+	var itemp : .internal.int;
 
-    //var fio : .internal.connection;
-
-    //var stat_conn : .internal.connection;
-
+	var xpos : int;
+	var ypos : int;
 
     void run(var console : .internal.io.tty)
     {
         var bmp : .internal.bitmap;
+        var bmpw : .internal.bitmap;
 
 		console.putws("Weather win: init\n");
 
@@ -50,16 +52,21 @@ class weather
 
         win.setWinPosition(650,500);
         win.setTitle("Weather");
-        win.setFg(0xFF000000); // black
-		win.setBg(0xFFcce6ff); // light cyan
+        //win.setFg(0xFF000000); // black
+		//win.setBg(0xFFcce6ff); // light cyan
+
+        win.setFg(0xFF93CDB4); // light green
+		win.setBg(0xFFccccb4); // light milk
 
         win.clear();
-		//win.drawImage( 0, 0, getBackgroundImage() ); // crashes kernel!
 		win.drawImage( 0, 0, bmp );
-		//win.drawString( 250, 250, "T -25 C" );
-		win.drawString( 250, 250, "T =" );
+		//win.drawString( 250, 250, "T =" );
 
-		//bmp.paintTo( win, 0, 0 );
+        //loadImages();
+        bmpw = new .internal.bitmap();
+        bmpw.loadFromString(import "../resources/backgrounds/weather_sun_sm.ppm");
+        win.drawImage( 17, 102, bmpw );
+
         win.update();
 
 		console.putws("Weather win: done init\n");
@@ -70,30 +77,44 @@ class weather
 		curl = new .internal.connection();
 		curl.connect("url:http://smart.:8080/rest/items/Current_Outdoor_Air_Temp/state");
 
+		/*
 		temperature = curl.block(null, 0);
 		console.putws("Weather win: curl = ");
 		console.putws(temperature);
 		console.putws("\n");
-		win.drawString( 250, 280, temperature );
+		win.drawString( 280, 240, temperature );
+		*/
 
+        xpos = 17;
 
         while(1)
         {
+			console.putws("Weather win: curl\n");
 			temperature = curl.block(null, 0);
 			console.putws("Weather win: curl = ");
 			console.putws(temperature);
 			console.putws("\n");
 
-			win.drawImage( 0, 0, bmp );
-			win.drawString( 250, 280, temperature );
-			win.drawString( 250, 250, "T =" );
+			//win.drawImage( 0, 0, bmp );
+            //win.drawImage( 17, 102, bmpw );
+            win.drawImagePart( 0, 0, bmp, 250, 240, 120, 22 );
+
+
+			win.drawString( 280, 235, temperature );
+			win.drawString( 250, 235, "T =" );
+
+            itemp = temperature.toInt();
+            ypos = 15 + (itemp * 2);
+
+            if( ypos < 70 )
+                win.fillBox( xpos, ypos, 2, 2 );
 
 			console.putws("Weather win: sleep\n");
 
-            sleep.block(null, 10000);
+            sleep.block(null, 60000);
 
-			console.putws("Weather win: repaint\n");
-
+            xpos = xpos+1;
+            if( xpos > 358 ) xpos = 17;
 		}
 
 
@@ -120,7 +141,7 @@ class weather
 			console.putws("Weather win: repaint\n");
             
 			win.drawImage( 0, 0, wbmp[i] );            
-			win.drawString( 250, 250, "T -26 C" );
+			win.drawString( 250, 240, "T -26 C" );
 
             win.update();
 
@@ -144,13 +165,17 @@ class weather
 
     .internal.string getBackgroundImage()
     {
-        return import "../resources/backgrounds/snow_weather.ppm" ;
+        return import "../resources/backgrounds/weather_window.ppm" ;
+        //return import "../resources/backgrounds/snow_weather.ppm" ;
     }
 
 
 	.internal.bitmap loadImages()
 	{
+        wbmp[7] = new .internal.bitmap();
+        wbmp[7].loadFromString(import "../resources/backgrounds/weather_sun_sm.ppm");
 
+/*
         wbmp[0] = new .internal.bitmap();
         wbmp[0].loadFromString(import "../resources/backgrounds/weather_clouds.ppm");
 
@@ -159,7 +184,7 @@ class weather
 
         wbmp[2] = new .internal.bitmap();
         wbmp[2].loadFromString(import "../resources/backgrounds/weather_ice.ppm");
-/*
+
         wbmp[3] = new .internal.bitmap();
         wbmp[3].loadFromString(import "../resources/backgrounds/weather_lightning.ppm");
 
@@ -172,8 +197,6 @@ class weather
         wbmp[6] = new .internal.bitmap();
         wbmp[6].loadFromString(import "../resources/backgrounds/weather_snow.ppm");
 
-        wbmp[7] = new .internal.bitmap();
-        wbmp[7].loadFromString(import "../resources/backgrounds/weather_sun.ppm");
 
         wbmp[8] = new .internal.bitmap();
         wbmp[8].loadFromString(import "../resources/backgrounds/weather_wind.ppm");

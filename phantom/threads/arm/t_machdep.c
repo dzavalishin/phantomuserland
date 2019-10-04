@@ -41,6 +41,11 @@ void phantom_thread_state_init(phantom_thread_t *t)
     //t->cpu.cpsr = PSR_SYS32_MODE|F_BIT|I_BIT; // We will change it to user mode later
     t->cpu.cpsr = my_cpsr|F_BIT|I_BIT; // We will change it to user mode later
 
+#if CONF_DUAL_PAGEMAP
+    //t_set_paged_mem(0); // by default forbid accessing paged mem
+    int32_t cr3 = arch_switch_pdir( 0 );
+    t->cr3 = cr3;
+#endif
 
     int *sp = (int *)(t->cpu.sp);
 

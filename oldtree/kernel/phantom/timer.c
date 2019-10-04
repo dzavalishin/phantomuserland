@@ -4,7 +4,7 @@
 
 #include <phantom_libc.h>
 
-#if OLD_VM_SLEEP
+#if 0 // OLD_VM_SLEEP
 #warning i am obsolete
 
 #define CN_TM_NET 1

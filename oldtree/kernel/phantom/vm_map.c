@@ -225,6 +225,15 @@ vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state 
 {
     (void) ip;
 
+#if CONF_DUAL_PAGEMAP
+	int ola = arch_is_object_land_access_enabled(); //< check if current thread attempts to access object space having access disabled
+	if( !ola )
+	{
+		lprintf("\nObject land access disabled\n");
+		trap_panic(ts);
+	}
+#endif
+
 #if 1
     vm_page *vmp = addr_to_vm_page((addr_t) address, ts);
 #else
@@ -405,7 +414,22 @@ vm_map_init(unsigned long page_count)
     for( np = 0; np < page_count; np++ )
         vm_page_init( &vm_map_map[np], ((char *)vm_map_start_of_virtual_address_space) + (__MEM_PAGE * np) );
 
-    if(pager_superblock_ptr()->last_snap == 0 )
+
+    disk_page_no_t snap_start = 0;
+
+    if(pager_superblock_ptr()->last_snap != 0 )
+    {
+        hal_printf("-- Use last snap\n");
+        snap_start = pager_superblock_ptr()->last_snap;
+    }
+    else if(pager_superblock_ptr()->prev_snap != 0 )
+    {
+        hal_printf("-- Missing last snap, use previous snap\n");
+        snap_start = pager_superblock_ptr()->prev_snap;
+    }
+
+
+    if( snap_start == 0 )
     {
         hal_printf("\n!!! No pagelist to load !!!\n");
         //panic("vmem load: no pagelist!");
@@ -413,10 +437,10 @@ vm_map_init(unsigned long page_count)
     else
     {
 
-        hal_printf("Loading pagelist from %d...\n", pager_superblock_ptr()->last_snap);
+        hal_printf("Loading pagelist from %d...\n", snap_start);
 
         pagelist loader;
-        pagelist_init( &loader, pager_superblock_ptr()->last_snap, 0, DISK_STRUCT_MAGIC_SNAP_LIST );
+        pagelist_init( &loader, snap_start, 0, DISK_STRUCT_MAGIC_SNAP_LIST );
 
         pagelist_seek(&loader);
 

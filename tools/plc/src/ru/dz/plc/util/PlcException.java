@@ -1,26 +1,36 @@
 package ru.dz.plc.util;
 
+import java.io.IOException;
+
 public class PlcException extends Throwable {
 	private static final long serialVersionUID = 2243954417063793676L;
 	
-	String what = null, where = null, param = null;
+	//String what = null, where = null, param = null;
 
 	public PlcException( String where, String what, String param) {
-		this.what = what; this.where = where; this.param = param;
+		super(what + " in " + where + " (" + param + ")");
+		//this.what = what; this.where = where; this.param = param;
 	}
 
 	public PlcException( String where, String what) {
-		this.what = what; this.where = where; this.param = null;
+		super(what + " in " + where);
+		//this.what = what; this.where = where; this.param = null;
 	}
 
 	public PlcException( String where ) {
-		this.what = "(unknown)"; this.where = where; this.param = null;
+		super(where);
+		//this.what = "(unknown)"; this.where = where; this.param = null;
 	}
 
 
+	public PlcException(String message, IOException cause) {
+		super(message,cause);
+	}
+
+	/*
 	public String toString() {
 		String sub = what + " in " + where;
 		return param == null ? sub : sub + " (" + param + ")";
-	}
+	}*/
 }
 

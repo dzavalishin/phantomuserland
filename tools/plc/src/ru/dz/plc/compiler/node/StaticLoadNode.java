@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomField;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
  /**
@@ -27,7 +28,7 @@ public class StaticLoadNode extends Node {
 		my_class = c;
 	}
 	public String toString()  {    return "load static field "+ident;  }
-	public void find_out_my_type() throws PlcException { if( type == null ) throw new PlcException( "tatic load Node", "no type known", ident ); }
+	public PhantomType find_out_my_type() throws PlcException { throw new PlcException( "static load Node", "no type known", ident ); }
 	public boolean is_const() { return false; }
 
 	
@@ -52,8 +53,24 @@ public class StaticLoadNode extends Node {
 		PhantomField f = s.get_class(). findStaticField(ident);
 		c.emitSummonByName(my_class.getName());
 		c.emitIConst_32bit(f.getOrdinal()); // Parameter
-		c.emitCall(11,1); // Method number 11, 1 parameter (static field ordinal) - read ststic field
+		c.emitCall(11,1); // Method number 11, 1 parameter (static field ordinal) - read static field
 		
 	}
-
+/*
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s)
+			throws PlcException {
+		
+		BiNode args = new BiNode() {
+			
+			@Override
+			public String toString() {
+				// TODO Auto-generated method stub
+				return null;
+			}
+		};
+		cgen.emitMethodCall(new ThisNode(my_class), 11, args , s);
+	}
+*/	
+	
 }

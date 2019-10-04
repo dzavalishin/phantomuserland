@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.trinode;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.MethodSignature;
 import ru.dz.plc.compiler.ParseState;
@@ -23,7 +24,8 @@ import ru.dz.plc.util.PlcException;
  */
 
 
-public class OpMethodCallNode extends TriNode {
+public class OpMethodCallNode extends TriNode 
+{
 	PhantomType obj_type = null; // type of object, which is used as 'this' in call
 
 	public OpMethodCallNode(Node object, Node method, Node args) 
@@ -43,11 +45,11 @@ public class OpMethodCallNode extends TriNode {
 		obj_type = _l.getType();
 
 		MethodNode method = (MethodNode)_m;
-		type = method.get_return_type(obj_type);
 
 		MethodSignature sig = new MethodSignature(method.getIdent(), _r);
 		method.setSignature(sig);
 
+		presetType(method.get_return_type(obj_type));
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
@@ -55,7 +57,7 @@ public class OpMethodCallNode extends TriNode {
 		// NB! Reverse order - _l, then _r - this opcode is brain damaged,
 		// it needs args pushed AFTER object to call
 		_l.generate_code(c,s); // get object
-		move_between_stacks(c, _l.is_on_int_stack());
+		move_between_stacks(c, _l);
 		
 		if( _r != null ) _r.generate_code(c,s); // calc args
 		
@@ -64,9 +66,9 @@ public class OpMethodCallNode extends TriNode {
 		generate_my_code(c,s);
 	}
 
-	public void find_out_my_type() throws PlcException {
-		if( type == null ) throw new PlcException("Method call Node","return type is not set");
-		//type = new ph_type_unknown(); // BUG! Wrong!
+	public PhantomType find_out_my_type() throws PlcException {
+		print_error("return type is not set");
+		throw new PlcException("Method call Node","return type is not set");
 	}
 
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
@@ -85,4 +87,17 @@ public class OpMethodCallNode extends TriNode {
 		c.emitCall(method_ordinal,n_param);
 	}
 
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException 
+	{
+		MethodNode method = (MethodNode)_m;
+
+		int method_ordinal = method.get_ordinal(obj_type);
+		
+		cgen.putln("// Call method "+method.getIdent());
+
+		cgen.emitMethodCall( _l,  method_ordinal, _r, s );
+
+	}
+	
 }

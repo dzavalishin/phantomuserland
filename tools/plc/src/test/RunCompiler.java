@@ -53,7 +53,19 @@ public class RunCompiler {
 	@Test
 	public void testShell() 			{		compile("test/ph/ru.dz/ru.dz.phantom.system.shell.ph" ); }
 	
+	//@Test
+	//public void testMethodCall()		{ 		compile("test/ph/etc/testMethodCallByName.ph");
 	
+	@Test
+	public void testUntypedVar()		{ 		compile("test/plc/test_untyped_var.ph");
+	}
 	
+	@Test
+	public void testBaseFieldAccess()	{ 		compile("test/plc/test_base_field_access.ph");
+	}
+	
+	@Test
+	public void testCtorParam()		{ 		compile("test/plc/test_ctor_param.ph");
+	}
 	
 }

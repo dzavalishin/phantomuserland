@@ -23,6 +23,9 @@
 
 #include <video/internal.h>
 
+#include <kernel/snap_sync.h>
+
+
 #include "ev_private.h"
 
 int                            ev_engine_active = 0;
@@ -153,9 +156,14 @@ static void ev_push_thread()
     // +1 so that it is a bit higher than regular sys threads
     t_current_set_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
+    //vm_lock_persistent_memory(); // We access persistent memory now and then
+
 #if EVENTS_ENABLED && 1
     while(1)
     {
+        //if(phantom_virtual_machine_snap_request) // Check if we need release access to persistent memory
+        //    phantom_thread_wait_4_snap();
+
         ev_remove_extra_unused();
 
         struct ui_event *e;
@@ -173,8 +181,10 @@ static void ev_push_thread()
 
         SHOW_FLOW(8, "%p", e);
 
+        vm_lock_persistent_memory();
         // Deliver to 'em
         ev_push_event(e);
+        vm_unlock_persistent_memory();
 
         // window code will return when done
         //return_unused_event(e);

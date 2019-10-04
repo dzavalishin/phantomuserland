@@ -43,7 +43,7 @@ static fs_probe_t fs_drivers[] =
 
 #if HAVE_UNIX
     { "FAT", 		fs_probe_fat, 	 	fs_start_fat                },
-    { "Ext2",  		fs_probe_ext2, 	        fs_start_ext2               },
+//    { "Ext2",  		fs_probe_ext2,      fs_start_ext2               },
     { "CD",  		fs_probe_cd, 	 	fs_start_cd                 },
 #endif // HAVE_UNIX
 

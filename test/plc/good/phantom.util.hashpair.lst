@@ -2,33 +2,36 @@ Class .phantom.util.hashpair
   Field val
   Field next
   Field key
-  Method .internal.object getKey(  ):
-    return : void
-      ident key : .internal.object
+  Method void setNext( _n: .phantom.util.hashpair ):
+    void  : void
+      = : void
+        ident next : .phantom.util.hashpair
+        ident _n : .phantom.util.hashpair
+
+  C'tor  void <init>(  ):
+    empty : void
+
+  Method void setVal( _val: .internal.object ):
+    void  : void
+      = : void
+        ident val : .internal.object
+        ident _val : .internal.object
 
   Method .internal.object getVal(  ):
     return : void
       ident val : .internal.object
 
-  Method void setNext( _n: .phantom.util.hashpair ):
-    void  : void
-      = : .phantom.util.hashpair
-        ident next : .phantom.util.hashpair
-        ident _n : .phantom.util.hashpair
+  Method .internal.object getKey(  ):
+    return : void
+      ident key : .internal.object
 
   Method .phantom.util.hashpair getNext(  ):
     return : void
       ident next : .phantom.util.hashpair
 
-  Method void setVal( _val: .internal.object ):
-    void  : void
-      = : .internal.object
-        ident val : .internal.object
-        ident _val : .internal.object
-
   Method void setKey( _key: .internal.object ):
     void  : void
-      = : .internal.object
+      = : void
         ident key : .internal.object
         ident _key : .internal.object
 

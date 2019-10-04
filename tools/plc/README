@@ -1,6 +1,25 @@
 Refactoring of old Phantom compiler and Java to Phantom convertor
 
 
+
+Building
+--------
+
+It is supposed that you use Eclipse to work with java sources. mkjar script builds binary and puts it 
+to buld direftory to be used by plc command.
+
+Run `mkjar` to put current build to project `/build` directory.
+
+
+Regress tests
+-------------
+
+If working with compiler please run regress tests in /test/plc.
+
+Make sure you executed mkjar.cmd/.sh before so that tests will use your new compiler binaries.
+
+
+
 Java to Phantom convertor
 -------------------------
 

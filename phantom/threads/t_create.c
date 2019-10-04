@@ -35,8 +35,9 @@ static void common_thread_init(phantom_thread_t *t, int stacksize );
 static hal_spinlock_t tid_lock; //init?
 
 
-#define DEF_STACK_SIZE (128*1024)
-//#define DEF_STACK_SIZE (256*1024)
+//#define DEF_STACK_SIZE (128*1024)
+#define DEF_STACK_SIZE (256*1024)
+//#define DEF_STACK_SIZE (1024*1024)
 
 
 
@@ -96,6 +97,7 @@ phantom_create_thread( void (*func)(void *), void *arg, int flags )
     snap_unlock();
 #endif
 
+    //if(0 == t->cr3) printf(" cr th tid %d set cr3=0x%x ", t->tid, t->cr3);
     return t;
 
 }
@@ -258,6 +260,8 @@ static void common_thread_init(phantom_thread_t *t, int stacksize )
     t->priority = THREAD_PRIO_NORM;
 
     t->cpu_id = GET_CPU_ID();
+
+    t->object_land_access_nest_level = 0;
 
 #if CONF_NEW_CTTY
     t_make_ctty( t );

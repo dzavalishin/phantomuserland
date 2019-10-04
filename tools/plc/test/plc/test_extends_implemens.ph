@@ -39,5 +39,7 @@ class child extends parent implements test_iface
 
     var j;
 
+	void child() {} // iface requires empty c'tor
+
 };
 

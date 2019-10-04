@@ -1,19 +1,22 @@
-Class version 20160114031914861
+Class version 20190820114719961
+
+method <init> ordinal 16
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 
 method run ordinal 8
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: run in .ru.dz.phantom.system.runnable"	//  @11
-  throw				//  @64
-_label_0:	//  @65
-  summon null			//  @65
-  ; Line 29			//  @66
-  const "Abstract runnable started"	//  @66
-  ; Line 29			//  @96
-  throw				//  @96
-  ret				//  @97
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 29
+; str 'Abstract runnable started'
+  const_pool <0>						//  @5
+; Line 29
+  throw							//  @10
+  ret							//  @11
 --
 method end
 

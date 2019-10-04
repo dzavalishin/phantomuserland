@@ -3,7 +3,9 @@ package ru.dz.plc.compiler.binode;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -12,8 +14,13 @@ import ru.dz.plc.util.PlcException;
  * @author dz
  *
  */
-public class ValEqNode extends BiBistackNode {
-	public ValEqNode( Node l, Node r) {    super(l,r);  }
+public class ValEqNode extends EqNeqNode {
+
+	public ValEqNode( Node l, Node r) throws PlcException {    
+		super(l,r);  
+		presetType(PhantomType.getInt());
+	}
+
 	public String toString()  {    return "==";  }
 	public boolean is_on_int_stack() { return true; }
 
@@ -26,8 +33,19 @@ public class ValEqNode extends BiBistackNode {
 		//if(getType().is_int())
 		if(!go_to_object_stack())
 		{
-			if(!(getType().is_int())) throw new PlcException("val_eq_node","not an int in int stack");
+			//if(!(getType().is_int())) throw new PlcException("val_eq_node","not an int in int stack");
+
+			if(!(getType().is_on_int_stack())) throw new PlcException("val_eq_node","not a numeric on int stack");
+
+			//assert(_l.getType().equals(type) );
+			//assert(_r.getType().equals(type) );
+
+			c.emitNumericPrefix(common_type);			
 			c.emitISubLU();
+			
+			if(!common_type.is_int())
+				c.emitNumericCast(common_type, PhantomType.getInt());
+
 			c.emitLogNot();
 		}
 		else
@@ -45,4 +63,12 @@ public class ValEqNode extends BiBistackNode {
 			c.emit_o2i();
 		}
 	}
+
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s) 
+			throws PlcException {
+		generate_cmp_C_code(cgen, s, "Eq");
+	}
+
+	
 }

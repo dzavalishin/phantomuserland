@@ -25,9 +25,10 @@
 
 #include <threads.h>
 
+#include <kernel/snap_sync.h>
 
 
-
+// TODO looses events?!
 static void w_do_deliver_event(window_handle_t w)
 {
     //if(w != 0 && w->eventDeliverSema)        hal_sem_release(w->eventDeliverSema);
@@ -82,9 +83,16 @@ void w_event_deliver_thread(void)
     t_current_set_name("WEvent");
     t_current_set_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
+    //vm_lock_persistent_memory(); // We access persistent memory now and then
+
     while(1)
     {
+        //if(phantom_virtual_machine_snap_request) // Check if we need release access to persistent memory
+        //    phantom_thread_wait_4_snap();
+
         hal_sem_acquire( &we_sem ); // TODO need some 'acquire_all' method to eat all releases
+
+        vm_lock_persistent_memory();
 
     restart:
         w_lock();
@@ -108,6 +116,8 @@ void w_event_deliver_thread(void)
         }
 
         w_unlock();
+        vm_unlock_persistent_memory();
+
     }
 }
 
@@ -150,6 +160,13 @@ static void select_event_target(struct ui_event *e)
     {
         if( w->flags & WFLAG_WIN_NOFOCUS )
             continue;
+
+        if( w->state & WSTATE_WIN_ROLLEDUP )
+            continue;
+
+        if( !(w->state & WSTATE_WIN_VISIBLE) )
+            continue;
+
         if( w->z < wz )
             continue;
 

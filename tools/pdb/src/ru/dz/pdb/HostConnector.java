@@ -19,16 +19,19 @@ public class HostConnector {
 
 	private InetAddress host;
 
+	private boolean connected = false;
+
 	private static Object commSema = new Object(); 
 
 	public HostConnector() throws UnknownHostException, IOException {
 		host = InetAddress.getByName("127.0.0.1");
-		connect();
+		//connect();
 	}
 
-	private void connect() throws IOException {
+	public void connect() throws IOException {
 		s = new Socket( host , 1256);
 		s.setSoTimeout(300);
+		connected = true;
 	}
 
 	private void putDebugChar(byte c) throws IOException
@@ -55,6 +58,7 @@ public class HostConnector {
 			e.printStackTrace();
 		}
 		 */		
+		connected = false;
 	}
 
 	// Something is wrong with it - doesnt work, kills communications
@@ -446,6 +450,10 @@ public class HostConnector {
 			throw new CmdException("Checksum error", e);
 		}
 
+	}
+
+	public boolean isConnected() {
+		return connected ;
 	}
 
 

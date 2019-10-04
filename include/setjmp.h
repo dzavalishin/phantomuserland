@@ -23,19 +23,11 @@
 /*
  * Setjmp/longjmp buffer for i386.
  */
-
-/* XXX The original definition of jmp_buf[] causes problems using
- * libthreads when linked against NetBSD and FreeBSD's libc because
- * it's too small.  When cthreads calls _setjmp, it gets the libc
- * version which saves more state than it's expecting and overwrites
- * important cthread data. =( This definition is big enough for all
- * known systems so far (Linux's is 6, FreeBSD's is 9 and NetBSD's is
- * 10).  
- */
 #if 0
 #define _JBLEN 6
 #else
-#define _JBLEN 10
+//#define _JBLEN 10
+#define _JBLEN (13 * 4) // in user mode we use GCC code, here it's buf size
 #endif
 #endif
 

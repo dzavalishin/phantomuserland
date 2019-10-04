@@ -3,6 +3,8 @@ package ru.dz.plc;
 import java.util.LinkedList;
 import java.io.File;
 import java.io.IOException;
+
+import ru.dz.plc.compiler.ClassMap;
 import ru.dz.plc.compiler.Grammar;
 import ru.dz.plc.parser.*;
 import ru.dz.plc.util.*;
@@ -21,6 +23,7 @@ public class PlcMain {
 	static LinkedList<Token> tokens = new LinkedList<Token>();
 	private static LinkedList<File> classFileSearchPath = new LinkedList<File>();
 	private static String outputPath = null;
+	private static boolean stop_codegen = false;
 	
 	public PlcMain() { }
 
@@ -43,23 +46,39 @@ public class PlcMain {
 		
 		try { 
 			Boolean err = go(args);
+
 			if(err) System.exit(1);
 			}
 		catch( PlcException e ) {
 			System.out.println("Failed: " + e.toString());
+			System.exit(2);
 		}
 		catch( java.io.FileNotFoundException e) {
 			System.out.println("File not found: " + e.toString());
+			System.exit(2);
 		}
 		catch( java.io.IOException e) {
 			System.out.println("IO error: " + e.toString());
+			System.exit(2);
 		}
 
+	}
+
+	public static void codegen() throws PlcException, IOException {
+		ClassMap classes = ClassMap.get_map();
+		if(!stop_codegen)
+		{
+			classes.set_ordinals(); // NO! we must do it after creating default constructors
+			classes.propagateVoid(); // Before preprocess!
+			classes.preprocess();
+			classes.codegen();
+		}
 	}
 
 	public static Boolean go(String[] args) throws FileNotFoundException,
 	IOException, FileNotFoundException, PlcException
 	{
+		boolean ok = true;
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
 			
@@ -72,10 +91,13 @@ public class PlcMain {
 			//System.out.println("Compiling " + arg);
 
 			if( compile(arg) )
-				return true;
+				ok = false;
 		}
 		
-		return false;
+		if(ok)
+			codegen();		
+		
+		return !ok;
 	}
 
 
@@ -131,20 +153,21 @@ public class PlcMain {
 	
 	static boolean compile( String fn ) throws FileNotFoundException, PlcException,
 	IOException {
+
 		FileInputStream  fis = new FileInputStream ( fn );
-
 		Lex l = new Lex(tokens,fn);
-
 		l.set_input(fis);
-
-		Grammar g = new Grammar(l,fn);
+		LexStack ls = new LexStack(l); // permit not just LR1
+	
+		Grammar g = new Grammar(ls,fn);
 
 		try {
-			//Node all = 
 			g.parse();
 
-			if(g.get_error_count() == 0) 
-				g.codegen();
+			// No, do it after all the compiles
+			//if(g.get_error_count() == 0) 				g.codegen();
+			if( g.get_error_count() > 0 )
+				stop_codegen  = true;
 
 			if(g.get_warning_count() > 0)
 				System.out.println(">> "+g.get_warning_count()+" warnings found");

@@ -18,9 +18,11 @@
 
 #define FT_MAKE_OPTION_SINGLE_OBJECT
 
+#warning turned off - makes dup funcs
+/*
 #include <ft2build.h>
 #include "ftgrays.c"
 #include "ftsmooth.c"
-
+*/
 
 /* END */

@@ -1,2 +1,2 @@
 #!/bin/sh
-java -jar ${PHANTOM_HOME}/build/jar/mkpfs.jar $@
+java -jar ${PHANTOM_HOME}/build/jar/mkpfs.jar $@ 

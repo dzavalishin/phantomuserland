@@ -15,6 +15,8 @@
 
 #include <testenv.h>
 
+int do_test_misc(const char *test_parm);
+
 
 int do_test_malloc(const char *test_parm);
 int do_test_physmem(const char *test_parm);
@@ -76,6 +78,7 @@ int do_test_timed_call(const char *test_parm);
 
 int do_test_amap(const char *test_parm);
 int do_test_pool(const char *test_parm);
+int do_test_hdir(const char *test_parm);
 
 int do_test_ports(const char *test_parm);
 

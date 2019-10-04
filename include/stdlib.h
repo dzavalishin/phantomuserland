@@ -27,6 +27,9 @@ strtoul(const char * __restrict nptr, char ** __restrict endptr, int base);
 int atoi(const char *str);
 long atol(const char *str);
 
+int  atoin(const char *str, size_t n); // for phantom strings, n is string len
+long atoln(const char *str, size_t n); // for phantom strings, n is string len
+
 
 #endif // __STDLIB_H__
 

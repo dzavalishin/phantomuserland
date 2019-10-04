@@ -27,6 +27,9 @@
 	    _r__; }))
 
 
+
+
+
 #if SPIN_DEBUG && !HAVE_SMP
 //#warning spin reenter debug on
 int global_lock_entry_count[MAX_CPUS] = {};
@@ -38,6 +41,9 @@ static void spin_dump(hal_spinlock_t *sl)
     panic("reenter");
 }
 #endif
+
+
+
 
 
 __asm (".p2align 4;\n"); // for profiler to distingush funcs
@@ -65,12 +71,15 @@ void hal_spin_lock(hal_spinlock_t *sl)
         while( sl->lock )
             ;
 
-
 #if SPIN_DEBUG && !HAVE_SMP
     global_lock_entry_count[GET_CPU_ID()]++;
     sl->ebp = (addr_t)arch_get_frame_pointer();
 #endif
 }
+
+
+
+
 
 __asm (".p2align 4;\n"); // for profiler to distingush funcs
 
@@ -90,8 +99,11 @@ void hal_spin_unlock(hal_spinlock_t *sl)
         printf("\n!spin unlock STI!\n");
 }
 
-__asm (".p2align 4;\n"); // for profiler to distingush funcs
 
+
+
+
+__asm (".p2align 4;\n"); // for profiler to distingush funcs
 
 
 void check_global_lock_entry_count()

@@ -4,17 +4,14 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: no
- * Preliminary: yes
+ * Bulk (multiple class) file read for userland (non-kernel) env.
  *
- * This source file implements Windows based wrapper for VM to
- * run in Windows-hosted environment.
+ * NB! Used in Windows and Linux builds, TODO rename to non_kernel_bulk.c
  *
 **/
 
-//#include <stdlib.h>
-#include "win_bulk.h"
 
+#include "win_bulk.h"
 
 #include "gcc_replacements.h"
 
@@ -52,6 +49,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     {
         printf("Can't read code: ret = %d\n", ret );
         free( code );
+        fclose( f );
         return 1;
     }
 
@@ -107,5 +105,6 @@ void save_mem( void *mem, int size )
     if( 1 != fwrite( mem, size, 1, f ) )
         printf("Can't save mem dump, IO error\n" );
 
+    fclose( f );
 }
 

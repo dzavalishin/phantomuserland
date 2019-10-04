@@ -48,12 +48,12 @@ class hashmap
 
         // pointer != null
         while( next :!= null )
-	{
+        {
             if( key == next.getKey() )
                 return next;
 
             next = next.getNext();
-	}
+        }
 
         // not found
         if( put == 0 )
@@ -73,7 +73,7 @@ class hashmap
         var hp : hashpair;
 
         lock();
-	hp = find( key, 1 );
+        hp = find( key, 1 );
         hp.setVal(val);
         unlock();
     }
@@ -83,7 +83,7 @@ class hashmap
         var hp : hashpair;
 
         lock();
-	hp = find( key, 0 );
+        hp = find( key, 0 );
         unlock();
         if( hp :== null ) return null;
         return hp.getVal();

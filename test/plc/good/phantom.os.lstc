@@ -1,92 +1,83 @@
-Class version 20160114032155699
+Class version 20190820114455782
+
+method <init> ordinal 19
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 
 method getTimeServer ordinal 16
 --
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: getTimeServer in .phantom.os"	//  @11
-  throw				//  @55
-_label_0:	//  @56
-  ; Line 45			//  @56
-  summon this			//  @56
-  call m=17 nparm=0		//  @57
-  os drop				//  @59
-  ; Line 45			//  @60
-  load fld=0			//  @60
-  call m=16 nparm=0		//  @62
-  ; Line 45			//  @64
-  ret				//  @64
-  ; Line 45			//  @65
-  ret				//  @65
+  arg_count 0						//  @0
+; Line 45
+  summon this						//  @2
+  call m=18 nparm=0					//  @3
+  os drop							//  @5
+; Line 45
+  load fld=0						//  @6
+  call m=19 nparm=0					//  @8
+; Line 45
+  ret							//  @10
+; Line 45
+  ret							//  @11
 --
 method end
 
-method init ordinal 17
+method getKernelEnvironmentValue ordinal 17
 --
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .phantom.os"	//  @11
-  throw				//  @46
-_label_0:	//  @47
-  summon null			//  @47
-  summon null			//  @48
-  ; Line 43			//  @49
-  ; Line 33			//  @49
-  load fld=0			//  @49
-  ; Line 33			//  @51
-  summon null			//  @51
-  ; Line 33			//  @52
-  ptr neq				//  @52
-  jz _label_1			//  @53
-  summon class internal.world	//  @58
-  new				//  @78
-  os dup				//  @79
-  set o stk pos=0			//  @80
-  os drop				//  @85
-  ; Line 39			//  @86
-  get o stk pos=0			//  @86
-  call m=8 nparm=0		//  @91
-  os dup				//  @93
-  set o stk pos=1			//  @94
-  os drop				//  @99
-  ; Line 39			//  @100
-  ; Line 41			//  @100
-  get o stk pos=1			//  @100
-  call m=14 nparm=0		//  @105
-  os dup				//  @107
-  save fld=0			//  @108
-  os drop				//  @110
-  ; Line 41			//  @111
-_label_1:	//  @111
-  ret				//  @111
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 49
+  summon this						//  @5
+  call m=18 nparm=0					//  @6
+  os drop							//  @8
+; Line 50
+  load fld=0						//  @9
+; Line 50
+; inkey
+  get o stk pos=0						//  @11
+; Line 50
+  call m=18 nparm=1					//  @16
+; Line 50
+  ret							//  @18
+; Line 50
+  ret							//  @19
 --
 method end
 
-method getKernelEnvironmentValue ordinal 18
+method init ordinal 18
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: getKernelEnvironmentValue in .phantom.os"	//  @11
-  throw				//  @67
-_label_0:	//  @68
-  summon null			//  @68
-  ; Line 49			//  @69
-  summon this			//  @69
-  call m=17 nparm=0		//  @70
-  os drop				//  @72
-  ; Line 50			//  @73
-  load fld=0			//  @73
-  ; Line 50			//  @75
-  get o stk pos=0			//  @75
-  ; Line 50			//  @80
-  call m=18 nparm=1		//  @80
-  ; Line 50			//  @82
-  ret				//  @82
-  ; Line 50			//  @83
-  ret				//  @83
+  arg_count 0						//  @0
+  stack_reserve obj=2 int=0				//  @2
+; Line 42
+; Line 33
+  load fld=0						//  @5
+; Line 33
+  summon null						//  @7
+; Line 33
+  ptr neq							//  @8
+  jz _label_0						//  @9
+  summon class internal.world				//  @14
+  new							//  @34
+; set w
+  set o stk pos=0						//  @35
+; Line 39
+; w
+  get o stk pos=0						//  @40
+  call m=8 nparm=0					//  @45
+; set th
+  set o stk pos=1						//  @47
+; Line 39
+; Line 41
+; th
+  get o stk pos=1						//  @52
+  call m=14 nparm=0					//  @57
+; set impl
+  save fld=0						//  @59
+; Line 41
+_label_0:	//  @61
+  ret							//  @61
 --
 method end
 

@@ -11,6 +11,10 @@
 #ifndef VCONFIG_H
 #define VCONFIG_H
 
+// New look/fill - accept & KILLME
+#define VIDEO_VANILLA 1
+
+
 #define VIDEO_NEW_BG_WIN 1
 
 
@@ -37,7 +41,7 @@
 //! If window is not covered, we can ignore z buffer when painting
 #define VIDEO_NOZBUF_BLIT 0
 
-
+// Can't turn off :(
 #define VIDEO_NEW_PAINTER 1
 
 #define VIDEO_DRV_WINBLT 0

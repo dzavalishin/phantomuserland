@@ -576,6 +576,7 @@ ssize_t usys_recvfrom(int *err, uuprocess_t *u, int fd, void *buf, size_t buflen
         *err = ENOTSOCK; // TODO correct?
         return -1;
     }
+    assert( fromlen );
 
     CHECK_FD(fd);
     struct uufile *f = GETF(fd);
@@ -797,6 +798,8 @@ errno_t sockaddr_int2unix( struct sockaddr *name, socklen_t *namelen, const i4so
     struct sockaddr_in *iname = (struct sockaddr_in *)name;
 
     SHOW_FLOW( 8, "port %d, ip %s", internal->port, inet_itoa(htonl(NETADDR_TO_IPV4(internal->addr))) );
+
+    assert( namelen );
 
     if( (unsigned)(*namelen) < sizeof(struct sockaddr_in) )
         return EINVAL;

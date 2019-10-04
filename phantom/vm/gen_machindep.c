@@ -64,11 +64,11 @@ ft_entry_t jit_kernel_func_table[JIT_FUNC_TABLE_SIZE];
 void jit_kernel_func_table_init()
 {
     _SF_( JIT_F_LOAD_F_ACC, 		pvm_exec_load_fast_acc );
-    _SF_( JIT_F_THREAD_SLEEP_WORKER,    phantom_thread_sleep_worker );
+    //_SF_( JIT_F_THREAD_SLEEP_WORKER,    phantom_thread_sleep_worker );
     _SF_( JIT_F_WAIT_SNAP, 		phantom_thread_wait_4_snap );
     _SF_( JIT_F_CODE_GET_BYTE, 		pvm_code_get_byte );
     _SF_( JIT_F_CREATE_OBJ, 		pvm_create_object );
-    _SF_( JIT_F_COPY_OBJ,               pvm_copy_object );
+    //_SF_( JIT_F_COPY_OBJ,               pvm_copy_object );
     _SF_( JIT_F_CREATE_INT_OBJ,         pvm_create_int_object );
 
 };

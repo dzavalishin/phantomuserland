@@ -326,7 +326,7 @@ class figure {
 	}
 	
 	// private
-	void rotate(var field : int, var isLeftRotating : int) {
+	void rotate(var field : playingfield, var isLeftRotating : int) {
 		if (!canRotate(field, isLeftRotating)) {
 			throw "InvalidOperation : cannot rotate a figure.";
 		}

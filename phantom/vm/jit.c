@@ -10,6 +10,7 @@
  *
 **/
 
+
 #include <phantom_assert.h>
 #include <errno.h>
 
@@ -57,7 +58,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
     struct jit_out      jo;
     struct jit_out      *j = &jo;
 
-    //struct data_area_4_thread *da = (struct data_area_4_thread *)&(current_thread.data->da);
+    //struct data_area_4_thread *da = (struct data_area_4_thread *)&(current_thread->da);
     // TODO: check for current_thread to be thread for real
 
     // JITted code supposed to be called with da in BX
@@ -426,8 +427,8 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             {
                 if( debug_print_instr ) printf("summon by name; ");
 
-                struct pvm_object name = pvm_code_get_string(code);
-                struct pvm_object cl = pvm_exec_lookup_class_by_name( name ); // TODO XXX must inc ref
+                pvm_object_t name = pvm_code_get_string(code);
+                pvm_object_t cl = pvm_exec_lookup_class_by_name( name ); // TODO XXX must inc ref
                 ref_dec_o(name);
 
                 // Need throw here?
@@ -484,7 +485,7 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
             if( debug_print_instr ) printf(" compose32; ");
             {
                 int num = pvm_code_get_int32(code);
-                struct pvm_object in_class = os_pop();
+                pvm_object_t in_class = os_pop();
                 os_push( pvm_exec_compose_object( in_class, da->_ostack, num ) );
             }
             break;
@@ -492,16 +493,16 @@ errno_t jit_compile_method(struct pvm_code_handler *code)
         case opcode_os_decompose:
             if( debug_print_instr ) printf(" decompose; ");
             {
-                struct pvm_object to_decomp = os_pop();
-                int num = da_po_limit(to_decomp.data);
+                pvm_object_t to_decomp = os_pop();
+                int num = da_po_limit(to_decomp);
                 is_push( num );
                 while( num )
                 {
                     num--;
-                    struct pvm_object o = pvm_get_ofield( to_decomp, num);
+                    pvm_object_t o = pvm_get_ofield( to_decomp, num);
                     os_push( ref_inc_o( o ) );
                 }
-                os_push(to_decomp.data->_class);
+                os_push(to_decomp->_class);
             }
             break;
 #endif

@@ -21,6 +21,8 @@
 #include <threads.h>
 #include <phantom_libc.h>
 
+#include <kernel/snap_sync.h>
+
 static void paint_thread(void *arg);
 static void start_paint_thread(void);
 
@@ -103,8 +105,13 @@ static void paint_thread(void *arg)
     // +1 so that it is a bit higher than regular sys threads
     t_current_set_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
+    //vm_lock_persistent_memory(); // We access persistent memory now and then
+
     while(1)
     {
+        //if(phantom_virtual_machine_snap_request) // Check if we need release access to persistent memory
+        //    phantom_thread_wait_4_snap();
+
         //hal_sleep_msec(10);
         hal_sem_acquire( &paint_sem );
         if( !paint_request )
@@ -125,8 +132,9 @@ static void paint_thread(void *arg)
         prev_paint_request = paint_request = 0;
         no_paint_msec = 0;
 
+        vm_lock_persistent_memory();
         do_paint_area();
-
+        vm_unlock_persistent_memory();
     }
 
 }

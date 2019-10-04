@@ -4,10 +4,10 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes?
+ * Object header flags
  *
  *
- **/
+**/
 
 #ifndef PO_OBJECT_FLAGS_H
 #define PO_OBJECT_FLAGS_H
@@ -78,11 +78,13 @@ POSF(IS_CODE,0x01)
 
 #endif
 
-// flags:
+// TODO rename PHANTOM_OBJECT_STORAGE_FLAG_IS_ --> PHANTOM_OBJECT_FLAG_IS_
+
+// flags: o->_flags
 
 // These are set on creation by class
 
-// object must not be modified at all - IMPLEMENTED PARTIALLY
+// object must not be modified at all - IMPLEMENTED PARTIALLY - can be set in run time
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE 0x2000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER 0x1000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE 0x800

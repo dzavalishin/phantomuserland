@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
-import ru.dz.plc.compiler.PhTypeVoid;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
@@ -34,7 +33,7 @@ public class SwitchListNode extends Node {
 
 	@Override
 	public String toString() {		return "switch list";	}
-	public void find_out_my_type() { if( type == null ) type = PhantomType.getVoid(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
 	public boolean is_const() { return true; }
 	public boolean args_on_int_stack() { return true; }
 
@@ -59,7 +58,7 @@ public class SwitchListNode extends Node {
 		if( !expr.getType().is_int() ) throw new PlcException(toString(),"not an integer expression");
 
 		expr.generate_code(c, s);
-		move_between_stacks(c, expr.is_on_int_stack());
+		move_between_stacks(c, expr);
 
 		generate_my_code(c,s);
 		

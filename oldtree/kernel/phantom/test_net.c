@@ -146,13 +146,13 @@ int do_test_udp_send(const char *test_parm)
 
 int do_test_udp_syslog(const char *test_parm)
 {
+    (void) test_parm;
 #if HAVE_NET
     //if(test_parm == 0 || *test_parm == 0)        test_parm = "Hello world";
     //syslog(LOG_DEBUG|LOG_KERN, "Test of UDP syslog: '%s'", test_parm );
 
     syslog(LOG_DEBUG|LOG_KERN, "Test of UDP syslog: '%s'", "Hello World!" );
 #else
-    (void) test_parm;
     // CI: this message is being watched by CI scripts (ci-runtest.sh)
     SHOW_INFO0( 0, "Warning - no network in kernel, test SKIPPED");
 #endif

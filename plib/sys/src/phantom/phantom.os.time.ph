@@ -4,20 +4,13 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
- *
-**/
-
-package .phantom;
-
-/**
- *
  * OS time services interface.
  * Current implementation is temporary and incomplete.
  *
 **/
+
+
+package .phantom;
 
 class os.time
 {

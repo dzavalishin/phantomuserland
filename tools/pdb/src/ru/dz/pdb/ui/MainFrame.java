@@ -232,6 +232,19 @@ public class MainFrame extends JFrame
 			}
 
 			fileMenu.addSeparator();
+			
+			{
+				JMenuItem item = new JMenuItem("Disassemble");
+				//item.setMnemonic(KeyEvent.VK_R);
+				//item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R, ActionEvent.ALT_MASK));
+				item.setToolTipText("Disassemble bytecode (.pc) file");
+				fileMenu.add(item);
+				item.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) { Main.disassemble(); }
+				});
+			}
+
+			fileMenu.addSeparator();
 
 			{
 				JMenuItem itemQuit = new JMenuItem("Quit"); //$NON-NLS-1$

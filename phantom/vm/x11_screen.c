@@ -13,8 +13,8 @@
  *
 **/
 
-//#include <phantom_libc.h>
 
+//#include <phantom_libc.h>
 #include <string.h>
 #include <assert.h>
 
@@ -146,12 +146,16 @@ void    pvm_x11_window_thread()
 
 #if 0
     drv_video_x11.bitblt = &vid_bitblt_forw;
+#if VIDEO_DRV_WINBLT
     drv_video_x11.winblt = &vid_win_winblt;
+#endif
     drv_video_x11.readblt = &vid_readblt_forw;
     drv_video_x11.bitblt_part = &vid_bitblt_part_forw;
 #else
     drv_video_x11.bitblt = &vid_bitblt_rev;
+#if VIDEO_DRV_WINBLT
     drv_video_x11.winblt = &vid_win_winblt_rev;
+#endif
     drv_video_x11.readblt = &vid_readblt_rev;
     drv_video_x11.bitblt_part = &vid_bitblt_part_rev;
 #endif

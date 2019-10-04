@@ -1,0 +1,40 @@
+<project name="Java2Phantom" default="convert">
+	<property file="build.properties" />
+
+	<target name="prepare" description="make dirs">
+		<mkdir dir="temp"/>
+		<copydir src="class" dest="temp" />
+	</target>
+	
+	<target name="compile" depends="prepare" description="compile Java sources">
+	
+		<path id="classpath">
+			<fileset dir="class" includes="**/*.class" />
+		</path>
+
+		<pathconvert property="compile.classpath" refid="classpath" />
+		<echo>CLASSPATH: ${compile.classpath}</echo>
+		
+		<javac destdir="temp" includeantruntime="false"
+		   source="1.6" target="1.6">
+		   <src path="src" />
+		   <classpath refid="classpath" />
+		 </javac>
+		
+	</target>
+
+	<target name="convert" depends="compile" description="convert Java classes to Phantom classes">
+		<exec executable="sh">
+			<arg value="-c"/>
+			<arg value="jpc -Ctemp -Xjava.lang.Object"/>
+		</exec>
+	</target>
+
+
+	<target name="clean" description="clean intermediate and result files">
+		<delete dir="temp/java"/>
+		<delete dir="temp/test"/>
+	</target>
+
+
+</project>

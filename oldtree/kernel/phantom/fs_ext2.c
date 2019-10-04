@@ -1,4 +1,4 @@
-#if HAVE_UNIX
+#if HAVE_UNIX && 0
 /**
  *
  * Phantom OS

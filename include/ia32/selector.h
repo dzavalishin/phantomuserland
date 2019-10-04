@@ -23,6 +23,11 @@ void free_ldt_selector(selector_id sel);
 #define SELECTOR_IS_LDT(__sel) ( __sel & 0x4 )
 #define SELECTOR_IS_USER(__sel) ( (__sel & 0x3) == 0x3 )
 
+
+
+errno_t arch_ia32_modify_ds_limit( bool on_off);
+
+
 #if 0
 typedef u_int64_t selector_type;
 

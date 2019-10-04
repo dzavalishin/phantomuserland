@@ -3,6 +3,7 @@ package ru.dz.plc.compiler.node;
 import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
+import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
@@ -39,5 +40,22 @@ public class InstanceOfNode extends Node {
 		checkType.emit_get_class_object(c,s);
 		c.emitCall(14, 1); // Class object, 1 arg - object to check type of
 		// Result is returned
+	}
+	
+	
+	@Override
+	public void generate_C_code(C_codegen cgen, CodeGeneratorState s)
+			throws PlcException {
+/*
+		checkType.emit_get_class_object(c,s);
+		
+		emitMethodCall( Node new_this, 14, null, s );
+*/
+		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"IsInstanceOf( ");
+		_l.generate_C_code(cgen, s);
+		cgen.put(", ");
+		cgen.put(C_codegen.getJitRuntimeFuncPrefix()+"GetClass( \"");
+		cgen.put(checkType.get_main_class_name());
+		cgen.put("\" ) ");
 	}
 }

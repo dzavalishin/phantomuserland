@@ -100,7 +100,7 @@ static void repaint_win_part( drv_video_window_t *w, rect_t *wtodo, rect_t *todo
 
 }
 
-
+/// TODO wrong name
 void w_repaint_screen_part( drv_video_window_t *w, rect_t *todo )
 {
     rect_t wtodo = *todo;

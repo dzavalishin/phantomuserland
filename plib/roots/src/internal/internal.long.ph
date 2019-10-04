@@ -38,6 +38,7 @@ class .internal.long
 
 	.internal.string toString() [5] {  }
 
+
 };
 
 

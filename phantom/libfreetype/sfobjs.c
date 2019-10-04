@@ -355,13 +355,13 @@
     FT_UNUSED( params );
 
 
-	FT_TRACE1( ( "john1\n" ) );
+	//FT_TRACE1( ( "john1\n" ) );
     sfnt = (SFNT_Service)face->sfnt;
-	FT_TRACE1( ( "john2\n" ) );
+	//FT_TRACE1( ( "john2\n" ) );
     if ( !sfnt )
     {
       sfnt = (SFNT_Service)FT_Get_Module_Interface( library, "sfnt" );
-	FT_TRACE1( ( "john3\n" ) );
+	//FT_TRACE1( ( "john3\n" ) );
       if ( !sfnt )
       {
         error = SFNT_Err_Invalid_File_Format;
@@ -372,12 +372,12 @@
       face->goto_table = sfnt->goto_table;
     }
 
-	FT_TRACE1( ( "john4\n" ) );
+	//FT_TRACE1( ( "john4\n" ) );
     FT_FACE_FIND_GLOBAL_SERVICE( face, face->psnames, POSTSCRIPT_CMAPS );
 
     /* check that we have a valid TrueType file */
     error = sfnt->load_sfnt_header( face, stream, face_index, &sfnt_header );
-	FT_TRACE1( ( "john5\n" ) );
+	//FT_TRACE1( ( "john5\n" ) );
     if ( error )
       goto Exit;
 
@@ -386,16 +386,16 @@
 
     /* Load font directory */
     error = sfnt->load_directory( face, stream, &sfnt_header );
-	FT_TRACE1( ( "john6\n" ) );
+	//FT_TRACE1( ( "john6\n" ) );
     if ( error )
       goto Exit;
 
-	FT_TRACE1( ( "john7\n" ) );
+	//FT_TRACE1( ( "john7\n" ) );
     face->root.num_faces = face->ttc_header.count;
-	FT_TRACE1( ( "john8\n" ) );
+	//FT_TRACE1( ( "john8\n" ) );
     if ( face->root.num_faces < 1 )
       face->root.num_faces = 1;
-	FT_TRACE1( ( "john9\n" ) );
+	//FT_TRACE1( ( "john9\n" ) );
 
   Exit:
     return error;

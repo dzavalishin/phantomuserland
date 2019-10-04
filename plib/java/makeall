@@ -1,0 +1,35 @@
+#!/bin/sh
+
+JAVA_CLASSES="java.lang.Class java.lang.String java.lang.Throwable java.lang.InterruptedException java.lang.CloneNotSupportedException java.lang.StringBuilder "
+JAVA_CLASSES+=" test.toPhantom.IPhantomPrinter test.toPhantom.Testable test.toPhantom.Assigns test.toPhantom.ArrayAccess test.toPhantom.ArrayAssigns test.toPhantom.Arrays test.toPhantom.ArraySimple1 test.toPhantom.D "
+JAVA_CLASSES+=" test.toPhantom.AllRun  "
+
+for CLASS in $JAVA_CLASSES ; do 
+    #echo "$CLASS"
+	FILE_NAME="src/${CLASS//./\/}.java"
+    echo "javac $FILE_NAME"
+	#jc $FILE_NAME
+	javac -source 1.6 -target 1.6 -g -cp class -cp bin -sourcepath src -bootclasspath class -d bin $FILE_NAME
+done
+
+for CLASS in $JAVA_CLASSES ; do 
+    echo "jpc $CLASS"
+	jpc "-cbin;class" $CLASS
+done
+
+
+#call jc src/java/lang/Class.java
+#call jc src/java/lang/String.java
+#call jc src/java/lang/Throwable.java 
+#call jc src/java/lang/InterruptedException.java 
+#call jc src/java/lang/CloneNotSupportedException.java 
+
+#call jc src/test/toPhantom/Assigns.java
+
+#call jpc -cbin;class java.lang.Class
+#call jpc -cbin;class java.lang.String
+#call jpc -cbin;class java.lang.Throwable
+#call jpc -cbin;class java.lang.InterruptedException
+#call jpc -cbin;class java.lang.CloneNotSupportedException
+
+#call jpc -cbin;class test.toPhantom.Assigns

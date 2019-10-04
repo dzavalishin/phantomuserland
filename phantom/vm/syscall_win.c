@@ -1,3 +1,6 @@
+
+
+
 #include <phantom_libc.h>
 
 
@@ -23,7 +26,7 @@ static int debug_print = 0;
 // --------- window -------------------------------------------------------
 
 
-static int si_window_5_tostring(struct pvm_object o, struct data_area_4_thread *tc )
+static int si_window_5_tostring(pvm_object_t o, struct data_area_4_thread *tc )
 {
     (void)o;
     DEBUG_INFO;
@@ -32,28 +35,28 @@ static int si_window_5_tostring(struct pvm_object o, struct data_area_4_thread *
 
 
 
-static int win_getXSize(struct pvm_object o, struct data_area_4_thread *tc )
+static int win_getXSize(pvm_object_t o, struct data_area_4_thread *tc )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object( da->w.xsize ));
 }
 
-static int win_getYSize(struct pvm_object o, struct data_area_4_thread *tc )
+static int win_getYSize(pvm_object_t o, struct data_area_4_thread *tc )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object( da->w.ysize ));
 }
 
-static int win_getX(struct pvm_object o, struct data_area_4_thread *tc )
+static int win_getX(pvm_object_t o, struct data_area_4_thread *tc )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object( da->x ));
 }
 
-static int win_getY(struct pvm_object o, struct data_area_4_thread *tc )
+static int win_getY(pvm_object_t o, struct data_area_4_thread *tc )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
     DEBUG_INFO;
@@ -64,7 +67,7 @@ static int win_getY(struct pvm_object o, struct data_area_4_thread *tc )
 
 
 
-static int win_clear_20(struct pvm_object me , struct data_area_4_thread *tc )
+static int win_clear_20(pvm_object_t me , struct data_area_4_thread *tc )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
@@ -78,7 +81,7 @@ static int win_clear_20(struct pvm_object me , struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_fill_21(struct pvm_object me , struct data_area_4_thread *tc )
+static int win_fill_21(pvm_object_t me , struct data_area_4_thread *tc )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
     DEBUG_INFO;
@@ -95,7 +98,7 @@ static int win_fill_21(struct pvm_object me , struct data_area_4_thread *tc )
 }
 
 
-static int win_setFGcolor_22(struct pvm_object me , struct data_area_4_thread *tc )
+static int win_setFGcolor_22(pvm_object_t me , struct data_area_4_thread *tc )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
@@ -110,7 +113,7 @@ static int win_setFGcolor_22(struct pvm_object me , struct data_area_4_thread *t
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_setBGcolor_23(struct pvm_object me , struct data_area_4_thread *tc )
+static int win_setBGcolor_23(pvm_object_t me , struct data_area_4_thread *tc )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
 
@@ -130,7 +133,7 @@ static int win_setBGcolor_23(struct pvm_object me , struct data_area_4_thread *t
 #define tty_font &drv_video_8x16san_font
 
 
-static int win_putString_24(struct pvm_object me , struct data_area_4_thread *tc )
+static int win_putString_24(pvm_object_t me , struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
 
@@ -139,11 +142,11 @@ static int win_putString_24(struct pvm_object me , struct data_area_4_thread *tc
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 3);
 
-    struct pvm_object _text = POP_ARG;
+    pvm_object_t _text = POP_ARG;
     ASSERT_STRING(_text);
 
-    int x = POP_INT();
     int y = POP_INT();
+    int x = POP_INT();
 
 
     int len = pvm_get_str_len( _text );
@@ -173,7 +176,7 @@ static int win_putString_24(struct pvm_object me , struct data_area_4_thread *tc
 
 
 
-static int win_putImage_25(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_putImage_25(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -181,7 +184,7 @@ static int win_putImage_25(struct pvm_object me, struct data_area_4_thread *tc )
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 3);
 
-    struct pvm_object _img = POP_ARG;
+    pvm_object_t _img = POP_ARG;
     int y = POP_INT();
     int x = POP_INT();
 
@@ -205,7 +208,7 @@ static int win_putImage_25(struct pvm_object me, struct data_area_4_thread *tc )
 }
 
 
-static int win_setSize_26(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_setSize_26(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -224,7 +227,7 @@ static int win_setSize_26(struct pvm_object me, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_setPos_27(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_setPos_27(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -240,7 +243,7 @@ static int win_setPos_27(struct pvm_object me, struct data_area_4_thread *tc )
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_drawLine_28(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_drawLine_28(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -261,7 +264,7 @@ static int win_drawLine_28(struct pvm_object me, struct data_area_4_thread *tc )
 
 // void	drawBox( var x : int, var y : int, var xsize : int, var ysize : int ) [26] {}
 
-static int win_drawBox_29(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_drawBox_29(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -281,7 +284,7 @@ static int win_drawBox_29(struct pvm_object me, struct data_area_4_thread *tc )
 
 // void	fillBox( var x : int, var y : int, var xsize : int, var ysize : int ) [30] {}
 
-static int win_fillBox_30(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_fillBox_30(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -302,7 +305,7 @@ static int win_fillBox_30(struct pvm_object me, struct data_area_4_thread *tc )
 
 // void	fillEllipse( var x : int, var y : int, var xsize : int, var ysize : int ) [31] {}
 
-static int win_fillEllipse_31(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_fillEllipse_31(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -322,7 +325,7 @@ static int win_fillEllipse_31(struct pvm_object me, struct data_area_4_thread *t
 
 // void	setEventHandler( var handler : .ru.dz.phantom.handler );
 
-static int win_setHandler_32(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_setHandler_32(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -330,14 +333,14 @@ static int win_setHandler_32(struct pvm_object me, struct data_area_4_thread *tc
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    struct pvm_object handler = POP_ARG;
+    pvm_object_t handler = POP_ARG;
 
     // TODO check class!
 
 //    da->event_handler = handler;
 
     {
-    struct data_area_4_connection  *cda = (struct data_area_4_connection *)da->connector.data->da;
+    struct data_area_4_connection  *cda = (struct data_area_4_connection *)da->connector->da;
     // No sync - assume caller does it before getting real callbacks
     cda->callback = handler;
     cda->callback_method = 8; // TODO BUG FIXME
@@ -348,7 +351,7 @@ static int win_setHandler_32(struct pvm_object me, struct data_area_4_thread *tc
     SYSCALL_RETURN_NOTHING;
 }
 
-static int win_setTitle_33(struct pvm_object me , struct data_area_4_thread *tc )
+static int win_setTitle_33(pvm_object_t me , struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -357,7 +360,7 @@ static int win_setTitle_33(struct pvm_object me , struct data_area_4_thread *tc 
     int n_param = POP_ISTACK;
     CHECK_PARAM_COUNT(n_param, 1);
 
-    struct pvm_object _text = POP_ARG;
+    pvm_object_t _text = POP_ARG;
     ASSERT_STRING(_text);
 
     int len = pvm_get_str_len( _text );
@@ -375,7 +378,7 @@ static int win_setTitle_33(struct pvm_object me , struct data_area_4_thread *tc 
 }
 
 
-static int win_update_34(struct pvm_object me , struct data_area_4_thread *tc )
+static int win_update_34(pvm_object_t me , struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -392,7 +395,7 @@ static int win_update_34(struct pvm_object me , struct data_area_4_thread *tc )
 
 
 
-static int win_scrollHor_35(struct pvm_object me, struct data_area_4_thread *tc )
+static int win_scrollHor_35(pvm_object_t me, struct data_area_4_thread *tc )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
@@ -410,6 +413,45 @@ static int win_scrollHor_35(struct pvm_object me, struct data_area_4_thread *tc 
 
     //SYSCALL_RETURN_NOTHING;
     SYSCALL_RETURN(pvm_create_int_object( err ));
+}
+
+
+/// Drawe part of bitmap to window
+/// Same as usual putImage, but copies just subset
+static int win_drawImagePart_36(pvm_object_t me, struct data_area_4_thread *tc )
+{
+    DEBUG_INFO;
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+
+    int n_param = POP_ISTACK;
+    CHECK_PARAM_COUNT(n_param, 3);
+
+    int ysize  = POP_INT();
+    int xsize  = POP_INT();
+    int ystart = POP_INT();
+    int xstart = POP_INT();
+
+    pvm_object_t _img = POP_ARG;
+    int y = POP_INT();
+    int x = POP_INT();
+
+    // TODO check class!
+    struct data_area_4_bitmap *_bmp = pvm_object_da( _img, bitmap );
+    //struct data_area_4_tty *tty = pvm_object_da( _tty, tty );
+    struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
+
+    bitmap2bitmap(
+    		da->pixel, da->w.xsize, da->w.ysize, x+xstart, y+ystart,
+    		(rgba_t *)pixels, _bmp->xsize, _bmp->ysize, xstart, ystart,
+    		xsize, ysize
+    );
+
+
+    w_update( &(da->w) );
+
+    SYS_FREE_O(_img);
+
+    SYSCALL_RETURN_NOTHING;
 }
 
 
@@ -438,7 +480,7 @@ syscall_func_t	syscall_table_4_window[32+8] =
     // 32
     &win_setHandler_32,  	    &win_setTitle_33,
     &win_update_34, 	    	    &win_scrollHor_35,
-    &invalid_syscall,               &invalid_syscall,
+    &win_drawImagePart_36,           &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
 
 };

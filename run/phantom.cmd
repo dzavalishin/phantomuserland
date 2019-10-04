@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 rem http://dietpc.org/windows/qemu/
 rem http://lassauge.free.fr/qemu/
 
@@ -6,22 +6,27 @@ SET QDIR=qemu\0.15.1
 SET QCMD=qemu.exe
 
 rem SET QDIR=qemu\1.2.0
-SET QDIR=qemu\1.0.1
-SET QCMD=qemu-system-i386.exe
+rem SET QDIR=qemu\1.0.1
+rem SET QCMD=qemu-system-i386.exe
 
 rem SET QDIR=qemu\2.4.1
 rem SET QCMD=qemu-system-i386w.exe
 
-rem SET QCMD=qemu-system-x86_64w.exe 
+rem SET QDIR=qemu\2019.02.18
+rem SET QCMD=qemu-system-x86_64w.exe
+
 
 rem SET QDIR=C:\bin\qemu
 rem SET QCMD=qemu-system-x86_64.exe
 
+
+
 set QEMU_AUDIO_DRV=dsound
-set QEMU_AUDIO_DRV=sdl
+rem set QEMU_AUDIO_DRV=sdl
 rem set QEMU_AUDIO_DRV=fmod
 rem set SOUND=-soundhw sb16,es1370 -device intel-hda -device hda-duplex
-set SOUND=-soundhw sb16,es1370
+rem set SOUND=-soundhw sb16,es1370
+set SOUND=-soundhw es1370
 
 rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=ohci.0 -device usb-kbd,bus=ohci.0
 rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=/i440FX-pcihost/pci.0/ohci/ohci.0
@@ -61,10 +66,18 @@ SET Q_MACHINE=-m 256
 rem SET Q_MACHINE=-m 120
 
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -hda fat:fat -hdb phantom.img
+rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -drive file=fat:fat,if=virtio,format=raw -drive file=phantom.img,if=virtio,format=raw 
+rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -drive file=phantom.img,if=virtio,format=raw 
+
+rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -drive file=fat:fat,if=ahci,format=raw -drive file=phantom.img,if=ahci,format=raw 
+rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -drive id=disk0,file=fat:fat,if=none -device ahci,id=ahci0 -device ide-drive,drive=disk0,bus=ahci0.0   -drive id=disk1,file=phantom.img,if=none -device ahci,id=ahci1 -device ide-drive,drive=disk1,bus=ahci1.0
+rem set Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -device ahci,id=ahci0 -drive id=disk1,file=phantom.img,if=none -device ide-drive,drive=disk1,bus=ahci0.0
+
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb openwrt-x86-ext2.image.kernel -hda fat:fat -hdb phantom.img
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img  -hda fat:fat -hdb phantom.img
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda raw:img/grubfloppy-hd0.img   -hdb phantom.img
 SET Q_DISKS=-boot a -no-fd-bootchk -drive file=img/grubfloppy-hd0.img,index=0,if=floppy,format=raw -drive file=fat:rw:fat,format=raw -drive if=ide,index=1,file=phantom.img,format=raw
+
 
 rem -fdb kolibri.iso
 rem SET Q_DISKS=-boot a -no-fd-bootchk -fda img/grubfloppy-hd0.img -fdb e2.img -hda fat:fat -hdb phantom.img 
@@ -74,16 +87,19 @@ rem SET Q_KQ=-enable-kqemu
 rem SET Q_KQ=-enable-kqemu -kernel-kqemu
 
 rem SET Q_VGA=-vga std
-rem SET Q_VGA=-vga cirrus
-SET Q_VGA=-vga vmware
+SET Q_VGA=-vga cirrus
+rem SET Q_VGA=-vga vmware
 rem SET Q_VGA=-device cirrus-vga
 rem -virtioconsole 1
+
+rem set Q_TRACE=-d trace:virtio_blk_req_complete,trace:virtio_blk_rw_complete,trace:virtio_queue_notify,trace:virtio_notify_irqfd,trace:virtio_notify,trace:virtio_set_status,trace:virtio_rng_guest_not_ready,trace:virtio_rng_pushed,trace:virtio_rng_request,trace:virtio_input_queue_full
 
 del serial0.log.old1
 ren serial0.log.old serial0.log.old1
 ren serial0.log serial0.log.old
 rem start /wait 
-%QDIR%\%QCMD% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% -L %QDIR%\bios %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR%
+
+%QDIR%\%QCMD% %Q_TRACE% -net dump,file=net.dmp -smp 3 %Q_VGA% -gdb tcp::1234,nowait,nodelay,server,ipv4 %Q_KQ% %Q_MACHINE% %Q_PORTS% %Q_DISKS% %Q_NET% %VIO% %USB% %SOUND% %Q_AHCI% %Q_REDIR% -L %QDIR%\bios 
 
 
 grep KERNEL.TEST serial0.log

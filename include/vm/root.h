@@ -28,62 +28,70 @@ void pvm_remove_object_from_restart_list( pvm_object_t o );
 int pvm_connect_object(pvm_object_t o, struct data_area_4_thread *tc);
 int pvm_disconnect_object(pvm_object_t o, struct data_area_4_thread *tc);
 
+// Persistent class cache
+//
+// Used twice - both in '.internal.boot' class loader method and
+// in exec.c class name to class resolution. Possibly, we should remove
+// its use from '.internal.boot'.
+//
+errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new_class);
+errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_class);
 
 
 
 struct pvm_root_t
 {
-    struct pvm_object           null_class;             // Default superclass for any class
+    pvm_object_t           null_class;             // Default superclass for any class
 
-    struct pvm_object           class_class;            // Class of a class (and of itself)
-    struct pvm_object           interface_class;
-    struct pvm_object           code_class;
+    pvm_object_t           class_class;            // Class of a class (and of itself)
+    pvm_object_t           interface_class;
+    pvm_object_t           code_class;
 
-    struct pvm_object           int_class;
-    struct pvm_object           long_class;
-    struct pvm_object           float_class;
-    struct pvm_object           double_class;
-    struct pvm_object           string_class;
+    pvm_object_t           int_class;
+    pvm_object_t           long_class;
+    pvm_object_t           float_class;
+    pvm_object_t           double_class;
+    pvm_object_t           string_class;
 
-    struct pvm_object           array_class;
-    struct pvm_object           page_class;
+    pvm_object_t           array_class;
+    pvm_object_t           page_class;
 
-    struct pvm_object           thread_class;
-    struct pvm_object           call_frame_class;
-    struct pvm_object           istack_class;
-    struct pvm_object           ostack_class;
-    struct pvm_object           estack_class;
+    pvm_object_t           thread_class;
+    pvm_object_t           call_frame_class;
+    pvm_object_t           istack_class;
+    pvm_object_t           ostack_class;
+    pvm_object_t           estack_class;
 
-    struct pvm_object           boot_class;
+    pvm_object_t           boot_class;
 
-    struct pvm_object           binary_class;
-    struct pvm_object           bitmap_class;
+    pvm_object_t           binary_class;
+    pvm_object_t           bitmap_class;
 
-    struct pvm_object           world_class;
-    struct pvm_object           closure_class;
+    pvm_object_t           world_class;
+    pvm_object_t           closure_class;
 
-    struct pvm_object           weakref_class;
-    struct pvm_object           window_class;
+    pvm_object_t           weakref_class;
+    pvm_object_t           window_class;
 
-    struct pvm_object           directory_class;
-    struct pvm_object           connection_class;
+    pvm_object_t           directory_class;
+    pvm_object_t           connection_class;
 
-    struct pvm_object           mutex_class;
-    struct pvm_object           cond_class;
-    struct pvm_object           sema_class;
+    pvm_object_t           mutex_class;
+    pvm_object_t           cond_class;
+    pvm_object_t           sema_class;
 
 
-    struct pvm_object           null_object;
-    struct pvm_object           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return
-    struct pvm_object           class_loader;           // Root class loader (user code)
-    struct pvm_object           threads_list;           // Array? of threads
-    struct pvm_object           restart_list;           // Array of weak refs to objects that need attention at restart - XXX func called?
-    struct pvm_object           users_list;           	// Array? of users - NOT IMPLEMENTED
-    struct pvm_object           kernel_environment;     // Array? of users - NOT IMPLEMENTED
-    struct pvm_object           os_entry;               // Main OS services entry point
-    struct pvm_object           root_dir;               // Root object directory
-
-    struct pvm_object           kernel_stats;           // Persisent kernel statistics
+    pvm_object_t           null_object;
+    pvm_object_t           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return
+    pvm_object_t           class_loader;           // Root class loader (user code)
+    pvm_object_t           threads_list;           // Array? of threads
+    pvm_object_t           restart_list;           // Array of weak refs to objects that need attention at restart - XXX func called?
+    pvm_object_t           users_list;           	// Array? of users - NOT IMPLEMENTED
+    pvm_object_t           kernel_environment;     // Array? of users - NOT IMPLEMENTED
+    pvm_object_t           os_entry;               // Main OS services entry point
+    pvm_object_t           root_dir;               // Root object directory
+    pvm_object_t           kernel_stats;           // Persisent kernel statistics
+    pvm_object_t           class_dir;              // .internal.directory of all classes used - class load cache - TODO must use weak refs or cleanup on ref cnt == 1
 
 };
 
@@ -215,7 +223,9 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_KERNEL_STATISTICS 72
 
-#define PVM_ROOT_OBJECTS_COUNT (PVM_ROOT_KERNEL_STATISTICS+31)
+#define PVM_ROOT_CLASS_DIR 73
+
+#define PVM_ROOT_OBJECTS_COUNT (PVM_ROOT_CLASS_DIR+30)
 
 
 

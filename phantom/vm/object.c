@@ -4,11 +4,10 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * Object access
  *
 **/
+
 
 #include "vm/object.h"
 #include "vm/alloc.h"
@@ -19,11 +18,7 @@
 
 #include <phantom_libc.h>
 
-//#include <stdio.h>
-//#include <string.h>
 
-//#define da_po_limit(o)	 (o->_da_size/sizeof(pvm_object))
-//#define da_po_ptr(da)  ((pvm_object)&da)
 
 #if 1
 static inline void verify_p( pvm_object_storage_t *p )
@@ -40,10 +35,10 @@ static inline void verify_p( pvm_object_storage_t *p )
 
 static inline void verify_o( pvm_object_t o )
 {
-    if( o.data )
+    if( o )
     {
-        verify_p( o.data );
-        verify_p( o.interface );
+        verify_p( o );
+        //verify_p( o.interface );
     }
 }
 #else
@@ -57,25 +52,25 @@ static inline void verify_o( pvm_object_t o )
  *
 **/
 
-struct pvm_object  pvm_get_array_ofield(struct pvm_object_storage *o, unsigned int slot  )
+pvm_object_t  pvm_get_array_ofield(pvm_object_t o, unsigned int slot  )
 {
     verify_p(o);
     if(
        !(PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) ) ||
        !( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (o->_flags) )
       )
-        pvm_exec_panic( "attempt to do an array op to non-array" );
+        pvm_exec_panic0( "attempt to do an array op to non-array" );
 
     struct data_area_4_array *da = (struct data_area_4_array *)&(o->da);
 
     if( slot >= da->used_slots )
-        pvm_exec_panic( "load: array index out of bounds" );
+        pvm_exec_panic0( "load: array index out of bounds" );
 
     return pvm_get_ofield( da->page, slot);
 }
 
 // TODO need semaphores here
-void pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struct pvm_object value )
+void pvm_set_array_ofield(pvm_object_t o, unsigned int slot, pvm_object_t value )
 {
     verify_p(o);
     verify_o(value);
@@ -83,10 +78,10 @@ void pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struc
        !(PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) ) ||
        !( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (o->_flags) )
       )
-        pvm_exec_panic( "attempt to do an array op to non-array" );
+        pvm_exec_panic0( "attempt to do an array op to non-array" );
 
     if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (o->_flags) )
-        pvm_exec_panic( "attempt to set_array_ofield for immutable" );
+        pvm_exec_panic0( "attempt to set_array_ofield for immutable" );
 
 
     struct data_area_4_array *da = (struct data_area_4_array *)&(o->da);
@@ -100,8 +95,8 @@ void pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struc
         if(new_page_size < 16) new_page_size = 16;
 
         if( (!pvm_is_null(da->page)) && da->page_size > 0 )
-            //da->page = pvm_object_storage::create_page( new_page_size, da->page.data()->da_po_ptr(), da->page_size );
-            da->page = pvm_create_page_object( new_page_size, (void *)&(da->page.data->da), da->page_size );
+            //da->page = pvm_object_storage::create_page( new_page_size, da->page()->da_po_ptr(), da->page_size );
+            da->page = pvm_create_page_object( new_page_size, (void *)&(da->page->da), da->page_size );
         else
             da->page = pvm_create_page_object( new_page_size, 0, 0 );
 
@@ -120,20 +115,20 @@ void pvm_set_array_ofield(struct pvm_object_storage *o, unsigned int slot, struc
 }
 
 // TODO need semaphores here
-void pvm_append_array(struct pvm_object_storage *array, struct pvm_object value_to_append )
+void pvm_append_array(pvm_object_t array, pvm_object_t value_to_append )
 {
     struct data_area_4_array *da = (struct data_area_4_array *)&(array->da);
 
     pvm_set_array_ofield(array, da->used_slots, value_to_append );
 }
 
-int get_array_size(struct pvm_object_storage *array)
+int get_array_size(pvm_object_t array)
 {
     struct data_area_4_array *da = (struct data_area_4_array *)&(array->da);
     return da->used_slots;
 }
 
-void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_pop )
+void pvm_pop_array(pvm_object_t array, pvm_object_t value_to_pop )
 {
     struct data_area_4_array *da = (struct data_area_4_array *)&(array->da);
 
@@ -142,17 +137,17 @@ void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_
        !(PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (array->_flags) ) ||
        !( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (array->_flags) )
       )
-        pvm_exec_panic( "attempt to do an array op to non-array" );
+        pvm_exec_panic0( "attempt to do an array op to non-array" );
 
     if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (array->_flags) )
-        pvm_exec_panic( "attempt to pop_array for immutable" );
+        pvm_exec_panic0( "attempt to pop_array for immutable" );
 
     //swap with last and decrement used_slots
-    struct pvm_object *p = da_po_ptr((da->page.data)->da);
+    pvm_object_t *p = da_po_ptr((da->page)->da);
     unsigned int slot;
     for( slot = 0; slot < da->used_slots; slot++ )
     {
-        if ( ( p[slot] ).data == value_to_pop.data )  //please don't leak refcnt
+        if ( ( p[slot] ) == value_to_pop )  //please don't leak refcnt
         {
             if (slot != da->used_slots-1) {
                 p[slot] = p[da->used_slots-1];
@@ -162,7 +157,7 @@ void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_
         }
     }
 
-    pvm_exec_panic( "attempt to remove non existing element from array" );
+    pvm_exec_panic0( "attempt to remove non existing element from array" );
 }
 
 
@@ -170,12 +165,13 @@ void pvm_pop_array(struct pvm_object_storage *array, struct pvm_object value_to_
 /**
  *
  * Fields access for noninternal ones.
+ * 
+ * TODO BUG XXX - races possible, see below
  *
 **/
 
-// TODO BUG XXX - races possible, see below
-struct pvm_object
-pvm_get_field( struct pvm_object_storage *o, unsigned int slot )
+pvm_object_t 
+pvm_get_field( pvm_object_t o, unsigned int slot )
 {
     verify_p(o);
     if( PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) )
@@ -184,50 +180,54 @@ pvm_get_field( struct pvm_object_storage *o, unsigned int slot )
         {
             return pvm_get_array_ofield( o, slot );
         }
-        pvm_exec_panic( "attempt to load from internal" );
+        pvm_exec_panic0( "attempt to load from internal" );
     }
 
     if( slot >= da_po_limit(o) )
     {
-        pvm_exec_panic( "save: slot index out of bounds" );
+        pvm_exec_panic0( "get: slot index out of bounds" );
     }
 
     verify_o(da_po_ptr(o->da)[slot]);
     return da_po_ptr(o->da)[slot];
 }
-
+/*
 // TODO BUG XXX - races possible, read obj, then other thread writes
 // to slot (derements refctr and kills object), then we attempt to
 // use it (even increment refctr) -> death. Need atomic (to slot write? to refcnt dec?)
 // refcnt incr here
-struct pvm_object
-pvm_get_ofield( struct pvm_object op, unsigned int slot )
+pvm_object_t 
+pvm_get_ofield( pvm_object_t op, unsigned int slot )
 {
     verify_o(op);
-    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & ((op.data)->_flags) )
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & ((op)->_flags) )
     {
-        if( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & ((op.data)->_flags) )
+        if( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & ((op)->_flags) )
         {
-            return pvm_get_array_ofield( op.data, slot );
+            return pvm_get_array_ofield( op, slot );
         }
-        pvm_exec_panic( "attempt to load from internal" );
+        pvm_exec_panic0( "attempt to load from internal" );
     }
 
-    if( slot >= da_po_limit(op.data) )
+    if( slot >= da_po_limit(op) )
     {
-        pvm_exec_panic( "load: slot index out of bounds" );
+        pvm_exec_panic0( "load: slot index out of bounds" );
     }
 
-    verify_o(da_po_ptr((op.data)->da)[slot]);
-    return da_po_ptr((op.data)->da)[slot];
+    verify_o(da_po_ptr((op)->da)[slot]);
+    return da_po_ptr((op)->da)[slot];
 }
-
+*/
 
 void
-pvm_set_field( struct pvm_object_storage *o, unsigned int slot, struct pvm_object value )
+pvm_set_field( pvm_object_t o, unsigned int slot, pvm_object_t value )
 {
     verify_p(o);
     verify_o(value);
+
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (o->_flags) )
+        pvm_exec_panic0( "attempt to set_field for immutable" );
+
     if( PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & (o->_flags) )
     {
         if( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & (o->_flags) )
@@ -235,99 +235,83 @@ pvm_set_field( struct pvm_object_storage *o, unsigned int slot, struct pvm_objec
             pvm_set_array_ofield( o, slot, value );
             return;
         }
-        pvm_exec_panic( "attempt to save to internal" );
+        pvm_exec_panic0( "attempt to save to internal" );
     }
-
-    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (o->_flags) )
-        pvm_exec_panic( "attempt to set_field for immutable" );
 
     if( slot >= da_po_limit(o) )
     {
-        pvm_exec_panic( "load: slot index out of bounds" );
+        pvm_exec_panic0( "set: slot index out of bounds" );
     }
 
-    if(da_po_ptr(o->da)[slot].data)     ref_dec_o(da_po_ptr(o->da)[slot]);  //decr old value
+    if(da_po_ptr(o->da)[slot])     ref_dec_o(da_po_ptr(o->da)[slot]);  //decr old value
     da_po_ptr(o->da)[slot] = value;
 }
-
+/*
 void
-pvm_set_ofield( struct pvm_object op, unsigned int slot, struct pvm_object value )
+pvm_set_ofield( pvm_object_t op, unsigned int slot, pvm_object_t value )
 {
     verify_o(op);
     verify_o(value);
-    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & ((op.data)->_flags) )
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL & ((op)->_flags) )
     {
-        if( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & ((op.data)->_flags) )
+        if( PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE & ((op)->_flags) )
         {
-            pvm_set_array_ofield( op.data, slot, value );
+            pvm_set_array_ofield( op, slot, value );
             return;
         }
-        pvm_exec_panic( "attempt to save to internal" );
+        pvm_exec_panic0( "attempt to save to internal" );
     }
 
-    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (op.data->_flags) )
-        pvm_exec_panic( "attempt to set_ofield for immutable" );
+    if( PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE &  (op->_flags) )
+        pvm_exec_panic0( "attempt to set_ofield for immutable" );
 
 
-    if( slot >= da_po_limit(op.data) )
+    if( slot >= da_po_limit(op) )
     {
-        pvm_exec_panic( "slot index out of bounds" );
+        pvm_exec_panic0( "slot index out of bounds" );
     }
 
-    if(da_po_ptr((op.data)->da)[slot].data) ref_dec_o(da_po_ptr((op.data)->da)[slot]);  //decr old value
-    da_po_ptr((op.data)->da)[slot] = value;
+    if(da_po_ptr((op)->da)[slot]) ref_dec_o(da_po_ptr((op)->da)[slot]);  //decr old value
+    da_po_ptr((op)->da)[slot] = value;
 }
-
+*/
 
 
 /**
  *
- * Class is: checks if object's class is tclass or it's parent.
+ * Class exactly is: checks if object's class is tclass.
  *
 **/
-/*
-int pvm_object_class_is( struct pvm_object object, struct pvm_object tclass )
+
+
+int pvm_object_class_exactly_is( pvm_object_t object, pvm_object_t tclass )
 {
-    struct pvm_object_storage *tested = object.data->_class.data;
-    struct pvm_object_storage *nullc = pvm_get_null_class().data;
+    pvm_object_t tested = object->_class;
+    //pvm_object_t nullc = pvm_get_null_class();
 
-    while( !pvm_is_null( tclass ) )
-    {
-        if( tested == tclass.data )
-            return 1;
-
-        if( tclass.data == nullc )
-            break;
-
-        tclass = pvm_object_da( tclass, class )->class_parent;
-    }
-    return 0;
-}
-*/
-
-int pvm_object_class_exactly_is( struct pvm_object object, struct pvm_object tclass )
-{
-    struct pvm_object_storage *tested = object.data->_class.data;
-    //struct pvm_object_storage *nullc = pvm_get_null_class().data;
-
-    if( (!pvm_is_null( tclass )) && (tested == tclass.data) )
+    if( (!pvm_is_null( tclass )) && (tested == tclass) )
         return 1;
 
     return 0;
 }
 
-// Really need this?
-int pvm_object_class_is_or_parent( struct pvm_object object, struct pvm_object tclass )
+/**
+ *
+ * Class is or parent: checks if object's class is tclass or it's parent.
+ *
+**/
+
+int pvm_object_class_is_or_parent( pvm_object_t object, pvm_object_t tclass )
 {
-    struct pvm_object_storage *tested = object.data->_class.data;
-    struct pvm_object_storage *nullc = pvm_get_null_class().data;
+    pvm_object_t tested = object->_class;
+    pvm_object_t nullc = pvm_get_null_class();
 
     while( !pvm_is_null( tclass ) )
     {
-        if( tested == tclass.data )
+        if( tested == tclass )
             return 1;
 
-        if( tclass.data == nullc )
+        if( tclass == nullc )
             break;
 
         tclass = pvm_object_da( tclass, class )->class_parent;
@@ -335,23 +319,30 @@ int pvm_object_class_is_or_parent( struct pvm_object object, struct pvm_object t
     return 0;
 }
 
-int pvm_object_class_is_or_child( struct pvm_object object, struct pvm_object tclass )
+/**
+ *
+ * Class is or child: checks if object's class is tclass or it's child.
+ *
+**/
+
+
+int pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t tclass )
 {
-    struct pvm_object oclass = object.data->_class;
-    //struct pvm_object_storage *tested = object.data->_class.data;
-    struct pvm_object_storage *nullc = pvm_get_null_class().data;
+    pvm_object_t oclass = object->_class;
+    pvm_object_t nullc = pvm_get_null_class();
 
     if( pvm_is_null( tclass ) ) return 0;
 
-    while(1)
+    while( !pvm_is_null(oclass) )
     {
-        if( oclass.data == tclass.data )
+        struct data_area_4_class *oclass_da = pvm_object_da( oclass, class );
+
+        if( oclass == tclass )
             return 1;
 
-        if( oclass.data == nullc )
+        if( oclass == nullc )
             break;
-
-        oclass = pvm_object_da( oclass, class )->class_parent;
+        oclass = oclass_da->class_parent;
     }
     return 0;
 }
@@ -361,36 +352,36 @@ int pvm_object_class_is_or_child( struct pvm_object object, struct pvm_object tc
  *
  * Shallow copy of the object
  *
-**/
+** /
 
-struct pvm_object
-pvm_copy_object( struct pvm_object in_object )
+pvm_object_t 
+pvm_copy_object( pvm_object_t in_object )
 {
     // TODO ERROR throw!
-    if(in_object.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL)
+    if(in_object->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL)
         panic("internal object copy?!");
 
-    //ref_inc_o( in_object.data->_class );  //increment if class is refcounted
-    struct pvm_object in_class = in_object.data->_class;
-    int da_size = in_object.data->_da_size;
+    //ref_inc_o( in_object->_class );  //increment if class is refcounted
+    pvm_object_t in_class = in_object->_class;
+    int da_size = in_object->_da_size;
 
-    struct pvm_object out = pvm_object_create_dynamic( in_class, da_size );
+    pvm_object_t out = pvm_object_create_dynamic( in_class, da_size );
 
-    int i = da_size/sizeof(struct pvm_object);
+    int i = da_size/sizeof(pvm_object_t );
     for(; i >= 0; i-- )
     {
-        if(da_po_ptr((in_object.data)->da)[i].data)
-            ref_inc_o( da_po_ptr((in_object.data)->da)[i] );
+        if(da_po_ptr((in_object)->da)[i])
+            ref_inc_o( da_po_ptr((in_object)->da)[i] );
     }
 
-    memcpy( out.data->da, in_object.data->da, da_size );
+    memcpy( out->da, in_object->da, da_size );
     // TODO: check for special cases - copy c'tor?
 
     return out;
 }
+*/
 
-
-
+/*
 pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st)
 {
     pvm_object_t ret;
@@ -400,7 +391,7 @@ pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st)
 
     return ret;
 }
-
+*/
 
 
 /**
@@ -409,11 +400,11 @@ pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st)
  *
 **/
 
-void pvm_puts(struct pvm_object o )
+void pvm_puts(pvm_object_t o )
 {
-    if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
+    if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
     {
-        struct data_area_4_string *da = (struct data_area_4_string *)&(o.data->da);
+        struct data_area_4_string *da = (struct data_area_4_string *)&(o->da);
         int len = da->length;
         unsigned const char *sp = da->data;
         /* TODO BUG! From unicode! */
@@ -426,13 +417,13 @@ void pvm_puts(struct pvm_object o )
         printf( "?" );
 }
 
-void pvm_object_print(struct pvm_object o )
+void pvm_object_print(pvm_object_t o )
 {
-    if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT)
+    if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INT)
     {
         printf( "%d", pvm_get_int( o ) );
     }
-    else if(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
+    else if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
     {
         pvm_puts( o );
     }
@@ -444,7 +435,7 @@ void pvm_object_print(struct pvm_object o )
     }
 }
 
-void print_object_flags(struct pvm_object_storage *o)
+void print_object_flags(pvm_object_t o)
 {
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER )       printf("FINALIZER ");
     if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE )       printf("CHILDFREE ");
@@ -465,12 +456,18 @@ void print_object_flags(struct pvm_object_storage *o)
 
 void dumpo( addr_t addr )
 {
-    struct pvm_object_storage *o = (struct pvm_object_storage *)addr;
+    pvm_object_t o = (pvm_object_t)addr;
+
+    if( o == 0)
+    {
+        printf("dumpo(0)\n");
+        return;
+    }
 
     printf("Flags: '");
     print_object_flags(o);
-    printf("'\n");
-    printf("Da size: %ld\n", (long)(o->_da_size) );
+    printf("', ");
+    //printf("', da size: %ld, ", (long)(o->_da_size) );
 
 
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
@@ -484,33 +481,47 @@ void dumpo( addr_t addr )
         {
             putchar(*sp++);
         }
-        printf("'\n");
+        printf("'");
     }
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
     {
         struct data_area_4_class *da = (struct data_area_4_class *)&(o->da);
-        printf("Is class: '"); pvm_object_print( da->class_name ); printf("'\n");
+        printf("Is class: '"); pvm_object_print( da->class_name ); printf("' @%p", o);
+        if(
+            (!pvm_isnull(da->class_parent)) &&
+            (pvm_get_null_class() != da->class_parent )
+            )
+        {
+            printf(" Parent: "); pvm_object_dump( da->class_parent ); 
+            //printf(" Parent: '"); pvm_object_print( da->class_parent ); 
+            //printf("' @%p", da->class_parent );
+        }
     }
     else
     {
         // Don't dump class class
-        printf("Class: { "); dumpo( (addr_t)(o->_class.data) ); printf("}\n");
+        //printf("Class: { "); dumpo( (addr_t)(o->_class) ); printf("}\n");
         //pvm_object_print( o->_class );
+        pvm_object_t cl = o->_class;
+        struct data_area_4_class *cda = (struct data_area_4_class *)&(cl->da);
+        //printf("Class: '"); pvm_object_print( cda->class_name ); printf(" @%p'", o);
+        printf("Class: '"); pvm_object_print( cda->class_name ); printf("' o@%p class@%p", o, cl );
     }
+    printf("\n");
 }
 
-void pvm_object_dump(struct pvm_object o )
+void pvm_object_dump(pvm_object_t o )
 {
-	dumpo((addr_t)o.data);
+	dumpo((addr_t)o);
 }
 
-struct pvm_object
-pvm_get_class_name( struct pvm_object o )
+pvm_object_t 
+pvm_get_class_name( pvm_object_t o )
 {
-    struct pvm_object c = o.data->_class;
-    if(c.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
+    pvm_object_t c = o->_class;
+    if(c->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS)
     {
-        struct data_area_4_class *da = (struct data_area_4_class *)&(c.data->da);
+        struct data_area_4_class *da = (struct data_area_4_class *)&(c->da);
         ref_inc_o( da->class_name );
         return da->class_name;
     }
@@ -519,9 +530,9 @@ pvm_get_class_name( struct pvm_object o )
 }
 
 
-void pvm_check_is_thread( struct pvm_object new_thread )
+void pvm_check_is_thread( pvm_object_t new_thread )
 {
-    struct pvm_object_storage	* d = new_thread.data;
+    struct pvm_object_storage	* d = new_thread;
 
     if( d->_flags != (PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD) )
         panic("Thread object has no INTERNAL flag");

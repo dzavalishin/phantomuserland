@@ -1,7 +1,7 @@
 package ru.dz.soot;
 
 import ru.dz.plc.compiler.Method;
-import ru.dz.plc.compiler.PhTypeInt;
+import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.PhantomVariable;
@@ -9,12 +9,9 @@ import ru.dz.plc.compiler.binode.OpAssignNode;
 import ru.dz.plc.compiler.binode.OpDynamicMethodCallNode;
 import ru.dz.plc.compiler.binode.OpSubscriptNode;
 import ru.dz.plc.compiler.binode.SequenceNode;
-import ru.dz.plc.compiler.node.EmptyNode;
 import ru.dz.plc.compiler.node.IdentNode;
-import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
-import ru.dz.plc.compiler.trinode.OpMethodCallNode;
 import ru.dz.plc.util.PlcException;
 import soot.SootClass;
 import soot.SootMethod;
@@ -61,11 +58,11 @@ public class PhantomCodeWrapper {
 
 
 
-	public static PhantomCodeWrapper getExpression(Value v, Method m, PhantomClass c) throws PlcException {
+	public static PhantomCodeWrapper getExpression(Value v, Method m, PhantomClass c, ParseState ps) throws PlcException {
 		//String vClass = v.getClass().toString();
 		//System.err.print(" ?? expr class = "+vClass);
 		
-		SootExpressionTranslator et = new SootExpressionTranslator( v, m, c );
+		SootExpressionTranslator et = new SootExpressionTranslator( v, m, c, ps );
 		return et.process();
 	}
 
@@ -78,7 +75,7 @@ public class PhantomCodeWrapper {
 
 // source type
 	public static PhantomCodeWrapper getAssign(Value assignTo,
-			PhantomCodeWrapper expression, Method m, PhantomClass pc) throws PlcException {
+			PhantomCodeWrapper expression, Method m, PhantomClass pc, ParseState ps) throws PlcException {
 		
 		if( expression == null )
 		{
@@ -91,14 +88,14 @@ public class PhantomCodeWrapper {
 		if(assignTo instanceof JimpleLocal)
 		{
 			JimpleLocal jl = (JimpleLocal)assignTo;
-			dest = new IdentNode(jl.getName());
+			dest = new IdentNode(jl.getName(), ps);
 			
 			Type type = jl.getType();
 			
 			try {
 				PhantomType ptype = SootExpressionTranslator.convertType(type);
 				//SootMain.say("var "+jl.getName()+" type "+ptype);
-				m.svars.add_stack_var(new PhantomVariable(jl.getName(), ptype));
+				m.svars.addStackVar(new PhantomVariable(jl.getName(), ptype));
 			} catch (PlcException e) {
 				dest = null;
 				SootMain.error(e);
@@ -110,8 +107,8 @@ public class PhantomCodeWrapper {
 		if (assignTo instanceof JArrayRef) {
 			JArrayRef ar = (JArrayRef) assignTo;
 			
-			Node base   = getExpression(ar.getBase(),  m, pc).getNode();			
-			Node subscr = getExpression(ar.getIndex(), m, pc).getNode();
+			Node base   = getExpression(ar.getBase(),  m, pc, ps).getNode();			
+			Node subscr = getExpression(ar.getIndex(), m, pc, ps).getNode();
 
 			dest = new OpSubscriptNode(base, subscr);			
 		}
@@ -120,7 +117,7 @@ public class PhantomCodeWrapper {
 			JInstanceFieldRef fr = (JInstanceFieldRef) assignTo;
 			
 			String name = fr.getField().getName();
-			dest = new IdentNode( name ); 
+			dest = new IdentNode( name, ps ); 
 			
 			try {
 				PhantomType ptype = SootExpressionTranslator.convertType(fr.getType());
@@ -145,7 +142,7 @@ public class PhantomCodeWrapper {
 	}
 
 
-	public static PhantomCodeWrapper getInvoke(InvokeExpr expr, Method m, PhantomClass phantomClass ) throws PlcException
+	public static PhantomCodeWrapper getInvoke(InvokeExpr expr, Method m, PhantomClass phantomClass, ParseState ps ) throws PlcException
 	{
 		boolean dumpMe = true;
 		
@@ -161,7 +158,7 @@ public class PhantomCodeWrapper {
 		//Node method = null;
 		Node args   = null;
 
-		args = makeArgs(expr, m, phantomClass);
+		args = makeArgs(expr, m, phantomClass, ps);
 		
 		boolean done = false;
 		
@@ -171,7 +168,7 @@ public class PhantomCodeWrapper {
 			if(dumpMe) SootMain.say("      invoke virt "+ie);
 			
 			
-			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass).getNode();
+			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass, ps).getNode();
 			done = true;
 		}
 
@@ -211,7 +208,7 @@ public class PhantomCodeWrapper {
 				}
 	
 			}
-			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass).getNode();
+			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass, ps).getNode();
 			done = true;
 		}
 		
@@ -221,7 +218,7 @@ public class PhantomCodeWrapper {
 			
 			if(dumpMe) SootMain.say("      invoke iface "+ie);
 			// Do it like dynamic
-			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass).getNode();
+			object = PhantomCodeWrapper.getExpression(ie.getBase(), m, phantomClass, ps).getNode();
 			done = true;
 		}
 		
@@ -249,27 +246,27 @@ public class PhantomCodeWrapper {
 		*/
 		
 		OpDynamicMethodCallNode node = new OpDynamicMethodCallNode(object, name, args); 	
-		node.setType(SootExpressionTranslator.convertType(expr.getType()));
+		node.presetType(SootExpressionTranslator.convertType(expr.getType()));
 		return new PhantomCodeWrapper(node);
 	}
 
-	private static Node makeArgs(InvokeExpr expr, Method m, PhantomClass pc) throws PlcException {
+	private static Node makeArgs(InvokeExpr expr, Method m, PhantomClass pc, ParseState ps) throws PlcException {
 		//int argCount = expr.getArgCount();		
 		//return makeArg( expr, argCount, m, pc );	
-		return makeArg( expr, 0, m, pc );
+		return makeArg( expr, 0, m, pc, ps );
 	}
 
-	private static Node makeArg(InvokeExpr expr, int argNo, Method m, PhantomClass phantomClass) throws PlcException {
+	private static Node makeArg(InvokeExpr expr, int argNo, Method m, PhantomClass phantomClass, ParseState ps) throws PlcException {
 		//argNo--;
 		
 		int argCount = expr.getArgCount();
 		if( argNo >= argCount ) return null; // codegen stops on null
 		
-		Node node = PhantomCodeWrapper.getExpression(expr.getArg(argNo), m, phantomClass).getNode();
+		Node node = PhantomCodeWrapper.getExpression(expr.getArg(argNo), m, phantomClass, ps).getNode();
 
 		
 		// wrong order?
-		return new SequenceNode(node, makeArg(expr, argNo+1, m, phantomClass));
+		return new SequenceNode(node, makeArg(expr, argNo+1, m, phantomClass, ps));
 		// try reverse - fails!
 		//return new SequenceNode( makeArg(expr, argNo+1, m, phantomClass), node );
 	}

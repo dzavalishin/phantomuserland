@@ -70,5 +70,6 @@ void drv_video_init_windows(void)
 #else
     hal_spin_init( &allw_lock ));
 #endif
+    init_truetype();
 }
 

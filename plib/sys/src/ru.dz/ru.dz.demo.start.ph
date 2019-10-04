@@ -22,18 +22,18 @@ attribute const * ->!;
 
 class start
 {
-	var wv : .ru.dz.demo.weather;
-	var cv : .ru.dz.demo.chart;
+        var wv : .ru.dz.demo.weather;
+        var cv : .ru.dz.demo.chart;
 
     void run(var console : .internal.io.tty)
     {
-		//cv = new .ru.dz.demo.chart();
-		//cv.start(console);
+        //cv = new .ru.dz.demo.chart();
+        //cv.start(console);
 
-		wv = new  .ru.dz.demo.weather();
-		wv.run(console);
+        wv = new  .ru.dz.demo.weather();
+        wv.run(console);
 
     }
-	
+        
 };
 

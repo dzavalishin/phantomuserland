@@ -1,26 +1,29 @@
 Class .test.toPhantom.PhantomPrinter
   Field console
-  Method void init( tt: .internal.io.tty ):
-    void  : void
-      = : .internal.io.tty
-        ident console : .internal.io.tty
-        ident tt : .internal.io.tty
+  C'tor  void <init>(  ):
+    empty : void
 
   Method void print( s: string ):
     void  : void
       . : void
         ident console : .internal.io.tty
-        Method putws : unknown
+        Method putws : void
         arg  : unknown
           ident s : string
+
+  Method void init( tt: .internal.io.tty ):
+    void  : void
+      = : void
+        ident console : .internal.io.tty
+        ident tt : .internal.io.tty
 
   Method void printInt( i: int ):
     void  : void
       . : void
         ident console : .internal.io.tty
-        Method putws : unknown
+        Method putws : void
         arg  : unknown
           . : string
             ident i : int
-            Method toString : unknown
+            Method toString : void
 
