@@ -48,46 +48,41 @@
 #include <video/vops.h>
 #include <video/internal.h>
 
-//extern syscall_func_t  pvm_exec_systables[PVM_SYSTABLE_SIZE][32];
-
-
 static int debug_print = 0;
 
 
-//static pvm_object_t root_os_interface_object;
-
 //
-//	Default syscalls.
+//      Default syscalls.
 //
-//	Any class with internal implementation will present at least:
+//      Any class with internal implementation will present at least:
 //
-//	sys 0:	Construct. No args.
+//      sys 0:  Construct. No args.
 //
-//	sys 1:	Destruct. No args.
+//      sys 1:  Destruct. No args.
 //
-//	sys 2:	GetClass. No args. Returns class object.
+//      sys 2:  GetClass. No args. Returns class object.
 //
-//	sys 3:	clone. No args. Returns copy of this, if possible.
+//      sys 3:  clone. No args. Returns copy of this, if possible.
 //
-//	sys 4:	equals. arg is object. Compares by value.
+//      sys 4:  equals. arg is object. Compares by value.
 //
-//	sys 5:	ToString. No args, returns string object, representing
-//			contents of this object.
+//      sys 5:  ToString. No args, returns string object, representing
+//                      contents of this object.
 //
-//	sys 6:  ToXML. Returns string object, representing
-//			contents of this object in XML form.
+//      sys 6:  ToXML. Returns string object, representing
+//                      contents of this object in XML form.
 //
-//	sys 7:	fromXML.
+//      sys 7:  fromXML.
 //
-//	sys 8:	default activity. depends on class
+//      sys 8:  default activity. depends on class
 //
-//	sys 9:	secondary activity, depends on class
+//      sys 9:  secondary activity, depends on class
 //
-//	sys 10:	third activity
+//      sys 10: third activity
 //
-//	sys 11:	fourth activity
+//      sys 11: fourth activity
 //
-//	sys 15:	int hashCode - returns int
+//      sys 15: int hashCode - returns int
 //
 
 
@@ -100,8 +95,7 @@ static int debug_print = 0;
 int invalid_syscall( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-printf("invalid syscal for object: "); dumpo( (addr_t)(o) );//pvm_object_print( o ); printf("\n");
-//printf("invalid value's class: "); pvm_object_print( o->_class); printf("\n");
+    printf("invalid syscal for object: "); dumpo( (addr_t)(o) );
     SYSCALL_THROW_STRING( "invalid syscall called" );
 }
 
@@ -119,7 +113,6 @@ int si_void_0_construct( pvm_object_t o, pvm_object_t *ret, struct data_area_4_t
 int si_void_1_destruct( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
-    //(void)tc;
 
     DEBUG_INFO;
     SYSCALL_RETURN_NOTHING;
@@ -173,18 +166,10 @@ int si_void_7_fromXML( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thr
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_string_object( "(void)" ));
 }
-/*
-int si_void_8_def_op_1( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
-{
-    (void)o;
-    DEBUG_INFO;
-    SYSCALL_THROW_STRING( "void default op 1 called" );
-}
-*/
+
 int si_void_14_to_immutable( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-
     
     CHECK_PARAM_COUNT(0);
 
@@ -200,14 +185,12 @@ int si_void_15_hashcode( pvm_object_t me, pvm_object_t *ret, struct data_area_4_
     size_t os = me->_da_size;
     void *oa = me->da;
 
-    //SYSCALL_RETURN(pvm_create_int_object( ((addr_t)me)^0x3685A634^((addr_t)&si_void_15_hashcode) ));
     SYSCALL_RETURN(pvm_create_int_object( calc_hash( oa, oa+os) ));
 }
 
 
 
-syscall_func_t	syscall_table_4_void[16] =
-//pvm_exec_systables[PVM_SYSTABLE_ID_NULL][] =
+syscall_func_t  syscall_table_4_void[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -217,7 +200,7 @@ syscall_func_t	syscall_table_4_void[16] =
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
-    &si_void_14_to_immutable,        &si_void_15_hashcode
+    &si_void_14_to_immutable,       &si_void_15_hashcode
 
 };
 DECLARE_SIZE(void);
@@ -261,25 +244,23 @@ static int si_int_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     char buf[32];
-    snprintf( buf, 31, "%d", pvm_get_int(me) );
-	//SYSCALL_RETURN(pvm_create_string_object( "<void>" ));
-    SYSCALL_THROW_STRING( "int toXML called" );
+    snprintf( buf, 31, "<int>%d</int>", pvm_get_int(me) );
+        SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
 
-syscall_func_t	syscall_table_4_int[16] =
+syscall_func_t  syscall_table_4_int[16] =
 {
-    &si_void_0_construct,           	&si_void_1_destruct,
-    &si_void_2_class,               	&si_int_3_clone,
+    &si_void_0_construct,               &si_void_1_destruct,
+    &si_void_2_class,                   &si_int_3_clone,
     &si_int_4_equals,                   &si_int_5_tostring,
     &si_int_6_toXML,                    &si_void_7_fromXML,
     // 8
     &invalid_syscall,                   &invalid_syscall,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&invalid_syscall,
+    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &invalid_syscall,
     &si_void_14_to_immutable,           &si_void_15_hashcode
 };
-//int	n_syscall_table_4_int =	(sizeof syscall_table_4_int) / sizeof(syscall_func_t);
 DECLARE_SIZE(int);
 
 
@@ -327,18 +308,18 @@ static int si_long_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_area
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "%Ld", pvm_get_long(me) );
-	//SYSCALL_RETURN(pvm_create_string_object( "<void>" ));
-    SYSCALL_THROW_STRING( "int toXML called" );
+    snprintf( buf, sizeof(buf), "<long>%Ld</long>", pvm_get_long(me) );
+        SYSCALL_RETURN(pvm_create_string_object( buf ));
+    //SYSCALL_THROW_STRING( "int toXML called" );
 }
 
 
-syscall_func_t	syscall_table_4_long[16] =
+syscall_func_t  syscall_table_4_long[16] =
 {
     &si_void_0_construct,       &si_void_1_destruct,
     &si_void_2_class,           &si_long_3_clone,
-    &si_long_4_equals,     	    &si_long_5_tostring,
-    &si_long_6_toXML,      	    &si_void_7_fromXML,
+    &si_long_4_equals,          &si_long_5_tostring,
+    &si_long_6_toXML,           &si_void_7_fromXML,
     // 8
     &invalid_syscall,           &invalid_syscall,
     &invalid_syscall,           &invalid_syscall,
@@ -386,12 +367,11 @@ static int si_float_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_are
     DEBUG_INFO;
     char buf[100];
     snprintf( buf, sizeof(buf), "<float>%f</float>", pvm_get_float(me) );
-	SYSCALL_RETURN(pvm_create_string_object( buf ));
-    //SYSCALL_THROW_STRING( "int toXML called" );
+        SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
 
-syscall_func_t	syscall_table_4_float[16] =
+syscall_func_t  syscall_table_4_float[16] =
 {
     &si_void_0_construct,       &si_void_1_destruct,
     &si_void_2_class,           &si_float_3_clone,
@@ -445,12 +425,11 @@ static int si_double_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_ar
     DEBUG_INFO;
     char buf[100];
     snprintf( buf, sizeof(buf), "<double>%f</double>", pvm_get_double(me) );
-	SYSCALL_RETURN(pvm_create_string_object( buf ));
-    //SYSCALL_THROW_STRING( "int toXML called" );
+        SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
 
-syscall_func_t	syscall_table_4_double[16] =
+syscall_func_t  syscall_table_4_double[16] =
 {
     &si_void_0_construct,       &si_void_1_destruct,
     &si_void_2_class,           &si_double_3_clone,
@@ -513,14 +492,14 @@ static int si_string_4_equals( pvm_object_t me, pvm_object_t *ret, struct data_a
     }
     SYS_FREE_O(him);
 
-    // BUG - can compare just same classes
+    // BUG - can compare just same classes? Call his .compare if he is not string?
     SYSCALL_RETURN(pvm_create_int_object( iret ) );
 }
 
 static int si_string_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    SYSCALL_RETURN(me);
+    SYSCALL_RETURN(ref_inc_o(me));
 }
 
 static int si_string_8_substring( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
@@ -543,9 +522,6 @@ static int si_string_8_substring( pvm_object_t me, pvm_object_t *ret, struct dat
 
     if( len < 0 )
         SYSCALL_THROW_STRING( "string.substring length is negative" );
-
-
-    //printf("substr inx %x len %d parmlen %d\n", index, len, parmlen);
 
     SYSCALL_RETURN(pvm_create_string_object_binary( (char *)meda->data + index, len ));
 }
@@ -580,7 +556,7 @@ static int si_string_10_concat( pvm_object_t me, pvm_object_t *ret, struct data_
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
     pvm_object_t oret = pvm_create_string_object_binary_cat(
-    		(char *)meda->data, meda->length,
+                (char *)meda->data, meda->length,
                 (char *)himda->data, himda->length );
 
     SYS_FREE_O(him);
@@ -594,7 +570,6 @@ static int si_string_11_length( pvm_object_t me, pvm_object_t *ret, struct data_
     DEBUG_INFO;
     ASSERT_STRING(me);
     struct data_area_4_string *meda = pvm_object_da( me, string );
-
     
     CHECK_PARAM_COUNT(0);
 
@@ -613,7 +588,7 @@ static int si_string_12_find( pvm_object_t me, pvm_object_t *ret, struct data_ar
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
     unsigned char * cret = (unsigned char *)strnstrn(
-    		(char *)meda->data, meda->length,
+                (char *)meda->data, meda->length,
                 (char *)himda->data, himda->length );
 
     SYS_FREE_O(him);
@@ -652,20 +627,20 @@ static int si_string_17_tolong( pvm_object_t me, pvm_object_t *ret, struct data_
 
 
 
-syscall_func_t	syscall_table_4_string[18] =
+syscall_func_t  syscall_table_4_string[18] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_string_3_clone,
     &si_string_4_equals,            &si_string_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_string_8_substring, 		&si_string_9_charat,
+    &si_string_8_substring,         &si_string_9_charat,
     &si_string_10_concat,           &si_string_11_length,
     &si_string_12_find,             &invalid_syscall,
     &si_void_14_to_immutable,       &si_void_15_hashcode,
     // 16
     &si_string_16_toint,            &si_string_17_tolong,
-    //&si_string_18_tofloat,          &si_string_19_todouble,
+    //&si_string_18_tofloat,        &si_string_19_todouble,
 };
 DECLARE_SIZE(string);
 
@@ -699,13 +674,9 @@ static int si_thread_10_pause( pvm_object_t me, pvm_object_t *ret, struct data_a
     struct data_area_4_thread *meda = pvm_object_da( me, thread );
 
     if(meda != tc)
-    	SYSCALL_THROW_STRING("Thread can pause itself only");
+        SYSCALL_THROW_STRING("Thread can pause itself only");
 
-//#if OLD_VM_SLEEP
-//    SYSCALL_PUT_THIS_THREAD_ASLEEP(0);
-//#else
     SYSCALL_THROW_STRING("Not this way");
-//#endif
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -718,7 +689,7 @@ static int si_thread_11_continue( pvm_object_t me, pvm_object_t *ret, struct dat
 
     //hal_spin_lock(&meda->spin);
 //    if( !meda->sleep_flag )
-//    	SYSCALL_THROW_STRING("Thread is not sleeping in continue");
+//      SYSCALL_THROW_STRING("Thread is not sleeping in continue");
     //hal_spin_unlock(&meda->spin);
 
 //    SYSCALL_WAKE_THREAD_UP(meda);
@@ -744,7 +715,7 @@ static int si_thread_13_getUser( pvm_object_t me, pvm_object_t *ret, struct data
     DEBUG_INFO;
     struct data_area_4_thread *meda = pvm_object_da( me, thread );
 
-    SYSCALL_RETURN(meda->owner);
+    SYSCALL_RETURN(ref_inc_o(meda->owner));
 }
 
 
@@ -754,20 +725,20 @@ static int si_thread_12_getEnvironment( pvm_object_t me, pvm_object_t *ret, stru
     DEBUG_INFO;
     struct data_area_4_thread *meda = pvm_object_da( me, thread );
 
+    // TODO vm_spinlock
     if( pvm_is_null(meda->environment) )
     {
         pvm_object_t env = pvm_create_string_object(".phantom.environment");
         pvm_object_t cl = pvm_exec_lookup_class_by_name( env );
         meda->environment = pvm_create_object(cl);
         ref_dec_o(env);
-        //ref_dec_o(cl);  // object keep class ref
     }
 
     SYSCALL_RETURN(meda->environment);
 }
 
 
-syscall_func_t	syscall_table_4_thread[16] =
+syscall_func_t  syscall_table_4_thread[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -793,7 +764,7 @@ static int si_call_frame_5_tostring( pvm_object_t me, pvm_object_t *ret, struct 
 }
 
 
-syscall_func_t	syscall_table_4_call_frame[16] =
+syscall_func_t  syscall_table_4_call_frame[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -819,7 +790,7 @@ static int si_istack_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data
 }
 
 
-syscall_func_t	syscall_table_4_istack[16] =
+syscall_func_t  syscall_table_4_istack[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -845,7 +816,7 @@ static int si_ostack_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data
 }
 
 
-syscall_func_t	syscall_table_4_ostack[16] =
+syscall_func_t  syscall_table_4_ostack[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -871,7 +842,7 @@ static int si_estack_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data
 }
 
 
-syscall_func_t	syscall_table_4_estack[16] =
+syscall_func_t  syscall_table_4_estack[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -895,6 +866,7 @@ static int si_class_class_5_tostring( pvm_object_t me, pvm_object_t *ret, struct
     SYSCALL_RETURN(pvm_create_string_object( "class" ));
 }
 
+// TODO who needs this?
 static int si_class_class_8_new_class( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)me;
@@ -909,9 +881,6 @@ static int si_class_class_8_new_class( pvm_object_t me, pvm_object_t *ret, struc
     ASSERT_STRING(class_name);
 
     pvm_object_t new_class = pvm_create_class_object(class_name, iface, sizeof(pvm_object_t ) * n_object_slots);
-
-    //SYS_FREE_O(class_name);  //linked in class object
-    //SYS_FREE_O(iface);  //linked in class object
 
     SYSCALL_RETURN( new_class );
 }
@@ -968,7 +937,7 @@ static int si_class_14_instanceof( pvm_object_t me, pvm_object_t *ret, struct da
 }
 
 
-syscall_func_t	syscall_table_4_class[16] =
+syscall_func_t  syscall_table_4_class[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -994,7 +963,7 @@ static int si_interface_5_tostring( pvm_object_t me, pvm_object_t *ret, struct d
 }
 
 
-syscall_func_t	syscall_table_4_interface[16] =
+syscall_func_t  syscall_table_4_interface[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -1020,7 +989,7 @@ static int si_code_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_a
 }
 
 
-syscall_func_t	syscall_table_4_code[16] =
+syscall_func_t  syscall_table_4_code[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -1046,7 +1015,7 @@ static int si_page_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_a
 }
 
 
-syscall_func_t	syscall_table_4_page[16] =
+syscall_func_t  syscall_table_4_page[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -1091,7 +1060,6 @@ errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new
     return ENOENT;
 #else
     if(DEBUG_CACHED_CLASSES) printf("---- pvm_class_cache_lookup %.*s\n", name_len, name );
-    //if( pvm_is_null(dir) )        dir = pvm_create_directory_object();
 
     struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
 
@@ -1099,7 +1067,7 @@ errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new
 
     if( DEBUG_CACHED_CLASSES && (rc == 0) )
     {
-        printf("---- pvm_class_cache_lookup %.*s FOUND\n", name_len, name );
+        //printf("---- pvm_class_cache_lookup %.*s FOUND\n", name_len, name );
         pvm_object_dump( *new_class );
     }
     return rc;
@@ -1146,7 +1114,6 @@ static int si_bootstrap_8_load_class( pvm_object_t me, pvm_object_t *ret, struct
 {
     (void)me;
     DEBUG_INFO;
-
     
     CHECK_PARAM_COUNT(1);
 
@@ -1159,7 +1126,6 @@ static int si_bootstrap_8_load_class( pvm_object_t me, pvm_object_t *ret, struct
     ASSERT_STRING(name);
 
     struct data_area_4_string *nameda = pvm_object_da( name, string );
-
 
     len = nameda->length > bufs ? bufs : nameda->length;
     memcpy( buf, nameda->data, len );
@@ -1176,7 +1142,7 @@ static int si_bootstrap_8_load_class( pvm_object_t me, pvm_object_t *ret, struct
     {
         printf("got from cache class '%.*s' @%p\n", len, buf, new_class );
         ref_inc_o(new_class);
-    	SYSCALL_RETURN(new_class);
+        SYSCALL_RETURN(new_class);
     }
 
     if( pvm_load_class_from_module(buf, &new_class))
@@ -1195,7 +1161,7 @@ static int si_bootstrap_8_load_class( pvm_object_t me, pvm_object_t *ret, struct
     else
     {
         pvm_class_cache_insert(buf, len, new_class);
-    	SYSCALL_RETURN(new_class);
+        SYSCALL_RETURN(new_class);
     }
 }
 
@@ -1239,7 +1205,7 @@ static int si_bootstrap_16_print( pvm_object_t me, pvm_object_t *ret, struct dat
 
     while( n_args-- )
         {
-    	pvm_object_t o = args[n_args];
+        pvm_object_t o = args[n_args];
         pvm_object_print( o );
         SYS_FREE_O( o );
         }
@@ -1259,7 +1225,6 @@ static int si_bootstrap_17_register_class_loader( pvm_object_t me, pvm_object_t 
     pvm_root.class_loader = loader;
     pvm_object_storage_t *root = get_root_object_storage();
     pvm_set_field( root, PVM_ROOT_OBJECT_CLASS_LOADER, pvm_root.class_loader );
-
     // Don't need do SYS_FREE_O(loader) since we store it
 
     SYSCALL_RETURN_NOTHING;
@@ -1273,12 +1238,9 @@ static int si_bootstrap_18_thread( pvm_object_t me, pvm_object_t *ret, struct da
     CHECK_PARAM_COUNT(1);
 
     pvm_object_t object = args[0];
-
     // Don't need do SYS_FREE_O(object) since we store it as 'this'
 
-#if 1
     // TODO check object class to be runnable or subclass
-
     {
     pvm_object_t new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
@@ -1292,18 +1254,14 @@ static int si_bootstrap_18_thread( pvm_object_t me, pvm_object_t *ret, struct da
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
 
-    //printf("here?\n");
-
     phantom_activate_thread(thread);
     }
-#endif
-
 
     SYSCALL_RETURN_NOTHING;
 }
 
 
-// THIS IS JUST A TEMP SHORTCUT!
+// THIS IS JUST A TEMP SHORTCUT! TODO need it?
 static int si_bootstrap_19_create_binary( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)me;
@@ -1321,7 +1279,7 @@ static int si_bootstrap_19_create_binary( pvm_object_t me, pvm_object_t *ret, st
 #if BACK_WIN && !VIDEO_NEW_BG_WIN
 static window_handle_t back_win = 0;
 #endif
-
+// TODO fix me - add me to restart list to restart background?
 static int si_bootstrap_20_set_screen_background( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)me;
@@ -1333,23 +1291,21 @@ static int si_bootstrap_20_set_screen_background( pvm_object_t me, pvm_object_t 
 
 #if !BACK_WIN
     if( drv_video_bmpblt(_bmp,0,0,0) )
-    	SYSCALL_THROW_STRING( "not a bitmap" );
-
+        SYSCALL_THROW_STRING( "not a bitmap" );
 
     drv_video_window_repaint_all();
 #else
     // TODO black screen :(
 
     if( !pvm_object_class_exactly_is( _bmp, pvm_get_bitmap_class() ) )
-    	SYSCALL_THROW_STRING( "not a bitmap" );
+        SYSCALL_THROW_STRING( "not a bitmap" );
 
     struct data_area_4_bitmap *bmp = pvm_object_da( _bmp, bitmap );
     struct data_area_4_binary *bin = pvm_object_da( bmp->image, binary );
 
-
 #if !VIDEO_NEW_BG_WIN
     if(back_win == 0)
-    	back_win = drv_video_window_create( scr_get_xsize(), scr_get_ysize(), 0, 0, COLOR_BLACK, "Background", WFLAG_WIN_DECORATED );
+        back_win = drv_video_window_create( scr_get_xsize(), scr_get_ysize(), 0, 0, COLOR_BLACK, "Background", WFLAG_WIN_DECORATED );
 
     back_win->flags &= ~WFLAG_WIN_DECORATED;
     back_win->flags |= WFLAG_WIN_NOFOCUS;
@@ -1362,14 +1318,12 @@ static int si_bootstrap_20_set_screen_background( pvm_object_t me, pvm_object_t 
 #endif
 
     bitmap2bitmap(
-    		back_win->w_pixel, back_win->xsize, back_win->ysize, 0, 0,
+                back_win->w_pixel, back_win->xsize, back_win->ysize, 0, 0,
                      (void *)bin->data, bmp->xsize, bmp->ysize, 0, 0,
                      bmp->xsize, bmp->ysize
                     );
 
-    //drv_video_winblt(back_win);
     w_update( back_win );
-    //scr_repaint_all();
 #endif
     // Remove it if will store bmp!
     SYS_FREE_O(_bmp);
@@ -1386,18 +1340,10 @@ static int si_bootstrap_21_sleep( pvm_object_t me, pvm_object_t *ret, struct dat
     CHECK_PARAM_COUNT(1);
 
     int msec = AS_INT(args[0]);
-//#if OLD_VM_SLEEP
-//    phantom_wakeup_after_msec(msec,tc);
-
-    //#warning to kill
-//    SHOW_ERROR0( 0, "si_bootstrap_21_sleep used" );
-
-//    if(phantom_is_a_real_kernel())
-//        SYSCALL_PUT_THIS_THREAD_ASLEEP(0);
-//#else
     (void) msec;
     SHOW_ERROR0( 0, "si_bootstrap_21_sleep used" );
-//#endif
+
+    // todo - unlock obj mem and sleep?
     SYSCALL_RETURN_NOTHING;
 }
 
@@ -1430,32 +1376,26 @@ static int si_bootstrap_24_reboot( pvm_object_t me, pvm_object_t *ret, struct da
     (void)me;
     DEBUG_INFO;
 
-    //
-    //CHECK_PARAM_COUNT(1);
-
-    //pvm_object_t arg = args[0];
-    
-    // F11
-    //phantom_shutdown(0);
-
-    //case KEY_F12:
+    //int mode = (n_args > 0) ? AS_INT(args[0]) : 0;
+    //if( mode )
     hal_cpu_reset_real();
+    //else phantom_shutdown(0);
 
     SYSCALL_RETURN_NOTHING;
 }
 
 
-syscall_func_t	syscall_table_4_boot[25] =
+syscall_func_t  syscall_table_4_boot[25] =
 {
-    &si_void_0_construct,           	&si_void_1_destruct,
-    &si_void_2_class,               	&si_void_3_clone,
-    &si_void_4_equals,              	&si_bootstrap_5_tostring,
-    &si_void_6_toXML,               	&si_void_7_fromXML,
+    &si_void_0_construct,               &si_void_1_destruct,
+    &si_void_2_class,                   &si_void_3_clone,
+    &si_void_4_equals,                  &si_bootstrap_5_tostring,
+    &si_void_6_toXML,                   &si_void_7_fromXML,
     // 8
-    &si_bootstrap_8_load_class,     	&invalid_syscall, //&si_bootstrap_9_load_code,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&invalid_syscall,
-    &invalid_syscall,               	&si_void_15_hashcode,
+    &si_bootstrap_8_load_class,         &invalid_syscall, //&si_bootstrap_9_load_code,
+    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &invalid_syscall,
+    &invalid_syscall,                   &si_void_15_hashcode,
     // 16
     &si_bootstrap_16_print,             &si_bootstrap_17_register_class_loader,
     &si_bootstrap_18_thread,            &si_bootstrap_19_create_binary,
@@ -1482,7 +1422,6 @@ static int si_array_8_get_iterator( pvm_object_t me, pvm_object_t *ret, struct d
 {
     (void)me;
     DEBUG_INFO;
-
     
     CHECK_PARAM_COUNT(0);
     SYSCALL_THROW_STRING( "get iterator is not implemented yet" );
@@ -1493,7 +1432,6 @@ static int si_array_9_get_subarray( pvm_object_t me, pvm_object_t *ret, struct d
 {
     (void)me;
     DEBUG_INFO;
-
     
     CHECK_PARAM_COUNT(2);
 
@@ -1548,14 +1486,13 @@ static int si_array_12_size( pvm_object_t me, pvm_object_t *ret, struct data_are
     CHECK_PARAM_COUNT(0);
 
     struct data_area_4_array *da = (struct data_area_4_array *)me->da;
-
     SYSCALL_RETURN(pvm_create_int_object( da->used_slots ) );
 }
 
 
 
 
-syscall_func_t	syscall_table_4_array[16] =
+syscall_func_t  syscall_table_4_array[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -1564,7 +1501,7 @@ syscall_func_t	syscall_table_4_array[16] =
     // 8
     &si_array_8_get_iterator,       &si_array_9_get_subarray,
     &si_array_10_get,               &si_array_11_set,
-    &si_array_12_size,               &invalid_syscall,
+    &si_array_12_size,              &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
 
@@ -1576,13 +1513,13 @@ DECLARE_SIZE(array);
 
 
 // --------- binary -------------------------------------------------------
-
+// TODO we do not need this class in fact - we use string instead
 static int si_binary_5_tostring( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
     DEBUG_INFO;
-    // TODO hexdump
 
+    // TODO hexdump to string
     if(1)
     {
         struct data_area_4_binary *da = pvm_object_da( o, binary );
@@ -1605,7 +1542,6 @@ static int si_binary_8_getbyte( pvm_object_t me, pvm_object_t *ret, struct data_
 
     int size = me->_da_size - sizeof( struct data_area_4_binary );
 
-    //if( index < 0 || index >= size )
     if( index >= size )
         SYSCALL_THROW_STRING( "binary index out of bounds" );
 
@@ -1624,7 +1560,6 @@ static int si_binary_9_setbyte( pvm_object_t me, pvm_object_t *ret, struct data_
 
     int size = me->_da_size - sizeof( struct data_area_4_binary );
 
-    //if( index < 0 || index >= size )
     if( index >= size )
         SYSCALL_THROW_STRING( "binary index out of bounds" );
 
@@ -1671,7 +1606,7 @@ static int si_binary_10_setrange( pvm_object_t me, pvm_object_t *ret, struct dat
 }
 
 
-syscall_func_t	syscall_table_4_binary[16] =
+syscall_func_t  syscall_table_4_binary[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
@@ -1689,8 +1624,6 @@ DECLARE_SIZE(binary);
 
 
 // --------- closure -------------------------------------------------------
-
-
 
 static int si_closure_9_getordinal( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
@@ -1727,21 +1660,23 @@ static int si_closure_11_setobject( pvm_object_t me, pvm_object_t *ret, struct d
 }
 
 
-syscall_func_t	syscall_table_4_closure[16] =
+syscall_func_t  syscall_table_4_closure[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_binary_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &invalid_syscall, 	    	    &si_closure_9_getordinal,
-    &si_closure_10_setordinal, 	    &si_closure_11_setobject,
+    &invalid_syscall,               &si_closure_9_getordinal,
+    &si_closure_10_setordinal,      &si_closure_11_setobject,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
 
 };
 DECLARE_SIZE(closure);
+
+
 
 // --------- bitmap -------------------------------------------------------
 
@@ -1762,12 +1697,11 @@ static int si_bitmap_8_fromstring( pvm_object_t me, pvm_object_t *ret, struct da
 
     CHECK_PARAM_COUNT(1);
 
-//printf("Load from string\n");
-
     pvm_object_t _s = args[0];
 
+    // TODO load PNG, JPG and binary dump of our bitmap format too
     if( drv_video_string2bmp( da, pvm_object_da( _s, string)->data ) )
-    	SYSCALL_THROW_STRING("can not parse graphics data");
+        SYSCALL_THROW_STRING("can not parse graphics data");
 
     SYS_FREE_O(_s);
 
@@ -1779,7 +1713,6 @@ static int si_bitmap_9_paintto( pvm_object_t me, pvm_object_t *ret, struct data_
 {
     DEBUG_INFO;
     struct data_area_4_bitmap *da = pvm_object_da( me, bitmap );
-
     
     CHECK_PARAM_COUNT(3);
 
@@ -1792,28 +1725,26 @@ static int si_bitmap_9_paintto( pvm_object_t me, pvm_object_t *ret, struct data_
     struct data_area_4_binary *pixels = pvm_object_da( da->image, binary );
 
     bitmap2bitmap(
-    		tty->pixel, tty->w.xsize, tty->w.ysize, x, y,
-    		(rgba_t *)pixels, da->xsize, da->ysize, 0, 0,
-    		da->xsize, da->ysize
+                tty->pixel, tty->w.xsize, tty->w.ysize, x, y,
+                (rgba_t *)pixels, da->xsize, da->ysize, 0, 0,
+                da->xsize, da->ysize
     );
-    //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
     w_update( &(tty->w) );
-
     SYS_FREE_O(_tty);
 
     SYSCALL_RETURN_NOTHING;
 }
 
 
-syscall_func_t	syscall_table_4_bitmap[16] =
+syscall_func_t  syscall_table_4_bitmap[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_bitmap_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_bitmap_8_fromstring,	    &si_bitmap_9_paintto,
-    &invalid_syscall, 	    	    &invalid_syscall,
+    &si_bitmap_8_fromstring,        &si_bitmap_9_paintto,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
@@ -1831,40 +1762,27 @@ static int si_world_5_tostring( pvm_object_t o, pvm_object_t *ret, struct data_a
     SYSCALL_RETURN(pvm_create_string_object( "(world)" ));
 }
 
-//static struct pvm_object_storage	* thread_iface = 0;
-
 static int si_world_8_getMyThread( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void)o;
     DEBUG_INFO;
-/*
-    // TODO spinlock!
-    if(thread_iface == 0 )
-    {
-        struct data_area_4_class *cda = pvm_object_da( pvm_get_thread_class(), class );
-        thread_iface = cda->object_default_interface;
-    }
-*/
-    pvm_object_t out;
-
-    out =
+    pvm_object_t out =
         (pvm_object_storage_t *)
         (tc - DA_OFFSET()); // TODO XXX HACK!
-    //out.interface = thread_iface;
 
     SYSCALL_RETURN( ref_inc_o( out ) );
 }
 
 
-syscall_func_t	syscall_table_4_world[16] =
+syscall_func_t  syscall_table_4_world[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_world_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_world_8_getMyThread,	    &invalid_syscall,
-    &invalid_syscall, 	    	    &invalid_syscall,
+    &si_world_8_getMyThread,        &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
@@ -1946,15 +1864,15 @@ errno_t si_weakref_9_resetMyObject(pvm_object_t o )
 
 
 
-syscall_func_t	syscall_table_4_weakref[16] =
+syscall_func_t  syscall_table_4_weakref[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_weakref_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_weakref_8_getMyObject,	    &invalid_syscall,
-    &invalid_syscall, 	    	    &invalid_syscall,
+    &si_weakref_8_getMyObject,      &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
@@ -2056,20 +1974,19 @@ static int si_directory_12_iterate( pvm_object_t o, pvm_object_t *ret, struct da
 
     SYSCALL_THROW_STRING( "dir.iterate: not implemented" );
     SYSCALL_RETURN_NOTHING;
-    //return pvm_create_null_object();
 }
 
 
 
 
-syscall_func_t	syscall_table_4_directory[16] =
+syscall_func_t  syscall_table_4_directory[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_directory_4_equals,         &si_directory_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_directory_8_put, 	    	&si_directory_9_get,
+    &si_directory_8_put,            &si_directory_9_get,
     &si_directory_10_remove,        &si_directory_11_size,
     &si_directory_12_iterate,       &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode,
@@ -2082,6 +1999,8 @@ DECLARE_SIZE(directory);
 
 
 // --------- connection -------------------------------------------------------
+
+// TODO rewrite all connections as .internal classes and kill
 
 static int si_connection_5_tostring( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
@@ -2128,7 +2047,6 @@ static int si_connection_9_disconnect( pvm_object_t o, pvm_object_t *ret, struct
 {
     DEBUG_INFO;
     //struct data_area_4_connection *da = pvm_object_da( o, connection );
-
     
     CHECK_PARAM_COUNT(0);
 
@@ -2136,7 +2054,7 @@ static int si_connection_9_disconnect( pvm_object_t o, pvm_object_t *ret, struct
 
     SYSCALL_RETURN(pvm_create_int_object( iret ) );
 }
-
+// Not needed at all?
 static int si_connection_10_check( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
@@ -2172,6 +2090,7 @@ static int si_connection_10_check( pvm_object_t o, pvm_object_t *ret, struct dat
     SYSCALL_RETURN(pvm_create_int_object( iret ) );
 }
 
+// Not needed at all?
 static int si_connection_11_do( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
@@ -2233,15 +2152,15 @@ static int si_connection_13_blocking( pvm_object_t o, pvm_object_t *ret, struct 
 
 
 
-syscall_func_t	syscall_table_4_connection[16] =
+syscall_func_t  syscall_table_4_connection[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_connection_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_connection_8_connect, 	    &si_connection_9_disconnect,
-    &si_connection_10_check, 	    &si_connection_11_do,
+    &si_connection_8_connect,       &si_connection_9_disconnect,
+    &si_connection_10_check,        &si_connection_11_do,
     &si_connection_12_set_callback, &si_connection_13_blocking,
     &invalid_syscall,               &si_void_15_hashcode,
 

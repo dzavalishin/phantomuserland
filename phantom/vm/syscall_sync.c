@@ -4,10 +4,19 @@
  *
  * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * Synchronization syscalls
- *
+ * Internal (native) classes implementation: Synchronization
+ * 
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
  *
 **/
+
+
+#define DEBUG_MSG_PREFIX "vm.sysc.win"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <phantom_libc.h>
 #include <time.h>
@@ -80,15 +89,15 @@ void pvm_spin_unlock( pvm_spinlock_t *ps )
 // --------- mutex -------------------------------------------------------
 
 // NB - persistent mutexes!
-// TODO have a mark - can this mutex be locked at snapshot
+// TODO have a mark - can this mutex be locked at snapshot? No. All of them can.
 
 
 void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
 {
 #if NEW_VM_SLEEP
     struct data_area_4_mutex *da = pvm_object_da( me, mutex );
-    //SYSCALL_THROW_STRING("Not this way");
-    lprintf("unimplemented vm_mutex_lock used\r");
+
+    lprintf("warning: unfinished vm_mutex_lock used\r");
 
     pvm_spin_lock( &(da->lock) );
     pvm_object_t this_thread = pvm_da_to_object(tc);
@@ -187,9 +196,6 @@ static int si_mutex_9_unlock( pvm_object_t me, pvm_object_t *ret, struct data_ar
     //struct data_area_4_mutex *da = pvm_object_da( me, mutex );
     //(void)da;
 
-    // No locking in syscalls!!
-    //pthread_mutex_unlock(&(da->mutex));
-
     errno_t rc = vm_mutex_unlock( me, tc );
     switch(rc)
     {
@@ -217,15 +223,15 @@ static int si_mutex_10_trylock( pvm_object_t me, pvm_object_t *ret, struct data_
 }
 
 
-syscall_func_t	syscall_table_4_mutex[16] =
+syscall_func_t  syscall_table_4_mutex[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_mutex_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_mutex_8_lock,     	    &si_mutex_9_unlock,
-    &si_mutex_10_trylock, 	    &invalid_syscall,
+    &si_mutex_8_lock,               &si_mutex_9_unlock,
+    &si_mutex_10_trylock,           &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
@@ -361,15 +367,15 @@ static int si_cond_11_signal( pvm_object_t me, pvm_object_t *ret, struct data_ar
 }
 
 
-syscall_func_t	syscall_table_4_cond[16] =
+syscall_func_t  syscall_table_4_cond[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_cond_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_cond_8_wait,      	    &si_cond_9_twait,
-    &si_cond_10_broadcast,	    &si_cond_11_signal,
+    &si_cond_8_wait,                &si_cond_9_twait,
+    &si_cond_10_broadcast,          &si_cond_11_signal,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16
@@ -442,6 +448,7 @@ static int si_sema_10_zero( pvm_object_t me, pvm_object_t *ret, struct data_area
     DEBUG_INFO;
     struct data_area_4_sema *da = pvm_object_da( me, sema );
 
+    // TODO in spinlock
     if( da->sem_value > 0 )
         da->sem_value = 0;
 
@@ -480,15 +487,15 @@ static int si_sema_11_release( pvm_object_t me, pvm_object_t *ret, struct data_a
 }
 
 
-syscall_func_t	syscall_table_4_sema[16] =
+syscall_func_t  syscall_table_4_sema[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_sema_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_sema_8_acquire,      	    &si_sema_9_tacquire,
-    &si_sema_10_zero,	            &si_sema_11_release,
+    &si_sema_8_acquire,             &si_sema_9_tacquire,
+    &si_sema_10_zero,               &si_sema_11_release,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16

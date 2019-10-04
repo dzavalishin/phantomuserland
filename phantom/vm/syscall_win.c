@@ -1,10 +1,24 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Internal (native) classes implementation: Window
+ * 
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
+ *
+**/
 
 
+#define DEBUG_MSG_PREFIX "vm.sysc.win"
+#include <debug_ext.h>
+#define debug_level_flow 6
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <phantom_libc.h>
-
-
-//#include "drv_video_screen.h"
 
 #include "vm/object.h"
 #include "vm/internal.h"
@@ -135,7 +149,6 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
     DEBUG_INFO;
 
     struct data_area_4_tty      *da = pvm_data_area( me, tty );
-
     
     CHECK_PARAM_COUNT(3);
 
@@ -144,7 +157,6 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
 
     int y = AS_INT(args[1]);
     int x = AS_INT(args[0]);
-
 
     int len = pvm_get_str_len( _text );
     const char * data = (const char *)pvm_get_str_data(_text);
@@ -190,12 +202,11 @@ static int win_putImage_25( pvm_object_t me, pvm_object_t *ret, struct data_area
     struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
 
     bitmap2bitmap(
-    		da->pixel, da->w.xsize, da->w.ysize, x, y,
-    		(rgba_t *)pixels, _bmp->xsize, _bmp->ysize, 0, 0,
-    		_bmp->xsize, _bmp->ysize
+                da->pixel, da->w.xsize, da->w.ysize, x, y,
+                (rgba_t *)pixels, _bmp->xsize, _bmp->ysize, 0, 0,
+                _bmp->xsize, _bmp->ysize
     );
-    //drv_video_winblt( &(tty->w), tty->w.x, tty->w.y);
-    // Sure?
+    // Sure? Have flag for window - autoUpdate! and method setAutoUpdate( false )
     w_update( &(da->w) );
 
     SYS_FREE_O(_img);
@@ -251,11 +262,10 @@ static int win_drawLine_28( pvm_object_t me, pvm_object_t *ret, struct data_area
 
     w_draw_line( &(da->w), x, y, x+xs, y+ys, da->fg );
 
-
     SYSCALL_RETURN_NOTHING;
 }
 
-// void	drawBox( var x : int, var y : int, var xsize : int, var ysize : int ) [26] {}
+// void drawBox( var x : int, var y : int, var xsize : int, var ysize : int ) [26] {}
 
 static int win_drawBox_29( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
@@ -274,7 +284,7 @@ static int win_drawBox_29( pvm_object_t me, pvm_object_t *ret, struct data_area_
     SYSCALL_RETURN_NOTHING;
 }
 
-// void	fillBox( var x : int, var y : int, var xsize : int, var ysize : int ) [30] {}
+// void fillBox( var x : int, var y : int, var xsize : int, var ysize : int ) [30] {}
 
 static int win_fillBox_30( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
@@ -294,7 +304,7 @@ static int win_fillBox_30( pvm_object_t me, pvm_object_t *ret, struct data_area_
 }
 
 
-// void	fillEllipse( var x : int, var y : int, var xsize : int, var ysize : int ) [31] {}
+// void fillEllipse( var x : int, var y : int, var xsize : int, var ysize : int ) [31] {}
 
 static int win_fillEllipse_31( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
@@ -313,7 +323,7 @@ static int win_fillEllipse_31( pvm_object_t me, pvm_object_t *ret, struct data_a
     SYSCALL_RETURN_NOTHING;
 }
 
-// void	setEventHandler( var handler : .ru.dz.phantom.handler );
+// void setEventHandler( var handler : .ru.dz.phantom.handler );
 
 static int win_setHandler_32( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
@@ -325,17 +335,12 @@ static int win_setHandler_32( pvm_object_t me, pvm_object_t *ret, struct data_ar
     pvm_object_t handler = args[0];
 
     // TODO check class!
-
-//    da->event_handler = handler;
-
     {
     struct data_area_4_connection  *cda = (struct data_area_4_connection *)da->connector->da;
     // No sync - assume caller does it before getting real callbacks
+    cda->callback_method = 8; // TODO BUG FIXME - lookup method by name?
     cda->callback = handler;
-    cda->callback_method = 8; // TODO BUG FIXME
     }
-
-    //SYS_FREE_O(_img);
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -369,11 +374,8 @@ static int win_update_34( pvm_object_t me, pvm_object_t *ret, struct data_area_4
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
-
-
     
     CHECK_PARAM_COUNT(0);
-
 
     w_update( &(da->w) );
 
@@ -401,13 +403,12 @@ static int win_scrollHor_35( pvm_object_t me, pvm_object_t *ret, struct data_are
 }
 
 
-/// Drawe part of bitmap to window
+/// Draw part of bitmap to window
 /// Same as usual putImage, but copies just subset
 static int win_drawImagePart_36( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
-
     
     CHECK_PARAM_COUNT(7);
 
@@ -426,11 +427,10 @@ static int win_drawImagePart_36( pvm_object_t me, pvm_object_t *ret, struct data
     struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
 
     bitmap2bitmap(
-    		da->pixel, da->w.xsize, da->w.ysize, x+xstart, y+ystart,
-    		(rgba_t *)pixels, _bmp->xsize, _bmp->ysize, xstart, ystart,
-    		xsize, ysize
+                da->pixel, da->w.xsize, da->w.ysize, x+xstart, y+ystart,
+                (rgba_t *)pixels, _bmp->xsize, _bmp->ysize, xstart, ystart,
+                xsize, ysize
     );
-
 
     w_update( &(da->w) );
 
@@ -441,31 +441,31 @@ static int win_drawImagePart_36( pvm_object_t me, pvm_object_t *ret, struct data
 
 
 
-syscall_func_t	syscall_table_4_window[32+8] =
+syscall_func_t  syscall_table_4_window[32+8] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_void_3_clone,
     &si_void_4_equals,              &si_window_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &invalid_syscall,    	    &invalid_syscall,
-    &invalid_syscall, 	    	    &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
+    &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode,
     // 16
-    &win_getXSize, 	    	    &win_getYSize,
-    &win_getX, 	    	    	    &win_getY,
+    &win_getXSize,                  &win_getYSize,
+    &win_getX,                      &win_getY,
     &win_clear_20,                  &win_fill_21,
     &win_setFGcolor_22,             &win_setBGcolor_23,
     // 24
-    &win_putString_24,		    &win_putImage_25,
-    &win_setSize_26,    	    &win_setPos_27,
-    &win_drawLine_28, 	    	    &win_drawBox_29,
+    &win_putString_24,              &win_putImage_25,
+    &win_setSize_26,                &win_setPos_27,
+    &win_drawLine_28,               &win_drawBox_29,
     &win_fillBox_30,                &win_fillEllipse_31,
     // 32
-    &win_setHandler_32,  	    &win_setTitle_33,
-    &win_update_34, 	    	    &win_scrollHor_35,
-    &win_drawImagePart_36,           &invalid_syscall,
+    &win_setHandler_32,             &win_setTitle_33,
+    &win_update_34,                 &win_scrollHor_35,
+    &win_drawImagePart_36,          &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
 
 };
