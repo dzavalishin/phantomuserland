@@ -413,11 +413,12 @@ int main(int argc, char **argv, char **envp)
     printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
 
 #if 1
-    /*
-    printf("PRESS Q TO STOP PHANTOM");
-    while(getchar() != 'Q')
-    ;
-    */
+    {
+        hal_sleep_msec(60000*13);
+        printf("\nWILL CRASH ON PURPOSE\n\n" );
+        hal_sleep_msec(20000);
+        hal_cpu_reset_real();
+    }
 
     while(1)
         hal_sleep_msec(20000);

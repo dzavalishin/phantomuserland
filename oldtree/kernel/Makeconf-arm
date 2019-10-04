@@ -1,7 +1,5 @@
 ARCH_FLAGS      = -mpoke-function-name
 
-TARGET_OBJECT_FORMAT=elf32-littlearm
-
 HOST_CPU	= i686
 HOST_ARCH	= x86
 unix_host	= NONE
@@ -17,7 +15,6 @@ export AR       = $(BIN_PREFIX)ar
 export RANLIB   = $(BIN_PREFIX)ranlib
 export OBJCOPY  = $(BIN_PREFIX)objcopy
 export NM       = $(BIN_PREFIX)nm
-
 
 AWK             = gawk
 YACC            = bison -y
@@ -35,6 +32,10 @@ INSTALL_BINDIR	= $(exec_prefix)/bin
 INSTALL_LIBDIR	= $(exec_prefix)/lib
 
 PHANTOM_FFLAGS    =  -fno-strict-aliasing -ffreestanding -fno-inline -fkeep-inline-functions
+
+
+TARGET_OBJECT_FORMAT=elf32-littlearm
+
 
 # Use local overrides, if any
 -include $(realpath $(PHANTOM_HOME))/local-config.$(ARCH).mk

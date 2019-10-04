@@ -60,7 +60,7 @@ int main(int argc, char *argv[], char *envp[])
 
     for(;;) {
 
-        printf("> ");
+        printf("unix > ");
 
         getline(buf, sizeof(buf));
         if(strlen(buf) > 0) {

@@ -11,7 +11,7 @@
 #define DEV_NAME "es1370"
 #define DEBUG_MSG_PREFIX "es1370"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -36,7 +36,7 @@
 #define u16 u_int16_t
 #define u8 u_int8_t
 //#define esSleep(__us) do { long us = __us; do { tenmicrosec(); us -= 100; } while( __us > 0); } while(0)
-#define esSleep(__us) do { long ms = __us/1000; if(ms == 0) ms = 1; hal_sleep_msec(ms);  } while(0)
+#define esSleep(__us) do { long ms = ((__us)-1)/1000; ms++; hal_sleep_msec(ms);  } while(0)
 
 static errno_t check_es1370_sanity(int iobase);
 static errno_t init_es1370(phantom_device_t *dev);
@@ -1032,7 +1032,7 @@ static int es1370_write(phantom_device_t *dev, const void *buf, int len)
 
     es1370_t *es = dev->drv_private;
 
-    //SHOW_FLOW( 1, "dev %p buf %p len %d", dev, buf, len );
+    SHOW_FLOW( 1, "dev %p buf %p len %d", dev, buf, len );
     // TODO mutex!
 
     // Eats all positive sema value

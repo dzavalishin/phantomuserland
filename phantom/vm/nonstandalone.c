@@ -317,6 +317,22 @@ int k_close( int fd )
 }
 
 
+#if defined(__CYGWIN__)
+
+// for some reason .weak does not work in cygwin
+
+asm("\
+.globl _longjmp_machdep;\
+    _longjmp_machdep: jmp _longjmp \
+    ");
+
+asm("\
+.globl _setjmp_machdep;\
+    _setjmp_machdep: jmp _setjmp \
+    ");
+
+
+#else
 
 //void machdep_longjmp () __attribute__ ((weak, alias ("longjmp")));
 //void machdep_setjmp () __attribute__ ((weak, alias ("setjmp")));
@@ -343,7 +359,7 @@ asm("\
 //int setjmp_machdep ( void *jb ) {    __asm__("jmp __setjmp");}
 
 
-
+#endif
 
 
 

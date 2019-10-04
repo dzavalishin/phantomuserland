@@ -13,11 +13,11 @@
 
 #if HAVE_NET && defined(ARCH_ia32)
 
-#define NE2000_INTR 0
+#define NE2000_INTR 1
 
 #define DEBUG_MSG_PREFIX "ne2000"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 6
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -292,6 +292,7 @@ static void ne_interrupt( void *_dev )
 static void ne2000_thread(void *_dev)
 {
     t_current_set_name("Ne2kDrv");
+    //t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
 
     phantom_device_t * dev = _dev;
     struct ne *pvt = dev->drv_private;
@@ -826,13 +827,16 @@ static int ne_read( struct phantom_device *dev, void *buf, int len)
         SHOW_FLOW( 7, "poll %d bytes", len );
 
 #if NE2000_INTR
-        hal_sem_acquire( &(pvt->recv_interrupt_sem) );
+        //hal_sem_acquire( &(pvt->recv_interrupt_sem) );
+        //hal_sem_acquire_etc( &(pvt->recv_interrupt_sem), 1, SEM_FLAG_TIMEOUT, 200*1000L );
+        hal_sem_acquire_etc( &(pvt->recv_interrupt_sem), 1, SEM_FLAG_TIMEOUT, 20*1000L*1000L );
+        ret = ne_poll(dev, buf, len);
 #else
         (void) pvt;
-#endif
         ret = ne_poll(dev, buf, len);
         if( ret <= 0 )
             hal_sleep_msec(200); // BUG! POLLING!
+#endif
 
         /*
         if( ret > 0 )
