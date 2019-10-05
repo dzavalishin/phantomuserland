@@ -63,10 +63,10 @@
 #define EOK 0
 
 #define LO(ptr) \
-	((uint32_t) (((uint64_t) ((uintptr_t) (ptr))) & 0xffffffff))
+    ((uint32_t) (((uint64_t) ((uintptr_t) (ptr))) & 0xffffffff))
 
 #define HI(ptr) \
-	((uint32_t) (((uint64_t) ((uintptr_t) (ptr))) >> 32))
+    ((uint32_t) (((uint64_t) ((uintptr_t) (ptr))) >> 32))
 
 #if 0
 /** Interrupt pseudocode for a single port
@@ -85,46 +85,46 @@
  *
  */
 #define AHCI_PORT_CMDS(port) \
-	{ \
-		/* Read port interrupt status register */ \
-		.cmd = CMD_PIO_READ_32, \
-		.addr = NULL, \
-		.dstarg = 2 \
-	}, \
-	{ \
-		/* Check if port asserted interrupt */ \
-		.cmd = CMD_PREDICATE, \
-		.value = 5, \
-		.srcarg = 2, \
-	}, \
-	{ \
-		/* Clear port interrupt status register */ \
-		.cmd = CMD_PIO_WRITE_A_32, \
-		.addr = NULL, \
-		.srcarg = 2 \
-	}, \
-	{ \
-		/* Read global interrupt status register */ \
-		.cmd = CMD_PIO_READ_32, \
-		.addr = NULL, \
-		.dstarg = 0 \
-	}, \
-	{ \
-		/* Clear global interrupt status register */ \
-		.cmd = CMD_PIO_WRITE_A_32, \
-		.addr = NULL, \
-		.srcarg = 0 \
-	}, \
-	{ \
-		/* Indicate port interrupt assertion */ \
-		.cmd = CMD_LOAD, \
-		.value = (port), \
-		.dstarg = 1 \
-	}, \
-	{ \
-		/* Accept the interrupt */ \
-		.cmd = CMD_ACCEPT \
-	}
+    { \
+    /* Read port interrupt status register */ \
+    .cmd = CMD_PIO_READ_32, \
+    .addr = NULL, \
+    .dstarg = 2 \
+    }, \
+    { \
+    /* Check if port asserted interrupt */ \
+    .cmd = CMD_PREDICATE, \
+    .value = 5, \
+    .srcarg = 2, \
+    }, \
+    { \
+    /* Clear port interrupt status register */ \
+    .cmd = CMD_PIO_WRITE_A_32, \
+    .addr = NULL, \
+    .srcarg = 2 \
+    }, \
+    { \
+    /* Read global interrupt status register */ \
+    .cmd = CMD_PIO_READ_32, \
+    .addr = NULL, \
+    .dstarg = 0 \
+    }, \
+    { \
+    /* Clear global interrupt status register */ \
+    .cmd = CMD_PIO_WRITE_A_32, \
+    .addr = NULL, \
+    .srcarg = 0 \
+    }, \
+    { \
+    /* Indicate port interrupt assertion */ \
+    .cmd = CMD_LOAD, \
+    .value = (port), \
+    .dstarg = 1 \
+    }, \
+    { \
+    /* Accept the interrupt */ \
+    .cmd = CMD_ACCEPT \
+    }
 #endif
 
 static int get_sata_device_name(ddf_fun_t *, size_t, char *);
@@ -154,36 +154,36 @@ static int sata_devices_count = 0;
 /*----------------------------------------------------------------------------*/
 #if 0
 static ahci_iface_t ahci_interface = {
-	.get_sata_device_name = &get_sata_device_name,
-	.get_num_blocks = &get_num_blocks,
-	.get_block_size = &get_block_size,
-	.read_blocks = &read_blocks,
-	.write_blocks = &write_blocks
+    .get_sata_device_name = &get_sata_device_name,
+    .get_num_blocks = &get_num_blocks,
+    .get_block_size = &get_block_size,
+    .read_blocks = &read_blocks,
+    .write_blocks = &write_blocks
 };
 
 static ddf_dev_ops_t ahci_ops = {
-	.interfaces[AHCI_DEV_IFACE] = &ahci_interface
+    .interfaces[AHCI_DEV_IFACE] = &ahci_interface
 };
 
 static driver_ops_t driver_ops = {
-	.dev_add = &ahci_dev_add
+    .dev_add = &ahci_dev_add
 };
 
 static driver_t ahci_driver = {
-	.name = NAME,
-	.driver_ops = &driver_ops
+    .name = NAME,
+    .driver_ops = &driver_ops
 };
 
 /** Get SATA structure from DDF function. */
 static sata_dev_t *fun_sata_dev(ddf_fun_t *fun)
 {
-	return ddf_fun_data_get(fun);
+    return ddf_fun_data_get(fun);
 }
 
 /** Get AHCI structure from DDF device. */
 static ahci_dev_t *dev_ahci_dev(ddf_dev_t *dev)
 {
-	return ddf_dev_data_get(dev);
+    return ddf_dev_data_get(dev);
 }
 #endif
 
@@ -197,11 +197,11 @@ static ahci_dev_t *dev_ahci_dev(ddf_dev_t *dev)
  *
  */
 static int get_sata_device_name(ddf_fun_t *fun,
-    size_t sata_dev_name_length, char *sata_dev_name)
+                                size_t sata_dev_name_length, char *sata_dev_name)
 {
-	sata_dev_t *sata = fun_sata_dev(fun);
-	str_cpy(sata_dev_name, sata_dev_name_length, sata->model);
-	return EOK;
+    sata_dev_t *sata = fun_sata_dev(fun);
+    str_cpy(sata_dev_name, sata_dev_name_length, sata->model);
+    return EOK;
 }
 
 /** Get Number of blocks in SATA device.
@@ -214,9 +214,9 @@ static int get_sata_device_name(ddf_fun_t *fun,
  */
 static int get_num_blocks(ddf_fun_t *fun, uint64_t *num_blocks)
 {
-	sata_dev_t *sata = fun_sata_dev(fun);
-	*num_blocks = sata->blocks;
-	return EOK;
+    sata_dev_t *sata = fun_sata_dev(fun);
+    *num_blocks = sata->blocks;
+    return EOK;
 }
 
 /** Get SATA device block size.
@@ -229,9 +229,9 @@ static int get_num_blocks(ddf_fun_t *fun, uint64_t *num_blocks)
  */
 static int get_block_size(ddf_fun_t *fun, size_t *block_size)
 {
-	sata_dev_t *sata = fun_sata_dev(fun);
-	*block_size = sata->block_size;
-	return EOK;
+    sata_dev_t *sata = fun_sata_dev(fun);
+    *block_size = sata->block_size;
+    return EOK;
 }
 
 /** Read data blocks into SATA device.
@@ -245,36 +245,37 @@ static int get_block_size(ddf_fun_t *fun, size_t *block_size)
  *
  */
 static int read_blocks(ddf_fun_t *fun, uint64_t blocknum,
-    size_t count, void *buf)
+                       size_t count, void *buf)
 {
-	sata_dev_t *sata = fun_sata_dev(fun);
-	
-	uintptr_t phys;
-	void *ibuf = AS_AREA_ANY;
-	int rc = dmamem_map_anonymous(sata->block_size, DMAMEM_4GiB,
-	    AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &ibuf);
-	if (rc != EOK) {
-		SHOW_ERROR0( 0, "Cannot allocate read buffer.");
-		return rc;
-	}
-	
-	memset(buf, 0, sata->block_size);
-	
-	fibril_mutex_lock(&sata->lock);
-	
-	for (size_t cur = 0; cur < count; cur++) {
-		rc = ahci_rb_fpdma(sata, phys, blocknum + cur);
-		if (rc != EOK)
-			break;
-		
-		memcpy((void *) (((uint8_t *) buf) + (sata->block_size * cur)),
-		    ibuf, sata->block_size);
-	}
-	
-	fibril_mutex_unlock(&sata->lock);
-	dmamem_unmap_anonymous(ibuf);
-	
-	return rc;
+    sata_dev_t *sata = fun_sata_dev(fun);
+
+    uintptr_t phys;
+    void *ibuf = AS_AREA_ANY;
+    int rc = dmamem_map_anonymous(sata->block_size, DMAMEM_4GiB,
+                                  AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &ibuf);
+    if (rc != EOK) {
+        SHOW_ERROR0( 0, "Cannot allocate read buffer.");
+        return rc;
+    }
+
+    memset(buf, 0, sata->block_size);
+
+    fibril_mutex_lock(&sata->lock);
+
+    size_t cur;
+    for(cur = 0; cur < count; cur++) {
+        rc = ahci_rb_fpdma(sata, phys, blocknum + cur);
+        if (rc != EOK)
+            break;
+
+        memcpy((void *) (((uint8_t *) buf) + (sata->block_size * cur)),
+               ibuf, sata->block_size);
+    }
+
+    fibril_mutex_unlock(&sata->lock);
+    dmamem_unmap_anonymous(ibuf);
+
+    return rc;
 }
 
 /** Write data blocks into SATA device.
@@ -288,33 +289,34 @@ static int read_blocks(ddf_fun_t *fun, uint64_t blocknum,
  *
  */
 static int write_blocks(ddf_fun_t *fun, uint64_t blocknum,
-    size_t count, void *buf)
+                        size_t count, void *buf)
 {
-	sata_dev_t *sata = fun_sata_dev(fun);
-	
-	uintptr_t phys;
-	void *ibuf = AS_AREA_ANY;
-	int rc = dmamem_map_anonymous(sata->block_size, DMAMEM_4GiB,
-	    AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &ibuf);
-	if (rc != EOK) {
-		SHOW_ERROR0( 0, "Cannot allocate write buffer.");
-		return rc;
-	}
-	
-	fibril_mutex_lock(&sata->lock);
-	
-	for (size_t cur = 0; cur < count; cur++) {
-		memcpy(ibuf, (void *) (((uint8_t *) buf) + (sata->block_size * cur)),
-		    sata->block_size);
-		rc = ahci_wb_fpdma(sata, phys, blocknum + cur);
-		if (rc != EOK)
-			break;
-	}
-	
-	fibril_mutex_unlock(&sata->lock);
-	dmamem_unmap_anonymous(ibuf);
-	
-	return rc;
+    sata_dev_t *sata = fun_sata_dev(fun);
+
+    uintptr_t phys;
+    void *ibuf = AS_AREA_ANY;
+    int rc = dmamem_map_anonymous(sata->block_size, DMAMEM_4GiB,
+                                  AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &ibuf);
+    if (rc != EOK) {
+        SHOW_ERROR0( 0, "Cannot allocate write buffer.");
+        return rc;
+    }
+
+    fibril_mutex_lock(&sata->lock);
+
+    size_t cur;
+    for(cur = 0; cur < count; cur++) {
+        memcpy(ibuf, (void *) (((uint8_t *) buf) + (sata->block_size * cur)),
+               sata->block_size);
+        rc = ahci_wb_fpdma(sata, phys, blocknum + cur);
+        if (rc != EOK)
+            break;
+    }
+
+    fibril_mutex_unlock(&sata->lock);
+    dmamem_unmap_anonymous(ibuf);
+
+    return rc;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -330,20 +332,20 @@ static int write_blocks(ddf_fun_t *fun, uint64_t blocknum,
  */
 static ahci_port_is_t ahci_wait_event(sata_dev_t *sata)
 {
-	fibril_mutex_lock(&sata->event_lock);
-	
-	sata->event_pxis = 0;
-	while (sata->event_pxis == 0)
-		fibril_condvar_wait(&sata->event_condvar, &sata->event_lock);
-	
-	ahci_port_is_t pxis = sata->event_pxis;
-	
-	if (ahci_port_is_permanent_error(pxis))
-		sata->is_invalid_device = true;
-	
-	fibril_mutex_unlock(&sata->event_lock);
-	
-	return pxis;
+    fibril_mutex_lock(&sata->event_lock);
+
+    sata->event_pxis = 0;
+    while (sata->event_pxis == 0)
+        fibril_condvar_wait(&sata->event_condvar, &sata->event_lock);
+
+    ahci_port_is_t pxis = sata->event_pxis;
+
+    if (ahci_port_is_permanent_error(pxis))
+        sata->is_invalid_device = true;
+
+    fibril_mutex_unlock(&sata->event_lock);
+
+    return pxis;
 }
 
 /** Set AHCI registers for identifying SATA device.
@@ -354,41 +356,41 @@ static ahci_port_is_t ahci_wait_event(sata_dev_t *sata)
  */
 static void ahci_identify_device_cmd(sata_dev_t *sata, uintptr_t phys)
 {
-	volatile sata_std_command_frame_t *cmd =
-	    (sata_std_command_frame_t *) sata->cmd_table;
-	
-	cmd->fis_type = SATA_CMD_FIS_TYPE;
-	cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
-	cmd->command = 0xec;
-	cmd->features = 0;
-	cmd->lba_lower = 0;
-	cmd->device = 0;
-	cmd->lba_upper = 0;
-	cmd->features_upper = 0;
-	cmd->count = 0;
-	cmd->reserved1 = 0;
-	cmd->control = 0;
-	cmd->reserved2 = 0;
-	
-	volatile ahci_cmd_prdt_t *prdt =
-	    (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
-	
-	prdt->data_address_low = LO(phys);
-	prdt->data_address_upper = HI(phys);
-	prdt->reserved1 = 0;
-	prdt->dbc = SATA_IDENTIFY_DEVICE_BUFFER_LENGTH - 1;
-	prdt->reserved2 = 0;
-	prdt->ioc = 0;
-	
-	sata->cmd_header->prdtl = 1;
-	sata->cmd_header->flags =
-	    AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
-	    AHCI_CMDHDR_FLAGS_2DWCMD;
-	sata->cmd_header->bytesprocessed = 0;
-	
-	/* Run command. */
-	sata->port->pxsact |= 1;
-	sata->port->pxci |= 1;
+    volatile sata_std_command_frame_t *cmd =
+        (sata_std_command_frame_t *) sata->cmd_table;
+
+    cmd->fis_type = SATA_CMD_FIS_TYPE;
+    cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
+    cmd->command = 0xec;
+    cmd->features = 0;
+    cmd->lba_lower = 0;
+    cmd->device = 0;
+    cmd->lba_upper = 0;
+    cmd->features_upper = 0;
+    cmd->count = 0;
+    cmd->reserved1 = 0;
+    cmd->control = 0;
+    cmd->reserved2 = 0;
+
+    volatile ahci_cmd_prdt_t *prdt =
+        (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
+
+    prdt->data_address_low = LO(phys);
+    prdt->data_address_upper = HI(phys);
+    prdt->reserved1 = 0;
+    prdt->dbc = SATA_IDENTIFY_DEVICE_BUFFER_LENGTH - 1;
+    prdt->reserved2 = 0;
+    prdt->ioc = 0;
+
+    sata->cmd_header->prdtl = 1;
+    sata->cmd_header->flags =
+        AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
+        AHCI_CMDHDR_FLAGS_2DWCMD;
+    sata->cmd_header->bytesprocessed = 0;
+
+    /* Run command. */
+    sata->port->pxsact |= 1;
+    sata->port->pxci |= 1;
 }
 
 /** Set AHCI registers for identifying packet SATA device.
@@ -399,41 +401,41 @@ static void ahci_identify_device_cmd(sata_dev_t *sata, uintptr_t phys)
  */
 static void ahci_identify_packet_device_cmd(sata_dev_t *sata, uintptr_t phys)
 {
-	volatile sata_std_command_frame_t *cmd =
-	    (sata_std_command_frame_t *) sata->cmd_table;
-	
-	cmd->fis_type = SATA_CMD_FIS_TYPE;
-	cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
-	cmd->command = 0xa1;
-	cmd->features = 0;
-	cmd->lba_lower = 0;
-	cmd->device = 0;
-	cmd->lba_upper = 0;
-	cmd->features_upper = 0;
-	cmd->count = 0;
-	cmd->reserved1 = 0;
-	cmd->control = 0;
-	cmd->reserved2 = 0;
-	
-	volatile ahci_cmd_prdt_t *prdt =
-	    (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
-	
-	prdt->data_address_low = LO(phys);
-	prdt->data_address_upper = HI(phys);
-	prdt->reserved1 = 0;
-	prdt->dbc = SATA_IDENTIFY_DEVICE_BUFFER_LENGTH - 1;
-	prdt->reserved2 = 0;
-	prdt->ioc = 0;
-	
-	sata->cmd_header->prdtl = 1;
-	sata->cmd_header->flags =
-	    AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
-	    AHCI_CMDHDR_FLAGS_2DWCMD;
-	sata->cmd_header->bytesprocessed = 0;
-	
-	/* Run command. */
-	sata->port->pxsact |= 1;
-	sata->port->pxci |= 1;
+    volatile sata_std_command_frame_t *cmd =
+        (sata_std_command_frame_t *) sata->cmd_table;
+
+    cmd->fis_type = SATA_CMD_FIS_TYPE;
+    cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
+    cmd->command = 0xa1;
+    cmd->features = 0;
+    cmd->lba_lower = 0;
+    cmd->device = 0;
+    cmd->lba_upper = 0;
+    cmd->features_upper = 0;
+    cmd->count = 0;
+    cmd->reserved1 = 0;
+    cmd->control = 0;
+    cmd->reserved2 = 0;
+
+    volatile ahci_cmd_prdt_t *prdt =
+        (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
+
+    prdt->data_address_low = LO(phys);
+    prdt->data_address_upper = HI(phys);
+    prdt->reserved1 = 0;
+    prdt->dbc = SATA_IDENTIFY_DEVICE_BUFFER_LENGTH - 1;
+    prdt->reserved2 = 0;
+    prdt->ioc = 0;
+
+    sata->cmd_header->prdtl = 1;
+    sata->cmd_header->flags =
+        AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
+        AHCI_CMDHDR_FLAGS_2DWCMD;
+    sata->cmd_header->bytesprocessed = 0;
+
+    /* Run command. */
+    sata->port->pxsact |= 1;
+    sata->port->pxci |= 1;
 }
 
 /** Fill device identification in SATA device structure.
@@ -445,130 +447,131 @@ static void ahci_identify_packet_device_cmd(sata_dev_t *sata, uintptr_t phys)
  */
 static int ahci_identify_device(sata_dev_t *sata)
 {
-	if (sata->is_invalid_device) {
-		SHOW_ERROR0( 0,
-		    "Identify command device on invalid device");
-		return EINTR;
-	}
-	
-	uintptr_t phys;
-	sata_identify_data_t *idata = AS_AREA_ANY;
-	int rc = dmamem_map_anonymous(SATA_IDENTIFY_DEVICE_BUFFER_LENGTH,
-	    DMAMEM_4GiB, AS_AREA_READ | AS_AREA_WRITE, 0, &phys,
-	    (void *) &idata);
-	if (rc != EOK) {
-		SHOW_ERROR0( 0, "Cannot allocate buffer to identify device.");
-		return rc;
-	}
-	
-	memset(idata, 0, SATA_IDENTIFY_DEVICE_BUFFER_LENGTH);
-	
-	fibril_mutex_lock(&sata->lock);
-	
-	ahci_identify_device_cmd(sata, phys);
-	ahci_port_is_t pxis = ahci_wait_event(sata);
-	
-	if (sata->is_invalid_device) {
-		SHOW_ERROR0( 0,
-		    "Unrecoverable error during ata identify device");
-		goto error;
-	}
-	
-	if (ahci_port_is_tfes(pxis)) {
-		ahci_identify_packet_device_cmd(sata, phys);
-		pxis = ahci_wait_event(sata);
-		
-		if ((sata->is_invalid_device) || (ahci_port_is_error(pxis))) {
-			SHOW_ERROR0( 0,
-			    "Unrecoverable error during ata identify packet device");
-			goto error;
-		}
-		
-		sata->is_packet_device = true;
-	}
-	
-	ahci_get_model_name(idata->model_name, sata->model);
-	
-	/*
-	 * Due to QEMU limitation (as of 2012-06-22),
-	 * only NCQ FPDMA mode is supported.
-	 */
-	if ((idata->sata_cap & sata_np_cap_ncq) == 0) {
-		SHOW_ERROR( 0, "%s: NCQ must be supported", sata->model);
-		goto error;
-	}
-	
-	uint16_t logsec = idata->physical_logic_sector_size;
-	if ((logsec & 0xc000) == 0x4000) {
-		/* Length of sector may be larger than 512 B */
-		if (logsec & 0x0100) {
-			/* Size of sector is larger than 512 B */
-			SHOW_ERROR( 0,
-			    "%s: Sector length other than 512 B not supported",
-			    sata->model);
-			goto error;
-		}
-		
-		if ((logsec & 0x0200) && ((logsec & 0x000f) != 0)) {
-			/* Physical sectors per logical sector is greather than 1 */
-			SHOW_ERROR( 0,
-			    "%s: Sector length other than 512 B not supported",
-			    sata->model);
-			goto error;
-		}
-	}
-	
-	if (sata->is_packet_device) {
-		/*
-		 * Due to QEMU limitation (as of 2012-06-22),
-		 * only NCQ FPDMA mode supported - block size is
-		 * 512 B, not 2048 B!
-		 */
-		sata->block_size = SATA_DEFAULT_SECTOR_SIZE;
-		sata->blocks = 0;
-	} else {
-		sata->block_size = SATA_DEFAULT_SECTOR_SIZE;
-		
-		if ((idata->caps & sata_rd_cap_lba) == 0) {
-			SHOW_ERROR( 0, "%s: LBA for NCQ must be supported",
-			    sata->model);
-			goto error;
-		} else if ((idata->cmd_set1 & sata_cs1_addr48) == 0) {
-			sata->blocks = (uint32_t) idata->total_lba28_0 |
-			    ((uint32_t) idata->total_lba28_1 << 16);
-		} else {
-			/* Device supports LBA-48 addressing. */
-			sata->blocks = (uint64_t) idata->total_lba48_0 |
-			    ((uint64_t) idata->total_lba48_1 << 16) |
-			    ((uint64_t) idata->total_lba48_2 << 32) |
-			    ((uint64_t) idata->total_lba48_3 << 48);
-		}
-	}
-	
-	uint8_t udma_mask = idata->udma & 0x007f;
-	sata->highest_udma_mode = (uint8_t) -1;
-	if (udma_mask == 0) {
-		SHOW_ERROR( 0,
-		    "%s: UDMA mode for NCQ FPDMA mode must be supported",
-		    sata->model);
-		goto error;
-	} else {
-		for (uint8_t i = 0; i < 7; i++) {
-			if (udma_mask & (1 << i))
-				sata->highest_udma_mode = i;
-		}
-	}
-	
-	fibril_mutex_unlock(&sata->lock);
-	dmamem_unmap_anonymous(idata);
-	
-	return EOK;
-	
+    if (sata->is_invalid_device) {
+        SHOW_ERROR0( 0,
+                     "Identify command device on invalid device");
+        return EINTR;
+    }
+
+    uintptr_t phys;
+    sata_identify_data_t *idata = AS_AREA_ANY;
+    int rc = dmamem_map_anonymous(SATA_IDENTIFY_DEVICE_BUFFER_LENGTH,
+                                  DMAMEM_4GiB, AS_AREA_READ | AS_AREA_WRITE, 0, &phys,
+                                  (void *) &idata);
+    if (rc != EOK) {
+        SHOW_ERROR0( 0, "Cannot allocate buffer to identify device.");
+        return rc;
+    }
+
+    memset(idata, 0, SATA_IDENTIFY_DEVICE_BUFFER_LENGTH);
+
+    fibril_mutex_lock(&sata->lock);
+
+    ahci_identify_device_cmd(sata, phys);
+    ahci_port_is_t pxis = ahci_wait_event(sata);
+
+    if (sata->is_invalid_device) {
+        SHOW_ERROR0( 0,
+                     "Unrecoverable error during ata identify device");
+        goto error;
+    }
+
+    if (ahci_port_is_tfes(pxis)) {
+        ahci_identify_packet_device_cmd(sata, phys);
+        pxis = ahci_wait_event(sata);
+
+        if ((sata->is_invalid_device) || (ahci_port_is_error(pxis))) {
+            SHOW_ERROR0( 0,
+                         "Unrecoverable error during ata identify packet device");
+            goto error;
+        }
+
+        sata->is_packet_device = true;
+    }
+
+    ahci_get_model_name(idata->model_name, sata->model);
+
+    /*
+     * Due to QEMU limitation (as of 2012-06-22),
+     * only NCQ FPDMA mode is supported.
+     */
+    if ((idata->sata_cap & sata_np_cap_ncq) == 0) {
+        SHOW_ERROR( 0, "%s: NCQ must be supported", sata->model);
+        goto error;
+    }
+
+    uint16_t logsec = idata->physical_logic_sector_size;
+    if ((logsec & 0xc000) == 0x4000) {
+        /* Length of sector may be larger than 512 B */
+        if (logsec & 0x0100) {
+            /* Size of sector is larger than 512 B */
+            SHOW_ERROR( 0,
+                        "%s: Sector length other than 512 B not supported",
+                        sata->model);
+            goto error;
+        }
+
+        if ((logsec & 0x0200) && ((logsec & 0x000f) != 0)) {
+            /* Physical sectors per logical sector is greather than 1 */
+            SHOW_ERROR( 0,
+                        "%s: Sector length other than 512 B not supported",
+                        sata->model);
+            goto error;
+        }
+    }
+
+    if (sata->is_packet_device) {
+        /*
+         * Due to QEMU limitation (as of 2012-06-22),
+         * only NCQ FPDMA mode supported - block size is
+         * 512 B, not 2048 B!
+         */
+        sata->block_size = SATA_DEFAULT_SECTOR_SIZE;
+        sata->blocks = 0;
+    } else {
+        sata->block_size = SATA_DEFAULT_SECTOR_SIZE;
+
+        if ((idata->caps & sata_rd_cap_lba) == 0) {
+            SHOW_ERROR( 0, "%s: LBA for NCQ must be supported",
+                        sata->model);
+            goto error;
+        } else if ((idata->cmd_set1 & sata_cs1_addr48) == 0) {
+            sata->blocks = (uint32_t) idata->total_lba28_0 |
+                ((uint32_t) idata->total_lba28_1 << 16);
+        } else {
+            /* Device supports LBA-48 addressing. */
+            sata->blocks = (uint64_t) idata->total_lba48_0 |
+                ((uint64_t) idata->total_lba48_1 << 16) |
+                ((uint64_t) idata->total_lba48_2 << 32) |
+                ((uint64_t) idata->total_lba48_3 << 48);
+        }
+    }
+
+    uint8_t udma_mask = idata->udma & 0x007f;
+    sata->highest_udma_mode = (uint8_t) -1;
+    if (udma_mask == 0) {
+        SHOW_ERROR( 0,
+                    "%s: UDMA mode for NCQ FPDMA mode must be supported",
+                    sata->model);
+        goto error;
+    } else {
+        uint8_t i;
+        for (i = 0; i < 7; i++) {
+            if (udma_mask & (1 << i))
+                sata->highest_udma_mode = i;
+        }
+    }
+
+    fibril_mutex_unlock(&sata->lock);
+    dmamem_unmap_anonymous(idata);
+
+    return EOK;
+
 error:
-	fibril_mutex_unlock(&sata->lock);
-	dmamem_unmap_anonymous(idata);
-	
-	return EINTR;
+    fibril_mutex_unlock(&sata->lock);
+    dmamem_unmap_anonymous(idata);
+
+    return EINTR;
 }
 
 /** Set AHCI registers for setting SATA device transfer mode.
@@ -580,41 +583,41 @@ error:
  */
 static void ahci_set_mode_cmd(sata_dev_t *sata, uintptr_t phys, uint8_t mode)
 {
-	volatile sata_std_command_frame_t *cmd =
-	    (sata_std_command_frame_t *) sata->cmd_table;
-	
-	cmd->fis_type = SATA_CMD_FIS_TYPE;
-	cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
-	cmd->command = 0xef;
-	cmd->features = 0x03;
-	cmd->lba_lower = 0;
-	cmd->device = 0;
-	cmd->lba_upper = 0;
-	cmd->features_upper = 0;
-	cmd->count = mode;
-	cmd->reserved1 = 0;
-	cmd->control = 0;
-	cmd->reserved2 = 0;
-	
-	volatile ahci_cmd_prdt_t *prdt =
-	    (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
-	
-	prdt->data_address_low = LO(phys);
-	prdt->data_address_upper = HI(phys);
-	prdt->reserved1 = 0;
-	prdt->dbc = SATA_SET_FEATURE_BUFFER_LENGTH - 1;
-	prdt->reserved2 = 0;
-	prdt->ioc = 0;
-	
-	sata->cmd_header->prdtl = 1;
-	sata->cmd_header->flags =
-	    AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
-	    AHCI_CMDHDR_FLAGS_2DWCMD;
-	sata->cmd_header->bytesprocessed = 0;
-	
-	/* Run command. */
-	sata->port->pxsact |= 1;
-	sata->port->pxci |= 1;
+    volatile sata_std_command_frame_t *cmd =
+        (sata_std_command_frame_t *) sata->cmd_table;
+
+    cmd->fis_type = SATA_CMD_FIS_TYPE;
+    cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
+    cmd->command = 0xef;
+    cmd->features = 0x03;
+    cmd->lba_lower = 0;
+    cmd->device = 0;
+    cmd->lba_upper = 0;
+    cmd->features_upper = 0;
+    cmd->count = mode;
+    cmd->reserved1 = 0;
+    cmd->control = 0;
+    cmd->reserved2 = 0;
+
+    volatile ahci_cmd_prdt_t *prdt =
+        (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
+
+    prdt->data_address_low = LO(phys);
+    prdt->data_address_upper = HI(phys);
+    prdt->reserved1 = 0;
+    prdt->dbc = SATA_SET_FEATURE_BUFFER_LENGTH - 1;
+    prdt->reserved2 = 0;
+    prdt->ioc = 0;
+
+    sata->cmd_header->prdtl = 1;
+    sata->cmd_header->flags =
+        AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
+        AHCI_CMDHDR_FLAGS_2DWCMD;
+    sata->cmd_header->bytesprocessed = 0;
+
+    /* Run command. */
+    sata->port->pxsact |= 1;
+    sata->port->pxci |= 1;
 }
 
 /** Set highest ultra DMA mode supported by SATA device.
@@ -626,66 +629,66 @@ static void ahci_set_mode_cmd(sata_dev_t *sata, uintptr_t phys, uint8_t mode)
  */
 static int ahci_set_highest_ultra_dma_mode(sata_dev_t *sata)
 {
-	if (sata->is_invalid_device) {
-		SHOW_ERROR( 0,
-		    "%s: Setting highest UDMA mode on invalid device",
-		    sata->model);
-		return EINTR;
-	}
-	
-	if (sata->highest_udma_mode == (uint8_t) -1) {
-		SHOW_ERROR( 0,
-		    "%s: No AHCI UDMA support.", sata->model);
-		return EINTR;
-	}
-	
-	if (sata->highest_udma_mode > 6) {
-		SHOW_ERROR( 0,
-		    "%s: Unknown AHCI UDMA mode.", sata->model);
-		return EINTR;
-	}
-	
-	uintptr_t phys;
-	sata_identify_data_t *idata = AS_AREA_ANY;
-	int rc = dmamem_map_anonymous(SATA_SET_FEATURE_BUFFER_LENGTH,
-	    DMAMEM_4GiB, AS_AREA_READ | AS_AREA_WRITE, 0, &phys,
-	    (void *) &idata);
-	if (rc != EOK) {
-		SHOW_ERROR0( 0, "Cannot allocate buffer for device set mode.");
-		return rc;
-	}
-	
-	memset(idata, 0, SATA_SET_FEATURE_BUFFER_LENGTH);
-	
-	fibril_mutex_lock(&sata->lock);
-	
-	uint8_t mode = 0x40 | (sata->highest_udma_mode & 0x07);
-	ahci_set_mode_cmd(sata, phys, mode);
-	ahci_port_is_t pxis = ahci_wait_event(sata);
-	
-	if (sata->is_invalid_device) {
-		SHOW_ERROR( 0,
-		    "%s: Unrecoverable error during set highest UDMA mode",
-		    sata->model);
-		goto error;
-	}
-	
-	if (ahci_port_is_error(pxis)) {
-		SHOW_ERROR( 0,
-		    "%s: Error during set highest UDMA mode", sata->model);
-		goto error;
-	}
-	
-	fibril_mutex_unlock(&sata->lock);
-	dmamem_unmap_anonymous(idata);
-	
-	return EOK;
-	
+    if (sata->is_invalid_device) {
+        SHOW_ERROR( 0,
+                    "%s: Setting highest UDMA mode on invalid device",
+                    sata->model);
+        return EINTR;
+    }
+
+    if (sata->highest_udma_mode == (uint8_t) -1) {
+        SHOW_ERROR( 0,
+                    "%s: No AHCI UDMA support.", sata->model);
+        return EINTR;
+    }
+
+    if (sata->highest_udma_mode > 6) {
+        SHOW_ERROR( 0,
+                    "%s: Unknown AHCI UDMA mode.", sata->model);
+        return EINTR;
+    }
+
+    uintptr_t phys;
+    sata_identify_data_t *idata = AS_AREA_ANY;
+    int rc = dmamem_map_anonymous(SATA_SET_FEATURE_BUFFER_LENGTH,
+                                  DMAMEM_4GiB, AS_AREA_READ | AS_AREA_WRITE, 0, &phys,
+                                  (void *) &idata);
+    if (rc != EOK) {
+        SHOW_ERROR0( 0, "Cannot allocate buffer for device set mode.");
+        return rc;
+    }
+
+    memset(idata, 0, SATA_SET_FEATURE_BUFFER_LENGTH);
+
+    fibril_mutex_lock(&sata->lock);
+
+    uint8_t mode = 0x40 | (sata->highest_udma_mode & 0x07);
+    ahci_set_mode_cmd(sata, phys, mode);
+    ahci_port_is_t pxis = ahci_wait_event(sata);
+
+    if (sata->is_invalid_device) {
+        SHOW_ERROR( 0,
+                    "%s: Unrecoverable error during set highest UDMA mode",
+                    sata->model);
+        goto error;
+    }
+
+    if (ahci_port_is_error(pxis)) {
+        SHOW_ERROR( 0,
+                    "%s: Error during set highest UDMA mode", sata->model);
+        goto error;
+    }
+
+    fibril_mutex_unlock(&sata->lock);
+    dmamem_unmap_anonymous(idata);
+
+    return EOK;
+
 error:
-	fibril_mutex_unlock(&sata->lock);
-	dmamem_unmap_anonymous(idata);
-	
-	return EINTR;
+    fibril_mutex_unlock(&sata->lock);
+    dmamem_unmap_anonymous(idata);
+
+    return EINTR;
 }
 
 /** Set AHCI registers for reading one sector from the SATA device using FPDMA.
@@ -696,52 +699,52 @@ error:
  *
  */
 static void ahci_rb_fpdma_cmd(sata_dev_t *sata, uintptr_t phys,
-    uint64_t blocknum)
+                              uint64_t blocknum)
 {
-	volatile sata_ncq_command_frame_t *cmd =
-	    (sata_ncq_command_frame_t *) sata->cmd_table;
-	
-	cmd->fis_type = SATA_CMD_FIS_TYPE;
-	cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
-	cmd->command = 0x60;
-	cmd->tag = 0;
-	cmd->control = 0;
-	
-	cmd->reserved1 = 0;
-	cmd->reserved2 = 0;
-	cmd->reserved3 = 0;
-	cmd->reserved4 = 0;
-	cmd->reserved5 = 0;
-	cmd->reserved6 = 0;
-	
-	cmd->sector_count_low = 1;
-	cmd->sector_count_high = 0;
-	
-	cmd->lba0 = blocknum & 0xff;
-	cmd->lba1 = (blocknum >> 8) & 0xff;
-	cmd->lba2 = (blocknum >> 16) & 0xff;
-	cmd->lba3 = (blocknum >> 24) & 0xff;
-	cmd->lba4 = (blocknum >> 32) & 0xff;
-	cmd->lba5 = (blocknum >> 40) & 0xff;
-	
-	volatile ahci_cmd_prdt_t *prdt =
-	    (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
-	
-	prdt->data_address_low = LO(phys);
-	prdt->data_address_upper = HI(phys);
-	prdt->reserved1 = 0;
-	prdt->dbc = sata->block_size - 1;
-	prdt->reserved2 = 0;
-	prdt->ioc = 0;
-	
-	sata->cmd_header->prdtl = 1;
-	sata->cmd_header->flags =
-	    AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
-	    AHCI_CMDHDR_FLAGS_5DWCMD;
-	sata->cmd_header->bytesprocessed = 0;
-	
-	sata->port->pxsact |= 1;
-	sata->port->pxci |= 1;
+    volatile sata_ncq_command_frame_t *cmd =
+        (sata_ncq_command_frame_t *) sata->cmd_table;
+
+    cmd->fis_type = SATA_CMD_FIS_TYPE;
+    cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
+    cmd->command = 0x60;
+    cmd->tag = 0;
+    cmd->control = 0;
+
+    cmd->reserved1 = 0;
+    cmd->reserved2 = 0;
+    cmd->reserved3 = 0;
+    cmd->reserved4 = 0;
+    cmd->reserved5 = 0;
+    cmd->reserved6 = 0;
+
+    cmd->sector_count_low = 1;
+    cmd->sector_count_high = 0;
+
+    cmd->lba0 = blocknum & 0xff;
+    cmd->lba1 = (blocknum >> 8) & 0xff;
+    cmd->lba2 = (blocknum >> 16) & 0xff;
+    cmd->lba3 = (blocknum >> 24) & 0xff;
+    cmd->lba4 = (blocknum >> 32) & 0xff;
+    cmd->lba5 = (blocknum >> 40) & 0xff;
+
+    volatile ahci_cmd_prdt_t *prdt =
+        (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
+
+    prdt->data_address_low = LO(phys);
+    prdt->data_address_upper = HI(phys);
+    prdt->reserved1 = 0;
+    prdt->dbc = sata->block_size - 1;
+    prdt->reserved2 = 0;
+    prdt->ioc = 0;
+
+    sata->cmd_header->prdtl = 1;
+    sata->cmd_header->flags =
+        AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
+        AHCI_CMDHDR_FLAGS_5DWCMD;
+    sata->cmd_header->bytesprocessed = 0;
+
+    sata->port->pxsact |= 1;
+    sata->port->pxci |= 1;
 }
 
 /** Read one sector from the SATA device using FPDMA.
@@ -755,22 +758,22 @@ static void ahci_rb_fpdma_cmd(sata_dev_t *sata, uintptr_t phys,
  */
 static int ahci_rb_fpdma(sata_dev_t *sata, uintptr_t phys, uint64_t blocknum)
 {
-	if (sata->is_invalid_device) {
-		SHOW_ERROR( 0,
-		    "%s: FPDMA read from invalid device", sata->model);
-		return EINTR;
-	}
-	
-	ahci_rb_fpdma_cmd(sata, phys, blocknum);
-	ahci_port_is_t pxis = ahci_wait_event(sata);
-	
-	if ((sata->is_invalid_device) || (ahci_port_is_error(pxis))) {
-		SHOW_ERROR( 0,
-		    "%s: Unrecoverable error during FPDMA read", sata->model);
-		return EINTR;
-	}
-	
-	return EOK;
+    if (sata->is_invalid_device) {
+        SHOW_ERROR( 0,
+                    "%s: FPDMA read from invalid device", sata->model);
+        return EINTR;
+    }
+
+    ahci_rb_fpdma_cmd(sata, phys, blocknum);
+    ahci_port_is_t pxis = ahci_wait_event(sata);
+
+    if ((sata->is_invalid_device) || (ahci_port_is_error(pxis))) {
+        SHOW_ERROR( 0,
+                    "%s: Unrecoverable error during FPDMA read", sata->model);
+        return EINTR;
+    }
+
+    return EOK;
 }
 
 /** Set AHCI registers for writing one sector to the SATA device, use FPDMA.
@@ -783,53 +786,53 @@ static int ahci_rb_fpdma(sata_dev_t *sata, uintptr_t phys, uint64_t blocknum)
  *
  */
 static void ahci_wb_fpdma_cmd(sata_dev_t *sata, uintptr_t phys,
-    uint64_t blocknum)
+                              uint64_t blocknum)
 {
-	volatile sata_ncq_command_frame_t *cmd =
-	    (sata_ncq_command_frame_t *) sata->cmd_table;
-	
-	cmd->fis_type = SATA_CMD_FIS_TYPE;
-	cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
-	cmd->command = 0x61;
-	cmd->tag = 0;
-	cmd->control = 0;
-	
-	cmd->reserved1 = 0;
-	cmd->reserved2 = 0;
-	cmd->reserved3 = 0;
-	cmd->reserved4 = 0;
-	cmd->reserved5 = 0;
-	cmd->reserved6 = 0;
-	
-	cmd->sector_count_low = 1;
-	cmd->sector_count_high = 0;
-	
-	cmd->lba0 = blocknum & 0xff;
-	cmd->lba1 = (blocknum >> 8) & 0xff;
-	cmd->lba2 = (blocknum >> 16) & 0xff;
-	cmd->lba3 = (blocknum >> 24) & 0xff;
-	cmd->lba4 = (blocknum >> 32) & 0xff;
-	cmd->lba5 = (blocknum >> 40) & 0xff;
-	
-	volatile ahci_cmd_prdt_t *prdt =
-	    (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
-	
-	prdt->data_address_low = LO(phys);
-	prdt->data_address_upper = HI(phys);
-	prdt->reserved1 = 0;
-	prdt->dbc = sata->block_size - 1;
-	prdt->reserved2 = 0;
-	prdt->ioc = 0;
-	
-	sata->cmd_header->prdtl = 1;
-	sata->cmd_header->flags =
-	    AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
-	    AHCI_CMDHDR_FLAGS_WRITE |
-	    AHCI_CMDHDR_FLAGS_5DWCMD;
-	sata->cmd_header->bytesprocessed = 0;
-	
-	sata->port->pxsact |= 1;
-	sata->port->pxci |= 1;
+    volatile sata_ncq_command_frame_t *cmd =
+        (sata_ncq_command_frame_t *) sata->cmd_table;
+
+    cmd->fis_type = SATA_CMD_FIS_TYPE;
+    cmd->c = SATA_CMD_FIS_COMMAND_INDICATOR;
+    cmd->command = 0x61;
+    cmd->tag = 0;
+    cmd->control = 0;
+
+    cmd->reserved1 = 0;
+    cmd->reserved2 = 0;
+    cmd->reserved3 = 0;
+    cmd->reserved4 = 0;
+    cmd->reserved5 = 0;
+    cmd->reserved6 = 0;
+
+    cmd->sector_count_low = 1;
+    cmd->sector_count_high = 0;
+
+    cmd->lba0 = blocknum & 0xff;
+    cmd->lba1 = (blocknum >> 8) & 0xff;
+    cmd->lba2 = (blocknum >> 16) & 0xff;
+    cmd->lba3 = (blocknum >> 24) & 0xff;
+    cmd->lba4 = (blocknum >> 32) & 0xff;
+    cmd->lba5 = (blocknum >> 40) & 0xff;
+
+    volatile ahci_cmd_prdt_t *prdt =
+        (ahci_cmd_prdt_t *) (&sata->cmd_table[0x20]);
+
+    prdt->data_address_low = LO(phys);
+    prdt->data_address_upper = HI(phys);
+    prdt->reserved1 = 0;
+    prdt->dbc = sata->block_size - 1;
+    prdt->reserved2 = 0;
+    prdt->ioc = 0;
+
+    sata->cmd_header->prdtl = 1;
+    sata->cmd_header->flags =
+        AHCI_CMDHDR_FLAGS_CLEAR_BUSY_UPON_OK |
+        AHCI_CMDHDR_FLAGS_WRITE |
+        AHCI_CMDHDR_FLAGS_5DWCMD;
+    sata->cmd_header->bytesprocessed = 0;
+
+    sata->port->pxsact |= 1;
+    sata->port->pxci |= 1;
 }
 
 /** Write one sector into the SATA device, use FPDMA.
@@ -843,22 +846,22 @@ static void ahci_wb_fpdma_cmd(sata_dev_t *sata, uintptr_t phys,
  */
 static int ahci_wb_fpdma(sata_dev_t *sata, uintptr_t phys, uint64_t blocknum)
 {
-	if (sata->is_invalid_device) {
-		SHOW_ERROR( 0,
-		    "%s: FPDMA write to invalid device", sata->model);
-		return EINTR;
-	}
-	
-	ahci_wb_fpdma_cmd(sata, phys, blocknum);
-	ahci_port_is_t pxis = ahci_wait_event(sata);
-	
-	if ((sata->is_invalid_device) || (ahci_port_is_error(pxis))) {
-		SHOW_ERROR( 0,
-		    "%s: Unrecoverable error during FPDMA write", sata->model);
-		return EINTR;
-	}
-	
-	return EOK;
+    if (sata->is_invalid_device) {
+        SHOW_ERROR( 0,
+                    "%s: FPDMA write to invalid device", sata->model);
+        return EINTR;
+    }
+
+    ahci_wb_fpdma_cmd(sata, phys, blocknum);
+    ahci_port_is_t pxis = ahci_wait_event(sata);
+
+    if ((sata->is_invalid_device) || (ahci_port_is_error(pxis))) {
+        SHOW_ERROR( 0,
+                    "%s: Unrecoverable error during FPDMA write", sata->model);
+        return EINTR;
+    }
+
+    return EOK;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -866,45 +869,45 @@ static int ahci_wb_fpdma(sata_dev_t *sata, uintptr_t phys, uint64_t blocknum)
 /*----------------------------------------------------------------------------*/
 #if 0
 static irq_pio_range_t ahci_ranges[] = {
-	{
-		.base = 0,
-		.size = 0,
-	}
+    {
+        .base = 0,
+        .size = 0,
+    }
 };
 
 static irq_cmd_t ahci_cmds[] = {
-	AHCI_PORT_CMDS(0),
-	AHCI_PORT_CMDS(1),
-	AHCI_PORT_CMDS(2),
-	AHCI_PORT_CMDS(3),
-	AHCI_PORT_CMDS(4),
-	AHCI_PORT_CMDS(5),
-	AHCI_PORT_CMDS(6),
-	AHCI_PORT_CMDS(7),
-	AHCI_PORT_CMDS(8),
-	AHCI_PORT_CMDS(9),
-	AHCI_PORT_CMDS(10),
-	AHCI_PORT_CMDS(11),
-	AHCI_PORT_CMDS(12),
-	AHCI_PORT_CMDS(13),
-	AHCI_PORT_CMDS(14),
-	AHCI_PORT_CMDS(15),
-	AHCI_PORT_CMDS(16),
-	AHCI_PORT_CMDS(17),
-	AHCI_PORT_CMDS(18),
-	AHCI_PORT_CMDS(19),
-	AHCI_PORT_CMDS(20),
-	AHCI_PORT_CMDS(21),
-	AHCI_PORT_CMDS(22),
-	AHCI_PORT_CMDS(23),
-	AHCI_PORT_CMDS(24),
-	AHCI_PORT_CMDS(25),
-	AHCI_PORT_CMDS(26),
-	AHCI_PORT_CMDS(27),
-	AHCI_PORT_CMDS(28),
-	AHCI_PORT_CMDS(29),
-	AHCI_PORT_CMDS(30),
-	AHCI_PORT_CMDS(31)
+    AHCI_PORT_CMDS(0),
+    AHCI_PORT_CMDS(1),
+    AHCI_PORT_CMDS(2),
+    AHCI_PORT_CMDS(3),
+    AHCI_PORT_CMDS(4),
+    AHCI_PORT_CMDS(5),
+    AHCI_PORT_CMDS(6),
+    AHCI_PORT_CMDS(7),
+    AHCI_PORT_CMDS(8),
+    AHCI_PORT_CMDS(9),
+    AHCI_PORT_CMDS(10),
+    AHCI_PORT_CMDS(11),
+    AHCI_PORT_CMDS(12),
+    AHCI_PORT_CMDS(13),
+    AHCI_PORT_CMDS(14),
+    AHCI_PORT_CMDS(15),
+    AHCI_PORT_CMDS(16),
+    AHCI_PORT_CMDS(17),
+    AHCI_PORT_CMDS(18),
+    AHCI_PORT_CMDS(19),
+    AHCI_PORT_CMDS(20),
+    AHCI_PORT_CMDS(21),
+    AHCI_PORT_CMDS(22),
+    AHCI_PORT_CMDS(23),
+    AHCI_PORT_CMDS(24),
+    AHCI_PORT_CMDS(25),
+    AHCI_PORT_CMDS(26),
+    AHCI_PORT_CMDS(27),
+    AHCI_PORT_CMDS(28),
+    AHCI_PORT_CMDS(29),
+    AHCI_PORT_CMDS(30),
+    AHCI_PORT_CMDS(31)
 };
 #endif
 /** AHCI interrupt handler.
@@ -915,30 +918,57 @@ static irq_cmd_t ahci_cmds[] = {
  *
  */
 //static void ahci_interrupt(ipc_callid_t iid, ipc_call_t *icall, ddf_dev_t *dev)
+static void ahci_port_interrupt(phantom_device_t *dev, int port)
+{
+    //ahci_dev_t *ahci = dev_ahci_dev(dev);
+    ahci_dev_t *ahci = (ahci_dev_t *)dev->drv_private;
+
+    //unsigned int port = IPC_GET_ARG1(*icall);
+    //ahci_port_is_t pxis = IPC_GET_ARG2(*icall);
+
+    if (port >= AHCI_MAX_PORTS)
+        return;
+
+    sata_dev_t *sata = (sata_dev_t *) ahci->sata_devs[port];
+    if (sata == NULL)
+        return;
+
+    /* Evaluate port event */
+    if ((ahci_port_is_end_of_operation(pxis)) ||
+        (ahci_port_is_error(pxis))) {
+        fibril_mutex_lock(&sata->event_lock);
+
+        sata->event_pxis = pxis;
+        fibril_condvar_signal(&sata->event_condvar);
+
+        fibril_mutex_unlock(&sata->event_lock);
+    }
+}
+
+
+
 static void ahci_interrupt(void *arg)
 {
-	ahci_dev_t *ahci = dev_ahci_dev(dev);
-	//unsigned int port = IPC_GET_ARG1(*icall);
-	//ahci_port_is_t pxis = IPC_GET_ARG2(*icall);
-	
-	if (port >= AHCI_MAX_PORTS)
-		return;
-	
-	sata_dev_t *sata = (sata_dev_t *) ahci->sata_devs[port];
-	if (sata == NULL)
-		return;
-	
-	/* Evaluate port event */
-	if ((ahci_port_is_end_of_operation(pxis)) ||
-	    (ahci_port_is_error(pxis))) {
-		fibril_mutex_lock(&sata->event_lock);
-		
-		sata->event_pxis = pxis;
-		fibril_condvar_signal(&sata->event_condvar);
-		
-		fibril_mutex_unlock(&sata->event_lock);
-	}
+    phantom_device_t *dev = arg;
+
+    u_int32_t ports = R32(dev,AHCI_IS);
+    u_int32_t ports_copy = ports;
+
+    SHOW_FLOW( 10, "Interrupt from " DEV_NAME ", ports %X", ports );
+
+    int nport = 0;
+    while(ports)
+    {
+        if( ports & 1 )
+            ahci_port_interrupt(dev, nport);
+        ports <<= 1;
+        nport++;
+    }
+
+    W32(dev,AHCI_IS, ports_copy );
 }
+
+
 
 /*----------------------------------------------------------------------------*/
 /*-- AHCI and SATA device creating and initializing routines -----------------*/
@@ -953,63 +983,63 @@ static void ahci_interrupt(void *arg)
  */
 static sata_dev_t *ahci_sata_allocate(ahci_dev_t *ahci, volatile ahci_port_t *port)
 {
-	size_t size = 4096;
-	uintptr_t phys = 0;
-	void *virt_fb = AS_AREA_ANY;
-	void *virt_cmd = AS_AREA_ANY;
-	void *virt_table = AS_AREA_ANY;
-	ddf_fun_t *fun;
-	
-	fun = ddf_fun_create(ahci->dev, fun_exposed, NULL);
-	
-	sata_dev_t *sata = ddf_fun_data_alloc(fun, sizeof(sata_dev_t));
-	if (sata == NULL)
-		return NULL;
-	
-	sata->fun = fun;
-	sata->port = port;
-	
-	/* Allocate and init retfis structure. */
-	int rc = dmamem_map_anonymous(size, DMAMEM_4GiB,
-	    AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &virt_fb);
-	if (rc != EOK)
-		goto error_retfis;
-	
-	memset(virt_fb, 0, size);
-	sata->port->pxfbu = HI(phys);
-	sata->port->pxfb = LO(phys);
-	
-	/* Allocate and init command header structure. */
-	rc = dmamem_map_anonymous(size, DMAMEM_4GiB,
-	    AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &virt_cmd);
-	if (rc != EOK)
-		goto error_cmd;
-	
-	memset(virt_cmd, 0, size);
-	sata->port->pxclbu = HI(phys);
-	sata->port->pxclb = LO(phys);
-	sata->cmd_header = (ahci_cmdhdr_t *) virt_cmd;
-	
-	/* Allocate and init command table structure. */
-	rc = dmamem_map_anonymous(size, DMAMEM_4GiB,
-	    AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &virt_table);
-	if (rc != EOK)
-		goto error_table;
-	
-	memset(virt_table, 0, size);
-	sata->cmd_header->cmdtableu = HI(phys);
-	sata->cmd_header->cmdtable = LO(phys);
-	sata->cmd_table = (uint32_t*) virt_table;
-	
-	return sata;
-	
+    size_t size = 4096;
+    uintptr_t phys = 0;
+    void *virt_fb = AS_AREA_ANY;
+    void *virt_cmd = AS_AREA_ANY;
+    void *virt_table = AS_AREA_ANY;
+    ddf_fun_t *fun;
+
+    fun = ddf_fun_create(ahci->dev, fun_exposed, NULL);
+
+    sata_dev_t *sata = ddf_fun_data_alloc(fun, sizeof(sata_dev_t));
+    if (sata == NULL)
+        return NULL;
+
+    sata->fun = fun;
+    sata->port = port;
+
+    /* Allocate and init retfis structure. */
+    int rc = dmamem_map_anonymous(size, DMAMEM_4GiB,
+                                  AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &virt_fb);
+    if (rc != EOK)
+        goto error_retfis;
+
+    memset(virt_fb, 0, size);
+    sata->port->pxfbu = HI(phys);
+    sata->port->pxfb = LO(phys);
+
+    /* Allocate and init command header structure. */
+    rc = dmamem_map_anonymous(size, DMAMEM_4GiB,
+                              AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &virt_cmd);
+    if (rc != EOK)
+        goto error_cmd;
+
+    memset(virt_cmd, 0, size);
+    sata->port->pxclbu = HI(phys);
+    sata->port->pxclb = LO(phys);
+    sata->cmd_header = (ahci_cmdhdr_t *) virt_cmd;
+
+    /* Allocate and init command table structure. */
+    rc = dmamem_map_anonymous(size, DMAMEM_4GiB,
+                              AS_AREA_READ | AS_AREA_WRITE, 0, &phys, &virt_table);
+    if (rc != EOK)
+        goto error_table;
+
+    memset(virt_table, 0, size);
+    sata->cmd_header->cmdtableu = HI(phys);
+    sata->cmd_header->cmdtable = LO(phys);
+    sata->cmd_table = (uint32_t*) virt_table;
+
+    return sata;
+
 error_table:
-	dmamem_unmap(virt_cmd, size);
+    dmamem_unmap(virt_cmd, size);
 error_cmd:
-	dmamem_unmap(virt_fb, size);
+    dmamem_unmap(virt_fb, size);
 error_retfis:
-	free(sata);
-	return NULL;
+    free(sata);
+    return NULL;
 }
 
 /** Initialize and start SATA hardware device.
@@ -1019,34 +1049,34 @@ error_retfis:
  */
 static void ahci_sata_hw_start(sata_dev_t *sata)
 {
-	ahci_port_cmd_t pxcmd;
-	
-	pxcmd.u32 = sata->port->pxcmd;
-	
-	/* Frame receiver disabled. */
-	pxcmd.fre = 0;
-	
-	/* Disable process the command list. */
-	pxcmd.st = 0;
-	
-	sata->port->pxcmd = pxcmd.u32;
-	
-	/* Clear interrupt status. */
-	sata->port->pxis = 0xffffffff;
-	
-	/* Clear error status. */
-	sata->port->pxserr = 0xffffffff;
-	
-	/* Enable all interrupts. */
-	sata->port->pxie = 0xffffffff;
-	
-	/* Frame receiver enabled. */
-	pxcmd.fre = 1;
-	
-	/* Enable process the command list. */
-	pxcmd.st = 1;
-	
-	sata->port->pxcmd = pxcmd.u32;
+    ahci_port_cmd_t pxcmd;
+
+    pxcmd.u32 = sata->port->pxcmd;
+
+    /* Frame receiver disabled. */
+    pxcmd.fre = 0;
+
+    /* Disable process the command list. */
+    pxcmd.st = 0;
+
+    sata->port->pxcmd = pxcmd.u32;
+
+    /* Clear interrupt status. */
+    sata->port->pxis = 0xffffffff;
+
+    /* Clear error status. */
+    sata->port->pxserr = 0xffffffff;
+
+    /* Enable all interrupts. */
+    sata->port->pxie = 0xffffffff;
+
+    /* Frame receiver enabled. */
+    pxcmd.fre = 1;
+
+    /* Enable process the command list. */
+    pxcmd.st = 1;
+
+    sata->port->pxcmd = pxcmd.u32;
 }
 
 /** Create and initialize connected SATA structure device
@@ -1060,64 +1090,64 @@ static void ahci_sata_hw_start(sata_dev_t *sata)
  *
  */
 static int ahci_sata_create(ahci_dev_t *ahci, ddf_dev_t *dev,
-    volatile ahci_port_t *port, unsigned int port_num)
+                            volatile ahci_port_t *port, unsigned int port_num)
 {
-	//ddf_fun_t *fun = NULL;
-	int rc;
-	
-	sata_dev_t *sata = ahci_sata_allocate(ahci, port);
-	if (sata == NULL)
-		return EINTR;
-	
-	/* Set pointers between SATA and AHCI structures. */
-	sata->ahci = ahci;
-	sata->port_num = port_num;
-	ahci->sata_devs[port_num] = sata;
-	
-	/* Initialize synchronization structures */
-	fibril_mutex_initialize(&sata->lock);
-	fibril_mutex_initialize(&sata->event_lock);
-	fibril_condvar_initialize(&sata->event_condvar);
-	
-	ahci_sata_hw_start(sata);
-	
-	/* Identify device. */
-	if (ahci_identify_device(sata) != EOK)
-		goto error;
-	
-	/* Set required UDMA mode */
-	if (ahci_set_highest_ultra_dma_mode(sata) != EOK)
-		goto error;
-	
-	/* Add device to the system */
-	char sata_dev_name[16];
-	snprintf(sata_dev_name, 16, "ahci_%u", sata_devices_count);
-	
-	fibril_mutex_lock(&sata_devices_count_lock);
-	sata_devices_count++;
-	fibril_mutex_unlock(&sata_devices_count_lock);
-#if 0	
-	rc= ddf_fun_set_name(sata->fun, sata_dev_name);
-	if (rc != EOK) {
-		SHOW_ERROR0( 0, "Failed setting function name.");
-		goto error;
-	}
-	
-	ddf_fun_set_ops(fun, &ahci_ops);
-	
-	rc = ddf_fun_bind(fun);
-	if (rc != EOK) {
-		SHOW_ERROR0( 0, "Failed binding function.");
-		goto error;
-	}
-#endif	
-	return EOK;
-	
+    //ddf_fun_t *fun = NULL;
+    int rc;
+
+    sata_dev_t *sata = ahci_sata_allocate(ahci, port);
+    if (sata == NULL)
+        return EINTR;
+
+    /* Set pointers between SATA and AHCI structures. */
+    sata->ahci = ahci;
+    sata->port_num = port_num;
+    ahci->sata_devs[port_num] = sata;
+
+    /* Initialize synchronization structures */
+    fibril_mutex_initialize(&sata->lock);
+    fibril_mutex_initialize(&sata->event_lock);
+    fibril_condvar_initialize(&sata->event_condvar);
+
+    ahci_sata_hw_start(sata);
+
+    /* Identify device. */
+    if (ahci_identify_device(sata) != EOK)
+        goto error;
+
+    /* Set required UDMA mode */
+    if (ahci_set_highest_ultra_dma_mode(sata) != EOK)
+        goto error;
+
+    /* Add device to the system */
+    char sata_dev_name[16];
+    snprintf(sata_dev_name, 16, "ahci_%u", sata_devices_count);
+
+    fibril_mutex_lock(&sata_devices_count_lock);
+    sata_devices_count++;
+    fibril_mutex_unlock(&sata_devices_count_lock);
+#if 0
+    rc= ddf_fun_set_name(sata->fun, sata_dev_name);
+    if (rc != EOK) {
+        SHOW_ERROR0( 0, "Failed setting function name.");
+        goto error;
+    }
+
+    ddf_fun_set_ops(fun, &ahci_ops);
+
+    rc = ddf_fun_bind(fun);
+    if (rc != EOK) {
+        SHOW_ERROR0( 0, "Failed binding function.");
+        goto error;
+    }
+#endif
+    return EOK;
+
 error:
-	sata->is_invalid_device = true;
-	//if (fun != NULL)		ddf_fun_destroy(fun);
-	
-	return EINTR;
+    sata->is_invalid_device = true;
+    //if (fun != NULL)		ddf_fun_destroy(fun);
+
+    return EINTR;
 }
 
 /** Create and initialize all SATA structure devices for connected SATA drives.
@@ -1128,21 +1158,21 @@ error:
  */
 static void ahci_sata_devices_create(ahci_dev_t *ahci, ddf_dev_t *dev)
 {
-	for (unsigned int port_num = 0; port_num < AHCI_MAX_PORTS; port_num++) {
-		/* Active ports only */
-		if (!(ahci->memregs->ghc.pi & (1 << port_num)))
-			continue;
-		
-		volatile ahci_port_t *port = ahci->memregs->ports + port_num;
-		
-		/* Active devices only */
-		ahci_port_ssts_t pxssts;
-		pxssts.u32 = port->pxssts;
-		if (pxssts.det != AHCI_PORT_SSTS_DET_ACTIVE)
-			continue;
-		
-		ahci_sata_create(ahci, dev, port, port_num);
-	}
+    for (unsigned int port_num = 0; port_num < AHCI_MAX_PORTS; port_num++) {
+        /* Active ports only */
+        if (!(ahci->memregs->ghc.pi & (1 << port_num)))
+            continue;
+
+        volatile ahci_port_t *port = ahci->memregs->ports + port_num;
+
+        /* Active devices only */
+        ahci_port_ssts_t pxssts;
+        pxssts.u32 = port->pxssts;
+        if (pxssts.det != AHCI_PORT_SSTS_DET_ACTIVE)
+            continue;
+
+        ahci_sata_create(ahci, dev, port, port_num);
+    }
 }
 
 /** Create AHCI device structure, intialize it and register interrupt routine.
@@ -1152,85 +1182,108 @@ static void ahci_sata_devices_create(ahci_dev_t *ahci, ddf_dev_t *dev)
  * @return AHCI device structure if succeed, NULL otherwise.
  *
  */
-static errno_t ahci_ahci_create(ahci_dev_t *ahci, phantom_device_t *dev, int irq)
+static errno_t ahci_ahci_create(ahci_dev_t *ahci, phantom_device_t *dev, pci_cfg_t *pci )
 {
-	//ahci_dev_t *ahci = ddf_dev_data_alloc(dev, sizeof(ahci_dev_t));
-	//if (!ahci)		return NULL;
-	
-	/* Connect to parent device */
-	//ahci->parent_sess = ddf_dev_parent_sess_create(dev);
-	//if (ahci->parent_sess == NULL)		return NULL;
-	
-	ahci->dev = dev;
-/*	
-	hw_res_list_parsed_t hw_res_parsed;
-	hw_res_list_parsed_init(&hw_res_parsed);
-	if (hw_res_get_list_parsed(ahci->parent_sess, &hw_res_parsed, 0) != EOK)
-		goto error_get_res_parsed;
-*/	
-	/* Map AHCI registers. */
-	ahci->memregs = AS_AREA_ANY;
-	
-	physmem_map(RNGABS(hw_res_parsed.mem_ranges.ranges[0]),
-	    AHCI_MEMREGS_PAGES_COUNT, AS_AREA_READ | AS_AREA_WRITE,
-	    (void *) &ahci->memregs);
-	if (ahci->memregs == NULL)
-		goto error_map_registers;
-	
-	/* Register interrupt handler */
-	ahci_ranges[0].base = RNGABS(hw_res_parsed.mem_ranges.ranges[0]);
-	ahci_ranges[0].size = sizeof(ahci_memregs_t);
-	
-	for (unsigned int port = 0; port < AHCI_MAX_PORTS; port++) {
-		size_t base = port * 7;
-		
-		ahci_cmds[base].addr =
-		    ((uint32_t *) RNGABSPTR(hw_res_parsed.mem_ranges.ranges[0])) +
-		    AHCI_PORTS_REGISTERS_OFFSET + port * AHCI_PORT_REGISTERS_SIZE +
-		    AHCI_PORT_IS_REGISTER_OFFSET;
-		ahci_cmds[base + 2].addr = ahci_cmds[base].addr;
-		
-		ahci_cmds[base + 3].addr =
-		    ((uint32_t *) RNGABSPTR(hw_res_parsed.mem_ranges.ranges[0])) +
-		    AHCI_GHC_IS_REGISTER_OFFSET;
-		ahci_cmds[base + 4].addr = ahci_cmds[base + 3].addr;
-	}
-	/*
-	irq_code_t ct;
-	ct.cmdcount = sizeof(ahci_cmds) / sizeof(irq_cmd_t);
-	ct.cmds = ahci_cmds;
-	ct.rangecount = sizeof(ahci_ranges) / sizeof(irq_pio_range_t);
-	ct.ranges = ahci_ranges;
-	*/
-	//int rc = register_interrupt_handler(dev, hw_res_parsed.irqs.irqs[0],   ahci_interrupt, &ct);
-	int rc = hal_irq_alloc( irq, &ahci_interrupt, dev, HAL_IRQ_SHAREABLE );
-	if (rc != EOK) {
-		SHOW_ERROR0( 0, "Failed registering interrupt handler.");
-		goto error_register_interrupt_handler;
-	}
-	/* TODO irq_alloc enables?
-	rc = irc_enable_interrupt(hw_res_parsed.irqs.irqs[0]);
-	if (rc != EOK) {
-		SHOW_ERROR0( 0, "Failed enable interupt.");
-		goto error_enable_interrupt;
-	} */
-	
-	hw_res_list_parsed_clean(&hw_res_parsed);
-	return 0;
-	
-//error_enable_interrupt:
-	//unregister_interrupt_handler(dev, hw_res_parsed.irqs.irqs[0]);
-//	hal_irq_free( rtl->irq, &rtl8139_int, rtl );
+    int irq = pci->interrupt;
+    //ahci_dev_t *ahci = ddf_dev_data_alloc(dev, sizeof(ahci_dev_t));
+    //if (!ahci)		return NULL;
 
+    /* Connect to parent device */
+    //ahci->parent_sess = ddf_dev_parent_sess_create(dev);
+    //if (ahci->parent_sess == NULL)		return NULL;
+
+    ahci->dev = dev;
+    dev->drv_private = ahci;
+
+
+
+    int i;
+    for (i = 0; i < 6; i++)
+    {
+        if (pci->base[i] > 0xffff)
+        {
+            dev->iomem = (pci->base[i]);
+            dev->iomemsize = pci->size[i];
+            SHOW_INFO( 1, "mem base 0x%lx, size 0x%lx", dev->iomem, dev->iomemsize);
+        } else if( pci->base[i] > 0) {
+            dev->iobase = pci->base[i];
+            SHOW_INFO( 1, "io_port 0x%x", dev->iobase);
+        }
+    }
+
+    dev->irq = pci->interrupt;
+
+    /* Map AHCI registers. */
+
+    const int n_pages = BYTES_TO_PAGES(dev->iomemsize);
+    void *va;
+    if( hal_alloc_vaddress(&va,n_pages ) )
+        panic("Can't alloc vaddress for %d mem pages", n_pages);
+
+    hal_pages_control_etc( dev->iomem, va, n_pages, page_map_io, page_rw, 0 );
+
+    //dev->iomem = (addr_t)va; // loose phys addr?!
+    ahci->memregs = (addr_t)va;
+
+    SHOW_FLOW( 1, "Look for " DEV_NAME " at mem %X phys %X", ahci->memregs, dev->iomem );
+
+
+
+    /* Register interrupt handler * /
+    ahci_ranges[0].base = RNGABS(hw_res_parsed.mem_ranges.ranges[0]);
+    ahci_ranges[0].size = sizeof(ahci_memregs_t);
+
+    for (unsigned int port = 0; port < AHCI_MAX_PORTS; port++) {
+        size_t base = port * 7;
+
+        ahci_cmds[base].addr =
+            ((uint32_t *) RNGABSPTR(hw_res_parsed.mem_ranges.ranges[0])) +
+            AHCI_PORTS_REGISTERS_OFFSET + port * AHCI_PORT_REGISTERS_SIZE +
+            AHCI_PORT_IS_REGISTER_OFFSET;
+        ahci_cmds[base + 2].addr = ahci_cmds[base].addr;
+
+        ahci_cmds[base + 3].addr =
+            ((uint32_t *) RNGABSPTR(hw_res_parsed.mem_ranges.ranges[0])) +
+            AHCI_GHC_IS_REGISTER_OFFSET;
+        ahci_cmds[base + 4].addr = ahci_cmds[base + 3].addr;
+    }
+    /*
+     irq_code_t ct;
+     ct.cmdcount = sizeof(ahci_cmds) / sizeof(irq_cmd_t);
+     ct.cmds = ahci_cmds;
+     ct.rangecount = sizeof(ahci_ranges) / sizeof(irq_pio_range_t);
+     ct.ranges = ahci_ranges;
+     */
+    //int rc = register_interrupt_handler(dev, hw_res_parsed.irqs.irqs[0],   ahci_interrupt, &ct);
+    int rc = hal_irq_alloc( irq, &ahci_interrupt, dev, HAL_IRQ_SHAREABLE );
+    if (rc != EOK) {
+        SHOW_ERROR0( 0, "Failed registering interrupt handler.");
+        goto error_register_interrupt_handler;
+    }
+    /* TODO irq_alloc enables?
+     rc = irc_enable_interrupt(hw_res_parsed.irqs.irqs[0]);
+     if (rc != EOK) {
+     SHOW_ERROR0( 0, "Failed enable interupt.");
+     goto error_enable_interrupt;
+     } */
+
+    //hw_res_list_parsed_clean(&hw_res_parsed);
+    return 0;
+
+    //error_enable_interrupt:
+    //unregister_interrupt_handler(dev, hw_res_parsed.irqs.irqs[0]);
+    //	hal_irq_free( rtl->irq, &rtl8139_int, rtl );
+/*
 error_register_interrupt_handler:
-	// FIXME: unmap physical memory
-	
+    // FIXME: unmap physical memory
+
 error_map_registers:
-	hw_res_list_parsed_clean(&hw_res_parsed);
-	
+    hw_res_list_parsed_clean(&hw_res_parsed);
+
 error_get_res_parsed:
-	free(ahci);
-	return EIO;
+    free(ahci);
+    return EIO;
+*/
 }
 
 /** Initialize and start AHCI hardware device.
@@ -1240,26 +1293,26 @@ error_get_res_parsed:
  */
 static void ahci_ahci_hw_start(ahci_dev_t *ahci)
 {
-	/* Disable command completion coalescing feature */
-	ahci_ghc_ccc_ctl_t ccc;
-	
-	ccc.u32 = ahci->memregs->ghc.ccc_ctl;
-	ccc.en = 0;
-	ahci->memregs->ghc.ccc_ctl = ccc.u32;
-	
-	/* Set master latency timer. */
-	pci_config_space_write_8(ahci->parent_sess, AHCI_PCI_MLT, 32);
-	
-	/* Enable PCI interrupt and bus mastering */
-	ahci_pcireg_cmd_t cmd;
-	
-	pci_config_space_read_16(ahci->parent_sess, AHCI_PCI_CMD, &cmd.u16);
-	cmd.id = 0;
-	cmd.bme = 1;
-	pci_config_space_write_16(ahci->parent_sess, AHCI_PCI_CMD, cmd.u16);
-	
-	/* Enable AHCI and interrupt. */
-	ahci->memregs->ghc.ghc = AHCI_GHC_GHC_AE | AHCI_GHC_GHC_IE;
+    /* Disable command completion coalescing feature */
+    ahci_ghc_ccc_ctl_t ccc;
+
+    ccc.u32 = ahci->memregs->ghc.ccc_ctl;
+    ccc.en = 0;
+    ahci->memregs->ghc.ccc_ctl = ccc.u32;
+
+    /* Set master latency timer. */
+    pci_config_space_write_8(ahci->parent_sess, AHCI_PCI_MLT, 32);
+
+    /* Enable PCI interrupt and bus mastering */
+    ahci_pcireg_cmd_t cmd;
+
+    pci_config_space_read_16(ahci->parent_sess, AHCI_PCI_CMD, &cmd.u16);
+    cmd.id = 0;
+    cmd.bme = 1;
+    pci_config_space_write_16(ahci->parent_sess, AHCI_PCI_CMD, cmd.u16);
+
+    /* Enable AHCI and interrupt. */
+    ahci->memregs->ghc.ghc = AHCI_GHC_GHC_AE | AHCI_GHC_GHC_IE;
 }
 
 #if 0
@@ -1273,22 +1326,22 @@ static void ahci_ahci_hw_start(ahci_dev_t *ahci)
  * @return EOK if succeed, error code otherwise.
  *
  */
-static int ahci_dev_add(ddf_dev_t *dev)	
+static int ahci_dev_add(ddf_dev_t *dev)
 {
-	ahci_dev_t *ahci = ahci_ahci_create(dev);
-	if (ahci == NULL)
-		goto error;
-	
-	/* Start AHCI hardware. */
-	ahci_ahci_hw_start(ahci);
-	
-	/* Create device structures for sata devices attached to AHCI. */
-	ahci_sata_devices_create(ahci, dev);
-	
-	return EOK;
-	
+    ahci_dev_t *ahci = ahci_ahci_create(dev);
+    if (ahci == NULL)
+        goto error;
+
+    /* Start AHCI hardware. */
+    ahci_ahci_hw_start(ahci);
+
+    /* Create device structures for sata devices attached to AHCI. */
+    ahci_sata_devices_create(ahci, dev);
+
+    return EOK;
+
 error:
-	return EINTR;
+    return EINTR;
 }
 #endif
 /*----------------------------------------------------------------------------*/
@@ -1306,45 +1359,45 @@ error:
  */
 static void ahci_get_model_name(uint16_t *src, char *dst)
 {
-	unsigned int i;
+    unsigned int i;
 
-	uint8_t model[40];
-	memset(model, 0, 40);
-	
-	for (i = 0; i < 20; i++) {
-		uint16_t w = src[i];
-		model[2 * i] = w >> 8;
-		model[2 * i + 1] = w & 0x00ff;
-	}
-	
-	uint32_t len = 40;
-	while ((len > 0) && (model[len - 1] == 0x20))
-		len--;
-	
-	size_t pos = 0;
-	for (i = 0; i < len; i++) {
-		uint8_t c = model[i];
-		if (c >= 0x80)
-			c = '?';
-		
-		chr_encode(c, dst, &pos, 40);
-	}
-	
-	dst[pos] = '\0';
+    uint8_t model[40];
+    memset(model, 0, 40);
+
+    for (i = 0; i < 20; i++) {
+        uint16_t w = src[i];
+        model[2 * i] = w >> 8;
+        model[2 * i + 1] = w & 0x00ff;
+    }
+
+    uint32_t len = 40;
+    while ((len > 0) && (model[len - 1] == 0x20))
+        len--;
+
+    size_t pos = 0;
+    for (i = 0; i < len; i++) {
+        uint8_t c = model[i];
+        if (c >= 0x80)
+            c = '?';
+
+        chr_encode(c, dst, &pos, 40);
+    }
+
+    dst[pos] = '\0';
 }
 
 /*----------------------------------------------------------------------------*/
 /*-- AHCI Main routine -------------------------------------------------------*/
 /*----------------------------------------------------------------------------*/
 /*
-int main(int argc, char *argv[])
-{
-	printf("%s: HelenOS AHCI device driver\n", NAME);
-	ddf_log_init(NAME);
-	fibril_mutex_initialize(&sata_devices_count_lock);
-	return ddf_driver_main(&ahci_driver);
-}
-*/
+ int main(int argc, char *argv[])
+ {
+ printf("%s: HelenOS AHCI device driver\n", NAME);
+ ddf_log_init(NAME);
+ fibril_mutex_initialize(&sata_devices_count_lock);
+ return ddf_driver_main(&ahci_driver);
+ }
+ */
 
 static int seq_number = 0;
 
@@ -1369,30 +1422,30 @@ phantom_device_t * driver_helen_ahci_probe( pci_cfg_t *pci, int stage )
     int i;
     for (i = 0; i < 6; i++)
     {
-/*        if (pci->base[i] > 0xffff)
-        {
-            nic->phys_base = pci->base[i];
-            nic->phys_size = pci->size[i];
-            SHOW_INFO( 0,  "base 0x%lx, size 0x%lx", nic->phys_base, nic->phys_size );
-        } else if( pci->base[i] > 0) {
-            nic->io_port = pci->base[i];
-            SHOW_INFO( 0,  "io_port 0x%x", nic->io_port );
-        }*/
+        /*        if (pci->base[i] > 0xffff)
+         {
+         nic->phys_base = pci->base[i];
+         nic->phys_size = pci->size[i];
+         SHOW_INFO( 0,  "base 0x%lx, size 0x%lx", nic->phys_base, nic->phys_size );
+         } else if( pci->base[i] > 0) {
+         nic->io_port = pci->base[i];
+         SHOW_INFO( 0,  "io_port 0x%x", nic->io_port );
+         }*/
     }
-/*
-    SHOW_FLOW0( 1, "stop" );
-	rtl8139_stop(nic);
-    hal_sleep_msec(10);
+    /*
+     SHOW_FLOW0( 1, "stop" );
+     rtl8139_stop(nic);
+     hal_sleep_msec(10);
 
-    SHOW_FLOW0( 1, "init");
-    if (rtl8139_init(nic) < 0)
-    {
-        SHOW_ERROR0( 0, "init failed");
-        return 0;
-    }
+     SHOW_FLOW0( 1, "init");
+     if (rtl8139_init(nic) < 0)
+     {
+     SHOW_ERROR0( 0, "init failed");
+     return 0;
+     }
 
-    //rtl8139_start(nic);
-#endif*/
+     //rtl8139_start(nic);
+     #endif*/
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = NAME;
     dev->seq_number = seq_number++;
@@ -1402,12 +1455,12 @@ phantom_device_t * driver_helen_ahci_probe( pci_cfg_t *pci, int stage )
     //dev->dops.write = rtl8139_write;
     //dev->dops.get_address = rtl8139_get_address;
 
-	errno_t rc = ahci_ahci_create(ahci, dev, pci->interrupt);
-	if( rc )
-	{
-		free(ahci);
-		free(dev);
-	}
+    errno_t rc = ahci_ahci_create(ahci, dev, pci_cfg_t *pci);
+    if( rc )
+    {
+        free(ahci);
+        free(dev);
+    }
 
     return dev;
 

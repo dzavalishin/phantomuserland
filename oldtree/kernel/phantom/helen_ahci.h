@@ -58,7 +58,7 @@ typedef struct {
 	void *sata_devs[AHCI_MAX_PORTS];
 
 	/** Parent session */
-	async_sess_t *parent_sess;
+	//async_sess_t *parent_sess;
 } ahci_dev_t;
 
 /** SATA Device. */
@@ -67,7 +67,7 @@ typedef struct {
 	ahci_dev_t *ahci;
 	
 	/** Pointer to ddf function. */
-	ddf_fun_t *fun;
+	//ddf_fun_t *fun;
 	
 	/** SATA port number (0-31). */
 	uint8_t port_num;
@@ -85,19 +85,19 @@ typedef struct {
 	volatile uint32_t *cmd_table;
 	
 	/** Mutex for single operation on device. */
-	fibril_mutex_t lock;
+	hal_mutex_t lock;
 	
 	/** Mutex for event signaling condition variable. */
-	fibril_mutex_t event_lock;
+	hal_mutex_t event_lock;
 	
 	/** Event signaling condition variable. */
-	fibril_condvar_t event_condvar;
+	hal_cond_t event_condvar;
 	
 	/** Event interrupt state. */
 	ahci_port_is_t event_pxis;
 	
 	/** Block device service id. */
-	service_id_t service_id;
+	//service_id_t service_id;
 	
 	/** Number of device data blocks. */
 	uint64_t blocks;

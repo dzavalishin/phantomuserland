@@ -63,4 +63,26 @@ typedef struct ddf_fun
 ddf_fun_t;
 
 
+
+
+
+
+
+
+
+// ---------------------------------------------
+// HACK UNCERTAIN
+
+#define AS_AREA_ANY 0
+#define AS_AREA_READ 0
+#define AS_AREA_WRITE 0
+#define DMAMEM_4GiB 0
+
+
+
+
+
+
+
+
 #endif // __COMPAT_HELENOS_H__
