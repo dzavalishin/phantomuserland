@@ -363,12 +363,8 @@ static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
  *
  * Syscall numbers are specific to object class.
  *
-**/
-
-
-/**
  *
- * In progress - restartable SYS instruction.
+ * NB! Restartable SYS instruction.
  *
  * We restore VM state as it was before SYS is started to execute,
  * then call kernel code to exec SYS, and if:

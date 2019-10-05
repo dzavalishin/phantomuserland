@@ -25,6 +25,7 @@ void
     va_list ap;
     va_start(ap,fmt);
     vprintf(fmt, ap);
+    va_end(ap);
     ThreadExit(-1);
 }
 
@@ -39,6 +40,7 @@ warn(char *fmt, ...)
         printf("Warning: ");
         vprintf(fmt, ap);
     }
+    va_end(ap);
 }
 
 
@@ -60,6 +62,7 @@ msg(char *fmt, ...)
             //FileFlush(stderr);
         }
     }
+    va_end(ap);
 }
 
 void

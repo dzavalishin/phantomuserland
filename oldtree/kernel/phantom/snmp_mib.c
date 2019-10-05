@@ -174,6 +174,7 @@ uint8_t *SnmpMibFind(OID * name, size_t * namelen, uint8_t * type, size_t * len,
                     *type = vp->var_type;
                     *acl = vp->var_acl;
                     *no_obj = !found;
+                    free(ori_oid);
                     return NULL;
                 }
             }

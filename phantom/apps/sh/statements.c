@@ -285,7 +285,7 @@ static int handle_exit(scan_info *info)
 {
     long int exit_value = 0;
     int err = SHE_NO_ERROR;
-    shell_value *expr;
+    shell_value *expr = 0;
 
     if(info->sym_code == SVO_PARENL){
 
@@ -312,7 +312,6 @@ static int handle_exit(scan_info *info)
 
     //_kern_exit(exit_value);
     exit(exit_value);
-
 
 err:
     shell_value_free(expr);
