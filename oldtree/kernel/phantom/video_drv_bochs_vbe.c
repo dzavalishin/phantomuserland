@@ -36,6 +36,15 @@
 
 #include "video_drv_bochs_vbe.h"
 
+
+#define BOCHS_VIDEO_DRV_DEFAULT_X_SIZE 1280
+#define BOCHS_VIDEO_DRV_DEFAULT_Y_SIZE 800
+#define BOCHS_VIDEO_DRV_DEFAULT_BPP 32
+
+//#define BOCHS_VIDEO_DRV_DEFAULT_X_SIZE 1024
+//#define BOCHS_VIDEO_DRV_DEFAULT_Y_SIZE 768
+//#define BOCHS_VIDEO_DRV_DEFAULT_BPP 24
+
 static int bochs_video_probe();
 static int bochs_video_start();
 static int bochs_video_stop();
@@ -52,7 +61,7 @@ struct drv_video_screen_t        video_driver_bochs_vesa_emulator =
     // size
     BOCHS_VIDEO_DRV_DEFAULT_X_SIZE, BOCHS_VIDEO_DRV_DEFAULT_Y_SIZE,
     // bpp
-    24,
+    BOCHS_VIDEO_DRV_DEFAULT_BPP,
     // mouse x y flags
     0, 0, 0,
 
@@ -173,8 +182,9 @@ static void bochs_map_video(int on_off)
 
 static int bochs_video_start()
 {
+    if( 32 == BOCHS_VIDEO_DRV_DEFAULT_BPP) switch_screen_bitblt_to_32bpp(1);
     bochs_map_video( 1 );
-    return vbe_set(BOCHS_VIDEO_DRV_DEFAULT_X_SIZE, BOCHS_VIDEO_DRV_DEFAULT_Y_SIZE, 24);
+    return vbe_set(BOCHS_VIDEO_DRV_DEFAULT_X_SIZE, BOCHS_VIDEO_DRV_DEFAULT_Y_SIZE, BOCHS_VIDEO_DRV_DEFAULT_BPP);
 }
 
 static int bochs_video_stop()
