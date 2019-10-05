@@ -41,7 +41,7 @@ fi
 
 #set -x	# debug
 
-for pass in `seq 1 $PASSES`
+for pass in $(seq 1 $PASSES)
 do
 	echo "
 ===> pass $pass"
@@ -50,11 +50,11 @@ do
 	while [ $ELAPSED -lt $PANIC_AFTER ]
 	do
 		sleep 2
-		ELAPSED=`expr $ELAPSED + 2`
+		ELAPSED=$(expr $ELAPSED + 2)
 		# tick every minute to keep CI going
 		[ "$SNAP_CI" ] && {
 			[ `expr $ELAPSED % 60` -eq 0 ] && {
-				M=`expr $ELAPSED / 60`
+				M=$(expr $ELAPSED / 60)
 				case $M in
 				1) echo "Running $M minute..."	;;
 				*) echo "Running $M minutes..."	;;

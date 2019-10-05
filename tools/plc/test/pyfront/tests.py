@@ -196,7 +196,7 @@ def t_render(ss,ex,exact=True):
     if exact:
         if res != ex: showerror(cmd, ss, ex, res)
         assert(res == ex)
-    else: 
+    else:
         if ex not in res: showerror(cmd, ss, ex, res)
         assert(ex in res)
 
@@ -703,8 +703,8 @@ test(x='OK')
     
     t_render("print(2**3)","8")
     t_render("print(2*3**2)", "18", False)
-    
-    
+
+
     t_render("""
 def test(**v): return 'OK'
 print(test())

@@ -67,15 +67,11 @@ trunk/tools/plc              - phantom language compiler / java bytecode transla
 
   <https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots>
 
-## Ready to take part? ##
+## Go on and take part ##
 
 [Issues to start with](https://github.com/dzavalishin/phantomuserland/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
-## Ready to take part? ##
-
-[Issues to start with](https://github.com/dzavalishin/phantomuserland/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-
-## O, my. Badges! ##
+## Badges ##
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8eec7d75d73b4a93b45a1befa3b70696)](https://www.codacy.com/manual/dzavalishin/phantomuserland?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dzavalishin/phantomuserland&amp;utm_campaign=Badge_Grade)
 

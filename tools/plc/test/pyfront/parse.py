@@ -152,7 +152,9 @@ def list_nud(t):
     t.type = 'list'
     t.val = '[]'
     t.items = []
-    next = P.token
+#    next = P.token
+    unused = P.token
+    print "unised item = "+unused
     tweak(',',0)
     while not check(P.token,'for',']'):
         r = expression(0)

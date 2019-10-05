@@ -128,3 +128,5 @@ test/unit/Makefile
 test/unit/suites/cmake_install.cmake
 test/unit/suites/Makefile
 *.stackdump
+*.sh~
+*.py~

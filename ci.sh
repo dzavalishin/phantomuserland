@@ -2,7 +2,7 @@
 #
 # you must stand in phantom home when you run this script
 #
-export PHANTOM_HOME="`pwd`"
+export PHANTOM_HOME=$(pwd)
 
 die ( ) {
 #	[ -s make.log ] && tail make.log
