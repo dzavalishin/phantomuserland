@@ -91,5 +91,6 @@ main( int ac, char **av )
 
 	CHECKA( 1 != fwrite( &u, DISK_STRUCT_BS, 1, fp ), "Can't write to %s\n", av[1] );
 
+        fclose(fp);
 	return 0;
 }

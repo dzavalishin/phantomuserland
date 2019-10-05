@@ -3,7 +3,7 @@
 # you must stand in phantom home when you run this script
 #
 export PHANTOM_NO_PVM_TEST=true
-export PHANTOM_HOME="`pwd`"
+export PHANTOM_HOME=$(pwd)
 
 # moved to config.mk
 #if [ "`uname`" == "Darwin" ]

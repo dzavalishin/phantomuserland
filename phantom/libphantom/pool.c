@@ -236,6 +236,7 @@ static pool_arena_t * alloc_arenas( int arena_size, int narenas, pool_t *init )
         ret[i].ptrs = calloc( sizeof(void*), arena_size );
         ret[i].refc = calloc( sizeof(int), arena_size );
         assert(ret[i].ptrs);
+        assert(ret[i].refc);
 
         if(init && i < init->narenas)
         {
@@ -437,7 +438,7 @@ pool_handle_t pool_create_el( pool_t *pool, void *arg )
 {
     //hal_mutex_lock( &pool->mutex );
     POOL_LOCK(pool);
-    pool_handle_t ret = -1;
+    pool_handle_t ret;
 
     // TODO grow
 

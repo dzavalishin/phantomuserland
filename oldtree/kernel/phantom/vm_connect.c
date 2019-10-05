@@ -6,6 +6,8 @@
  *
  * Virtual machine objects interface.
  *
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/ObjectKernelConnector>
+ *
 **/
 
 #define DEBUG_MSG_PREFIX "vmconnect"
@@ -57,8 +59,8 @@ static pool_t *ko_pool;
 
 struct kohandle_entry {
     struct kohandle_entry *	next;
-    pvm_object_t 		o;
-    pool_handle_t               handle;
+    pvm_object_t     o;
+    pool_handle_t    handle;
 };
 
 typedef struct kohandle_entry kohandle_entry_t;
@@ -68,7 +70,8 @@ static int kohandle_entry_compare_func(void *_e, const void *_key)
     kohandle_entry_t *e = _e;
     const pvm_object_t *o = _key;
 
-    return ((e->o.data == o->data) && (e->o.interface == o->interface)) ? 0 : 1;
+    //return ((e->o == o) && (e->o.interface == o->interface)) ? 0 : 1;
+    return (e->o == *o) ? 0 : 1;
 }
 
 static unsigned int kohandle_entry_hash_func(void *_e, const void *_key, unsigned int range)
@@ -77,9 +80,9 @@ static unsigned int kohandle_entry_hash_func(void *_e, const void *_key, unsigne
     const pvm_object_t *o = _key;
 
     if(e)
-        return ((addr_t)e->o.data) % range;
+        return ((addr_t)e->o) % range;
     else
-        return ((addr_t)o->data) % range;
+        return ((addr_t)*o) % range;
 }
 
 static kohandle_entry_t *kohandles;
@@ -150,7 +153,7 @@ errno_t  object_assign_handle( ko_handle_t *h, pvm_object_t o )
         return ENOENT;
 
     // it is possible to get two objects with same data and different iface
-    // *h = o.data; // that simple - just use data address as handle
+    // *h = o; // that simple - just use data address as handle
     SHOW_ERROR0( 0, "Implement me" );
     (void) h;
 
@@ -197,7 +200,7 @@ errno_t  object2handle( ko_handle_t *h, pvm_object_t o )
     {
         if( !he )
         {
-            SHOW_ERROR( 0, "Integrity fail: in hash, not in pool!? %p", o.data );
+            SHOW_ERROR( 0, "Integrity fail: in hash, not in pool!? %p", o );
             return ENOENT;
         }
 
@@ -221,14 +224,14 @@ errno_t  object2handle( ko_handle_t *h, pvm_object_t o )
     pool_handle_t ph = pool_create_el( ko_pool, 0 );
     if( ph < 0 )
     {
-        SHOW_ERROR( 0, "Pool insert fail %p", o.data );
+        SHOW_ERROR( 0, "Pool insert fail %p", o );
         return ENOMEM;
     }
 
     he = pool_get_el( ko_pool, ph );
     if( !he )
     {
-        SHOW_ERROR( 0, "Integrity fail: not in pool after create!? %p", o.data );
+        SHOW_ERROR( 0, "Integrity fail: not in pool after create!? %p", o );
         return ENOENT;
     }
 
@@ -239,7 +242,7 @@ errno_t  object2handle( ko_handle_t *h, pvm_object_t o )
     if( hash_insert(kohandles, he) )
     {
         hal_mutex_unlock(&kohandles_lock);
-        SHOW_ERROR( 0, "Hash insert fail %p", o.data );
+        SHOW_ERROR( 0, "Hash insert fail %p", o );
         return EFAULT;
     }
     hal_mutex_unlock(&kohandles_lock);
@@ -300,7 +303,7 @@ errno_t ko_make_object( ko_handle_t *ret, ko_handle_t ko_class, void *init ) // 
 
 errno_t ko_get_class( ko_handle_t *ret, const char *class_name )
 {
-    struct pvm_object cname = pvm_create_string_object(class_name);
+    pvm_object_t cname = pvm_create_string_object(class_name);
     errno_t rc = object2handle( ret, pvm_exec_lookup_class_by_name( cname ) );
     ref_dec_o( cname );
 
@@ -320,7 +323,7 @@ errno_t ko_map_method( int *out_ord, ko_handle_t *ko_this, const char *method_na
 
     handle_release_object( ko_this );
 
-    pvm_object_t tclass = _this.data->_class;
+    pvm_object_t tclass = _this->_class;
 
     // TODO XXX VERY ineffective!
     int ord;
@@ -523,22 +526,28 @@ static void run_cb_thread(void *arg)
 
     struct cb_parm *p = arg;
 
-    struct pvm_object args[1] = { p->arg };
+    pvm_object_t args[1] = { p->arg };
     struct data_area_4_connection * da = p->da;
 
     free(p);
 
     SHOW_FLOW( 1, "cb conn '%s'", da->name );
 
+    vm_lock_persistent_memory();
+
     while(da->n_active_callbacks > 16)
     {
         SHOW_ERROR( 1, "conn '%s' too much cb: %d", da->name, da->n_active_callbacks );
-        hal_sleep_msec(1000);
+        vm_unlock_persistent_memory();
+        hal_sleep_msec(100);
+        vm_lock_persistent_memory();
     }
 
     da->n_active_callbacks++; // TODO atomic?
     pvm_exec_run_method(da->callback, da->callback_method, 1, args);
     da->n_active_callbacks--; // TODO atomic?
+
+    vm_unlock_persistent_memory();
 
     SHOW_FLOW( 1, "cb conn '%s' done", da->name );
 

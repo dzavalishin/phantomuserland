@@ -80,6 +80,8 @@
  *
  */
 
+
+
 #include <string.h>
 #include <assert.h>
 #include "vm/internal_da.h"
@@ -95,9 +97,9 @@ struct gdb_pt_regs
     void *              r_istack;
     void *              r_estack;
 
-    int         	r_ip;
-    struct pvm_object 	r_this;
-    struct pvm_object 	r_frame;
+    int                 r_ip;
+    pvm_object_t        r_this;
+    pvm_object_t        r_frame;
 };
 
 
@@ -773,7 +775,8 @@ void gdb_stub_handle_cmds(struct data_area_4_thread *da, int signal)
 
                     // TODO add to kernel objects list (object must be available from root)
 
-                    snprintf( output_buffer, sizeof(output_buffer), "%lx, %lx", (long)o.data, (long)o.interface  );
+                    //snprintf( output_buffer, sizeof(output_buffer), "%lx, %lx", (long)o, (long)o.interface  );
+                    snprintf( output_buffer, sizeof(output_buffer), "%lx", (long)o );
                     break;
                 }
 

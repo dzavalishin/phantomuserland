@@ -27,11 +27,11 @@ id(opcode_os_save8,0x15)	// save (pop) stack top to this object's field
 id(opcode_os_load32,0x16)
 id(opcode_os_save32,0x17)
 id(opcode_new,0x18) // create new object, class must be on stack
-id(opcode_copy,0x19) // create new object, copy of stack top (just copy of data area as is)
-id(opcode_os_compose32,0x1A) // n objects from ostack combine into the object. topmost is a class
-id(opcode_os_decompose,0x1B) // decompose topmost object on stack
+id(opcode_copy,0x19) // create new object, copy of stack top (just copy of data area as is) TODO do we need it?
+id(opcode_os_compose32,0x1A) // n objects from ostack combine into the object. topmost is a class TODO UNUSED, KILL ME
+id(opcode_os_decompose,0x1B) // decompose topmost object on stack TODO UNUSED, KILL ME
 
-// deprecated?
+// deprecated? no, we use it
 id(opcode_os_pull32,0x1C) // copy opbject n steps down the ostack on top. pull 0 is dup;
 
 // deprecated and was not implemented
@@ -57,6 +57,10 @@ id(opcode_is_get32,0x26)	// get value from stack absolute-addressed slot, push o
 id(opcode_is_set32,0x27)	// pop stack top, set value in stack absolute-addressed slot
 
 id(opcode_const_pool,0x28)  // int32 follows - get constant with corresponding index from object constant pool of this class
+
+id(opcode_stack_reserve,0x29)  // int8 object stack size to reserve (push zeroes), int8 integer stack size to reserve
+// ? unclear how to init objects
+//id(opcode_stack_init,0x2A)  // int32 const pool id, int8 object stack size to init (push data from const pool??), int8 integer stack size to init (rest of constant data)
 
 
 id(opcode_cast,0x2B) // pop class, pop object, cast, push object
@@ -146,7 +150,7 @@ id(opcode_ishl,0x70)  // shift left
 id(opcode_ishr,0x71)  // shift right signed
 id(opcode_ushr,0x72)  // shift right unsigned
 
-// no 73 yet
+id(opcode_arg_count,0x73)  // byte with number of args this func waits for - compares with int on istack, throws if not eq
 
 id(opcode_fromi,0x74) // cast int from int stack to current (as defined by prefix) type on int stack
 id(opcode_froml,0x75) // cast from long
@@ -155,23 +159,26 @@ id(opcode_fromd,0x77) // cast from double
 
 // 73-7f
 
-// TODO kill shortcuts for we will have JIT anyway and bytecode size does not matter
-id(opcode_sys_0,0x80) // shortcut for syscall 0
-id(opcode_sys_1,0x81)
-id(opcode_sys_2,0x82)
-id(opcode_sys_3,0x83)
-id(opcode_sys_4,0x84)
-id(opcode_sys_5,0x85)
-id(opcode_sys_6,0x86)
-id(opcode_sys_7,0x87)
-id(opcode_sys_8,0x88)
-id(opcode_sys_9,0x89)
-id(opcode_sys_A,0x8A)
-id(opcode_sys_B,0x8B)
-id(opcode_sys_C,0x8C)
-id(opcode_sys_D,0x8D)
-id(opcode_sys_E,0x8E)
-id(opcode_sys_F,0x8F)
+
+
+
+// We can't have sys shortcuts because of syscall restart needs fixed sycall instr size for restart 
+//id(opcode_sys_0,0x80) // shortcut for syscall 0
+//id(opcode_sys_1,0x81)
+//id(opcode_sys_2,0x82)
+//id(opcode_sys_3,0x83)
+//id(opcode_sys_4,0x84)
+//id(opcode_sys_5,0x85)
+//id(opcode_sys_6,0x86)
+//id(opcode_sys_7,0x87)
+//id(opcode_sys_8,0x88)
+//id(opcode_sys_9,0x89)
+//id(opcode_sys_A,0x8A)
+//id(opcode_sys_B,0x8B)
+//id(opcode_sys_C,0x8C)
+//id(opcode_sys_D,0x8D)
+//id(opcode_sys_E,0x8E)
+//id(opcode_sys_F,0x8F)
 
 
 id(opcode_call_00,0xA0) // shortcut for call 0

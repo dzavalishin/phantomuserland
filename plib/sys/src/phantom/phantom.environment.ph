@@ -4,22 +4,14 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
+ * Environment: set of objects mapped to string names.
+ * Used as kernel and thread environment.
  *
 **/
 
 package .phantom;
 
 import .phantom.util.map;
-
-/**
- *
- * Environment: set of objects mapped to string names.
- * Used as kernel and thread environment.
- *
-**/
 
 class environment
 {

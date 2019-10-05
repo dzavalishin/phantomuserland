@@ -1,79 +1,73 @@
-Class version 20160109081030718
+Class version 20190820114327538
 
-method init ordinal 16
+method <init> ordinal 19
 --
-  const 2	//  @0
-  isublu	//  @5
-  jz _label_0	//  @6
-  const "arg count: init in .ru.dz.windows.base"	//  @11
-  throw	//  @54
-_label_0:	//  @55
-  summon null	//  @55
-  summon null	//  @56
-  ; Line 17	//  @57
-  get o stk pos=0	//  @57
-  os dup	//  @62
-  save fld=0	//  @63
-  os drop	//  @65
-  ; Line 18	//  @66
-  get o stk pos=1	//  @66
-  os dup	//  @71
-  save fld=1	//  @72
-  os drop	//  @74
-  ; Line 18	//  @75
-  ; Line 19	//  @75
-  load fld=0	//  @75
-  ; Line 19	//  @77
-  const " in root..."	//  @77
-  ; Line 19	//  @93
-  call m=17 nparm=1	//  @93
-  os drop	//  @95
-  ; Line 19	//  @96
-  ret	//  @96
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
+
+method putws ordinal 16
+--
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 40
+  load fld=0						//  @5
+; Line 40
+; s
+  get o stk pos=0						//  @7
+; Line 40
+  call m=17 nparm=1					//  @12
+  os drop							//  @14
+  ret							//  @15
 --
 method end
 
 method gotoxy ordinal 17
 --
-  const 2	//  @0
-  isublu	//  @5
-  jz _label_0	//  @6
-  const "arg count: gotoxy in .ru.dz.windows.base"	//  @11
-  throw	//  @56
-_label_0:	//  @57
-  summon null	//  @57
-  summon null	//  @58
-  ; Line 35	//  @59
-  load fld=0	//  @59
-  ; Line 35	//  @61
-  get o stk pos=0	//  @61
-  ; Line 35	//  @66
-  get o stk pos=1	//  @66
-  ; Line 35	//  @71
-  ; Line 35	//  @71
-  call m=19 nparm=2	//  @71
-  os drop	//  @73
-  ret	//  @74
+  arg_count 2						//  @0
+  stack_reserve obj=2 int=0				//  @2
+; Line 35
+  load fld=0						//  @5
+; Line 35
+; x
+  get o stk pos=0						//  @7
+; Line 35
+; y
+  get o stk pos=1						//  @12
+; Line 35
+; Line 35
+  call m=19 nparm=2					//  @17
+  os drop							//  @19
+  ret							//  @20
 --
 method end
 
-method putws ordinal 18
+method init ordinal 18
 --
-  const 1	//  @0
-  isublu	//  @5
-  jz _label_0	//  @6
-  const "arg count: putws in .ru.dz.windows.base"	//  @11
-  throw	//  @55
-_label_0:	//  @56
-  summon null	//  @56
-  ; Line 40	//  @57
-  load fld=0	//  @57
-  ; Line 40	//  @59
-  get o stk pos=0	//  @59
-  ; Line 40	//  @64
-  call m=17 nparm=1	//  @64
-  os drop	//  @66
-  ret	//  @67
+  arg_count 2						//  @0
+  stack_reserve obj=2 int=0				//  @2
+; Line 17
+; _console
+  get o stk pos=0						//  @5
+; set console
+  save fld=0						//  @10
+; Line 18
+; _booto
+  get o stk pos=1						//  @12
+; set boot_object
+  save fld=1						//  @17
+; Line 18
+; Line 19
+  load fld=0						//  @19
+; Line 19
+; str ' in root...'
+  const_pool <0>						//  @21
+; Line 19
+  call m=17 nparm=1					//  @26
+  os drop							//  @28
+; Line 19
+  ret							//  @29
 --
 method end
 

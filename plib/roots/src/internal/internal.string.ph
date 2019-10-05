@@ -12,6 +12,9 @@
 
 package .internal;
 
+import .internal.int;
+import .internal.long;
+
 /**
  *
  * This class has internal implementation (as everything in
@@ -41,6 +44,14 @@ class .internal.string
 	int length() [11] {}
 
 	int strstr( var s : string ) [12] {}
+
+	void setImmutable() [14] { }
+
+    int  toInt() [16] { }
+    long toLong() [17] { }
+
+    //float  toFloat() [18] { }
+    //double toDouble() [19] { }
 
 };
 

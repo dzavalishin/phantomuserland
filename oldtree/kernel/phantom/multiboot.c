@@ -380,6 +380,12 @@ void phantom_map_mem_equally()
     hal_pages_control( ds_start, (void *)ds_start, ds_pages, page_map, page_rw );
 
     SHOW_FLOW( 7, "Data seg 0x%X-%X, %d bytes, %d pages", ds_start, ((int)&_bss_end__), ds_bytes, ds_pages );
+
+    // vm86 and VESA die if so
+#if 0
+	// unmap page 0, catch zero ptr access
+	hal_page_control( 0, 0, page_unmap, page_noaccess );
+#endif
 }
 
 

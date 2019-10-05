@@ -18,8 +18,9 @@ endif
 tools: \
 	$(INST_BIN)/plc.cmd $(INST_BIN)/plc \
 	$(INST_BIN)/jpc.cmd $(INST_BIN)/jpc \
+	$(INST_BIN)/pcdump.cmd $(INST_BIN)/pcdump \
 	$(INST_BIN)/pvm_test.cmd $(INST_BIN)/pvm_test \
-       $(INST_BIN)/pbitmap.cmd  \
+	$(INST_BIN)/pbitmap.cmd  \
 		$(INST_BIN)/mkbulk.cmd $(INST_BIN)/mkbulk $(INST_BIN)/mkpfs $(INST_BIN)/mkpfs.cmd $(INST_BIN)/pfsextract.cmd $(INST_BIN)/pfsextract
 
 # $(INST_BIN)/bin2hex.cmd 
@@ -67,6 +68,11 @@ $(INST_BIN)/pvm_test.cmd: bin/pvm_test.cmd
 $(INST_BIN)/pvm_test: bin/pvm_test
 	cp $^ $@
 
+$(INST_BIN)/pcdump.cmd: bin/pcdump.cmd
+	cp $^ $@
+
+$(INST_BIN)/pcdump: bin/pcdump
+	cp $^ $@
 
 
 #$(INST_BIN)/pvm_test.exe: bin/pvm_test.exe

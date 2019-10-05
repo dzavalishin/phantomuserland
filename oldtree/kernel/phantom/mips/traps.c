@@ -62,6 +62,8 @@ const char *trap_name(unsigned int trapnum)
 
 extern int panic_reenter;
 
+// We're called from page fault and can't print to screen - it causes
+// window system problems sometimes - use lprintf
 void dump_ss(struct trap_state *st)
 {
     if(panic_reenter > 1)
@@ -69,21 +71,21 @@ void dump_ss(struct trap_state *st)
 
     //int from_user = (st->cs & 3) || (st->eflags & EFL_VM);
 
-    printf("Dump of mips state:\n" );
+    lprintf("Dump of mips state:\n" );
 
-    printf("Z = (0)      AT= %08x V0= %08x V1= %08x\n", st->r1, st->r2, st->r3);
-    printf("A0= %08x A1= %08x A2= %08x A3= %08x\n", st->r4, st->r5, st->r6, st->r7);
-    printf("T0= %08x T1= %08x T2= %08x T3= %08x\n", st->r8, st->r9, st->r10, st->r11);
-    printf("T4= %08x T5= %08x T6= %08x T7= %08x\n", st->r12, st->r13, st->r14, st->r15);
+    lprintf("Z = (0)      AT= %08x V0= %08x V1= %08x\n", st->r1, st->r2, st->r3);
+    lprintf("A0= %08x A1= %08x A2= %08x A3= %08x\n", st->r4, st->r5, st->r6, st->r7);
+    lprintf("T0= %08x T1= %08x T2= %08x T3= %08x\n", st->r8, st->r9, st->r10, st->r11);
+    lprintf("T4= %08x T5= %08x T6= %08x T7= %08x\n", st->r12, st->r13, st->r14, st->r15);
     // TODO rest 16
-    printf("S0= %08x S1= %08x S2= %08x S3= %08x\n", st->r16, st->r17, st->r18, st->r19);
-    printf("S4= %08x S5= %08x S6= %08x S7= %08x\n", st->r20, st->r21, st->r22, st->r23);
-    printf("T8= %08x T9= %08x K0= %08x K1= %08x\n", st->r24, st->r25, st->r26, st->r27);
-    printf("GP= %08x SP= %08x FP= %08x RA= %08x\n", st->r28, st->r29, st->r30, st->r31);
+    lprintf("S0= %08x S1= %08x S2= %08x S3= %08x\n", st->r16, st->r17, st->r18, st->r19);
+    lprintf("S4= %08x S5= %08x S6= %08x S7= %08x\n", st->r20, st->r21, st->r22, st->r23);
+    lprintf("T8= %08x T9= %08x K0= %08x K1= %08x\n", st->r24, st->r25, st->r26, st->r27);
+    lprintf("GP= %08x SP= %08x FP= %08x RA= %08x\n", st->r28, st->r29, st->r30, st->r31);
 
-    printf("HI= %08x LO= %08x PC= %08x\n",           st->hi, st->lo, st->pc );
+    lprintf("HI= %08x LO= %08x PC= %08x\n",           st->hi, st->lo, st->pc );
 
-    printf("trapno %d: %s, intno %08x\n",
+    lprintf("trapno %d: %s, intno %08x\n",
            st->trapno, trap_name(st->trapno),
            st->intno);
 
@@ -91,7 +93,7 @@ void dump_ss(struct trap_state *st)
 
     if(phantom_symtab_getname)
     {
-        printf("PC %6p: %s\n", st->pc, phantom_symtab_getname((void *)st->pc) );
+        lprintf("PC %6p: %s\n", st->pc, phantom_symtab_getname((void *)st->pc) );
     }
 
     stack_dump_from((void *)st->r11);

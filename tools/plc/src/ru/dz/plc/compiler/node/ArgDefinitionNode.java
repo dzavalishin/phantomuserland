@@ -14,11 +14,11 @@ public class ArgDefinitionNode extends Node {
 	String my_name;
 	public ArgDefinitionNode( String my_name, PhantomType my_type ) {
 		super(null);
-		this.type = my_type;
+		this.presetType(my_type);
 		this.my_name = my_name;
 	}
 	public String toString()  {    return "arg def ("+my_name+")";  }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
-	public void find_out_my_type() { if( type == null ) type = new PhTypeUnknown(); }
+	public PhantomType find_out_my_type() { return new PhTypeUnknown(); }
 }
 

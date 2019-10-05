@@ -28,10 +28,18 @@ void ev_make_mouse_event( struct ui_event *e, int x, int y, int buttons )
     e->time = fast_time();
     e->focus= 0;
 
-    e->m.buttons = buttons;
     e->abs_x = x;
     e->abs_y = y;
     e->extra = 0;
+
+    e->m.buttons = buttons;
+
+    static int prev_buttons = 0;
+
+    e->m.clicked  = buttons & ~prev_buttons;
+    e->m.released = ~buttons & prev_buttons;
+
+    prev_buttons = buttons;
 }
 
 

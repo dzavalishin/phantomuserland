@@ -27,3 +27,9 @@ source -v ./.gdb-local
 
 #watch usec_per_tick
 
+#break phantom_paging_init
+#break hal_PIC_interrupt_dispatcher
+#break arch_adjust_after_thread_switch
+#break pvm_root_init
+
+break scr_painter.c:213

@@ -42,7 +42,10 @@
 
 //#define DEFAULT_DSP	"/dev/sb16"
 //#define DEFAULT_DSP	"/dev/sound/sb/dsp"
+
 #define DEFAULT_DSP	"/dev/pci/es1370.0"
+//#define DEFAULT_DSP	"/dev/pci/SBlaster.0"
+
 //#define DEFAULT_DSP	"/dev/null"
 #define DEFAULT_BUFFERSIZE (2048*8)
 //#define perror	//
@@ -77,12 +80,14 @@ int main( int argc, char **argv )
     //static char arena[1024*1024];
     //init_malloc( arena, sizeof(arena) );
 
+    printf("wavplay started\n");
 
     if ( argc == 1 ) {
         //printf( "Usage: wavplay [WAVE-File]\n" );
         //return -1;
-        if( play( "/amnt0/siren.wav" ) ) return 1;
-        if( play( "/amnt1/siren.wav" ) ) return 1;
+        if( play( "/amnt0/siren.wav" ) ) 
+            if( play( "/amnt1/siren.wav" ) ) 
+                return 1;
         return 0;
 
     }

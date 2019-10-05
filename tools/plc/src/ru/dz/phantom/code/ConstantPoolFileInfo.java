@@ -2,9 +2,9 @@ package ru.dz.phantom.code;
 
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.Charset;
 
-import ru.dz.plc.compiler.CodeGeneratorState;
-import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.ConstantPool;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
@@ -41,7 +41,9 @@ public class ConstantPoolFileInfo extends FileInfo {
 	{
 		Fileops.put_int32( os, ordinal );
 		pt.save_to_file(os);
-		os.write(sConst.getBytes());
+		//System.err.println("const type "+pt);
+		byte[] bytes = sConst.getBytes(Charset.forName(ConstantPool.FILE_ENCODING));
+		os.write(bytes); 
 	}
 
 }

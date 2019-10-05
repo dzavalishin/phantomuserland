@@ -4,11 +4,15 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * Virtual machine startup and root objects creation
  *
 **/
+
+#define DEBUG_MSG_PREFIX "vm.root"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <assert.h>
 #include <phantom_libc.h>
@@ -30,6 +34,7 @@
 #include <kernel/boot.h>
 #include <kernel/debug.h>
 #include <kernel/stats.h>
+#include <kernel/snap_sync.h>
 
 //#include "vm/systable_id.h"
 
@@ -49,7 +54,7 @@ static void handle_object_at_restart( pvm_object_t o );
 
 static void runclass(int, char **);
 
-static void process_generic_restarts(struct pvm_object_storage *root);
+static void process_generic_restarts(pvm_object_t root);
 static void process_specific_restarts(void);
 
 
@@ -65,10 +70,11 @@ static void process_specific_restarts(void);
 
 void pvm_root_init(void)
 {
-    struct pvm_object_storage *root = get_root_object_storage();
+    vm_lock_persistent_memory();
+
+    pvm_object_t root = get_root_object_storage();
 
     dbg_add_command( runclass, "runclass", "runclass class [method ordinal] - create object of given class and run method (ord 8 by default)");
-
 
     if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
     {
@@ -82,19 +88,9 @@ void pvm_root_init(void)
 
         load_kernel_boot_env();
 
-        /* test code
-        {
-            char buf[512];
-            phantom_getenv("root.shell", buf, 511 );
-            printf("Root shell env var is '%s'\n", buf );
-            phantom_getenv("root.init", buf, 511 );
-            printf("Root init env var is '%s'\n", buf );
-            getchar();
-        }
-        */
-
         pvm_boot();
 
+        vm_unlock_persistent_memory(); // We return to main, rest of code assumed to not to have objects access
         return;
     }
 
@@ -111,7 +107,6 @@ void pvm_root_init(void)
 
     set_root_from_table();
 
-
     pvm_root.null_object = pvm_get_field( root, PVM_ROOT_OBJECT_NULL );
     pvm_root.threads_list = pvm_get_field( root, PVM_ROOT_OBJECT_THREAD_LIST );
     pvm_root.sys_interface_object = pvm_get_field( root, PVM_ROOT_OBJECT_SYSINTERFACE );
@@ -121,16 +116,17 @@ void pvm_root_init(void)
     pvm_root.kernel_environment = pvm_get_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT );
     pvm_root.os_entry = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
     pvm_root.root_dir = pvm_get_field( root, PVM_ROOT_OBJECT_ROOT_DIR );
-
     pvm_root.kernel_stats = pvm_get_field( root, PVM_ROOT_KERNEL_STATISTICS );
+    pvm_root.class_dir = pvm_get_field( root, PVM_ROOT_CLASS_DIR );
 
 
     process_specific_restarts();
     process_generic_restarts(root);
 
+    vm_unlock_persistent_memory(); // We return to main, rest of code assumed to not to have objects access
 }
 
-static void process_generic_restarts(struct pvm_object_storage *root)
+static void process_generic_restarts(pvm_object_t root)
 {
     int i;
 
@@ -147,14 +143,14 @@ static void process_generic_restarts(struct pvm_object_storage *root)
 
     //cycle through restart objects here and call restart func
 //#if COMPILE_EXPERIMENTAL
-    int items = get_array_size(prev_restart_list.data);
+    int items = get_array_size(prev_restart_list);
 
     if( !pvm_is_null( prev_restart_list ) )
     {
         printf("Processing restart list: %d items.\n", items);
         for( i = 0; i < items; i++ )
         {
-            pvm_object_t o = pvm_get_array_ofield(prev_restart_list.data, i);
+            pvm_object_t o = pvm_get_array_ofield(prev_restart_list, i);
 
             if(!pvm_is_null(o) )
                 handle_object_at_restart(o);
@@ -233,20 +229,22 @@ static void pvm_save_root_objects()
     pvm_set_field( root, PVM_ROOT_OBJECT_ROOT_DIR, pvm_root.root_dir);
 
     pvm_set_field( root, PVM_ROOT_KERNEL_STATISTICS, pvm_root.kernel_stats );
+    pvm_set_field( root, PVM_ROOT_CLASS_DIR, pvm_root.class_dir );
+
 
 }
 
-#define CL_DA(name) (*((struct data_area_4_class *)&(pvm_root. name##_class .data->da)))
+#define CL_DA(name) (*((struct data_area_4_class *)&(pvm_root. name##_class ->da)))
 
 static void pvm_create_root_objects()
 {
-    int root_da_size = PVM_ROOT_OBJECTS_COUNT * sizeof(struct pvm_object);
+    int root_da_size = PVM_ROOT_OBJECTS_COUNT * sizeof(pvm_object_t );
     unsigned int flags = 0; // usual plain vanilla array
     // make sure refcount is disabled for all objects created here: 3-rd argument of pvm_object_alloc is true (obsolete: ref_saturate_p)
 
     // Allocate the very first object
-    struct pvm_object_storage *root = get_root_object_storage();
-    struct pvm_object_storage *roota = pvm_object_alloc( root_da_size, flags, 1 );
+    pvm_object_t root = get_root_object_storage();
+    pvm_object_t roota = pvm_object_alloc( root_da_size, flags, 1 );
 
     // and make sure it is really the first
     assert(root == roota);
@@ -256,37 +254,37 @@ static void pvm_create_root_objects()
     // Partially build interface object for internal classes
 
     flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE ;
-    pvm_root.sys_interface_object.data = pvm_object_alloc( N_SYS_METHODS * sizeof(struct pvm_object), flags, 0 );
-    pvm_root.sys_interface_object.interface = pvm_root.sys_interface_object.data;
+    pvm_root.sys_interface_object = pvm_object_alloc( N_SYS_METHODS * sizeof(pvm_object_t), flags, 0 );
+    //pvm_root.sys_interface_object.interface = pvm_root.sys_interface_object.data;
 
-    pvm_root.null_object.data = pvm_object_alloc( 0, 0, 1 ); // da does not exist
-    pvm_root.null_object.interface = pvm_root.sys_interface_object.data;
+    pvm_root.null_object = pvm_object_alloc( 0, 0, 1 ); // da does not exist
+    //pvm_root.null_object.interface = pvm_root.sys_interface_object.data;
 
 
     int i;
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
         flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS ;
-        struct pvm_object_storage *curr = pvm_object_alloc( sizeof( struct data_area_4_class ), flags, 1 );
+        pvm_object_t curr = pvm_object_alloc( sizeof( struct data_area_4_class ), flags, 1 );
         struct data_area_4_class *da = (struct data_area_4_class *)curr->da;
 
         da->sys_table_id 		= i; // so simple
         da->object_flags 		= pvm_internal_classes[i].flags;
         da->object_data_area_size       = pvm_internal_classes[i].da_size;
 
-        pvm_internal_classes[i].class_object.data           = curr;
-        pvm_internal_classes[i].class_object.interface      = pvm_root.sys_interface_object.data;
+        pvm_internal_classes[i].class_object           = curr;
+        //pvm_internal_classes[i].class_object.interface      = pvm_root.sys_interface_object.data;
     }
 
     set_root_from_table();
 
-    pvm_root.null_object.data->_class = pvm_root.null_class;
+    pvm_root.null_object->_class = pvm_root.null_class;
 
-    pvm_root.sys_interface_object.data->_class = pvm_root.interface_class;
+    pvm_root.sys_interface_object->_class = pvm_root.interface_class;
 
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
-        struct pvm_object_storage *curr = pvm_internal_classes[i].class_object.data;
+        pvm_object_t curr = pvm_internal_classes[i].class_object;
         struct data_area_4_class *da = (struct data_area_4_class *)curr->da;
 
         da->class_parent 		= pvm_root.null_class;
@@ -300,7 +298,7 @@ static void pvm_create_root_objects()
 
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
-        struct pvm_object_storage *curr = pvm_internal_classes[i].class_object.data;
+        pvm_object_t curr = pvm_internal_classes[i].class_object;
         struct data_area_4_class *da = (struct data_area_4_class *)curr->da;
 
         da->class_name 			= pvm_create_string_object(pvm_internal_classes[i].name);
@@ -319,6 +317,8 @@ static void pvm_create_root_objects()
     pvm_root.root_dir      = pvm_create_directory_object();
 
     pvm_root.kernel_stats  = pvm_create_binary_object( STAT_CNT_PERSISTENT_DA_SIZE, 0 );
+    pvm_root.class_dir     = pvm_create_directory_object();
+
 
     ref_saturate_o(pvm_root.threads_list); //Need it?
     ref_saturate_o(pvm_root.kernel_environment); //Need it?
@@ -382,37 +382,37 @@ static void set_root_from_table()
 //#define GCINLINE __inline__
 #define GCINLINE
 
-GCINLINE struct pvm_object     pvm_get_null_class() { return pvm_root.null_class; }
-GCINLINE struct pvm_object     pvm_get_class_class() { return pvm_root.class_class; }
-GCINLINE struct pvm_object     pvm_get_interface_class() { return pvm_root.interface_class; }
-GCINLINE struct pvm_object     pvm_get_code_class() { return pvm_root.code_class; }
-GCINLINE struct pvm_object     pvm_get_int_class() { return pvm_root.int_class; }
-GCINLINE struct pvm_object     pvm_get_long_class() { return pvm_root.long_class; }
-GCINLINE struct pvm_object     pvm_get_float_class() { return pvm_root.float_class; }
-GCINLINE struct pvm_object     pvm_get_double_class() { return pvm_root.double_class; }
-GCINLINE struct pvm_object     pvm_get_string_class() { return pvm_root.string_class; }
-GCINLINE struct pvm_object     pvm_get_array_class() { return pvm_root.array_class; }
-GCINLINE struct pvm_object     pvm_get_page_class() { return pvm_root.page_class; }
-GCINLINE struct pvm_object     pvm_get_thread_class() { return pvm_root.thread_class; }
-GCINLINE struct pvm_object     pvm_get_call_frame_class() { return pvm_root.call_frame_class; }
-GCINLINE struct pvm_object     pvm_get_istack_class() { return pvm_root.istack_class; }
-GCINLINE struct pvm_object     pvm_get_ostack_class() { return pvm_root.ostack_class; }
-GCINLINE struct pvm_object     pvm_get_estack_class() { return pvm_root.estack_class; }
-GCINLINE struct pvm_object     pvm_get_boot_class() { return pvm_root.boot_class; }
-GCINLINE struct pvm_object     pvm_get_binary_class() { return pvm_root.binary_class; }
-GCINLINE struct pvm_object     pvm_get_bitmap_class() { return pvm_root.bitmap_class; }
-GCINLINE struct pvm_object     pvm_get_closure_class() { return pvm_root.closure_class; }
-GCINLINE struct pvm_object     pvm_get_world_class() { return pvm_root.world_class; }
+GCINLINE pvm_object_t     pvm_get_null_class() { return pvm_root.null_class; }
+GCINLINE pvm_object_t     pvm_get_class_class() { return pvm_root.class_class; }
+GCINLINE pvm_object_t     pvm_get_interface_class() { return pvm_root.interface_class; }
+GCINLINE pvm_object_t     pvm_get_code_class() { return pvm_root.code_class; }
+GCINLINE pvm_object_t     pvm_get_int_class() { return pvm_root.int_class; }
+GCINLINE pvm_object_t     pvm_get_long_class() { return pvm_root.long_class; }
+GCINLINE pvm_object_t     pvm_get_float_class() { return pvm_root.float_class; }
+GCINLINE pvm_object_t     pvm_get_double_class() { return pvm_root.double_class; }
+GCINLINE pvm_object_t     pvm_get_string_class() { return pvm_root.string_class; }
+GCINLINE pvm_object_t     pvm_get_array_class() { return pvm_root.array_class; }
+GCINLINE pvm_object_t     pvm_get_page_class() { return pvm_root.page_class; }
+GCINLINE pvm_object_t     pvm_get_thread_class() { return pvm_root.thread_class; }
+GCINLINE pvm_object_t     pvm_get_call_frame_class() { return pvm_root.call_frame_class; }
+GCINLINE pvm_object_t     pvm_get_istack_class() { return pvm_root.istack_class; }
+GCINLINE pvm_object_t     pvm_get_ostack_class() { return pvm_root.ostack_class; }
+GCINLINE pvm_object_t     pvm_get_estack_class() { return pvm_root.estack_class; }
+GCINLINE pvm_object_t     pvm_get_boot_class() { return pvm_root.boot_class; }
+GCINLINE pvm_object_t     pvm_get_binary_class() { return pvm_root.binary_class; }
+GCINLINE pvm_object_t     pvm_get_bitmap_class() { return pvm_root.bitmap_class; }
+GCINLINE pvm_object_t     pvm_get_closure_class() { return pvm_root.closure_class; }
+GCINLINE pvm_object_t     pvm_get_world_class() { return pvm_root.world_class; }
 #if COMPILE_WEAKREF
-GCINLINE struct pvm_object     pvm_get_weakref_class() { return pvm_root.weakref_class; }
+GCINLINE pvm_object_t     pvm_get_weakref_class() { return pvm_root.weakref_class; }
 #endif
-GCINLINE struct pvm_object     pvm_get_window_class() { return pvm_root.window_class; }
-GCINLINE struct pvm_object     pvm_get_directory_class() { return pvm_root.directory_class; }
-GCINLINE struct pvm_object     pvm_get_connection_class() { return pvm_root.connection_class; }
+GCINLINE pvm_object_t     pvm_get_window_class() { return pvm_root.window_class; }
+GCINLINE pvm_object_t     pvm_get_directory_class() { return pvm_root.directory_class; }
+GCINLINE pvm_object_t     pvm_get_connection_class() { return pvm_root.connection_class; }
 
-GCINLINE struct pvm_object     pvm_get_mutex_class() { return pvm_root.mutex_class; }
-GCINLINE struct pvm_object     pvm_get_cond_class() { return pvm_root.cond_class; }
-GCINLINE struct pvm_object     pvm_get_sema_class() { return pvm_root.sema_class; }
+GCINLINE pvm_object_t     pvm_get_mutex_class() { return pvm_root.mutex_class; }
+GCINLINE pvm_object_t     pvm_get_cond_class() { return pvm_root.cond_class; }
+GCINLINE pvm_object_t     pvm_get_sema_class() { return pvm_root.sema_class; }
 
 
 #undef GCINLINE
@@ -427,10 +427,10 @@ GCINLINE struct pvm_object     pvm_get_sema_class() { return pvm_root.sema_class
 
 static void pvm_boot()
 {
-    //struct pvm_object system_boot = pvm_object_create_fixed( pvm_get_boot_class() );
-    struct pvm_object system_boot = pvm_create_object( pvm_get_boot_class() );
+    //pvm_object_t system_boot = pvm_object_create_fixed( pvm_get_boot_class() );
+    pvm_object_t system_boot = pvm_create_object( pvm_get_boot_class() );
 
-    struct pvm_object user_boot_class;
+    pvm_object_t user_boot_class;
 
     char boot_class[128];
     if( !phantom_getenv("root.boot", boot_class, sizeof(boot_class) ) )
@@ -439,13 +439,13 @@ static void pvm_boot()
     if( pvm_load_class_from_module(boot_class, &user_boot_class))
     {
         printf("Unable to load boot class '%s'", boot_class );
-        pvm_exec_panic("Unable to load user boot class");
+        pvm_exec_panic0("Unable to load user boot class");
     }
 
-    struct pvm_object user_boot = pvm_create_object( user_boot_class );
+    pvm_object_t user_boot = pvm_create_object( user_boot_class );
 
 
-    struct pvm_object args[1] = { system_boot };
+    pvm_object_t args[1] = { system_boot };
     pvm_exec_run_method(user_boot, 8, 1, args);
 }
 
@@ -459,12 +459,12 @@ static void pvm_boot()
 
 static int get_env_name_pos( const char *name )
 {
-    int items = get_array_size(pvm_root.kernel_environment.data);
+    int items = get_array_size(pvm_root.kernel_environment);
 
     int i;
     for( i = 0; i < items; i++ )
     {
-        pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, i);
+        pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment, i);
         char *ed = pvm_get_str_data(o);
         //int el = pvm_get_str_len(o);
 
@@ -499,9 +499,9 @@ void phantom_setenv( const char *name, const char *value )
     int pos = get_env_name_pos( name );
 
     if(pos < 0)
-        pvm_append_array(pvm_root.kernel_environment.data, s);
+        pvm_append_array(pvm_root.kernel_environment, s);
     else
-        pvm_set_array_ofield(pvm_root.kernel_environment.data, pos, s);
+        pvm_set_array_ofield(pvm_root.kernel_environment, pos, s);
 }
 
 int phantom_getenv( const char *name, char *value, int vsize )
@@ -511,8 +511,8 @@ int phantom_getenv( const char *name, char *value, int vsize )
 
     assert( vsize > 1 ); // trailing zero and at least one char
 
-    pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment.data, pos);
-    if( o.data == 0 ) return 0;
+    pvm_object_t o = pvm_get_array_ofield(pvm_root.kernel_environment, pos);
+    if( o == 0 ) return 0;
     char *ed = pvm_get_str_data(o);
     int el = pvm_get_str_len(o);
 
@@ -578,12 +578,12 @@ static void load_kernel_boot_env(void)
 }
 
 
-static o_restart_func_t find_restart_f( struct pvm_object _class )
+static o_restart_func_t find_restart_f( pvm_object_t _class )
 {
-    if(!(_class.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
-        pvm_exec_panic( "find_restart_f: not a class object" );
+    if(!(_class->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
+        pvm_exec_panic0( "find_restart_f: not a class object" );
 
-    struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
+    struct data_area_4_class *da = (struct data_area_4_class *)&(_class->da);
 
     assert( da->sys_table_id < pvm_n_internal_classes );
 
@@ -597,14 +597,14 @@ static o_restart_func_t find_restart_f( struct pvm_object _class )
 static void handle_object_at_restart( pvm_object_t o )
 {
 //#if COMPILE_EXPERIMENTAL
-    printf( "restart 0x%p\n", o.data );
+    printf( "restart 0x%p\n", o );
 
-    if(!(o.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL))
+    if(!(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL))
     {
         printf( "not internal object in restart list!\n" );
         return;
     }
-    o_restart_func_t rf = find_restart_f( o.data->_class );
+    o_restart_func_t rf = find_restart_f( o->_class );
 
     if(rf) rf(o);
 //#endif
@@ -616,7 +616,7 @@ void pvm_add_object_to_restart_list( pvm_object_t o )
 {
     // TODO must cleanup inc/dec convention
     ref_inc_o( o );
-    pvm_append_array( pvm_root.restart_list.data, o );
+    pvm_append_array( pvm_root.restart_list, o );
 }
 
 void pvm_remove_object_from_restart_list( pvm_object_t o )
@@ -628,18 +628,18 @@ void pvm_remove_object_from_restart_list( pvm_object_t o )
 
     //cycle through restart objects
 
-    int items = get_array_size(curr_restart_list.data);
+    int items = get_array_size(curr_restart_list);
 
     if( !pvm_is_null( curr_restart_list ) )
     {
         //printf("Processing restart list: %d items.\n", items);
         for( i = 0; i < items; i++ )
         {
-            pvm_object_t o1 = pvm_get_array_ofield(curr_restart_list.data, i);
+            pvm_object_t o1 = pvm_get_array_ofield(curr_restart_list, i);
 
             if( pvm_is_eq(o,o1) )
             {
-                pvm_set_array_ofield(curr_restart_list.data, i, pvm_create_null_object() );
+                pvm_set_array_ofield(curr_restart_list, i, pvm_create_null_object() );
                 break;
             }
         }
@@ -654,9 +654,9 @@ void create_and_run_object(const char *class_name, int method )
     if( method < 0 )
         method = 8;
 
-    struct pvm_object name = pvm_create_string_object(class_name);
+    pvm_object_t name = pvm_create_string_object(class_name);
 
-    struct pvm_object user_class = pvm_exec_lookup_class_by_name(name);
+    pvm_object_t user_class = pvm_exec_lookup_class_by_name(name);
 
 
     if( pvm_is_null(user_class))
@@ -666,7 +666,7 @@ void create_and_run_object(const char *class_name, int method )
         return;
     }
 
-    struct pvm_object user_o = pvm_create_object( user_class );
+    pvm_object_t user_o = pvm_create_object( user_class );
     ref_dec_o(user_class);
 
     pvm_exec_run_method(user_o, method, 0, 0);

@@ -10,8 +10,6 @@
 
 package .ru.dz.test;
 
-// NB! Due to compiler error we need to define here a lot of 
-// methods to fill ordinals up to 8-th minimum.
 
 attribute const * ->!;
 
@@ -76,6 +74,10 @@ class regression_tests
 	var int_array : .internal.int [];
 
 	var _utilities : utilites;
+
+	void regression_tests()
+	{
+	}
 
 	int methodReturningInt() { return 0; }
 
@@ -152,8 +154,8 @@ var ch : string;
 		i = i - 1;
 		if( int_array[i] != i )
 			{
-			print("array error: array["); print(i);
-			print("] == "); print(int_array[i]);
+			print("array error: array["); print(i.toString());
+			print("] == "); print(int_array[i].toString());
 			throw "array error";
 			}
 		}
@@ -271,29 +273,6 @@ var ch : string;
 
 	}
 
-/*
-	// ---------------------------------------------------------------------
-	// Special methods, have to implement for now
-	// ---------------------------------------------------------------------
-
-	void construct_me () [0] { }
-	void destruct_me () [1] { print("regression_tests object destructor called"); }
-	void getClass () [2] { throw "regression_tests object getClass called"; }
-	void clone() [3] { throw "regression_tests object clone called"; }
-	void equals() [4] { throw "regression_tests object equals called"; }
-	void toString() [5] { return "regression_tests object"; }
-	void toXML() [6] { return "<regression_tests/>"; }
-	void fromXML( var input : string) [7] { }
-
-	void filler_8 () [8] {  }
-	void filler_9 () [9] {  }
-	void filler_10 () [10] {  }
-	void filler_11 () [11] {  }
-	void filler_12 () [12] {  }
-	void filler_13 () [13] {  }
-	void filler_14 () [14] {  }
-	int hashCode() [15] { return 0; }
-*/
 
 };
 

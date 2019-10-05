@@ -4,13 +4,16 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * VM memory allocator
  *
 **/
 
 
+#define DEBUG_MSG_PREFIX "vm.alloc"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <vm/alloc.h>
 #include <vm/object_flags.h>
@@ -351,7 +354,7 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 
 
 // Find a piece of mem of given or bigger size. Linear allocation.
-static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
+static pvm_object_t pvm_find(unsigned int size, int arena)
 {
 
 #define CURR_POS  curr_a[arena]
@@ -367,13 +370,13 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
 
 
 
-    struct pvm_object_storage *result = 0;
+    pvm_object_t result = 0;
 
-    struct pvm_object_storage *start = start_a[arena];
-    struct pvm_object_storage *end = end_a[arena];
+    pvm_object_t start = start_a[arena];
+    pvm_object_t end = end_a[arena];
 
     int wrap = 0;
-    struct pvm_object_storage *curr = CURR_POS;
+    pvm_object_t curr = CURR_POS;
 
     while(result == 0)
     {
@@ -522,13 +525,13 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 // -----------------------------------------------------------------------
 
 
-static inline struct pvm_object_storage *pvm_next_object(struct pvm_object_storage *op)
+static inline pvm_object_t pvm_next_object(pvm_object_t op)
 {
     //assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
 
     void *o = (void *)op;
     o += op->_ah.exact_size;
-    return (struct pvm_object_storage *)o;
+    return (pvm_object_t )o;
 }
 
 
@@ -583,7 +586,7 @@ static int memcheck_one(unsigned int i, void * start, void * end)
 
     unsigned long used = 0, free = 0, objects = 0, largest = 0;
 
-    struct pvm_object_storage *curr = start;
+    pvm_object_t curr = start;
 
     printf("Memcheck: checking object memory allocation consistency (at %p, %ld bytes)\n", start, (long)(end - start) );
 
@@ -623,7 +626,7 @@ static int memcheck_one(unsigned int i, void * start, void * end)
 
 
         //curr = pvm_next_object(curr);
-        curr = (struct pvm_object_storage *)( ((void *)curr) + curr->_ah.exact_size );
+        curr = (pvm_object_t)( ((void *)curr) + curr->_ah.exact_size );
     }
 
     //printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );

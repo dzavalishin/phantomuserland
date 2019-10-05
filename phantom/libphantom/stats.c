@@ -13,6 +13,7 @@
 #include <kernel/init.h>
 #include <kernel/stats.h>
 #include <kernel/debug.h>
+#include <kernel/snap_sync.h>
 #include <time.h>
 
 
@@ -190,6 +191,7 @@ void stat_dump_all( int av, char **ac )
     (void) ac;
     (void) av;
 
+    vm_lock_persistent_memory();
 #if COMPILE_PERSISTENT_STATS
     printf(" Statistics            /sec t/sec total/run total/life\n");
 #else
@@ -198,11 +200,11 @@ void stat_dump_all( int av, char **ac )
     int i;
     for( i = 0; i < MAX_STAT_COUNTERS; i++ )
     {
-        if(*stat_counter_name[i] == 0)
-            continue;
-
         if(stat_counter_name[i] == 0)
             break;
+
+        if(*stat_counter_name[i] == 0)
+            continue;
 
 #if COMPILE_PERSISTENT_STATS
         printf(" %-20s %5d %5ld %10ld %10ld\n",
@@ -221,12 +223,13 @@ void stat_dump_all( int av, char **ac )
               );
 #endif
     }
+    vm_unlock_persistent_memory();
 }
 
 static struct persistent_kernel_stats dumb_pst = { 0, 0 };
 
 
-void phantom_dump_stats_buf(char *buf, int len)
+static void do_phantom_dump_stats_buf(char *buf, int len)
 {
     int rc;
 #if COMPILE_PERSISTENT_STATS
@@ -241,6 +244,9 @@ void phantom_dump_stats_buf(char *buf, int len)
     int i;
     for( i = 0; i < MAX_STAT_COUNTERS; i++ )
     {
+        if(stat_counter_name[i] == 0)
+            break;
+
         if(*stat_counter_name[i] == 0)
             continue;
 #if COMPILE_PERSISTENT_STATS
@@ -258,9 +264,6 @@ void phantom_dump_stats_buf(char *buf, int len)
             continue;
 #endif
 
-
-        if(stat_counter_name[i] == 0)
-            break;
 
         char *scol = "\x1b[37m";
 
@@ -294,6 +297,14 @@ void phantom_dump_stats_buf(char *buf, int len)
         *buf++ = 0;
 }
 
+void phantom_dump_stats_buf(char *buf, int len)
+{
+    vm_lock_persistent_memory();
+    do_phantom_dump_stats_buf(buf, len);
+    vm_unlock_persistent_memory();
+}
+
+
 
 
 errno_t get_stats_record( int id, struct kernel_stats *out )
@@ -311,8 +322,10 @@ errno_t get_stats_record( int id, struct kernel_stats *out )
     out->total                  = stat_total_counters[id];
 
 #if COMPILE_PERSISTENT_STATS
+    vm_lock_persistent_memory();
     out->total_prev_and_this_runs = pdata[id].total_prev_and_this_runs;
     out->total_prev_runs          = pdata[id].total_prev_runs;
+    vm_unlock_persistent_memory();
 #else
     out->total_prev_and_this_runs = 0;
     out->total_prev_runs = 0;
@@ -331,10 +344,14 @@ void stat_set_persistent_storage( struct persistent_kernel_stats *_pdata )
     pdata = _pdata;
     assert(pdata); // TODO check that addr is in persistent area
 
+    vm_lock_persistent_memory();
+
     for( i = 0; i < MAX_STAT_COUNTERS; i++ )
     {
         pdata[i].total_prev_runs = pdata[i].total_prev_and_this_runs;
     }
+
+    vm_unlock_persistent_memory();
 #endif
 }
 
@@ -357,12 +374,14 @@ static void stat_update_persistent_storage( void *ign )
     if( !pdata )
         return;
 
+    vm_lock_persistent_memory();
     for( i = 0; i < MAX_STAT_COUNTERS; i++ )
     {
         pdata[i].total_prev_and_this_runs =
             pdata[i].total_prev_runs +
             stat_total_counters[i];
     }
+    vm_unlock_persistent_memory();
 #endif
 }
 

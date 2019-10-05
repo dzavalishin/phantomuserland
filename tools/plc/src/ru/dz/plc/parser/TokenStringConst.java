@@ -18,7 +18,7 @@ public class TokenStringConst extends Token {
     throw new PlcException("Lex", "wrong escape sequence", "\\"+in );
   }
 
-  static boolean convert( StringBuffer out, String src ) throws PlcException {
+  public static boolean convert( StringBuffer out, String src ) throws PlcException {
     if( src.charAt(0) != '"' ) return false;
     int len = src.length() - 1;
     for( int i = 1; i < len; i++ )

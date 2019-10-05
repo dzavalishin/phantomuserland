@@ -30,6 +30,8 @@
  *  At this moment class loader is started from kernel and locks up 
  *  everything (namely - snaps) while is working.
  *
+ * TODO: remove cache as kernel now has its own one.
+ *
 **/
 
 
@@ -41,7 +43,7 @@ attribute const * ->!;
 
 class class_loader
 {
-    var classes : void [];
+    var classes : .internal.object [];
     var index : int;
     var boot_object;
 
@@ -54,7 +56,7 @@ class class_loader
         boot_object = _boot_object;
         index = 0;
 
-        classes = new void[]();
+        classes = new .internal.object[]();
     }
 
     void print( var input : string )

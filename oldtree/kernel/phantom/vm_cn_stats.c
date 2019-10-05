@@ -41,22 +41,36 @@ errno_t cn_stats_do_operation( int op_no, struct data_area_4_connection *c, stru
     return EINVAL;
 }
 
+static pvm_object_t unlock_and_ret_int( int v )
+{
+    pvm_object_t ret = pvm_create_int_object(v);
+    vm_unlock_persistent_memory();
+    return ret;
+}
+
+static pvm_object_t unlock_and_ret_err( void )
+{
+    return unlock_and_ret_int( -1 );
+}
+
 static pvm_object_t cn_stats_blocking_syscall_worker( pvm_object_t conn, struct data_area_4_thread *tc, int nmethod, pvm_object_t arg )
 {
     (void) conn;
     (void) tc;
     (void) arg;
 
+    vm_lock_persistent_memory();
+
     if( nmethod >= CN_STS_OP_LAST )
     {
         SHOW_ERROR( 1, "wrong op %d", nmethod );
-        return pvm_create_int_object(-1);
+        return unlock_and_ret_err();
     }
 
     if(!IS_PHANTOM_INT(arg))
     {
         SHOW_ERROR0( 1, "arg not int" );
-        return pvm_create_int_object(-1);
+        return unlock_and_ret_err();
     }
 
     int n_stat_counter = pvm_get_int(arg);
@@ -65,7 +79,7 @@ static pvm_object_t cn_stats_blocking_syscall_worker( pvm_object_t conn, struct 
     if( n_stat_counter >= MAX_STAT_COUNTERS )
     {
         SHOW_ERROR( 1, "counter num %d > max", n_stat_counter );
-        return pvm_create_int_object(-1);
+        return unlock_and_ret_err();
     }
 
     if( nmethod == CN_STS_OP_GET_CPU_IDLE )
@@ -75,17 +89,21 @@ static pvm_object_t cn_stats_blocking_syscall_worker( pvm_object_t conn, struct 
         // CPU0 - use n_stat_counter to select other
         int ret = 100-percpu_cpu_load[0];
 
-        return pvm_create_int_object(ret);
+        return unlock_and_ret_int(ret);
     }
+
+    vm_unlock_persistent_memory();
 
     struct kernel_stats out;
 
     errno_t e = get_stats_record( n_stat_counter, &out );
 
+    vm_lock_persistent_memory();
+
     if( e )
     {
         SHOW_ERROR( 1, "err %d", e );
-        return pvm_create_int_object(-e);
+        return unlock_and_ret_int(-e);
     }
 
     int ret = 0;
@@ -113,7 +131,7 @@ static pvm_object_t cn_stats_blocking_syscall_worker( pvm_object_t conn, struct 
         break;
     }
 
-    return pvm_create_int_object(ret);
+    return unlock_and_ret_int(ret);
 }
 
 

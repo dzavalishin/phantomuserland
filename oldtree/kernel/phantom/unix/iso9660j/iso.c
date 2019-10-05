@@ -385,9 +385,9 @@ InitVolDesc(nspace* vol, char* buf)
 	vol->rootDirRec.id = ISO_ROOTNODE_ID;
 	buf += 34;
 	
-	vol->volSetIDString[128] = '\0';
-	strncpy(vol->volSetIDString, buf, 128);
-	buf += 128;
+	vol->volSetIDString[28] = '\0';
+	strncpy(vol->volSetIDString, buf, 28);
+	buf += 28;
 	//dprintf("InitVolDesc - volume set id string is %s\n", vol->volSetIDString);
 	
 	vol->pubIDString[128] = '\0';
@@ -405,17 +405,17 @@ InitVolDesc(nspace* vol, char* buf)
 	buf += 128;
 	//dprintf("InitVolDesc - volume app id string is %s\n", vol->appIDString);
 	
-	vol->copyright[38] = '\0';
-	strncpy(vol->copyright, buf, 38);
+	vol->copyright[37] = '\0';
+	strncpy(vol->copyright, buf, 37);
 	buf += 38;
 	//dprintf("InitVolDesc - copyright is %s\n", vol->copyright);
 	
-	vol->abstractFName[38] = '\0';
-	strncpy(vol->abstractFName, buf, 38);
+	vol->abstractFName[37] = '\0';
+	strncpy(vol->abstractFName, buf, 37);
 	buf += 38;
 	
-	vol->biblioFName[38] = '\0';
-	strncpy(vol->biblioFName, buf, 38);
+	vol->biblioFName[37] = '\0';
+	strncpy(vol->biblioFName, buf, 37);
 	buf += 38;
 	
 	InitVolDate(&(vol->createDate), buf);

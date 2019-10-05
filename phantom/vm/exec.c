@@ -2,13 +2,19 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2012 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Bytecode interpreter.
  *
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/VirtualMachine>
  *
 **/
 
+#define DEBUG_MSG_PREFIX "vm.exec"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <phantom_assert.h>
 
@@ -33,9 +39,15 @@
 
 #include <exceptions.h>
 
+#include "main.h"
+
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
-struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
+static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
+static syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int syscall_index );
+static int pvm_exec_find_catch( struct data_area_4_exception_stack* stack, unsigned int *jump_to, pvm_object_t thrown_obj );
+
+static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj, pvm_object_t type);
 
 
 /*
@@ -49,6 +61,7 @@ struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref,
 #define DEB_DYNCALL 0
 
 int debug_print_instr = 0;
+int debug_trace = 0;
 
 #define LISTI(iName) do { if( debug_print_instr ) lprintf("%s @ %d; ",(iName), da->code.IP); } while(0)
 #define LISTIA(fmt,a) do { if( debug_print_instr ) { lprintf((fmt), a); lprintf(" @ %d; ",da->code.IP); } } while(0)
@@ -64,10 +77,10 @@ int debug_print_instr = 0;
 
 
 
-#define os_push( o ) 	pvm_ostack_push( da->_ostack, o )
-#define os_pop() 	pvm_ostack_pop( da->_ostack )
-#define os_top() 	pvm_ostack_top( da->_ostack )
-#define os_empty() 	pvm_ostack_empty( da->_ostack )
+#define os_push( o )    pvm_ostack_push( da->_ostack, o )
+#define os_pop()        pvm_ostack_pop( da->_ostack )
+#define os_top()        pvm_ostack_top( da->_ostack )
+#define os_empty()      pvm_ostack_empty( da->_ostack )
 
 #define os_pull( pos ) 	pvm_ostack_pull( da->_ostack, pos )
 
@@ -98,10 +111,10 @@ int debug_print_instr = 0;
 **/
 
 // v must be lvalue
-#define TO_DOUBLE( __v ) (*((double *)&(__v)))
-#define TO_LONG( __v ) (*((u_int64_t *)&(__v)))
-#define TO_FLOAT( __v ) (*((float *)&(__v)))
-#define TO_INT( __v ) (*((u_int32_t *)&(__v)))
+#define TO_DOUBLE( __v )  ( *((double *)    &(__v)) )
+#define TO_LONG( __v )    ( *((u_int64_t *) &(__v)) )
+#define TO_FLOAT( __v )   ( *((float *)     &(__v)) )
+#define TO_INT( __v )     ( *((u_int32_t *) &(__v)) )
 
 #define AS_DOUBLE( __a1, __a2, __op ) (TO_DOUBLE(__a1) __op TO_DOUBLE(__a2))
 #define AS_FLOAT( __a1, __a2, __op )  (TO_FLOAT(__a1)  __op TO_FLOAT(__a2))
@@ -128,9 +141,13 @@ do { \
 
 
 
-/**
+/*************************************************************************
  *
- * Helpers
+ * Fast access helpers.
+ *
+ * We keep copies of some call frame fields in thread object data area for
+ * faster access. Most are read only, but current IP value must be saved back
+ * if we switch call frame (for example, in call instruction).
  *
 **/
 
@@ -138,7 +155,7 @@ do { \
 
 void pvm_exec_load_fast_acc(struct data_area_4_thread *da)
 {
-    struct data_area_4_call_frame *cf = (struct data_area_4_call_frame *)&(da->call_frame.data->da);
+    struct data_area_4_call_frame *cf = (struct data_area_4_call_frame *)&(da->call_frame->da);
 
     da->code.IP_max  = cf->IP_max;
     da->code.code    = cf->code;
@@ -146,14 +163,14 @@ void pvm_exec_load_fast_acc(struct data_area_4_thread *da)
     da->code.IP      = cf->IP;  /* Instruction Pointer */
 
     da->_this_object = cf->this_object;
-    da->_istack = (struct data_area_4_integer_stack*)(& cf->istack.data->da);
-    da->_ostack = (struct data_area_4_object_stack*)(& cf->ostack.data->da);
-    da->_estack = (struct data_area_4_exception_stack*)(& cf->estack.data->da);
+    da->_istack = (struct data_area_4_integer_stack*)(& cf->istack->da);
+    da->_ostack = (struct data_area_4_object_stack*)(& cf->ostack->da);
+    da->_estack = (struct data_area_4_exception_stack*)(& cf->estack->da);
 }
 
 void pvm_exec_save_fast_acc(struct data_area_4_thread *da)
 {
-    struct data_area_4_call_frame *cf = (struct data_area_4_call_frame *)&(da->call_frame.data->da);
+    struct data_area_4_call_frame *cf = (struct data_area_4_call_frame *)&(da->call_frame->da);
     cf->IP = da->code.IP;
 }
 
@@ -168,7 +185,7 @@ void pvm_exec_save_fast_acc(struct data_area_4_thread *da)
 static void pvm_exec_load( struct data_area_4_thread *da, unsigned slot )
 {
     LISTIA("os load %d", slot);
-    struct pvm_object o = pvm_get_ofield( this_object(), slot);
+    pvm_object_t o = pvm_get_ofield( this_object(), slot);
     os_push( ref_inc_o (o) );
 }
 
@@ -206,7 +223,7 @@ static void pvm_exec_set( struct data_area_4_thread *da, unsigned abs_stack_pos 
     pvm_ostack_abs_set( da->_ostack, abs_stack_pos, os_pop() );
 }
 
-
+/*
 static void pvm_exec_iget( struct data_area_4_thread *da, unsigned abs_stack_pos )
 {
     LISTIA("is stack get %d", abs_stack_pos);
@@ -218,11 +235,11 @@ static void pvm_exec_iset( struct data_area_4_thread *da, unsigned abs_stack_pos
     LISTIA("is stack set %d", abs_stack_pos);
     pvm_istack_abs_set( da->_istack, abs_stack_pos, is_pop() );
 }
+*/
 
-
-static void free_call_frame(struct pvm_object cf, struct data_area_4_thread *da)
+static void free_call_frame(pvm_object_t cf, struct data_area_4_thread *da)
 {
-    pvm_object_da( cf, call_frame )->prev.data = 0; // Or else refcounter will follow this link
+    pvm_object_da( cf, call_frame )->prev = 0; // Or else refcounter will follow this link
     ref_dec_o( cf ); // we are erasing reference to old call frame - release it!
 
     da->stack_depth--;
@@ -231,7 +248,7 @@ static void free_call_frame(struct pvm_object cf, struct data_area_4_thread *da)
 
 static void pvm_exec_do_return(struct data_area_4_thread *da)
 {
-    struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev; // prev exists - we guarantee it
+    pvm_object_t ret = pvm_object_da( da->call_frame, call_frame )->prev; // prev exists - we guarantee it
 
     pvm_object_t return_val = os_empty() ?  pvm_get_null_object() : os_pop(); // return value not in stack? Why?
 
@@ -244,23 +261,34 @@ static void pvm_exec_do_return(struct data_area_4_thread *da)
 }
 
 
-static int pvm_exec_find_catch(
-                               struct data_area_4_exception_stack* stack,
-                               unsigned int *jump_to,
-                               struct pvm_object thrown_obj );
 
-
-// object to throw is on stack
-static void pvm_exec_do_throw(struct data_area_4_thread *da)
+/**
+ *
+ * \brief Virtual machine throw.
+ *
+ * \param[in]  da         Current thread data area
+ * \param[in]  thrown_obj Object to throw
+ *
+ * Must be called in main interpreter loop right before 'break' of main switch,
+ * i.e. right before next instruction execution.
+ *
+ * Unwinds stack looking for catch for given type.
+ *
+ * On return we are on stack of method which had corresponding catch.
+ *
+**/
+static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t thrown_obj)
 {
     unsigned int jump_to = (unsigned int)-1; // to cause fault
-    struct pvm_object thrown_obj = os_pop();
+
+    if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+
     // call_frame.catch_found( &jump_to, thrown_obj )
     while( !(pvm_exec_find_catch( da->_estack, &jump_to, thrown_obj )) )
     {
         // like ret here
         LISTI("except does unwind, ");
-        struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;
+        pvm_object_t ret = pvm_object_da( da->call_frame, call_frame )->prev;
 
         if( pvm_is_null( ret ) )
         {
@@ -269,7 +297,7 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
             printf("\n");
             //getchar();
 
-            pvm_exec_panic( "unwind: nowhere to return" );
+            pvm_exec_panic( "unwind: nowhere to return", da );
         }
         free_call_frame( da->call_frame, da );
 
@@ -279,40 +307,157 @@ static void pvm_exec_do_throw(struct data_area_4_thread *da)
     LISTIA("except jump to %d", jump_to);
     da->code.IP = jump_to;
     os_push(thrown_obj);
+    if( DEB_CALLRET || debug_print_instr ) printf( "throw stack_depth -> %d)", da->stack_depth );
+}
+
+/**
+ *
+ * \brief Check obect type
+ *
+ * \param[in]  da         Current thread data area
+ * \param[in]  obj        Object to check
+ * \param[in]  type       Class object to check type against
+ *
+ * Must be called in main interpreter loop right before 'break' of main switch,
+ * i.e. right before next instruction execution.
+ *
+ * If object is of given type or its child, return 0. Else throw type error 
+ * (temporarily throws string) and return non-zero. Caller must abort instruction
+ * execution and break.
+ *
+ * \return 0 if type is ok, throw and return non-zero otherwise.
+ *
+ * **Example**
+ * 
+ * if(pvm_exec_assert_type(da, obj, pvm_get_double_class()))
+ *     break;
+ * 
+**/
+static int pvm_exec_assert_type(struct data_area_4_thread *da, pvm_object_t obj, pvm_object_t type)
+{
+    if( pvm_object_class_is_or_child( obj, type) )
+        return 0;
+
+    pvm_exec_do_throw_object( da, pvm_create_string_object("type assert failed") );
+    return 1;
 }
 
 
-static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned int syscall_index );
+// object to throw is on stack
+static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
+{
+    pvm_object_t thrown_obj = os_pop();
+    pvm_exec_do_throw_object( da, thrown_obj );
+}
 
 
-// syscalss numbers are specific to object class
-static void pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_index )
+
+/**
+ *
+ * \brief Exec system call instruction.
+ *
+ * \param[in]  da            Current thread data area
+ * \param[in]  syscall_index Number of syscall to execute,
+ *
+ * Similar to usual methid call, but executes native code.
+ *
+ * Syscall numbers are specific to object class.
+ *
+ *
+ * NB! Restartable SYS instruction.
+ *
+ * We restore VM state as it was before SYS is started to execute,
+ * then call kernel code to exec SYS, and if:
+ *
+ * - Kernel returned: we just complete SYS as usual.
+ *
+ * - OS is rebooted and restored from snap shot: SYS instruction is started again.
+ *
+**/
+
+// 
+static void
+pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_index )
 {
     LISTIA("sys %d start", syscall_index );
 
-    //n_args = is_top();
+    da->code.IP -= VM_SYSCALL_INSTR_SIZE;
+    
+    pvm_object_t o = this_object(); // which object's syscall we'll call
 
-    // which object's syscall we'll call
-    struct pvm_object o = this_object();
+    syscall_func_t func = pvm_exec_find_syscall( o->_class, syscall_index );
 
-    syscall_func_t func = pvm_exec_find_syscall( o.data->_class, syscall_index );
+    int n_param = is_top();
+
+    assert( n_param < 32 ); // TODO max 32 sys params - document?!
+
+    pvm_object_t args[n_param];
+    pvm_object_t ret = 0;
+
+    // first parameter is most deep one on stack
+    int i;
+    for( i = 0; i < n_param; i ++ )
+    {
+        args[i] = os_pull( n_param - 1 - i );
+    }
+
+    pvm_exec_save_fast_acc(da); // Before snap that can happen in func()
 
     if( func == 0 )
     {
         LISTIA("sys %d invalid! ", syscall_index );
+        // TODO VM throw?
+        pvm_exec_do_throw_object( da, pvm_create_string_object("no syscall") );
+        return;
     }
     else
     {
         // TODO dec refcount for all the args after call?
         // OR! in syscall arg pop?
         // OR! in syscall code?
-        if( func( o, da ) == 0 )	// exec syscall
-            pvm_exec_do_throw(da); // exception reported
+        if( 0 == func( o, &ret, da, n_param, args ) )	// exec syscall
+        {
+            //pvm_exec_do_throw_pop(da); // exception reported
+            pvm_exec_do_throw_object( da, ret ? ret : pvm_create_string_object("syscall thrown null") );
+            LISTIA("sys %d throw", syscall_index );
+            return;
+        }
     }
+
+    // Now really remove params from stack and move IP forward
+    da->code.IP += VM_SYSCALL_INSTR_SIZE;
+    is_pop(); // eat n_param
+
+    for( i = 0; i < n_param; i ++ )
+        os_pop(); // remove parameter
+
+    os_push( ret );
 
     LISTIA("sys %d end", syscall_index );
 }
 
+
+
+/**
+ *
+ * \brief Init call frame data area.
+ *
+ * \param[in]  da            Current thread data area
+ * \param[in]  cfda          New call frame to fill
+ * \param[in]  method_index  Ordinal of method we call
+ * \param[in]  n_param       Number of parameters to copy on new stack
+ * \param[in]  new_this      This for called method
+ * \param[in]  class_ref     If not null - we do static call. If null - will do VMT call.
+ *
+ * Fill new call stack data area with correct values.
+ *
+ * Copy parameters to new stack (poping from current one).
+ *
+ * Pass number of parameters on integer stack.
+ *
+ * Find and set code object to be executed.
+ *
+**/
 
 
 static void init_cfda(
@@ -321,11 +466,14 @@ static void init_cfda(
     unsigned int method_index, 
     unsigned int n_param, 
     pvm_object_t new_this,     
-    pvm_object_t class_ref  // for static calls. will do VMT call if null
-     )
+    pvm_object_t class_ref
+                     )
 {
     cfda->ordinal = method_index;
     // which object's method we'll call - pop after args!
+
+    //printf("new_this @%p %s\n", new_this, pvm_is_null(new_this) ? "null" : "not null"); 
+    //printf("class_ref @%p\n", class_ref); 
 
 #if 1
     // TODO warn? print call info?
@@ -335,14 +483,10 @@ static void init_cfda(
         //n_param = 1024*16; // no - stack underflow will follow
     }
 #endif
+
     // allocate places on stack
-    {
-        unsigned int i;
-        for( i = n_param; i; i-- )
-        {
-            pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), pvm_get_null_object() );
-        }
-    }
+    // push nulls to reserve stack space
+    pvm_ostack_reserve( pvm_object_da(cfda->ostack, object_stack), n_param );
 
     // fill 'em in correct order
     {
@@ -357,9 +501,12 @@ static void init_cfda(
     pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), n_param);
 
     if( pvm_is_null(new_this) )
+    {
         new_this = os_pop();
+        //printf("pop new_this = "); pvm_object_dump( new_this );
+    }
 
-    struct pvm_object_storage *code;
+    pvm_object_t code;
     
     if( !pvm_is_null(class_ref) )
     {
@@ -369,14 +516,19 @@ static void init_cfda(
         // Check that object we call method for is related to
         // method's class
 
+        //printf("cmp class:\n");
+        //int related = pvm_object_class_is_or_parent( new_this, class_ref );
         int related = pvm_object_class_is_or_child( new_this, class_ref );
         if( !related )
-            pvm_exec_panic( "static_invoke: non-related class is given" );
-
+            {
+                printf("new_this @%p: ", new_this); pvm_object_dump( new_this );
+                printf("class_ref @%p: ", class_ref); pvm_object_dump( class_ref );
+                pvm_exec_panic( "static_invoke: non-related class is given", da );
+            }
         code = pvm_exec_find_static_method( class_ref, method_index );
     }
     else
-        code = pvm_exec_find_method( new_this, method_index );
+        code = pvm_exec_find_method( new_this, method_index, da );
 
     assert(code != 0);
     pvm_exec_set_cs( cfda, code );
@@ -384,9 +536,35 @@ static void init_cfda(
 }
 
 
+/**
+ *
+ * \brief Execute (dynamic, VMT based) call instruction.
+ *
+ * \param[in]  da              Current thread data area
+ * \param[in]  method_index    Ordinal of method we call
+ * \param[in]  n_param         Number of parameters to copy on new stack
+ * \param[in]  do_optimize_ret Optimize stack if next instuction is opcode_ret
+ * \param[in]  new_this        This for called method
+ *
+ * Create new call frame, init it.
+ *
+ * If optimising, free current call frame and link new one with our caller directly.
+ *
+ * Set new call frame as current.
+ *
+ * \todo Possibly do not even create/free call frame, just reuse? Criteria?
+ *
+**/
+
+
 static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_index, unsigned int n_param, int do_optimize_ret, pvm_object_t new_this )
 {
-    if( DEB_CALLRET || debug_print_instr ) printf( "\ncall %d (stack_depth %d -> ", method_index, da->stack_depth );
+    if( DEB_CALLRET || debug_print_instr )
+    {
+        printf( "\nnew this: " );
+        pvm_object_dump( new_this );
+        printf( "call %d (stack_depth %d -> ", method_index, da->stack_depth );
+    }
 
     /*
      * Stack growth optimization for bytecode [opcode_call; opcode_ret]
@@ -410,14 +588,15 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
         optimize_stack = es_empty();
     }
 
+    // Before call save current fast access data
     pvm_exec_save_fast_acc(da);  // not needed for optimized stack in fact
 
-    struct pvm_object new_cf = pvm_create_call_frame_object();
+    pvm_object_t new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
-    //if( pvm_is_null(new_this) )                new_this = os_pop();
+    //if( pvm_is_null(new_this) )                new_this = os_pop(); // now in init_cfda
 
-    //struct pvm_object_storage *code = pvm_exec_find_method( new_this, method_index );
+    //pvm_object_t code = pvm_exec_find_method( new_this, method_index );
 
     init_cfda(da, cfda, method_index, n_param, new_this, pvm_get_null_object() );
 
@@ -434,12 +613,33 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
 
     da->stack_depth++;
     da->call_frame = new_cf;
+
+    // We are on a new stack in a new code, load fast access data
     pvm_exec_load_fast_acc(da);
 
     if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
 }
 
-// TODO combine this and prev funcs where possible
+
+
+
+/**
+ *
+ * \brief Execute static call instruction.
+ *
+ * \param[in]  da              Current thread data area
+ * \param[in]  method_ordinal  Ordinal of method we call
+ * \param[in]  n_param         Number of parameters to copy on new stack
+ * \param[in]  class_ref       Class to look up method in (we do static call, not use 'this')
+ * \param[in]  new_this        This for called method
+ *
+ * Create new call frame, init it.
+ *
+ * Set new call frame as current.
+ *
+ * \todo Combine this and prev funcs where possible
+ *
+**/
 
 static void
 pvm_exec_static_call(
@@ -447,7 +647,8 @@ pvm_exec_static_call(
     int method_ordinal,
     int n_param,
     pvm_object_t class_ref,             // Class to find method in
-    pvm_object_t new_this)
+    pvm_object_t new_this
+                    )
 {
     if( DEB_CALLRET || debug_print_instr ) printf( "\nstatic call %d (stack_depth %d -> ", method_ordinal, da->stack_depth );
 
@@ -456,10 +657,8 @@ pvm_exec_static_call(
 
     pvm_exec_save_fast_acc(da);  
 
-    struct pvm_object new_cf = pvm_create_call_frame_object();
+    pvm_object_t new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
-
-    //struct pvm_object_storage *code = pvm_exec_find_static_method( class_ref, method_ordinal );
 
     init_cfda(da, cfda, method_ordinal, n_param, new_this, class_ref );
     
@@ -470,6 +669,41 @@ pvm_exec_static_call(
     pvm_exec_load_fast_acc(da);
 
     if( DEB_CALLRET || debug_print_instr ) printf( "%d); ", da->stack_depth );
+}
+
+
+/** UNTESTED, UNUSED
+ *
+ * \brief Simulate call - used to call methods on behalf of current thread.
+ *
+ * \param[in]  da              Current thread data area
+ * \param[in]  new_this        This for called method
+ * \param[in]  method_ordinal  Ordinal of method we call
+ * \param[in]  n_args          Number of parameters 
+ * \param[in]  args            Parameters
+ *
+ * Create new call frame, init it.
+ *
+ * Set new call frame as current.
+ *
+**/
+
+void
+pvm_exec_simulated_call(
+                    struct data_area_4_thread *da,
+                    pvm_object_t new_this,
+                    int method,
+                    int n_args,
+                    pvm_object_t args[]
+                   )
+{
+    int i;
+    for( i = 0; i < n_args; i++ )
+    {
+        os_push( args[i] ); // right order? seem so...
+    }
+
+    pvm_exec_call( da, method, n_args, 0, new_this );
 }
 
 /**
@@ -495,8 +729,10 @@ pvm_exec_static_call(
  *
  *
 **/
+static void do_pvm_exec(pvm_object_t current_thread) 
+__attribute__((hot)); // tell compiler this func must be optimized a lot
 
-static void do_pvm_exec(pvm_object_t current_thread)
+static void do_pvm_exec(pvm_object_t current_thread) 
 {
     int prefix_long = 0;
     int prefix_float = 0;
@@ -508,16 +744,14 @@ static void do_pvm_exec(pvm_object_t current_thread)
     if( !pvm_object_class_exactly_is( current_thread, pvm_get_thread_class() ))
         panic("attempt to run not a thread");
 
-    struct data_area_4_thread *da = (struct data_area_4_thread *)&(current_thread.data->da);
+    struct data_area_4_thread *da = (struct data_area_4_thread *)&(current_thread->da);
 
     pvm_exec_load_fast_acc(da); // For any case
 
-#if OLD_VM_SLEEP
+#if NEW_VM_SLEEP
     // Thread was snapped sleeping - resleep it
     if(da->sleep_flag)
         phantom_thread_sleep_worker( da );
-#else
-#warning resleep?
 #endif
 
     while(1)
@@ -543,6 +777,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
             run_gc();
         }
 #endif // GC_ENABLED
+
+        if( debug_trace ) pvm_trace_here(da);
+
 
         unsigned char instruction = pvm_code_get_byte(&(da->code));
         //printf("instr 0x%02X ", instruction);
@@ -611,6 +848,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
+                    if(0||debug_print_instr) printf("%lld - %lld ; ", l, u );
                     ls_push(l-u);
                 }
                 break;
@@ -629,6 +867,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 {
                     int64_t u = ls_pop();
                     int64_t l = ls_pop();
+                    //if(debug_print_instr) printf("%ld/%ld = %ld;", (long)l, (long)u, (long)(l/u) );
+                    if(0||debug_print_instr) printf("%lld/%lld", l, u ); // next line can crash, let me be printed
+                    if(0||debug_print_instr) printf(" = %lld ; ", l/u ); 
                     ls_push(l/u);
                 }
                 break;
@@ -693,7 +934,13 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 // NB! Returns int!
             case opcode_ige:	// >=
                 LISTI("l-ige");
-                { int64_t operand = ls_pop();	is_push( ls_pop() >= operand ); }
+                { 
+                    int64_t o1 = ls_pop();	
+                    int64_t o2 = ls_pop();
+                    int res = o2 >= o1;
+                    //printf("l-ige %ld >= %ld = %d ;", (long)o2, (long)o1, res );
+                    is_push( res ); 
+                }
                 break;
             case opcode_ile:	// <=
                 LISTI("l-ile");
@@ -722,7 +969,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             case opcode_fromd:
                 LISTI("l-fromd");
                 {
-                    long l = ls_pop();
+                    int64_t l = ls_pop();
                     double d = TO_DOUBLE( l );
                     ls_push( (long) d );
                 }
@@ -746,9 +993,11 @@ static void do_pvm_exec(pvm_object_t current_thread)
             case opcode_o2i:
                 LISTI("l-o2i");
                 {
-                    struct pvm_object o = os_pop();
-                    if( o.data == 0 ) pvm_exec_panic("l-o2i(null)");
-                    ls_push( pvm_get_long( o ) );
+                    pvm_object_t o = os_pop();
+                    if( o == 0 ) pvm_exec_panic("l-o2i(null)", da);
+                    int64_t p = pvm_get_long( o );
+                    //printf("l-o2i %d ;", (int)p );
+                    ls_push( p );
                     ref_dec_o(o);
                 }
                 break;
@@ -779,7 +1028,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             case opcode_log_and:
             case opcode_log_xor:
             case opcode_log_not:
-                pvm_exec_panic("invalid float op");
+                pvm_exec_panic("invalid float op", da);
                 break;
 
             case opcode_isum:
@@ -917,8 +1166,8 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 LISTI("f-o2i");
                 //pvm_exec_panic("unimpl float o2i");
                 {
-                    struct pvm_object o = os_pop();
-                    if( o.data == 0 ) pvm_exec_panic("f-o2i(null)");
+                    pvm_object_t o = os_pop();
+                    if( o == 0 ) pvm_exec_panic("f-o2i(null)", da);
                     float d = pvm_get_float( o );
                     is_push( TO_INT( d ) );
                     ref_dec_o(o);
@@ -951,7 +1200,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             case opcode_log_and:
             case opcode_log_xor:
             case opcode_log_not:
-                pvm_exec_panic("invalid double op");
+                pvm_exec_panic("invalid double op", da);
                 break;
 
 
@@ -984,6 +1233,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                     int64_t l = ls_pop();
                     double r = AS_DOUBLE( l, u, - );
                     ls_push( TO_LONG(r) );
+                    //printf("d-sublu %g - %g -> %g ( %g ) ; ", TO_DOUBLE(l), TO_DOUBLE(u), r, TO_LONG(r) );
                 }
                 break;
 
@@ -1004,6 +1254,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                     int64_t l = ls_pop();
                     double r = AS_DOUBLE( l, u, / );
                     ls_push( TO_LONG(r) );
+                    //printf("d-idivlu %g / %g -> %g ( %g ) ; ", TO_DOUBLE(l), TO_DOUBLE(u), r, TO_LONG(r) );
                 }
                 break;
 
@@ -1079,21 +1330,25 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 }
                 break;
 
-            case opcode_i2o: // ERROR IMPLEMENT ME
+            case opcode_i2o:
                 LISTI("d-i2o");
                 {
-                    //pvm_exec_panic("unimpl double i2o");
                     int64_t d = ls_pop();
                     os_push( pvm_create_double_object( TO_DOUBLE(d) ) );
                 }
                 break;
 
-            case opcode_o2i: // ERROR IMPLEMENT ME
+            case opcode_o2i:
                 LISTI("d-o2i");
-                //pvm_exec_panic("unimpl double o2i");
                 {
-                    struct pvm_object o = os_pop();
-                    if( o.data == 0 ) pvm_exec_panic("d-o2i(null)");
+                    pvm_object_t o = os_pop(); // TODO type check
+                    if( pvm_exec_assert_type(da, o, pvm_get_double_class()))
+                    {
+                        ref_dec_o(o);
+                        break;
+                    }
+
+                    if( o == 0 ) pvm_exec_panic("d-o2i(null)", da);
                     double d = pvm_get_double( o );
                     ls_push( TO_LONG( d ) );
                     ref_dec_o(o);
@@ -1147,8 +1402,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 if( os_empty() ) printf(", ostack empty");
                 else
                 {
-                    printf(",\n\tostack top = {" );
-                    pvm_object_print( os_top() );
+                    printf(",\n\tostack depth %d top = {", pvm_ostack_count(da->_ostack) );
+                    // pvm_object_print( os_top() ); // calls tostring, fails
+                    pvm_object_dump( os_top() );
                     printf("}" );
                 }
                 printf(";\n\n");
@@ -1162,7 +1418,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             LISTI("lock");
             {
                 // This is java monitor, arbitrary object
-                struct pvm_object lock_obj = os_pop();
+                pvm_object_t lock_obj = os_pop();
                 // TODO impl me
                 ref_dec_o(lock_obj);
             }
@@ -1172,7 +1428,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             LISTI("unlock");
             {
                 // This is java monitor, arbitrary object
-                struct pvm_object lock_obj = os_pop();
+                pvm_object_t lock_obj = os_pop();
                 // TODO impl me
                 ref_dec_o(lock_obj);
             }
@@ -1181,23 +1437,32 @@ static void do_pvm_exec(pvm_object_t current_thread)
             // int stack ops ---------------------------------------
 
         case opcode_is_dup:
-            LISTI("is dup");
             {
                 if(DO_TWICE)
                 {
-                    int i1 = is_pop();
-                    int i2 = is_pop();
-                    is_push(i1); is_push(i2);
-                    is_push(i1); is_push(i2);
+                    LISTI("l-is dup");
+                    //int i1 = is_pop();
+                    //int i2 = is_pop();
+                    //is_push(i1); is_push(i2);
+                    //is_push(i1); is_push(i2);
+                    int64_t l = ls_top();
+                    ls_push(l);
+                    prefix_long = prefix_double = 0;
+                    //printf("l-is dup = %lld ; ", l);
                 }
                 else
+                {
+                    LISTI("is dup");
                     is_push(is_top());
+                    prefix_float = 0; // same for float
+                }
             }
             break;
 
         case opcode_is_drop:
             LISTI("is drop");
-            is_pop(); if(DO_TWICE) is_pop();
+            is_pop(); if(DO_TWICE) { is_pop(); prefix_long = prefix_double = 0; }
+            prefix_float = 0; // same for float
             break;
 
         case opcode_iconst_0:
@@ -1207,7 +1472,8 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
         case opcode_iconst_1:
             LISTI("iconst 1");
-            is_push(1); if(DO_TWICE) is_push(1);
+            if(DO_TWICE) ls_push(1);
+            else is_push(1); 
             break;
 
         case opcode_iconst_8bit:
@@ -1243,6 +1509,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
                 int32_t id = pvm_code_get_int32(&(da->code));
                 pvm_object_t co = pvm_get_ofield( cda->const_pool, id );
+                ref_inc_o(co);
                 os_push(co);
                 LISTIA("const_pool id %d", id);
             }
@@ -1253,10 +1520,57 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 pvm_object_t target_class = os_pop();
                 pvm_object_t o = os_pop();
 
-                // TODO cast here!
+#if 1
+                LISTIA("cast %s", "?"); // TODO class name
+     
+                if( pvm_object_class_is_or_child(o,target_class) )
+                {
+                    // nothing to do, oh, baby, stay in bed
+                    os_push( o );
+                    break;
+                }
 
+                if(1||debug_print_instr)
+                {
+                    printf("CAST to class which is not parent \n");
+                    printf("obj = "); pvm_object_dump(o);
+                    printf("to class = "); pvm_object_dump(target_class);
+#if 1
+                    // Throw
+                    pvm_object_t msg = pvm_create_string_object("cast to not parent");
+                    //if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+                    pvm_exec_do_throw_object( da, msg );
+                    //if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
+#else
+                    // ignore - there's duplicate '.ru.dz.phantom.system.shell' for some reason :(
+                    // TODO fix class duplication, remove this hack
+                    os_push( o );
+#endif
+                    break;
+                }
+#else
+                if( pvm_object_class_exactly_is(o,target_class) )
+                {
+                    // nothing to do, oh, baby, stay in bed
+                    os_push( o );
+                    break;
+                }
+
+                // Compiler generates casts if target variable is of different type.
+                // Suppose it is safe to implement cast as a check if object class is
+                // child or equals to cast class
+
+                if(1||debug_print_instr)
+                {
+                // TODO cast here!
+                    printf("<!!! CAST unimpl !!!>\n");
+                    printf("obj = "); pvm_object_dump(o);
+                    printf("to class = "); pvm_object_dump(target_class);
+                    printf("</!!! CAST unimpl !!!>\n\n");
+                }
                 os_push( o );
                 LISTIA("cast %s", "unimplemented!");
+#endif
             }
             break;
 
@@ -1430,9 +1744,12 @@ static void do_pvm_exec(pvm_object_t current_thread)
             case opcode_fromd:
                 LISTI("i-fromd");
                 {
-                    long l = ls_pop();
+                    int64_t l = ls_pop();
                     double d = TO_DOUBLE( l );
                     is_push( (int) d );
+                    //printf("i-fromd %g", d );
+                    //printf(" ( %g )", l );
+                    //printf(" -> %d ; ", (int) d );
                 }
                 break;
 
@@ -1449,14 +1766,18 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
         case opcode_i2o:
             LISTI("i2o");
-            os_push(pvm_create_int_object(is_pop()));
+            {
+                pvm_object_t o = pvm_create_int_object(is_pop());
+                //pvm_object_dump(o);
+                os_push(o);
+            }
             break;
 
         case opcode_o2i:
             LISTI("o2i");
             {
-                struct pvm_object o = os_pop();
-                if( o.data == 0 ) pvm_exec_panic("o2i(null)");
+                pvm_object_t o = os_pop();
+                if( o == 0 ) pvm_exec_panic("o2i(null)",da);
                 is_push( pvm_get_int( o ) );
                 ref_dec_o(o);
             }
@@ -1466,9 +1787,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_os_eq:
             LISTI("os eq");
             {
-                struct pvm_object o1 = os_pop();
-                struct pvm_object o2 = os_pop();
-                is_push( o1.data == o2.data );
+                pvm_object_t o1 = os_pop();
+                pvm_object_t o2 = os_pop();
+                is_push( o1 == o2 );
                 ref_dec_o(o1);
                 ref_dec_o(o2);
                 break;
@@ -1477,9 +1798,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_os_neq:
             LISTI("os neq");
             {
-                struct pvm_object o1 = os_pop();
-                struct pvm_object o2 = os_pop();
-                is_push( o1.data != o2.data );
+                pvm_object_t o1 = os_pop();
+                pvm_object_t o2 = os_pop();
+                is_push( o1 != o2 );
                 ref_dec_o(o1);
                 ref_dec_o(o2);
                 break;
@@ -1488,7 +1809,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_os_isnull:
             LISTI("isnull");
             {
-                struct pvm_object o1 = os_pop();
+                pvm_object_t o1 = os_pop();
                 is_push( pvm_is_null( o1 ) );
                 ref_dec_o(o1);
                 break;
@@ -1509,7 +1830,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             os_push( pvm_get_null_object() ); // so what opcode_os_push_null is for then?
             break;
 
-        case opcode_summon_thread:
+        case opcode_summon_thread: // TODO unused really
             LISTI("summon thread");
             os_push( ref_inc_o( current_thread ) );
             //printf("ERROR: summon thread");
@@ -1520,37 +1841,37 @@ static void do_pvm_exec(pvm_object_t current_thread)
             os_push( ref_inc_o( this_object() ) );
             break;
 
-        case opcode_summon_class_class:
+        case opcode_summon_class_class: // TODO unused really
             LISTI("summon class class");
             // it has locked refcount
             os_push( pvm_get_class_class() );
             break;
 
-        case opcode_summon_interface_class:
+        case opcode_summon_interface_class: // TODO unused really
             LISTI("summon interface class");
             // locked refcnt
             os_push( pvm_get_interface_class() );
             break;
 
-        case opcode_summon_code_class:
+        case opcode_summon_code_class: // TODO unused really
             LISTI("summon code class");
         	// locked refcnt
             os_push( pvm_get_code_class() );
             break;
 
-        case opcode_summon_int_class:
+        case opcode_summon_int_class: // TODO used?
             LISTI("summon int class");
         	// locked refcnt
             os_push( pvm_get_int_class() );
             break;
 
-        case opcode_summon_string_class:
+        case opcode_summon_string_class: // TODO used?
             LISTI("summon string class");
         	// locked refcnt
             os_push( pvm_get_string_class() );
             break;
 
-        case opcode_summon_array_class:
+        case opcode_summon_array_class: // TODO used?
             LISTI("summon array class");
         	// locked refcnt
             os_push( pvm_get_array_class() );
@@ -1559,16 +1880,19 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_summon_by_name:
             {
                 LISTI("summon by name");
-                struct pvm_object name = pvm_code_get_string(&(da->code));
-                struct pvm_object cl = pvm_exec_lookup_class_by_name( name );
-                ref_dec_o(name);
+                pvm_object_t name = pvm_code_get_string(&(da->code));
+                pvm_object_t cl = pvm_exec_lookup_class_by_name( name );
                 // TODO: Need throw here?
-                if( pvm_is_null( cl ) ) {
-                    pvm_exec_panic("summon by name: null class");
+                if( pvm_is_null( cl ) ) 
+                {
+                    printf("summon class '"); pvm_object_print(name); printf("'\n");
+                    pvm_exec_panic("summon by name: no class found", da);
+                    ref_dec_o(name);
                     //printf("summon by name: null class");
                     //pvm_exec_do_throw(da);
                     break;
                 }
+                ref_dec_o(name);
                 os_push( cl );  // cl popped from stack - don't increment
             }
             break;
@@ -1587,12 +1911,14 @@ static void do_pvm_exec(pvm_object_t current_thread)
             LISTI("new");
             {
                 pvm_object_t cl = os_pop();
-                os_push( pvm_create_object( cl ) );
-                //ref_dec_o( cl );  // object keep class ref
+                pvm_object_t no = pvm_create_object( cl );
+                os_push( no );
+                //printf("\nop_new\nclass @%p\n", cl );
+                //printf("new_this @%p %s\n", no, pvm_is_null(no) ? "null" : "not null"); 
             }
             break;
-
-        case opcode_copy:
+#if 0
+        case opcode_copy: // TODO unused? Kill?
             LISTI("copy");
             {
                 pvm_object_t o = os_pop();
@@ -1600,7 +1926,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 ref_dec_o(o);
             }
             break;
-
+#endif
             // if you want to enable these, work out refcount
             // and security issues first!
             // compose/decompose
@@ -1609,7 +1935,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             LISTI(" compose32");
             {
                 int num = pvm_code_get_int32(&(da->code));
-                struct pvm_object in_class = os_pop();
+                pvm_object_t in_class = os_pop();
                 os_push( pvm_exec_compose_object( in_class, da->_ostack, num ) );
             }
             break;
@@ -1617,16 +1943,16 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_os_decompose:
             LISTI(" decompose");
             {
-                struct pvm_object to_decomp = os_pop();
-                int num = da_po_limit(to_decomp.data);
+                pvm_object_t to_decomp = os_pop();
+                int num = da_po_limit(to_decomp);
                 is_push( num );
                 while( num )
                 {
                     num--;
-                    struct pvm_object o = pvm_get_ofield( to_decomp, num);
+                    pvm_object_t o = pvm_get_ofield( to_decomp, num);
                     os_push( ref_inc_o( o ) );
                 }
-                os_push(to_decomp.data->_class);
+                os_push(to_decomp->_class);
             }
             break;
 #endif
@@ -1705,7 +2031,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_ret:
             {
                 if( DEB_CALLRET || debug_print_instr ) printf( "\nret     (stack_depth %d -> ", da->stack_depth );
-                struct pvm_object ret = pvm_object_da( da->call_frame, call_frame )->prev;
+                pvm_object_t ret = pvm_object_da( da->call_frame, call_frame )->prev;
 
                 if( pvm_is_null( ret ) )
                 {
@@ -1721,7 +2047,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
         case opcode_throw:
             if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
-            pvm_exec_do_throw(da);
+            pvm_exec_do_throw_pop(da);
             if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
             break;
 
@@ -1750,6 +2076,25 @@ static void do_pvm_exec(pvm_object_t current_thread)
             ref_dec_o( es_pop().object );
             break;
 
+            // kind of throw        ------------------------------------------------------
+
+
+        case opcode_arg_count: // TODO use me in compiler
+            LISTI("arg count check");
+            {
+                u_int8_t want_args = pvm_code_get_byte(&(da->code));
+                u_int32_t have_args = is_pop();
+                if( have_args != want_args)
+                {
+                    pvm_object_t msg = pvm_create_string_object("invalid arg count");
+                    //if( DEB_CALLRET || debug_print_instr ) printf( "\nthrow     (stack_depth %d -> ", da->stack_depth );
+                    pvm_exec_do_throw_object( da, msg );
+                    //if( DEB_CALLRET || debug_print_instr ) printf( "%d)", da->stack_depth );
+                }
+            }
+            break;
+        
+
             // ok, now method calls ------------------------------------------------------
 
             // these 4 are parameter-less calls!
@@ -1772,6 +2117,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 pvm_exec_call(da,method_index,n_param,1,pvm_get_null_object());
             }
             break;
+
+        // TODO
+        //case opcode_interface_invoke:
 
 
         case opcode_dynamic_invoke:
@@ -1806,7 +2154,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
 #endif // DEB_DYNCALL
 
                 if( find_dynamic_method( &mi ) )
-                    pvm_exec_panic("dynamic invoke failed");
+                    pvm_exec_panic("dynamic invoke failed", da);
 
                 pvm_exec_call(da,mi.method_ordinal,mi.n_param,1,mi.new_this);
             }
@@ -1819,6 +2167,9 @@ static void do_pvm_exec(pvm_object_t current_thread)
 
                 pvm_object_t class_ref = os_pop();
                 pvm_object_t new_this = os_pop();
+
+                //printf("\nstatic_invoke\nnew_this @%p %s\n", new_this, pvm_is_null(new_this) ? "null" : "not null"); 
+                //printf("class_ref @%p\n", class_ref); 
 
                 // Now there are just parameters on object stack
                 pvm_exec_static_call(da,method_ordinal,n_param,class_ref,new_this);
@@ -1860,33 +2211,83 @@ static void do_pvm_exec(pvm_object_t current_thread)
         case opcode_os_get32:        pvm_exec_get(da, pvm_code_get_int32(&(da->code)));	break;
         case opcode_os_set32:        pvm_exec_set(da, pvm_code_get_int32(&(da->code)));	break;
 
-        case opcode_is_get32:        pvm_exec_iget(da, pvm_code_get_int32(&(da->code)));	break;
-        case opcode_is_set32:        pvm_exec_iset(da, pvm_code_get_int32(&(da->code)));	break;
+        case opcode_is_get32:        
+        {
+            //pvm_exec_iget(da, pvm_code_get_int32(&(da->code)));	
+            int abs_stack_pos = pvm_code_get_int32(&(da->code));
+            LISTIA("is stack get %d", abs_stack_pos);
+
+            if(DO_TWICE) 
+            {
+                LISTIA("l-is stack get %d", abs_stack_pos);
+                int64_t l = pvm_lstack_abs_get(da->_istack, abs_stack_pos);
+                ls_push( l );
+                //printf("l-is stack get @%d = %lld ; ", abs_stack_pos, l);
+                prefix_long = prefix_double = 0;
+            }
+            else 
+            {
+                LISTIA("is stack get %d", abs_stack_pos);
+                is_push( pvm_istack_abs_get(da->_istack, abs_stack_pos) );
+                prefix_float = 0; // same for float
+            }
+        }
+            break;
+        case opcode_is_set32:
+        {
+            //pvm_exec_iset(da, pvm_code_get_int32(&(da->code)));	break;
+            int abs_stack_pos = pvm_code_get_int32(&(da->code));
+            if(DO_TWICE) 
+            {
+                int64_t l = ls_pop();
+                LISTIA("l-is stack set %d", abs_stack_pos);
+                pvm_lstack_abs_set( da->_istack, abs_stack_pos, l );
+                //printf("l-is stack set @%d = %lld ; ", abs_stack_pos, l);
+                prefix_long = prefix_double = 0;
+            }
+            else
+            {
+                LISTIA("is stack set %d", abs_stack_pos);
+                pvm_istack_abs_set( da->_istack, abs_stack_pos, is_pop() );
+                prefix_float = 0; // same for float
+            }
+        }
+            break;
+
+        case opcode_stack_reserve:
+        {
+            int o_reserve = pvm_code_get_byte(&(da->code));
+            int i_reserve = pvm_code_get_byte(&(da->code));
+
+            //pvm_ostack_reserve( pvm_object_da(da->_ostack, object_stack), o_reserve );
+            //pvm_istack_reserve( pvm_object_da(da->_istack, integer_stack), i_reserve );
+            pvm_ostack_reserve( da->_ostack, o_reserve );
+            pvm_istack_reserve( da->_istack, i_reserve );
+        }
+            break;
 
         default:
+#if 0 // turned off because of syscall restart mechanism needs fixed syscall instr size        
             if( (instruction & 0xF0 ) == opcode_sys_0 )
             {
                 pvm_exec_sys(da,instruction & 0x0F);
-    sys_sleep:
-#if OLD_VM_SLEEP
+                goto sys_sleep;
+                //break;
+            }
+#endif
+            if( instruction  == opcode_sys_8bit )
+            {
+                pvm_exec_sys(da,pvm_code_get_byte(&(da->code))); //cf->cs.get_byte( cf->IP ));
+//sys_sleep:
+#if NEW_VM_SLEEP
                 // Only sys can put thread asleep
                 // If we are snapped here we, possibly, will continue from
                 // the entry to this func. So save fast acc and recheck
                 // sleep condition on the func entry.
                 if(da->sleep_flag)
-                {
-                    pvm_exec_save_fast_acc(da); // Before snap
                     phantom_thread_sleep_worker( da );
-                }
 #endif
                 break;
-            }
-
-            if( instruction  == opcode_sys_8bit )
-            {
-                pvm_exec_sys(da,pvm_code_get_byte(&(da->code))); //cf->cs.get_byte( cf->IP ));
-                goto sys_sleep;
-                //break;
             }
 
             if( (instruction & 0xE0 ) == opcode_call_00 )
@@ -1897,7 +2298,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
             }
 
             printf("Unknown op code 0x%X\n", instruction );
-            pvm_exec_panic( "thread exec: unknown opcode" ); //, instruction );
+            pvm_exec_panic( "thread exec: unknown opcode", da ); //, instruction );
 
         } // outer switch(instruction)
 
@@ -1914,8 +2315,15 @@ static void do_pvm_exec(pvm_object_t current_thread)
     } // while(1)
 }
 
+
+
+
+
+
 void pvm_exec(pvm_object_t current_thread)
 {
+    vm_lock_persistent_memory();
+
 #if CONF_USE_E4C
     volatile int status = 0;
     //e4c_context_begin( 0 );
@@ -1940,6 +2348,7 @@ void pvm_exec(pvm_object_t current_thread)
 
     (void) status;
 #endif // CONF_USE_E4C
+    vm_unlock_persistent_memory();
 }
 
 
@@ -1947,69 +2356,74 @@ void pvm_exec(pvm_object_t current_thread)
 
 
 
-static syscall_func_t pvm_exec_find_syscall( struct pvm_object _class, unsigned int syscall_index )
+static syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int syscall_index )
 {
-    if(!(_class.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
-        pvm_exec_panic( "pvm_exec_find_syscall: not a class object" );
+    if(!(_class->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
+        pvm_exec_panic0( "pvm_exec_find_syscall: not a class object" );
 
     struct data_area_4_class *da = 0;
 
     // TODO make sure compiler does not generate such calls and return panic
 #if 0
-        if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
-            pvm_exec_panic("find_syscall: not internal class in SYS" );
+    if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
+        pvm_exec_panic("find_syscall: not internal class in SYS" );
 #else
     // Find parent which is internal. This can happen if class got a method from
     // internal parent, such as .internal.object. Happens often with constructor.
     int i = 1024; // max parent levels
     while( i-- > 0 )
     {
-        da = (struct data_area_4_class *)&(_class.data->da);
+        da = (struct data_area_4_class *)&(_class->da);
 
         if( da->object_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL )
             break;
 
+        // TODO why?
         // we do that only for 0 = construct, that's a hack, must be gone too )
         if( syscall_index != 0 )
-            pvm_exec_panic("find_syscall: not internal class in SYS > 0" );
+            pvm_exec_panic0("find_syscall: not internal class in SYS > 0" );
 
         if( pvm_is_null( da->class_parent ) )
-            pvm_exec_panic("find_syscall: not internal class and no internal parent" );
+            pvm_exec_panic0("find_syscall: not internal class and no internal parent" );
 
-            _class = da->class_parent;
+        _class = da->class_parent;
     }
 
     if( pvm_is_null( da->class_parent ) )
-            pvm_exec_panic("find_syscall: not internal class and no internal parent" );
+            pvm_exec_panic0("find_syscall: not internal class and no internal parent" );
 #endif
 
     if( da->sys_table_id >= pvm_n_internal_classes )
-        pvm_exec_panic("find_syscall: internal class index out of table" );
+        pvm_exec_panic0("find_syscall: internal class index out of table" );
     //pvm_exec_panic("find_syscall: internal class index (%d) out of table (%d)", da->sys_table_id, pvm_n_internal_classes );
 
-    if( syscall_index >= *pvm_internal_classes[da->sys_table_id].syscalls_table_size_ptr ) pvm_exec_panic("find_syscall: syscall_index no out of table size" );
+    if( syscall_index >= *pvm_internal_classes[da->sys_table_id].syscalls_table_size_ptr ) 
+        pvm_exec_panic0("find_syscall: syscall_index no out of table size" );
 
     syscall_func_t *tab = pvm_internal_classes[da->sys_table_id].syscalls_table;
     return tab[syscall_index];
 }
 
 
-static struct pvm_object_storage * 
+static pvm_object_t  
     pvm_exec_get_iface_method(
-        struct pvm_object_storage *iface,
+        pvm_object_t iface,
         unsigned int method_index
         )
 {
     if( iface == 0 )
-        pvm_exec_panic( "pvm_exec_get_iface_method: no interface found" );
+        pvm_exec_panic0( "pvm_exec_get_iface_method: no interface found" );
 
     if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
-        pvm_exec_panic( "pvm_exec_get_iface_method: not an interface object" );
+        pvm_exec_panic0( "pvm_exec_get_iface_method: not an interface object" );
 
     if(method_index > da_po_limit(iface))
-        pvm_exec_panic( "pvm_exec_get_iface_method: method index is out of bounds" );
+    {
+        lprintf("pvm_exec_get_iface_method: method index %d is out of bounds\n", method_index);
+        pvm_exec_panic0( "pvm_exec_get_iface_method: method index is out of bounds" );
+    }
 
-    return da_po_ptr(iface->da)[method_index].data;    
+    return da_po_ptr(iface->da)[method_index];    
 }
 
 /**
@@ -2019,71 +2433,30 @@ static struct pvm_object_storage *
  *
 **/
 
-struct pvm_object_storage * pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal )
+static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal )
 {
-    if( class_ref.data == 0 )
-    {
-        pvm_exec_panic( "pvm_exec_find_static_method: null class!" );
-    }
+    if( class_ref == 0 )
+        pvm_exec_panic0( "pvm_exec_find_static_method: null class!" );
 
-    struct pvm_object_storage *iface;
-    iface = pvm_object_da( class_ref, class )->object_default_interface.data;
+    pvm_object_t iface = pvm_object_da( class_ref, class )->object_default_interface;
 
-#if 1
     return pvm_exec_get_iface_method(iface, method_ordinal );        
-#else
-    // Same as in find_method, combine!
-
-    if( iface == 0 )
-        pvm_exec_panic( "pvm_exec_find_method: no interface found" );
-
-    if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
-        pvm_exec_panic( "pvm_exec_find_method: not an interface object" );
-
-    if(method_index > da_po_limit(iface))
-        pvm_exec_panic( "pvm_exec_find_method: method index is out of bounds" );
-
-    return da_po_ptr(iface->da)[method_index].data;
-#endif
 }
 
 /*
  *
  * Returns code object
- *
+ * Param tda is for backtrace only
  */
 
-struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned int method_index )
+pvm_object_t  pvm_exec_find_method( pvm_object_t o, unsigned int method_index, struct data_area_4_thread *tda )
 {
-    if( o.data == 0 )
-    {
-        pvm_exec_panic( "pvm_exec_find_method: null object!" );
-    }
+    if( o == 0 )          pvm_exec_panic( "pvm_exec_find_method: null object!", tda );
+    if( o->_class == 0 )  pvm_exec_panic( "pvm_exec_find_method: no interface and no class!", tda );
 
-    struct pvm_object_storage *iface = o.interface;
-    if( iface == 0 )
-    {
-    	if( o.data->_class.data == 0 )
-    	{
-            //dumpo(o.data);
-            pvm_exec_panic( "pvm_exec_find_method: no interface and no class!" );
-    	}
-        iface = pvm_object_da( o.data->_class, class )->object_default_interface.data;
-    }
-#if 1
+    pvm_object_t iface = pvm_object_da( o->_class, class )->object_default_interface;
+
     return pvm_exec_get_iface_method(iface, method_index );        
-#else
-    if( iface == 0 )
-        pvm_exec_panic( "pvm_exec_find_method: no interface found" );
-
-    if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
-        pvm_exec_panic( "pvm_exec_find_method: not an interface object" );
-
-    if(method_index > da_po_limit(iface))
-        pvm_exec_panic( "pvm_exec_find_method: method index is out of bounds" );
-
-    return da_po_ptr(iface->da)[method_index].data;
-#endif
 }
 
 
@@ -2101,10 +2474,23 @@ static int catch_comparator( void *backptr, struct pvm_exception_handler *test )
     return 0;
 }
 
+
+/**
+ *
+ * \brief Find catch for given thrown object.
+ *
+ * \param[in]  stack        Exceptions stack to look for catcher on
+ * \param[out] jump_to      IP address to jump to
+ * \param[in]  thrown_obj   Object that is being thrown, class of this object is checked against catcher class
+ *
+ * \return Nonzero if catcher found.
+ *
+**/
+
 static int pvm_exec_find_catch(
                                struct data_area_4_exception_stack* stack,
                                unsigned int *jump_to,
-                               struct pvm_object thrown_obj )
+                               pvm_object_t thrown_obj )
 {
     struct pvm_exception_handler topass;
     topass.object = thrown_obj;
@@ -2124,7 +2510,7 @@ static int pvm_exec_find_catch(
 
 
 // Todo it's a call_frame method!
-void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_storage * code )
+void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, pvm_object_t  code )
 {
     struct data_area_4_code *cda = (struct data_area_4_code *)code->da;
 
@@ -2133,18 +2519,51 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_sto
     cfda->code = cda->code;
     // TODO set ref from cfda to code for gc to make sure code wont be collected while running
     //pvm_object_t co;
-    //co.data = code;
+    //co = code;
     //co.interface = 0;
 }
 
 
+/**
+ *
+ * \brief Find class object by class name.
+ *
+ * \param[in]  name        Name of class to find,
+ *
+ * \return Class obect if class is found and null object otherwise.
+ *
+ * \todo Must have some persistent cache to lookup. Currently can load class twice on
+ *       system start. Cache is implemented in userland and can be absent in early boot time.
+ *       See syscall.c pvm_class_cache_* funcs implementing such cache.
+ *       See also pvm_root.class_dir
+ *
+ * \todo We can speed up class load if we use cache here directly.
+ *
+**/
+
+#define USE_PERSISTENT_CACHE_IN_SUMMON 1
+
 // TODO: implement!
-struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
+pvm_object_t pvm_exec_lookup_class_by_name(pvm_object_t name)
 {
+    pvm_object_t found_class;
+
+    ref_inc_o(name); // hack
+
     // Try internal
-    struct pvm_object ret = pvm_lookup_internal_class(name);
+    pvm_object_t ret = pvm_lookup_internal_class(name);
     if( !pvm_is_null(ret) )
         return ret;
+
+#if USE_PERSISTENT_CACHE_IN_SUMMON
+    // Try persistent class cache
+    {
+    //printf("lookup class in pers cache: "); pvm_object_dump(name);
+    errno_t rc = pvm_class_cache_lookup(pvm_get_str_data(name), pvm_get_str_len(name), &found_class );
+    if( rc == 0 )
+        return found_class;
+    }
+#endif
 
     /*
      *
@@ -2161,8 +2580,18 @@ struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
         return pvm_create_null_object();
 
     // Try userland loader
-    struct pvm_object args[1] = { name };
-    return pvm_exec_run_method( pvm_root.class_loader, 8, 1, args );
+    pvm_object_t args[1] = { name };
+    found_class = pvm_exec_run_method( pvm_root.class_loader, 8, 1, args );
+
+#if USE_PERSISTENT_CACHE_IN_SUMMON
+    if( !pvm_is_null(found_class) )
+    {
+        //errno_t rc = 
+        pvm_class_cache_insert(pvm_get_str_data(name), pvm_get_str_len(name), found_class );
+    }
+#endif
+
+    return found_class;
 }
 
 
@@ -2173,15 +2602,15 @@ struct pvm_object pvm_exec_lookup_class_by_name(struct pvm_object name)
  *
  */
 
-struct pvm_object
+pvm_object_t 
 pvm_exec_run_method(
-                    struct pvm_object this_object,
+                    pvm_object_t this_object,
                     int method,
                     int n_args,
-                    struct pvm_object args[]
+                    pvm_object_t args[]
                    )
 {
-    struct pvm_object new_cf = pvm_create_call_frame_object();
+    pvm_object_t new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
     int i;
@@ -2192,13 +2621,17 @@ pvm_exec_run_method(
 
     pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), n_args); // pass him real number of parameters
 
-    struct pvm_object_storage *code = pvm_exec_find_method( this_object, method );
+    pvm_object_t code = pvm_exec_find_method( this_object, method, NULL );
     pvm_exec_set_cs( cfda, code );
     cfda->this_object = ref_inc_o( this_object );
 
     pvm_object_t thread = pvm_create_thread_object( new_cf );
 
+    //vm_unlock_persistent_memory(); // pvm_exec will lock, do not need nested lock - will prevent snaps
+    // NO - we must prevent snap here!! it won't work right after restart, part of state is in C code
     pvm_exec( thread );
+    //vm_lock_persistent_memory();
+
 
     pvm_object_t ret = pvm_ostack_pop( pvm_object_da(cfda->ostack, object_stack) );
 

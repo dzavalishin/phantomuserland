@@ -9,9 +9,12 @@ import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
- * <p>Method definition node.</p>
+ * <p>Method definition node. Used as method call node child too.</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -21,6 +24,7 @@ public class MethodNode extends Node
 	private String ident;
 	private int    ordinal;
 	private MethodSignature signature;
+	private ParseState ps;
 
 	public int get_ordinal(PhantomType obj_type) throws PlcException {
 		if( ordinal >= 0 )
@@ -35,11 +39,20 @@ public class MethodNode extends Node
 
 		Method m = findMethod(pc);
 
+		// TODO hack!
 		pc.set_ordinals();
 
-		if(m.getOrdinal() < 0)      throw new PlcException("MethodNode","don't know Method number for class "+pc.toString(), ident);
+		int ord = m.getOrdinal();
+		
+		if(ord < 0)
+		{
+			if( signature == null)
+				throw new PlcException("MethodNode","don't know (no signature) Method number for class "+pc.toString(), ident);
+			else
+				throw new PlcException("MethodNode","don't know Method number for class "+pc.toString(), signature.toString());
+		}
 
-		return m.getOrdinal();
+		return ord;
 	}
 
 	public PhantomType get_return_type(PhantomType obj_type) throws PlcException {
@@ -62,30 +75,38 @@ public class MethodNode extends Node
 	private Method findMethod(PhantomClass pc) throws PlcException {
 		Method m = null;
 		
+		if( signature == null )
+			print_warning("No signature for "+toString());
+		
 		if( signature != null ) m = pc.findMethod(signature);
-		if( m == null ) m = pc.findMethod(ident); // old way
+		//if( m == null ) m = pc.findMethod(ident); // old way
 
 		if( m == null )
+		{
+			print_error("Can't find method "+signature);
 			throw new PlcException("MethodNode", "Method of "+pc.toString()+" is null", ident );
+		}
 		
 		return m;
 	}
 
 
-	public MethodNode( String ident ) {
+	public MethodNode( String ident, ParseState ps ) {
 		super(null);
 		this.ident = ident;
+		this.ps = ps;
 		ordinal = -1;
 	}
 
-	public MethodNode( int meth_no ) {
+	public MethodNode( int meth_no, ParseState ps ) {
 		super(null);
+		this.ps = ps;
 		this.ident = null;
 		ordinal = meth_no;
 	}
 
-	// BUG?
-	public void find_out_my_type() { type = new PhTypeUnknown(); }
+	public PhantomType find_out_my_type() { return PhantomType.getVoid(); }
+	
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 
 	public String toString()
@@ -96,6 +117,7 @@ public class MethodNode extends Node
 
 	public void setSignature(MethodSignature sig) {
 		this.signature = sig;
+		//ps.get_class().addMethod(this); //
 	}
 
 	public String getIdent() {

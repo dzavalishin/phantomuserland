@@ -1,8 +1,11 @@
 Class .ru.dz.phantom.system.shell_callback
   Field console
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void init( tt: .internal.io.tty ):
     void  : void
-      = : .internal.io.tty
+      = : void
         ident console : .internal.io.tty
         ident tt : .internal.io.tty
 
@@ -12,25 +15,21 @@ Class .ru.dz.phantom.system.shell_callback
         void  : void
           . : void
             ident console : .internal.io.tty
-            Method putws : unknown
+            Method putws : void
             arg  : unknown
-              string const "
-
-Timer callback: " : string const
+              string pool const id="0" : string const
         void  : void
           . : void
             ident console : .internal.io.tty
-            Method putws : unknown
+            Method putws : void
             arg  : unknown
               . : string
                 ident time : int
-                Method toString : unknown
+                Method toString : void
       void  : void
         . : void
           ident console : .internal.io.tty
-          Method putws : unknown
+          Method putws : void
           arg  : unknown
-            string const " !!
-
-" : string const
+            string pool const id="1" : string const
 

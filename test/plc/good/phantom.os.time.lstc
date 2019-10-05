@@ -1,2 +1,9 @@
-Class version 20160114031911105
+Class version 20190820114529413
+
+method <init> ordinal 16
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 

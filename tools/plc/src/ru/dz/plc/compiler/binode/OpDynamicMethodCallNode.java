@@ -5,6 +5,7 @@ import java.io.IOException;
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
+import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.llvm.LlvmStringConstant;
@@ -14,8 +15,11 @@ import ru.dz.soot.SootMain;
 
 /**
  * <p>Dynamic method call node.</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
@@ -42,10 +46,9 @@ public class OpDynamicMethodCallNode extends BiNode {
 		generate_my_code(c,s);
 	}
 
-	public void find_out_my_type() throws PlcException {
-		checkPresetType();
-		if( type == null ) throw new PlcException("Dynamic method call Node","return type is not set");
-		//type = new ph_type_unknown(); // BUG! Wrong!
+	public PhantomType find_out_my_type() throws PlcException {
+		//if( getType() == null ) 
+		throw new PlcException("Dynamic method call Node","return type is not set");
 	}
 
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
@@ -63,7 +66,7 @@ public class OpDynamicMethodCallNode extends BiNode {
 		c.emitIConst_32bit(n_param); // n args
 		
 		_l.generate_code(c,s); // get object
-		move_between_stacks(c, _l.is_on_int_stack());
+		move_between_stacks(c, _l.is_on_int_stack(), _l.getType());
 
 		c.emitString(methodName);
 		
@@ -82,7 +85,7 @@ public class OpDynamicMethodCallNode extends BiNode {
 		String proxyName = methodName;
 
 		proxyName += "_"+llc.getPhantomMethod().getLlvmTempName("dyncall");
-		proxyName = proxyName.replaceAll("<init>", "\\$Constructor");
+		proxyName = proxyName.replaceAll(Method.CONSTRUCTOR_M_NAME, "\\$Constructor");
 		proxyName = proxyName.replaceAll("%", "");
 		
 		boolean first = true;

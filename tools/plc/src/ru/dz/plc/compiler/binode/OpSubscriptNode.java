@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
@@ -21,32 +22,19 @@ public class OpSubscriptNode extends BiNode {
 	public OpSubscriptNode(Node atom, Node subscr) {    super(atom,subscr);  }
 	public String toString()  {    return "[]";  }
 
-	public void find_out_my_type() throws PlcException
+	public PhantomType find_out_my_type() throws PlcException
 	{
 		Node atom = _l;
 
 		PhantomType a_type = atom.getType();
 
 		if( a_type == null || a_type.is_unknown() )
-		{
-			type = new PhTypeUnknown();
-			checkPresetType();
-			return;
-		}
+			return new PhTypeUnknown();
 
 		if( !a_type.is_container() )
 			throw new PlcException( "[] Node", "not a container subscripted" );
 
-		/*if( a_type._class == null )
-	    {
-	      type = new PhTypeUnknown();
-	      return;
-	    }
-
-	    type = new PhantomType( a_type._class );
-		 */
-		type = new PhantomType( a_type.get_class() );
-		checkPresetType();
+		return new PhantomType( a_type.get_class() );		
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
@@ -58,11 +46,11 @@ public class OpSubscriptNode extends BiNode {
 
 		// put array object to load from
 		atom.generate_code(c,s);
-		move_between_stacks(c, atom.is_on_int_stack());
+		move_between_stacks(c, atom);
 
 		// put subscript
 		subscr.generate_code(c,s);
-		move_between_stacks(c, subscr.is_on_int_stack());
+		move_between_stacks(c, subscr);
 
 		c.emitCall(10,1); // Method number 10, 1 parameter - get
 	}
@@ -83,7 +71,7 @@ public class OpSubscriptNode extends BiNode {
 		//move_between_stacks(c, subscr.is_on_int_stack());
 
 		//c.emitCall(10,1); // Method number 10, 1 parameter - get
-		llc.putln(getLlvmTempName()+" = call "+llc.getObjectType()+" @PhantomVm_ArrayLoad( "+llc.getObjectType()+" "+_l.getLlvmTempName()+", i32 "+_r.getLlvmTempName()+ ") ;");
+		llc.putln(getLlvmTempName()+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_ArrayLoad( "+LlvmCodegen.getObjectType()+" "+_l.getLlvmTempName()+", i32 "+_r.getLlvmTempName()+ ") ;");
 	}
 	
 

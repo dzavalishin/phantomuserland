@@ -368,6 +368,8 @@ void free_ldt_selector(selector_id sel)
 #endif
 }
 
+// does not work in QEMU and not portable
+#if 0
 // -----------------------------------------------------------------------
 //
 // Modify kernel DS limit to enable/disable access to paged/persistent memory
@@ -399,5 +401,34 @@ arch_ia32_modify_ds_limit( bool on_off)
     asm volatile("movw %w0,%%ss" : : "r" (KERNEL_DS));
 
     return 0;
+}
+
+#endif
+
+
+void dump_descriptor( struct real_descriptor *d )
+{
+    unsigned long base;
+    unsigned int limit;
+
+    base = d->base_low | (d->base_med << 16) | (d->base_high << 24);
+    limit = d->limit_low | (d->limit_high << 16);
+
+    printf("descriptor base = 0x%lx limit = 0x%05x access = 0x%02x granularity = 0x%01x\n",
+        base, limit,
+        d->access,
+        d->granularity
+        );
+}
+
+void dump_gdt( void )
+{
+    printf("GDT:\n");
+    int i;
+    for( i = 0; i < GDTSZ; i++ )
+    {
+        printf("%02x: ", i*8 );
+        dump_descriptor( gdt+i );
+    }
 }
 

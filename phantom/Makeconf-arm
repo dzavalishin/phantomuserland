@@ -2,8 +2,9 @@ ARCH_FLAGS      = -msoft-float
 #-mpoke-function-name
 
 
-BIN_PREFIX=arm-elf-
+#BIN_PREFIX=arm-elf-
 #BIN_PREFIX=arm-none-eabi-
+BIN_PREFIX=arm-linux-gnueabihf-
 
 export AS       = $(BIN_PREFIX)as
 export CC       = $(BIN_PREFIX)gcc

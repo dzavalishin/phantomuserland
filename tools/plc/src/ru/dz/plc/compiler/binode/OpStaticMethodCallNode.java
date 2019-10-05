@@ -4,13 +4,12 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
-import ru.dz.plc.compiler.LlvmCodegen;
+import ru.dz.plc.compiler.Method;
 import ru.dz.plc.compiler.ParseState;
+import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
-import ru.dz.plc.compiler.llvm.LlvmStringConstant;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
-import ru.dz.soot.SootMain;
 
 /**
  * <p>Static method call node.</p>
@@ -25,15 +24,34 @@ import ru.dz.soot.SootMain;
 
 public class OpStaticMethodCallNode extends BiNode 
 {
-	PhantomType obj_type = null; // type of object, which is used as 'this' in call
+	//PhantomType obj_type = null; // type of object, which is used as 'this' in call
 	private int ordinal;
+	private PhantomClass callClass;
 
-    public OpStaticMethodCallNode(Node object, int ordinal, Node args) 
+	/**
+	 * 
+	 * @param object object to be this in called method
+	 * @param ordinal method ordinal
+	 * @param args call args
+	 * @param callClass class to call method statically from
+	 */
+    public OpStaticMethodCallNode(Node object, int ordinal, Node args, PhantomClass callClass ) 
     { 
         super(object, args);
-        this.ordinal = ordinal; 
+        this.ordinal = ordinal;
+		this.callClass = callClass; 
     }
-	public String toString()  {    return ".static_call."+ordinal;  }
+	
+    public String toString()  {    return ".static_call."+ordinal+" in "+callClass.getName();  }
+
+	public PhantomClass getCallClass() {
+		return callClass;
+	}
+
+	public int getOrdinal() {
+		return ordinal;
+	}
+
 
 	@Override
 	public boolean args_on_int_stack() {
@@ -49,10 +67,9 @@ public class OpStaticMethodCallNode extends BiNode
 		generate_my_code(c,s);
 	}
 
-	public void find_out_my_type() throws PlcException {
-		checkPresetType();
-		if( type == null ) throw new PlcException("Static method call Node","return type is not set");
-		//type = new ph_type_unknown(); // BUG! Wrong!
+	public PhantomType find_out_my_type() throws PlcException {
+		//if( getType() == null ) 
+		throw new PlcException("Static method call Node","return type is not set");
 	}
 
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
@@ -64,20 +81,23 @@ public class OpStaticMethodCallNode extends BiNode
 			n_param++;
 
 		if(n_param > 1024)
-			SootMain.warning("too many params in static call: "+n_param);
+			print_warning("too many params in static call: "+n_param);
 		
 		if( _r != null ) _r.generate_code(c,s); // calc args
 		//c.emitIConst_32bit(n_param); // n args
 		
 		_l.generate_code(c,s); // get object
-		move_between_stacks(c, _l.is_on_int_stack());
+		move_between_stacks(c, _l );
 
-        //c.emitString(methodName);
-        // Summon class of 'this' by name - right? 
-        // Or have it extracted from this itself? Dup this above and
-        // call special bytecode 'getClassRef'?
-        c.emitSummonByName(_l.getType().get_main_class_name());
-		
+		if( callClass != null )
+			c.emitSummonByName( callClass.getName() );
+		else
+			c.emitSummonByName(_l.getType().get_main_class_name()); // Default       
+
+        	
+        // TODO rewrite bytecode implementation to get class in bytecode if
+        // null is passed as class
+        
 		c.emitStaticCall(ordinal,n_param);
 	}
 
@@ -86,14 +106,14 @@ public class OpStaticMethodCallNode extends BiNode
 	 * data for dynlinker and will be replaced then with call to real method.
 	 * Finally dynlinker will reset stack to previous frame's state and jump 
 	 * (return) to real method.
-	 */
+	 * /
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
 		String proxyArgdef = "";
 		String proxyName = methodName;
 
 		proxyName += "_"+llc.getPhantomMethod().getLlvmTempName("dyncall");
-		proxyName = proxyName.replaceAll("<init>", "\\$Constructor");
+		proxyName = proxyName.replaceAll(Method.CONSTRUCTOR_M_NAME, "\\$Constructor");
 		proxyName = proxyName.replaceAll("%", "");
 		
 		boolean first = true;
@@ -142,7 +162,7 @@ public class OpStaticMethodCallNode extends BiNode
 			}
 		
 		llc.putln(");");
-	}
+	}*/
 	
 	/*
 	@Override

@@ -27,16 +27,18 @@ public class TestCommons {
 	{
 		String[] args = new String[4];
 		
+		System.out.println(String.format("Compiling %s", src));
+		
 		args[0] = "-Itest/pc";
-		args[1] = "-I../../plib/bin";
+		args[1] = "-I" + System.getenv("PHANTOM_HOME") + "plib/bin"; //"-I../../plib/bin";
 		args[2] = "-otest/pc";
 		args[3] = src;
 		
 		try {
-			
-		
-		if( PlcMain.go(args) )
-			fail("Compile failed");
+			if( PlcMain.go(args) )
+				fail("Compile failed");
+			else
+				System.out.println(String.format("Compilation of %s done", src));
 		}
 		catch( Throwable o )
 		{

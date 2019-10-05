@@ -13,6 +13,9 @@ extends Token {
 		boolean hex = false;
 		
 		//System.out.format("number '%s'  ", part);
+		// have to do it in grammar, or else 2-2 can't be compiled
+		//if( part.charAt(0) == '-') part = part.substring(1);
+		
 		
 		
 		// Hex const - if part len is 1, leading 0 will be covered below in for loop

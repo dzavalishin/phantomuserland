@@ -16,8 +16,25 @@ public class ClassMap {
 	ClassTable       imported_classes = new ClassTable();
 
 	private static ClassMap  static_hack;
-	public static ClassMap  get_map() { if(null==static_hack) static_hack = new ClassMap(); return static_hack; }
-	private ClassMap() { static_hack = this; }
+	public static ClassMap  get_map() { 
+		if(null==static_hack)
+		{
+			static_hack = new ClassMap();
+			try {
+				static_hack.imported_classes.add( new PhantomClass(".internal.void") );
+			} catch (PlcException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return static_hack; 
+	}
+
+	private ClassMap() { 
+		static_hack = this;
+
+
+	}
 
 
 
@@ -25,7 +42,9 @@ public class ClassMap {
 	public void codegen() throws PlcException, IOException { classes.codegen(); }
 	//public void llvmCodegen() throws PlcException, IOException { classes.llvmCodegen(); }
 	public void preprocess() throws PlcException {		classes.preprocess();	}
+	public void set_ordinals() throws PlcException { classes.set_ordinals(); }
 
+	
 	/**
 	 * do_import - import class
 	 *
@@ -47,7 +66,7 @@ public class ClassMap {
 
 	/** Need this in unit tests - must clean class map after compiling root class stubs */
 	public void clear() { imported_classes.clear(); classes.clear(); }
-	
+
 	/**
 	 * 
 	 * @param cln Class name
@@ -62,11 +81,11 @@ public class ClassMap {
 			c = imported_classes.get(cln,justTry, ps);
 		return c;
 	}
-	
-	public void listMethods() {
-		classes.listMethods();		
-	}
-	
+
+	public void listMethods() {		classes.listMethods();	}
+	public void propagateVoid() throws PlcException { classes.propagateVoid(); }
+
+
 
 
 }

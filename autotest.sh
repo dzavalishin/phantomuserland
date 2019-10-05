@@ -1,18 +1,18 @@
 #!/bin/sh
-cd `dirname $0`
-export PHANTOM_HOME=`pwd`
+cd $(dirname $0)
+export PHANTOM_HOME=$(pwd)
 export LANG=C
 ME=${0##*/}
 PASSES=2
 GDB_PORT=1235		# get rid of stalled instance by incrementing port no.
 GDB_PORT_LIMIT=1250	# avoid spawning too many stalled instances
-GDB_OPTS="-gdb tcp::$GDB_PORT"
+#GDB_OPTS="-gdb tcp::$GDB_PORT"
 #GDB_OPTS="-s"
-QEMU=`which qemu`		# qemu 0.x
-[ "$QEMU" ] || QEMU=`which kvm`	# qemu 1.x and later
+QEMU=$(which qemu)			# qemu 0.x
+[ "$QEMU" ] || QEMU=$(which kvm)	# qemu 1.x and later
 
 TEST_DIR=run/test	# was oldtree/run_test
-TFTP_PATH=../fat/boot
+#TFTP_PATH=../fat/boot
 DISK_IMG=phantom.img
 PHANTOM_LOG=$PHANTOM_HOME/$TEST_DIR/serial0.log
 
@@ -25,22 +25,22 @@ die ( ) {
 COMPILE=1
 SNAPTEST=1
 TESTRUN=1
-PANIC_AFTER=180		# abort test after 3 minutes (consider stalled)
+#PANIC_AFTER=180		# abort test after 3 minutes (consider stalled)
 
 at_exit ( ) {
 	[ "$RESTORE_IMG" ] && mv $DISK_IMG.orig $DISK_IMG
 	[ "$CRONMODE" ] && grep -qv svn $0.log >/dev/null && {
 		if [ make.log -nt $PHANTOM_LOG ]
 		then
-			VERSION=`grep revision $0.log`
-			RESULT=`grep Error make.log | head -1`
+			VERSION=$(grep revision $0.log)
+			RESULT=$(grep Error make.log | head -1)
 			SEND_LOG=make.log
 		else
-			VERSION=`grep SVN $PHANTOM_LOG | sed 's/[^m]*m//g;s/starting//'`
-			RESULT=`grep 'FAIL\|Panic\|snapshot test' $PHANTOM_LOG | tr '\n' ';'`
+			VERSION=$(grep SVN $PHANTOM_LOG | sed 's/[^m]*m//g;s/starting//')
+			RESULT=$(grep 'FAIL\|Panic\|snapshot test' $PHANTOM_LOG | tr '\n' ';')
 			SEND_LOG="$0.log $PHANTOM_LOG"
 		fi
-		sed 's/[^m]*m//g;s///g' $SEND_LOG | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-`whoami`}
+		sed 's/[^m]*m//g;s///g' $SEND_LOG | mail -s "$VERSION: ${RESULT:-test ok}" ${MAILTO:-$(whoami)}
 	}
 }
 
@@ -105,7 +105,7 @@ preserve_log ( ) {
 
 	while [ $C -gt 0 ]
 	do
-		T=`expr $C - 1`
+		T=$(expr $C - 1)
 
 		[ -e $SAVED_LOG.$T ] && mv $SAVED_LOG.$T $SAVED_LOG.$C
 		C=$T
@@ -117,7 +117,7 @@ preserve_log ( ) {
 
 	echo "The $1 can be viewed at
 
-http://misc.dz.ru/~`whoami`/$1
+http://misc.dz.ru/~$(whoami)/$1
 
 Previous copies are kept ($1.0 through .9)"
 }
@@ -125,8 +125,8 @@ Previous copies are kept ($1.0 through .9)"
 # update data BEFORE checking for stalled copies
 [ "$CHECK_GIT" ] && {
 	rm -f make.log
-	GIT_OUT=`git pull`
-	[ $? -ne 0 -o `echo "$GIT_OUT" | grep -c '^Already up-to-date'` -ne 0 ] && \
+	GIT_OUT=$(git pull)
+	[ $? -ne 0 -o $(echo "$GIT_OUT" | grep -c '^Already up-to-date') -ne 0 ] && \
 		die "$MSG"
 
 	echo "$GIT_OUT"
@@ -135,8 +135,8 @@ Previous copies are kept ($1.0 through .9)"
 
 # check if another copy is running
 [ "$FORCE" ] || {
-	RUNNING=`ps xjf | grep $ME | grep -vw "grep\\|$$"`
-	DEAD=`ps xjf | grep $QEMU | grep -vw "grep"`
+	RUNNING=$(ps xjf | grep $ME | grep -vw "grep\\|$$")
+	DEAD=$(ps xjf | grep $QEMU | grep -vw "grep")
 	[ "$RUNNING" ] && {
 		(echo "$RUNNING" | grep -q defunct) || \
 		(tail -1 $PHANTOM_LOG | grep ^Press) || {
@@ -148,18 +148,18 @@ Previous copies are kept ($1.0 through .9)"
 		echo "$RUNNING
 $DEAD
 Previous test run stalled. Trying gdb..."
-		call_gdb $GDB_PORT `echo "$DEAD" | awk '{ print $2 }'`
+		call_gdb $GDB_PORT $(echo "$DEAD" | awk '{ print $2 }')
 
 		preserve_log serial0.log
 	}
 #[ -s $0.lock ] && exit 0
 #touch $0.lock
-	IN_USE=`netstat -ntpl4 2>/dev/null`
+	IN_USE=$(netstat -ntpl4 2>/dev/null)
 
-	while [ `echo "$IN_USE" | grep :$GDB_PORT` ]
+	while [ $(echo "$IN_USE" | grep :$GDB_PORT) ]
 	do
 		echo "Somebody took my gdb port! Taking next one..."
-		GDB_PORT=`expr $GDB_PORT + 1`
+		GDB_PORT=$(expr $GDB_PORT + 1)
 		[ $GDB_PORT -gt $GDB_PORT_LIMIT ] && {
 			echo "Too many attempts. Aborted"
 			exit 0

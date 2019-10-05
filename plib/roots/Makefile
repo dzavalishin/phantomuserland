@@ -15,13 +15,15 @@ roots:
 	@$(PLC) src/stub.object.ph
 	@$(PLC) src/stub.class.ph
 	@$(PLC) src/stub.thread.ph
+	@$(PLC) src/stub.int.ph
+	@$(PLC) src/stub.long.ph
 	@$(PLC) src/internal/internal.string.ph
 	@$(PLC) src/internal/internal.int.ph
+	@$(PLC) src/internal/internal.long.ph
 	@$(PLC) src/internal/internal.class.ph
 	@$(PLC) src/internal/internal.object.ph
 	@$(PLC) src/internal/internal.string.ph
 	@$(PLC) src/internal/internal.int.ph
-	@$(PLC) src/internal/internal.long.ph
 	@$(PLC) src/internal/internal.float.ph
 	@$(PLC) src/internal/internal.double.ph
 	@$(PLC) src/internal/internal.class.ph

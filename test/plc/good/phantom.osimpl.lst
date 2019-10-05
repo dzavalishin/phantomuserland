@@ -1,13 +1,18 @@
 Class .phantom.osimpl
   Field bootObject
   Field timeServer
-  Method .phantom.os.time getTimeServer(  ):
-    return : void
-      ident timeServer : .phantom.os.time
+  Method void setTimeServer( ts: .phantom.os.time ):
+    void  : void
+      = : void
+        ident timeServer : .phantom.os.time
+        ident ts : .phantom.os.time
+
+  C'tor  void <init>(  ):
+    empty : void
 
   Method void init( _bootObject: .internal.object ):
     void  : void
-      = : .internal.object
+      = : void
         ident bootObject : .internal.object
         ident _bootObject : .internal.object
 
@@ -17,22 +22,24 @@ Class .phantom.osimpl
         ,  : void
           ,  : void
             void  : void
-              = : string[]
+              = : void
                 ident env : string[]
-                . : unknown
-                  ident bootObject : .internal.object
-                  Method (no. 23) : unknown
+                (cast) : string[]
+                  . : unknown
+                    ident bootObject : .internal.object
+                    Method (no. 23) : void
             void  : void
-              = : int
+              = : void
                 ident size : int
-                . : unknown
-                  ident env : string[]
-                  Method (no. 12) : unknown
+                (cast) : int
+                  . : unknown
+                    ident env : string[]
+                    Method (no. 12) : void
           void  : void
-            = : int
+            = : void
               ident i : int
               ident size : int
-        do-while : unknown
+        do-while : void
           > : int
             ident i : int
             int const "0" : int const
@@ -43,46 +50,46 @@ Class .phantom.osimpl
                   ,  : void
                     ,  : void
                       void  : void
-                        = : int
+                        = : void
                           ident i : int
                           - : int
                             ident i : int
                             int const "1" : int const
                       void  : void
-                        = : string
+                        = : void
                           ident el : string
                           [] : string
                             ident env : string[]
                             ident i : int
                     void  : void
-                      = : int
+                      = : void
                         ident pos : int
                         . : int
                           ident el : string
-                          Method strstr : unknown
+                          Method strstr : void
                           arg  : unknown
-                            string const "=" : string const
+                            string pool const id="0" : string const
                   if : unknown
                     < : int
                       ident pos : int
                       int const "0" : int const
                     continue : void
                 void  : void
-                  = : string
+                  = : void
                     ident key : string
                     . : string
                       ident el : string
-                      Method substring : unknown
+                      Method substring : void
                       arg  : int
                         int const "0" : int const
                       arg  : unknown
                         ident pos : int
               void  : void
-                = : string
+                = : void
                   ident val : string
                   . : string
                     ident el : string
-                    Method substring : unknown
+                    Method substring : void
                     arg  : int
                       + : int
                         ident pos : int
@@ -92,11 +99,11 @@ Class .phantom.osimpl
                         - : int
                           . : int
                             ident el : string
-                            Method length : unknown
+                            Method length : void
                           ident pos : int
                         int const "1" : int const
             if : unknown
-              == : string
+              == : int
                 ident key : string
                 ident inkey : string
               return : void
@@ -104,9 +111,7 @@ Class .phantom.osimpl
       return : void const
         null : .internal.object const
 
-  Method void setTimeServer( ts: .phantom.os.time ):
-    void  : void
-      = : .phantom.os.time
-        ident timeServer : .phantom.os.time
-        ident ts : .phantom.os.time
+  Method .phantom.os.time getTimeServer(  ):
+    return : void
+      ident timeServer : .phantom.os.time
 

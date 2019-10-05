@@ -25,7 +25,7 @@ class DState:
         code('</PythonCode>')
         
         # This next line forces the encoder to
-        # throw an exception if any tmp regs 
+        # throw an exception if any tmp regs
         # were leaked within the frame
         assert(self.tmpc == 0) #REG
         
@@ -51,7 +51,7 @@ def setpos(v):
     if line == D.lineno: return
     text = D.lines[line-1]
     D.lineno = line
-    val = text + "\0"*(4-len(text)%4)
+    #val = text + "\0"*(4-len(text)%4)
     #code('POS','strlen='+str(len(val)),'line='+str(line), "'"+val+"'")
     #code('<POS','line='+str(line), 'text="'+text+'"',' />')
     xml('pos','line',line, 'text',text)
@@ -436,7 +436,7 @@ def do_from(t):
             Token(t.pos,'get',None,[ Token(t.pos,'reg',v),item])
             )) #REG
 
-        
+
 def do_globals(t):
     for t in t.items:
         if t.val not in D.globals:

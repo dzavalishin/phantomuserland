@@ -137,7 +137,7 @@ window_handle_t drv_video_next_window(window_handle_t curr)
         }
 
         // No focus means no focus
-        if( next->flags & WFLAG_WIN_NOFOCUS )
+        if( next->flags & (WFLAG_WIN_NOFOCUS|WFLAG_WIN_NOKEYFOCUS) )
         {
             SHOW_FLOW( 4, "next = %x nofocus", (int)next );
             continue;

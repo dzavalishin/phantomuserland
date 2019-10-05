@@ -7,6 +7,11 @@ ifeq ($(ARCH),e2k)
 EXCLUDED_SUBDIRS=test
 endif
 
+ifeq ($(ARCH),arm)
+EXCLUDED_SUBDIRS=test tcpdemo
+endif
+
+
 # TODO divide in bin and modules
 SUBDIRS = $(filter-out $(EXCLUDED_SUBDIRS), tcpdemo test )
 

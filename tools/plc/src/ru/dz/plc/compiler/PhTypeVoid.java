@@ -5,5 +5,6 @@ public class PhTypeVoid extends PhantomType {
 	{
 		//super( null );
 		_is_void = true;
+		//_class = new PhantomClass(".internal.void");
 	}
 }

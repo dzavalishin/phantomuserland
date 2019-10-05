@@ -1,84 +1,86 @@
-Class version 20160109081030178
+Class version 20190822083908271
+
+method <init> ordinal 16
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 
 method run ordinal 8
 --
-  const 1	//  @0
-  isublu	//  @5
-  jz _label_0	//  @6
-  const "arg count: run in .ru.dz.phantom.system.thread_test"	//  @11
-  throw	//  @67
-_label_0:	//  @68
-  summon null	//  @68
-  ; Line 26	//  @69
-  load fld=2	//  @69
-  call m=17 nparm=0	//  @71
-  os drop	//  @73
-  summon class internal.io.tty	//  @74
-  new	//  @95
-  os dup	//  @96
-  save fld=0	//  @97
-  os drop	//  @99
-  ; Line 28	//  @100
-  ; Line 29	//  @100
-  const 1	//  @100
-  i2o	//  @105
-  os dup	//  @106
-  save fld=1	//  @107
-  os drop	//  @109
-  ; Line 29	//  @110
-  ; Line 40	//  @110
-_label_1:	//  @110
-  ; Line 33	//  @110
-  const 1	//  @110
-  jz _label_2	//  @115
-  ; Line 35	//  @120
-  load fld=0	//  @120
-  ; Line 35	//  @122
-  const "Thread is running... "	//  @122
-  ; Line 35	//  @148
-  call m=17 nparm=1	//  @148
-  os drop	//  @150
-  ; Line 36	//  @151
-  load fld=0	//  @151
-  ; Line 36	//  @153
-  const "... "	//  @153
-  ; Line 36	//  @162
-  call m=17 nparm=1	//  @162
-  os drop	//  @164
-  ; Line 36	//  @165
-  ; Line 37	//  @165
-  load fld=1	//  @165
-  o2i	//  @167
-  ; Line 37	//  @168
-  const 1	//  @168
-  ; Line 37	//  @173
-  isum	//  @173
-  i2o	//  @174
-  os dup	//  @175
-  save fld=1	//  @176
-  os drop	//  @178
-  ; Line 37	//  @179
-  ; Line 38	//  @179
-  load fld=0	//  @179
-  ; Line 38	//  @181
-  load fld=1	//  @181
-  call m=5 nparm=0	//  @183
-  ; Line 38	//  @185
-  call m=17 nparm=1	//  @185
-  os drop	//  @187
-  ; Line 38	//  @188
-  ; Line 39	//  @188
-  load fld=0	//  @188
-  ; Line 39	//  @190
-  const "  "	//  @190
-  ; Line 39	//  @197
-  call m=17 nparm=1	//  @197
-  os drop	//  @199
-  ; Line 39	//  @200
-  jmp _label_1	//  @200
-_label_2:	//  @205
-  ; Line 40	//  @205
-  ret	//  @205
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 26
+  load fld=2						//  @5
+  call m=18 nparm=0					//  @7
+  os drop							//  @9
+  summon class internal.io.tty				//  @10
+  new							//  @31
+; set console
+  save fld=0						//  @32
+; Line 28
+; Line 29
+  const 1							//  @34
+  i2o							//  @39
+; set incr
+  save fld=1						//  @40
+; Line 29
+; Line 40
+_label_0:	//  @42
+; Line 33
+  const 1							//  @42
+  jz _label_1						//  @47
+; Line 35
+  load fld=0						//  @52
+; Line 35
+; str 'Thread is running... '
+  const_pool <0>						//  @54
+; Line 35
+  call m=17 nparm=1					//  @59
+  os drop							//  @61
+; Line 36
+  load fld=0						//  @62
+; Line 36
+; str '... '
+  const_pool <1>						//  @64
+; Line 36
+  call m=17 nparm=1					//  @69
+  os drop							//  @71
+; Line 36
+; Line 37
+  load fld=1						//  @72
+  o2i							//  @74
+; Line 37
+  const 1							//  @75
+; Line 37
+  isum							//  @80
+  i2o							//  @81
+; set incr
+  save fld=1						//  @82
+; Line 37
+; Line 38
+  load fld=0						//  @84
+; Line 38
+  load fld=1						//  @86
+  call m=5 nparm=0					//  @88
+; Line 38
+  call m=17 nparm=1					//  @90
+  os drop							//  @92
+; Line 38
+; Line 39
+  load fld=0						//  @93
+; Line 39
+; str '  '
+  const_pool <2>						//  @95
+; Line 39
+  call m=17 nparm=1					//  @100
+  os drop							//  @102
+; Line 39
+  jmp _label_0						//  @103
+_label_1:	//  @108
+; Line 40
+  ret							//  @108
 --
 method end
 

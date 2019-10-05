@@ -7,7 +7,6 @@ import ru.dz.phantom.code.*;
 import ru.dz.plc.PlcMain;
 //import ru.dz.plc.parser.ParserContext;
 import ru.dz.plc.util.*;
-import ru.dz.soot.SootMain;
 
 /**
  * <p>Used to look for classes.</p>
@@ -22,7 +21,7 @@ public class ClassTable {
 
 	ClassTable() {    
 		table = new HashMap<String, PhantomClass>();  
-		}
+	}
 
 	void add( PhantomClass pc ) throws PlcException {
 		String name = pc.getName();
@@ -32,20 +31,20 @@ public class ClassTable {
 	}
 
 	boolean have( String name ) { return table.containsKey(name); }
-	
+
 	public PhantomClass get( String name, boolean justTry, ParseState pc ) { 
 		if(name.charAt(0) != '.' && (!justTry))
 		{
 			System.out.println("Warning: Request for non-absolute class "+name);
 			name = "."+name;
 		}
-		
+
 		PhantomClass ret = ((PhantomClass)table.get(name));
-		
+
 		// Note which classes caller references
 		if( pc != null && ret != null )
 			pc.addReferencedClass(ret);
-		
+
 		return ret;
 	}
 
@@ -64,118 +63,47 @@ public class ClassTable {
 		for( Iterator<PhantomClass> i = table.values().iterator(); i.hasNext(); )
 		{
 			PhantomClass c = i.next();
-			//SootMain.say("gen class "+c);
-			{
-				String classfns = c.getName()+".pc";
-				String lstfns = c.getName()+".lstc";
-				String llvmfns = c.getName()+".ll";
-				
-				// skip leading point
-				File classfn = new File( PlcMain.getOutputPath(), classfns.substring(1));
-				File lstfn = new File( PlcMain.getOutputPath(), lstfns.substring(1));
-				File llvmfn = new File( PlcMain.getOutputPath(), llvmfns.substring(1));
 
-				classfn.delete();
-				RandomAccessFile of = new RandomAccessFile( classfn, "rw" );
+			CodeWriters cw = new CodeWriters( c.getName() );
 
-				lstfn.delete();
-				FileWriter lst = new FileWriter(lstfn);
-
-				llvmfn.delete();
-				BufferedWriter llvmFile = new BufferedWriter( new FileWriter(llvmfn) );
-				
-				{
-					/*
-					File verfn = new File( PlcMain.getOutputPath(), verfns.substring(1));
-					RandomAccessFile vf = new RandomAccessFile( verfn, "rw" );
-					String verstr = vf.readLine();
-					int ver = 0;
-					if(verstr.matches("Version=[0-9]+"))
-					{
-						
-					}
-					else
-					{
-						verstr = String.format("%4d", year, month, day, hour, min, sec );
-					}*/
-
-					
-				}
-
-				Calendar cc = Calendar.getInstance(TimeZone.getTimeZone("GMT"));						
-				String verstr = String.format("%4d%02d%02d%02d%02d%02d%03d", 
-						cc.get(Calendar.YEAR), 
-						cc.get(Calendar.MONTH), 
-						cc.get(Calendar.DAY_OF_MONTH), 
-						cc.get(Calendar.HOUR), 
-						cc.get(Calendar.MINUTE), 
-						cc.get(Calendar.SECOND),
-						cc.get(Calendar.MILLISECOND)
-						);
-				
-				ClassFileInfo cf =
+			ClassFileInfo cf =
 					new ClassFileInfo(
-							of, c.getName(), c.getParent() == null ? "" : c.getParent(),
+							cw.get_of(), c.getName(), c.getParent() == null ? "" : c.getParent(),
 									c.getFieldSlotsNeeded(), c.getMethodSlotsNeeded(),
-									verstr
-					);
+									cw.getVersionString()
+							);
 
-				cf.write();
-				c.codegen(of, lst, llvmFile, verstr);
-				//cf.reWrite();
+			cf.write();
+			//c.codegen(of, lst, llvmFile, c_File, verstr);
+			c.codegen( cw );
+			//cf.reWrite();
 
-				of.close();
-				lst.close();
-				llvmFile.close();
-			}
 
-			{
-				String fns = c.getName()+".lst";
-				// skip leading point
-				File fn = new File( PlcMain.getOutputPath(), fns.substring(1));			
-				fn.delete();
-				
-				FileOutputStream os = new FileOutputStream( fn );
-				//BufferedOutputStream bos = new BufferedOutputStream(os);
-			
-				PrintStream ps = new PrintStream(os);
-				
-				c.print(ps);
-				os.close();
-				ps.close();
-			}
+			c.print(cw.get_lstps());
 
 			{
-				String fns = c.getName()+".d";
-				// skip leading point
-				File fn = new File( PlcMain.getOutputPath(), fns.substring(1));			
-				fn.delete();
-				
-				FileOutputStream os = new FileOutputStream( fn );
-				//BufferedOutputStream bos = new BufferedOutputStream(os);
-			
-				PrintStream ps = new PrintStream(os);
-				
-				//c.print(ps);
-				
-				ps.format("%s: ", c.getName().substring(1)+".pc" );
-				ps.format("%s", c.getName().substring(1)+".ph" );
-				
+
+				PrintStream d_ps = cw.get_d_ps();
+
+				d_ps.format("%s: ", c.getName().substring(1)+".pc" );
+				d_ps.format("%s", c.getName().substring(1)+".ph" );
+
 				Set<PhantomClass> referencedClasses = c.getReferencedClasses();
 				if( referencedClasses != null )
 				{
 					for( PhantomClass ref : referencedClasses )
 					{
-						ps.format("\t%s", ref.getName().substring(1)+".pc" );
+						d_ps.format("\t%s", ref.getName().substring(1)+".pc" );
 					}
 				}
-				
-				ps.format("\n");
-				
-				os.close();
-				ps.close();
+
+				d_ps.format("\n");
+
 			}
-		
+
+			cw.closeAll();
+
+
 		}
 	}
 
@@ -194,7 +122,7 @@ public class ClassTable {
 			try { of = new RandomAccessFile(tryFile, "r"); return of; }
 			catch (FileNotFoundException ex) { /* fall through */ }
 		}
-		
+
 		//System.out.println("Search failed: "+tryname);
 
 		return null;
@@ -218,7 +146,7 @@ public class ClassTable {
 
 		if(starred)
 			throw new PlcException("class import", "* in import is not implemented", name );
-		
+
 		if( name.indexOf(".") == 0 ) name = name.substring(1); // remove leading '.'
 
 		return tryImport(name);
@@ -262,14 +190,75 @@ public class ClassTable {
 		}
 	}
 
-	public void preprocess() throws PlcException {
+	public void set_ordinals() throws PlcException 
+	{
+		for( PhantomClass c : table.values() )
+			c.set_ordinals();
+	}
+
+	
+	public void preprocess() throws PlcException 
+	{
+		// Process referenced classes first
+		
+		/*		
+		List<PhantomClass> todo = new ArrayList<>( table.values() ); 
+		
+		do {
+			boolean skipped = false;
+			PhantomClass c = todo.remove(0);
+			
+			for( PhantomClass ref : todo )
+			{
+				if( c.getReferencedClasses().contains(ref) )
+				{
+					System.err.println("Class "+c.getName()+" depends on "+ref);
+					skipped = true;
+				}
+				
+			}
+
+			if( skipped )
+			{
+				todo.add(c);
+				System.err.println("Reordered "+c.getName());
+				continue;
+			}
+			
+			c.createDefaultConstructor( new ParseState(c) );
+			c.set_ordinals();
+			//c.preprocess( new ParseState(c) );
+			
+		} while(!todo.isEmpty());
+		
 		for( Iterator<PhantomClass> i = table.values().iterator(); i.hasNext(); )
 		{
 			PhantomClass c = i.next();
+			
+			//c.getReferencedClasses()
+			
 			//c.listMethods();
+			c.createDefaultConstructor( new ParseState(c) );
 			c.preprocess( new ParseState(c) );
 		}
+		*/
 
+		for( PhantomClass c : table.values() )
+		{
+			c.createDefaultConstructor( new ParseState(c) );
+			c.set_ordinals();
+		}
+
+		for( PhantomClass c : table.values() )
+			c.preprocess( new ParseState(c) );
+		
+		
+	}
+
+	public void propagateVoid() throws PlcException 
+	{
+		for( PhantomClass c : table.values() )
+			c.propagateVoid();
 	}
 
 

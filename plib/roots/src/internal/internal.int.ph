@@ -38,6 +38,7 @@ class .internal.int
 
 	.internal.string toString() [5] {  }
 
+
 };
 
 

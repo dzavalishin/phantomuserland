@@ -14,6 +14,7 @@
  *
 **/
 
+
 #include <kernel/init.h>
 #include <kernel/mutex.h>
 #include <kernel/stats.h>
@@ -26,7 +27,7 @@
 #include <vm/object.h>
 
 static int inited = 0;
-static int stop = 0;
+static volatile int stop_refdec_thread = 0;
 
 
 static void deferred_refdec_init(void);
@@ -67,7 +68,7 @@ static void deferred_refdec_init(void)
 /*
 static void deferred_refdec_stop(void) //__attribute__((unused))
 {
-    stop = 1;
+    stop_refdec_thread = 1;
     hal_cond_signal( &start_refdec_cond );
 }
 */
@@ -146,7 +147,7 @@ static void deferred_refdec_thread(void *a)
     t_current_set_name("RefDec");
     t_current_set_priority( THREAD_PRIO_HIGH );
 
-    while(!stop)
+    while(!stop_refdec_thread)
     {
         hal_mutex_lock(  &deferred_refdec_mutex );
         // TODO timed wait

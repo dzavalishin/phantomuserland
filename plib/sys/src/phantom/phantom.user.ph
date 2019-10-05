@@ -4,20 +4,12 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
- *
-**/
-
-package .phantom;
-
-/**
- *
  * Represents user account.
  * Current implementation is temporary.
  *
 **/
+
+package .phantom;
 
 class user
 {

@@ -34,11 +34,17 @@ int rect_eq( rect_t *a, rect_t *b )
         (a->ysize == b->ysize );
 }
 
+/*
 int rect_empty( rect_t *a )
 {
     return (a->x > 0) && (a->y > 0);
 }
+*/
 
+int rect_empty( rect_t *a )
+{
+    return !((a->xsize > 0) && (a->ysize > 0));
+}
 
 
 
@@ -149,6 +155,18 @@ int rect_mul( rect_t *real_out, rect_t *a, rect_t *b )
     return (out.xsize > 0) && (out.ysize > 0);
 }
 
+#warning intersection can give up to 4 rectangles
+
+
+    /*
+    +--------------------+
+    |      | out2 |      |   
+    |      +------+      |
+    | out1 | new  | out4 |   <-- new
+    |      +------+      |
+    |      | out3 |      |   
+    +------+------+------+   <-- old
+    */
 
 
 //! Returns two rectangles which together cover space which is

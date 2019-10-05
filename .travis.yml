@@ -1,0 +1,56 @@
+#dist: trusty
+dist: bionic
+language: c
+
+# /home/travis/build/dzavalishin/phantomuserland
+env:
+  - PHANTOM_HOME="/home/travis/build/dzavalishin/phantomuserland"
+#  - ARCH=arm PHANTOM_HOME="/home/travis/build/dzavalishin/phantomuserland" 
+
+# TODO env?
+#ARCH=ia32
+#ARCH=arm
+#ARCH=mips
+#ARCH=amd64
+#ARCH=e2k
+
+# what hardware configuration we build for.
+#     Usual Intel PC
+#BOARD=pc_pci
+#     Arm Integrator/CP
+#BOARD=arm_icp
+
+
+#python:
+#  - "3.6"
+
+compiler:
+  - gcc
+  - clang
+
+#cache:
+#  directories:
+#    - $HOME/.m2
+
+#env:
+#  - LUA_PATH="/usr/local/lua/;;"
+
+before_install:
+  - sudo apt-get install libcunit1 libcunit1-dev
+  - sudo apt-get install gcc-multilib
+  - sudo apt-get install gcc-arm-linux-gnueabihf
+  - sudo apt-get install binutils-arm-linux-gnueabihf
+#  - sudo apt-get install -y lua5.1 # no socket
+#  - sudo apt-get -y install luarocks
+
+
+script:
+  - echo PHANTOM_HOME=$PHANTOM_HOME
+  - make
+  - make -C test unit
+
+# java.lang.ClassNotFoundException: ru.dz.plc.PlcMain
+#  - make -C test/plc
+
+# does not pass yet - needs CUnit, which seem to be absent :(
+#  - make test

@@ -4,25 +4,18 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
+ * Main OS services interface.
+ * Current implementation is temporary and lets everybody to 
+ * replace OS servivce with own implementation. This will be changed.
  *
 **/
+
 
 package .phantom;
 import .phantom.os.time;
 import .phantom.osimpl;
 import .internal.world;
 import .internal."thread";
-
-/**
- *
- * Main OS services interface.
- * Current implementation is temporary and lets everybody to 
- * replace OS servivce with own implementation. This will be changed.
- *
-**/
 
 class os
 {
@@ -31,7 +24,7 @@ class os
     void init()
     {
         if( impl :!= null )
-	{
+        {
             var w : .internal.world;
             w = new .internal.world();
 
@@ -39,7 +32,7 @@ class os
             th = w.getMyThread();
 
             impl = th.getOsInterface();
-	}
+        }
     }
 
     .phantom.os.time getTimeServer() { init(); return impl.getTimeServer(); }

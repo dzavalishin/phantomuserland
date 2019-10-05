@@ -37,6 +37,7 @@ static void port_test_thread_func(void* arg)
 {
     (void) arg;
 
+    errno_t err;
     int msg_code;
     int n;
     char buf[6] = "-----";
@@ -46,32 +47,35 @@ static void port_test_thread_func(void* arg)
 
     SHOW_INFO0( 0, "porttest: thread running");
 
-    n = port_read(test_p1, &msg_code, &buf, 3);
+    err = phantom_port_read( &n, test_p1, &msg_code, &buf, 3);
     SHOW_INFO( 0, "port_read #0 code %d len %d buf %s", msg_code, n, buf);
+    test_check_eq(err,0);
     test_check_eq(n,3);
     test_check_eq( strncmp(buf, expected, 3), 0 );
 
-    n = port_read(test_p1, &msg_code, &buf, 3);
+    err = phantom_port_read( &n, test_p1, &msg_code, &buf, 3);
     SHOW_INFO( 0, "port_read #1 code %d len %d buf %s", msg_code, n, buf);
+    test_check_eq(err,0);
     test_check_eq(n,3);
     test_check_eq( strncmp(buf, expected, 3), 0 );
 
-    n = port_read(test_p1, &msg_code, &buf, 4);
+    err = phantom_port_read( &n, test_p1, &msg_code, &buf, 4);
     SHOW_INFO( 0, "port_read #2 code %d len %d buf %s", msg_code, n, buf);
+    test_check_eq(err,0);
     test_check_eq(n,4);
     test_check_eq( strncmp(buf, expected, 4), 0 );
 
     buf[4] = 'X';
-    n = port_read(test_p1, &msg_code, &buf, 5);
+    err = phantom_port_read( &n, test_p1, &msg_code, &buf, 5);
     SHOW_INFO( 0, "port_read #3 code %d len %d buf %s", msg_code, n, buf);
+    test_check_eq(err,0);
     test_check_eq(n,5);
     test_check_eq( strcmp(buf, expected), 0 );
 
     SHOW_INFO0( 0, "porttest: testing delete p1 from other thread");
-    n = port_delete(test_p1);
+    err = phantom_port_delete(test_p1);
+    test_check_eq(err,0);
     SHOW_INFO0( 0, "porttest: end port_test_thread_func()");
-    test_check_eq(n,0);
-
 
     port_test_thread_func_finished = 1;
 }
@@ -82,6 +86,7 @@ int do_test_ports(const char *test_parm)
 {
     (void) test_parm;
 
+    errno_t err;
     char testdata[5];
     //thread_id t;
     int res;
@@ -92,10 +97,14 @@ int do_test_ports(const char *test_parm)
     strcpy(testdata, "abcd");
 
     SHOW_INFO0( 0, "porttest: port_create()");
-    test_p1 = port_create(1,    "test port #1");
-    test_p2 = port_create(10,   "test port #2");
-    test_p3 = port_create(1024, "test port #3");
-    test_p4 = port_create(1024, "test port #4");
+    err = phantom_port_create( &test_p1, 1,    "test port #1");
+    test_check_eq(err,0);
+    err = phantom_port_create( &test_p2, 10,   "test port #2");
+    test_check_eq(err,0);
+    err = phantom_port_create( &test_p3, 1024, "test port #3");
+    test_check_eq(err,0);
+    err = phantom_port_create( &test_p4, 1024, "test port #4");
+    test_check_eq(err,0);
 
     test_check_ge(test_p1,0);
     test_check_ge(test_p2,0);
@@ -104,33 +113,37 @@ int do_test_ports(const char *test_parm)
 
 
     SHOW_INFO0( 0, "porttest: port_find()");
-    int found = port_find("test port #1");
+    int found;
+    err = phantom_port_find( &found, "test port #1");
+    test_check_eq(err,0);
     SHOW_INFO( 0, "'test port #1' has id %d (should be %d)", found, test_p1);
     test_check_eq(found, test_p1);
 
     SHOW_INFO0( 0, "porttest: port_write() on 1, 2 and 3");
-    res = port_write(test_p1, 1, &testdata, sizeof(testdata));
+    res = phantom_port_write(test_p1, 1, &testdata, sizeof(testdata));
     test_check_eq(res,0);
-    res = port_write(test_p2, 666, &testdata, sizeof(testdata));
+    res = phantom_port_write(test_p2, 666, &testdata, sizeof(testdata));
     test_check_eq(res,0);
-    res = port_write(test_p3, 999, &testdata, sizeof(testdata));
+    res = phantom_port_write(test_p3, 999, &testdata, sizeof(testdata));
     test_check_eq(res,0);
-    SHOW_INFO( 0, "porttest: port_count(test_p1) = %d", port_count(test_p1));
+    err = phantom_port_count( &res, test_p1 );
+    test_check_eq(err,0);
+    SHOW_INFO( 0, "porttest: port_count(test_p1) = %d", res );
 
     SHOW_INFO0( 0, "porttest: port_write() on 1 with timeout of 1 sec (blocks 1 sec)");
-    res = port_write_etc(test_p1, 1, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
+    res = phantom_port_write_etc(test_p1, 1, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
     //test_check_ne(res,0); // TODO check for actual errno
-    test_check_eq(res,-ETIMEDOUT);
+    test_check_eq(res, ETIMEDOUT);
 
     SHOW_INFO0( 0, "porttest: port_write() on 2 with timeout of 1 sec (wont block)");
-    res = port_write_etc(test_p2, 777, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
+    res = phantom_port_write_etc(test_p2, 777, &testdata, sizeof(testdata), PORT_FLAG_TIMEOUT, 1000000);
     SHOW_INFO( 0, "porttest: res=%d, %s", res, res == 0 ? "ok" : "BAD");
     test_check_eq(res,0);
 
     SHOW_INFO0( 0, "porttest: port_read() on empty port 4 with timeout of 1 sec (blocks 1 sec)");
-    res = port_read_etc(test_p4, &dummy, &dummy2, sizeof(dummy2), PORT_FLAG_TIMEOUT, 1000000);
-    SHOW_INFO( 0, "porttest: res=%d, %s", res, res == -ETIMEDOUT ? "ok" : "BAD");
-    test_check_eq(res,-ETIMEDOUT);
+    err = phantom_port_read_etc( &res, test_p4, &dummy, &dummy2, sizeof(dummy2), PORT_FLAG_TIMEOUT, 1000000);
+    SHOW_INFO( 0, "porttest: err=%d, %s", err, err == ETIMEDOUT ? "ok" : "BAD");
+    test_check_eq(err, ETIMEDOUT);
 
     SHOW_INFO0( 0, "porttest: spawning thread for port 1");
 
@@ -146,15 +159,15 @@ int do_test_ports(const char *test_parm)
     test_check_ge(res,0);
 
     SHOW_INFO0( 0, "porttest: write");
-    res = port_write(test_p1, 1, &testdata, sizeof(testdata));
+    res = phantom_port_write(test_p1, 1, &testdata, sizeof(testdata));
     test_check_eq(res,0);
 
     // now we can write more (no blocking)
     SHOW_INFO0( 0, "porttest: write #2");
-    res = port_write(test_p1, 2, &testdata, sizeof(testdata));
+    res = phantom_port_write(test_p1, 2, &testdata, sizeof(testdata));
     test_check_eq(res,0);
     SHOW_INFO0( 0, "porttest: write #3");
-    res = port_write(test_p1, 3, &testdata, sizeof(testdata));
+    res = phantom_port_write(test_p1, 3, &testdata, sizeof(testdata));
     test_check_eq(res,0);
 
     SHOW_INFO0( 0, "porttest: waiting on spawned thread");
@@ -165,16 +178,18 @@ int do_test_ports(const char *test_parm)
         hal_sleep_msec(10);
 
     SHOW_INFO0( 0, "porttest: close p1");
-    port_close(test_p2);
+    err = phantom_port_close(test_p2);
+    test_check_eq(err,0);
+
     SHOW_INFO0( 0, "porttest: attempt write p1 after close");
-    res = port_write(test_p2, 4, &testdata, sizeof(testdata));
+    res = phantom_port_write(test_p2, 4, &testdata, sizeof(testdata));
     SHOW_INFO( 0, "porttest: port_write ret %d", res);
     test_check_ne(res,0);
 
-#if 1
+#if 0 // must be deleted in close?
     SHOW_INFO0( 0, "porttest: testing delete p2");
-    res = port_delete(test_p2);
-    test_check_eq(res,0);
+    err = phantom_port_delete(test_p2);
+    test_check_eq(err,0);
 #endif
     SHOW_INFO0( 0, "porttest: end test main thread");
 

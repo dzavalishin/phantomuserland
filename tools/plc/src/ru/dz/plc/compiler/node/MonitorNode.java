@@ -24,7 +24,7 @@ public class MonitorNode extends Node {
 		this.lock =  lock;
 	}
 	public String toString()  {    return "monitor  "+ (lock ? "lock" : "unlock");  }
-	public void find_out_my_type() throws PlcException { /* don't care */ type = PhantomType.getVoid(); }
+	public PhantomType find_out_my_type() throws PlcException { return PhantomType.getVoid(); }
 	public boolean is_const() { return false; }
 
 	
@@ -41,7 +41,7 @@ public class MonitorNode extends Node {
 		
 		// Parameter - value
 		_l.generate_code(c, s);
-		move_between_stacks(c, _l.is_on_int_stack()); 
+		move_between_stacks(c, _l.is_on_int_stack(), _l.getType()); 
 		
 		if(lock) c.emitLock();		
 		else     c.emitUnLock();
