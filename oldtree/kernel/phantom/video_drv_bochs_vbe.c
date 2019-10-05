@@ -11,15 +11,20 @@
 
 #ifdef ARCH_ia32
 
-#define DEBUG_MSG_PREFIX "video"
+#define DEV_NAME "Bochs VGA PCI driver"
+
+#define DEBUG_MSG_PREFIX "vga.bochs"
 #include <debug_ext.h>
-#define debug_level_flow 6
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
 
 #include <hal.h>
 #include <kernel/vm.h>
+#include <kernel/drivers.h>
+#include <kernel/page.h>
+
 #include <ia32/phantom_pmap.h>
 
 #include <ia32/pio.h>
@@ -35,6 +40,9 @@ static int bochs_video_probe();
 static int bochs_video_start();
 static int bochs_video_stop();
 
+static physaddr_t bochs_iomem_phys = 0;
+static physaddr_t bochs_framebuf_phys = 0;
+static int bochs_framebuf_phys_pages = 1024;
 
 // TODO - try 32bpp?
 
@@ -112,21 +120,28 @@ int vbe_set(unsigned short xres, unsigned short yres, unsigned short bpp)
     return 0;
 }
 
-static int n_pages = 1024;
 static int bochs_video_probe()
 {
+
     //printf("Probing for ");
     vbe_write(VBE_DISPI_INDEX_ID, VBE_DISPI_ID2);
     int id = vbe_read(VBE_DISPI_INDEX_ID);
 
+    printf("Bochs VBE emulator id 0x%x \n", id);
+
     if( id < VBE_DISPI_ID2 || id > VBE_DISPI_ID3 )
         return VIDEO_PROBE_FAIL;
 
-    if( hal_alloc_vaddress((void **)&video_driver_bochs_vesa_emulator.screen, n_pages) )
-        panic("Can't alloc vaddress for %d videmem pages", n_pages);
+    if( hal_alloc_vaddress((void **)&video_driver_bochs_vesa_emulator.screen, bochs_framebuf_phys_pages) )
+        panic("Can't alloc vaddress for %d videmem pages", bochs_framebuf_phys_pages);
 
     SHOW_FLOW( 7, "vmem va 0x%X", video_driver_bochs_vesa_emulator.screen);
 
+    if( bochs_framebuf_phys == 0 )
+    {
+        SHOW_ERROR0( 0, "Unknown physmem addr for frame buffer" );
+        return VIDEO_PROBE_FAIL;
+    }
 
     printf("Bochs VBE emulator ver 0x%x found\n", id);
     return VIDEO_PROBE_SUCCESS;
@@ -142,10 +157,17 @@ static void bochs_map_video(int on_off)
 {
     assert( video_driver_bochs_vesa_emulator.screen != 0 );
 
+    if( bochs_framebuf_phys == 0 )
+    {
+        SHOW_ERROR0( 0, "Unknown physmem addr for frame buffer" );
+        return;
+    }
+
     hal_pages_control_etc(
-                          VBE_DISPI_LFB_PHYSICAL_ADDRESS,
+                          //VBE_DISPI_LFB_PHYSICAL_ADDRESS,
+                          bochs_framebuf_phys,
                           video_driver_bochs_vesa_emulator.screen,
-                          n_pages, on_off ? page_map : page_unmap, page_rw,
+                          bochs_framebuf_phys_pages, on_off ? page_map : page_unmap, page_rw,
                           INTEL_PTE_WTHRU|INTEL_PTE_NCACHE );
 }
 
@@ -163,6 +185,73 @@ static int bochs_video_stop()
     return 0;
 }
 
+
+
+phantom_device_t * driver_bochs_svga_probe( pci_cfg_t *pci, int stage )
+{
+    (void) stage;
+
+    SHOW_FLOW( 1, "Probe for " DEV_NAME " stage %d", stage );
+
+    phantom_device_t * dev = calloc(sizeof(phantom_device_t),1);
+
+    int i;
+    for (i = 0; i < 6; i++)
+    {
+        if (pci->base[i] > 0xffff)
+        {
+            SHOW_INFO( 1, "mem base 0x%lx, size 0x%lx", dev->iomem, dev->iomemsize);
+
+            if( pci->size[i] <= 0x2000 ) 
+            {
+                bochs_iomem_phys = pci->base[i];
+
+                dev->iomem = pci->base[i];
+                dev->iomemsize = pci->size[i];
+            }
+            else 
+            {
+                bochs_framebuf_phys = pci->base[i];
+                bochs_framebuf_phys_pages = BYTES_TO_PAGES(pci->size[i]);
+            }
+
+        } else if( pci->base[i] > 0) {
+            dev->iobase = pci->base[i];
+            SHOW_INFO( 1, "io_port 0x%x", dev->iobase);
+        }
+    }
+
+    dev->irq = pci->interrupt;
+
+    // Gets port 0. uninited by BIOS? Need explicit PCI io addr assign?
+    if( dev->iomem == 0 )
+    {
+        SHOW_ERROR0( 0, "No io mem?" );
+        goto free;
+    }
+
+    SHOW_FLOW( 1, "Got " DEV_NAME " at io mem %X framebuf %x, %d pages", 
+        bochs_iomem_phys, bochs_framebuf_phys, bochs_framebuf_phys_pages );
+    
+    dev->name = DEV_NAME;
+    dev->seq_number = 0;
+
+    /*
+    if( hal_irq_alloc( dev->irq, &es1370_interrupt, dev, HAL_IRQ_SHAREABLE ) )
+    {
+        SHOW_ERROR( 0, "IRQ %d is busy", dev->irq );
+        goto free;
+    }*/
+
+
+    dev->drv_private = &video_driver_bochs_vesa_emulator;
+
+    return dev;
+
+free:
+    free(dev);
+    return 0;
+}
 
 
 

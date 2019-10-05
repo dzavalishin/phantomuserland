@@ -38,6 +38,8 @@ static void add_alldevs( phantom_device_t *dev );
 static void dump_alldevs( int ac, char **av );
 
 
+phantom_device_t * driver_bochs_svga_probe( pci_cfg_t *pci, int stage );
+
 
 
 #define SPECIAL_VIRTIO_MAP 0
@@ -113,6 +115,9 @@ static pci_probe_t pci_drivers[] =
 
     // Parallels pseudo-SVGA
     { "Parallels SVGA",     driver_parallels_svga_pci_probe,     0, 0x1AB8, 0x4005, 0 },
+
+    // Bochs pseudo-SVGA - QEMU
+    { "Bochs SVGA",     driver_bochs_svga_probe,     0, 0x1234, 0x1111, 0 },
 
 };
 

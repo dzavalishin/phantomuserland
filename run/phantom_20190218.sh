@@ -3,7 +3,8 @@
 # Test script for Phantom OS
 # Requires QEMU 2.5 or higher
 
-Q_VGA="-vga cirrus"
+#Q_VGA="-vga cirrus"
+#Q_VGA="-vga cirrus"
 #-display sdl 
 
 Q_DEBUG="-gdb tcp::1234  "

@@ -58,10 +58,10 @@ struct drv_video_screen_t *video_drivers[] =
     &video_driver_basic_vga,
 #if !JUST_VGA
 
-    // Incomplete, and suspected to break VESA driver
+    // Works as accelerator - hw mouse cursor
     &video_driver_cirrus,
 
-    // &video_driver_bochs_vesa_emulator,
+    &video_driver_bochs_vesa_emulator,
 
     &video_driver_vmware_svga,
 
