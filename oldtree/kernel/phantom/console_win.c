@@ -378,7 +378,7 @@ static void put_progress()
     //progress_rect.y = DEBWIN_YS-PROGRESS_H;
     progress_rect.y = 0;
     progress_rect.ysize = PROGRESS_H;
-    progress_rect.xsize = 0;
+    //progress_rect.xsize = 0;
 
     extern int vm_map_do_for_percentage;
 

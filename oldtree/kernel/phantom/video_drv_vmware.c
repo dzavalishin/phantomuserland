@@ -1350,13 +1350,13 @@ static void alpha_to_bits_line( u_int8_t *bits, size_t noutbytes, rgba_t *pixels
         *bits >>= 1;
 
         //if( pixels->a )
-        if( (!!(*((int*)pixels) & mask)) ^ !!invert )
+        if( (!!(*((int*)pixels) & mask)) ^ (!!invert) )
             *bits |= 0x80;
 #else
         *bits <<= 1;
 
         //if( pixels->a )
-        if( (!!(*((int*)pixels) & mask)) ^ !!invert )
+        if( (!!(*((int*)pixels) & mask)) ^ (!!invert) )
             *bits |= 1;
 #endif
         pixels++;

@@ -301,12 +301,10 @@ static void sb_interrupt( void *_dev )
 
     hal_sti();
 
-
-
     // Clean buffer so that if no incoming data available,
     // No sound will be produced
     u_int16_t *destptr =  (u_int16_t *)sb->blockptr[sb->curblock];
-    memset( destptr, BLOCK_LENGTH*2, 0 );
+    memset( destptr, 0, BLOCK_LENGTH*2 );
 
     int ie = hal_save_cli();
     hal_spin_lock( &sb->lock );
