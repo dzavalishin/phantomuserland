@@ -4,7 +4,7 @@
 # Requires QEMU 2.5 or higher
 
 #Q_VGA="-vga cirrus"
-#Q_VGA="-vga cirrus"
+Q_VGA="-vga vmware"
 #-display sdl 
 
 Q_DEBUG="-gdb tcp::1234  "

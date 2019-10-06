@@ -7,12 +7,12 @@
  * VMWare 'SVGA' driver.
  *
  **/
-
-#ifdef ARCH_ia32
+//temp
+//#ifdef ARCH_ia32
 
 #define DEBUG_MSG_PREFIX "vmware"
 #include <debug_ext.h>
-#define debug_level_flow 8
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -33,16 +33,19 @@
 #include <dev/pci/vmware/svga.h>
 
 
-#define VMWARE_VIDEO_DRV_DEFAULT_X_SIZE 1024
-#define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 768
+//#define VMWARE_VIDEO_DRV_DEFAULT_X_SIZE 1024
+//#define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 768
+#define VMWARE_VIDEO_DRV_DEFAULT_X_SIZE 1280
+//#define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 960
+#define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 900
 
 static void dump_bits( u_int8_t *bits, size_t noutbytes ) __attribute__((unused));
 
 
-void vmware_draw_mouse_bp2(void);
-void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor );
-void vmware_mouse_on_bp2(void);
-void vmware_mouse_off_bp2(void);
+static void vmware_draw_mouse_bp2(void);
+static void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor );
+static void vmware_mouse_on_bp2(void);
+static void vmware_mouse_off_bp2(void);
 
 
 static int vmware_video_probe();
@@ -50,6 +53,10 @@ static int vmware_video_start();
 static int vmware_video_stop();
 static void vmware_video_update(void);
 static errno_t vmware_accel_start(void);
+
+static void vmware_accel_copy(int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize ); // Screen to screen copy    
+static void vmware_accel_clear(int xpos, int ypos, int xsize, int ysize ); // Screen rect clear
+
 
 static void vmware_detect2(int xsize, int ysize, int bpp);
 
@@ -82,11 +89,11 @@ struct drv_video_screen_t        video_driver_vmware_svga =
 .screen		=	0,
 
 .probe	        =	vmware_video_probe,
-.start		= 	vmware_video_start,
-.accel		=	vmware_accel_start,
-.stop		=	vmware_video_stop,
+.start          = 	vmware_video_start,
+.accel          =	vmware_accel_start,
+.stop           =	vmware_video_stop,
 
-.update		=	vmware_video_update,
+.update         =	vmware_video_update,
 
 // todo hw mouse!
 #if 0
@@ -111,7 +118,8 @@ static int vmware_video_probe()
 
 
 // need 4Mbytes aperture
-#define N_PAGES 1024
+//#define N_PAGES 1024
+#define N_PAGES 2048
 
 static void vmware_map_video(int on_off)
 {
@@ -204,7 +212,7 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
     // TODO why?
-#if 1
+#if 0
     (void) pci;
     return 0;
 #else
@@ -270,12 +278,16 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
 
         if( gSVGA.capabilities & SVGA_CAP_RECT_FILL )
         {
+            // QEMU does it, TODO
+            video_driver_vmware_svga.clear = &vmware_accel_clear;
             SHOW_FLOW0( 2, "capas: rect fill" );
         }
 
         if( gSVGA.capabilities & SVGA_CAP_RECT_COPY )
         {
+            // QEMU does it, TODO
             SHOW_FLOW0( 2, "capas: rect copy" );
+            video_driver_vmware_svga.copy = &vmware_accel_copy;
         }
 
         if( gSVGA.capabilities & SVGA_CAP_RECT_PAT_FILL )
@@ -340,14 +352,14 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
         /* Enable the IRQ */
         //Intr_SetHandler(IRQ_VECTOR(irq), SVGAInterruptHandler);
         //Intr_SetMask(irq, TRUE);
-
+        /*
         if( hal_irq_alloc( irq, &SVGAInterruptHandler, 0, HAL_IRQ_SHAREABLE ) )
         {
             SHOW_ERROR( 0, "IRQ %d is busy", irq );
             return 0;
-        }
+        }*/
 
-        SHOW_FLOW( 1, "took urq %d", irq );
+        SHOW_FLOW( 1, "(unused) irq %d", irq );
     }
 
     gSVGA.found = 1;
@@ -496,10 +508,6 @@ SVGA_WriteReg(u_int32_t index, u_int32_t value)
 
 u_int32_t SVGA_ClearIRQ(void)
 {
-    //u_int32_t flags = 0;
-    //Atomic_Exchange(gSVGA.irq.pending, flags);
-    //return flags;
-    //return atomic_set( (int *) &gSVGA.irq.pending, 0 );
     return ATOMIC_FETCH_AND_SET( (int *) &gSVGA.irq.pending, 0 );
 }
 
@@ -769,7 +777,7 @@ SVGA_HasFIFOCap(int cap)
  *
  *-----------------------------------------------------------------------------
  */
-
+// TODO spinlock or mutex me
 void *
 SVGA_FIFOReserve(u_int32_t bytes)  // IN
 {
@@ -1288,7 +1296,7 @@ SVGA_Update(u_int32_t x,       // IN
    SVGA_FIFOCommitAll();
 }
 
-
+// TODO can update not all the screen each time
 static void vmware_video_update(void)
 {
     if(!gSVGA.found) return;
@@ -1452,9 +1460,9 @@ void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
     bzero(andMask, andSize);
     memset(xorMask, 0xFF, xorSize);
 
-    alpha_to_bits( andMask, andSize, cursor, 0xFF000000, 1 );
+//    alpha_to_bits( andMask, andSize, cursor, 0xFF000000, 1 );
 #if !CUR32
-    alpha_to_bits( xorMask, xorSize, cursor, 0x00FFFFFF, 0 );
+//    alpha_to_bits( xorMask, xorSize, cursor, 0x00FFFFFF, 0 );
 #endif
 
 
@@ -1472,15 +1480,65 @@ void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
 
 
 
-
 void vmware_mouse_off_bp2(void)
 {
-    SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_REMOVE_FROM_FB);
+    //SHOW_FLOW0( 0, "cursor off" );
+    //SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_REMOVE_FROM_FB);
 }
 
 void vmware_mouse_on_bp2(void)
 {
+    //SHOW_FLOW0( 0, "cursor on" );
     //SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_RESTORE_TO_FB);
 }
 
-#endif // ARCH_ia32
+// there is no such bit in distributed header, but QEMU reports and, supposedly, does it
+static const int SVGA_CMD_RECT_FILL = 2;
+
+typedef
+struct {
+   uint32 color;
+   uint32 x;
+   uint32 y;
+   uint32 width;
+   uint32 height;
+} __packed
+SVGAFifoCmdFill;
+
+
+static void vmware_accel_clear(int xpos, int ypos, int xsize, int ysize ) // Screen rect clear
+{
+   SVGAFifoCmdFill *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_UPDATE, sizeof *cmd);
+   cmd->x = xpos;
+   cmd->y = ypos;
+   cmd->width = xsize;
+   cmd->height = ysize;
+   cmd->color = 0; // TODO add parameter and test
+   SVGA_FIFOCommitAll();
+}
+
+static void vmware_accel_copy(int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize ) // Screen to screen copy                
+{
+   SVGAFifoCmdRectCopy *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_UPDATE, sizeof *cmd);
+   cmd->srcX = src_xpos;
+   cmd->srcY = src_ypos;
+   cmd->destX = dst_xpos;
+   cmd->destY = dst_ypos;
+   cmd->width = xsize;
+   cmd->height = ysize;
+   SVGA_FIFOCommitAll();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+//#endif // ARCH_ia32

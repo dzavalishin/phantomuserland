@@ -87,8 +87,8 @@ rem SET Q_KQ=-enable-kqemu
 rem SET Q_KQ=-enable-kqemu -kernel-kqemu
 
 rem SET Q_VGA=-vga std
-SET Q_VGA=-vga cirrus
-rem SET Q_VGA=-vga vmware
+rem SET Q_VGA=-vga cirrus
+SET Q_VGA=-vga vmware
 rem SET Q_VGA=-device cirrus-vga
 rem -virtioconsole 1
 
