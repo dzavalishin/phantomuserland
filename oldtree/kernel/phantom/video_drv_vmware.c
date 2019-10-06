@@ -1460,7 +1460,9 @@ void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
     bzero(andMask, andSize);
     memset(xorMask, 0xFF, xorSize);
 
-//    alpha_to_bits( andMask, andSize, cursor, 0xFF000000, 1 );
+    alpha_to_bits( andMask, andSize, cursor, 0xFF000000, 1 );
+    //alpha_to_bits( xorMask, andSize, cursor, 0xFF000000, 1 );
+    alpha_to_bits( xorMask, xorSize, cursor, 0x00FFFFFF, 0 );
 #if !CUR32
 //    alpha_to_bits( xorMask, xorSize, cursor, 0x00FFFFFF, 0 );
 #endif
@@ -1508,7 +1510,7 @@ SVGAFifoCmdFill;
 
 static void vmware_accel_clear(int xpos, int ypos, int xsize, int ysize ) // Screen rect clear
 {
-   SVGAFifoCmdFill *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_UPDATE, sizeof *cmd);
+   SVGAFifoCmdFill *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_RECT_FILL, sizeof *cmd);
    cmd->x = xpos;
    cmd->y = ypos;
    cmd->width = xsize;
