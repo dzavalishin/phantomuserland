@@ -73,6 +73,7 @@ void SVGA_Panic(const char *s) { panic("VmWare SVGA: %s", s); }
 
 SVGADevice gSVGA; // TODO rename
 
+static hal_mutex_t fifo_mutex;
 
 struct drv_video_screen_t        video_driver_vmware_svga =
 {
@@ -218,6 +219,7 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
 #else
     SHOW_FLOW0( 0, "Init" );
 
+    hal_mutex_init( &fifo_mutex, "vmware fifo" );
     /*
      * Use the default base address for each memory region.
      * We must map at least ioBase before using ReadReg/WriteReg.
@@ -787,6 +789,8 @@ SVGA_FIFOReserve(u_int32_t bytes)  // IN
    u_int32_t nextCmd = fifo[SVGA_FIFO_NEXT_CMD];
    Bool reserveable = SVGA_HasFIFOCap(SVGA_FIFO_CAP_RESERVE);
 
+   hal_mutex_lock( &fifo_mutex );
+
    /*
     * This example implementation uses only a statically allocated
     * buffer.  If you want to support arbitrarily large commands,
@@ -1013,6 +1017,8 @@ SVGA_FIFOCommit(u_int32_t bytes)  // IN
    if (reserveable) {
       fifo[SVGA_FIFO_RESERVED] = 0;
    }
+
+   hal_mutex_unlock( &fifo_mutex );
 }
 
 
@@ -1176,7 +1182,7 @@ SVGAFIFOFull(void)
        * for an arbitrary amount of time, then returns control back to
        * the guest CPU.
        */
-
+      //lprintf("vmware SVGA FIFO full\n");
       SVGA_WriteReg(SVGA_REG_SYNC, 1);
       SVGA_ReadReg(SVGA_REG_BUSY);
    }
@@ -1334,7 +1340,8 @@ static void vmware_video_update(void)
 void vmware_draw_mouse_bp2(void)
 {
     SVGA_WriteReg(SVGA_REG_CURSOR_X, video_driver_vmware_svga.mouse_x );
-    SVGA_WriteReg(SVGA_REG_CURSOR_Y, scr_get_ysize() - video_driver_vmware_svga.mouse_y );
+    //SVGA_WriteReg(SVGA_REG_CURSOR_Y, scr_get_ysize() - video_driver_vmware_svga.mouse_y );
+    SVGA_WriteReg(SVGA_REG_CURSOR_Y, Y_PHANTOM_TO_HOST(video_driver_vmware_svga.mouse_y) );
     SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_SHOW);
     SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_REMOVE_FROM_FB);
 }
@@ -1512,7 +1519,7 @@ static void vmware_accel_clear(int xpos, int ypos, int xsize, int ysize ) // Scr
 {
    SVGAFifoCmdFill *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_RECT_FILL, sizeof *cmd);
    cmd->x = xpos;
-   cmd->y = ypos;
+   cmd->y = Y_PHANTOM_TO_HOST(ypos) - ysize;
    cmd->width = xsize;
    cmd->height = ysize;
    cmd->color = 0; // TODO add parameter and test
@@ -1520,12 +1527,13 @@ static void vmware_accel_clear(int xpos, int ypos, int xsize, int ysize ) // Scr
 }
 
 static void vmware_accel_copy(int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize ) // Screen to screen copy                
-{
-   SVGAFifoCmdRectCopy *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_UPDATE, sizeof *cmd);
+{  
+    // TODO coord sanity check and clip, QEMU does not accept out of screen coords (negative at least)      
+   SVGAFifoCmdRectCopy *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_RECT_COPY, sizeof *cmd);
    cmd->srcX = src_xpos;
-   cmd->srcY = src_ypos;
+   cmd->srcY = Y_PHANTOM_TO_HOST(src_ypos) - ysize;
    cmd->destX = dst_xpos;
-   cmd->destY = dst_ypos;
+   cmd->destY = Y_PHANTOM_TO_HOST(dst_ypos) - ysize;
    cmd->width = xsize;
    cmd->height = ysize;
    SVGA_FIFOCommitAll();

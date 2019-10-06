@@ -19,7 +19,7 @@
 #include <video/internal.h>
 #include <video/screen.h>
 
-// if mouse_intersects is used we loose mouse sooner or later
+// If mouse_intersects is used we loose mouse sooner or later. Usually sooner.
 
 /*
 static int mouse_intersects(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize )

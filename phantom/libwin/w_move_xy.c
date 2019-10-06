@@ -21,6 +21,7 @@
 #include <video/window.h>
 #include <video/internal.h>
 #include <video/zbuf.h>
+#include <video/screen.h>
 
 // faster, but has artefacts at top when move down
 #if 0
@@ -103,6 +104,53 @@ w_move( drv_video_window_t *w, int x, int y )
     //lprintf( "w move @ %d/%d, sz %d x %d, to %d/%d\n", w->x, w->y, w->xsize, w->ysize, x, y );
 
     w_lock();
+
+
+#if 1 // vmware needs single thread access, do from paint thread?
+    if( (video_drv->copy != 0) && (video_drv->copy != (void *)vid_null) )
+    {
+        // have hardware accelerated screen to screen bitblt
+        //lprintf( "video accelerator use copy %d/%d -> %d/%d size %d/%d\n", w->x, w->y, x, y, w->xsize, w->ysize );
+
+        if( w->w_decor )
+        {
+            int dest_x = x - ( w->x - w->w_decor->x );
+            int dest_y = y - ( w->y - w->w_decor->y );
+
+            if( w->w_title )
+            {
+                int y_size = w->w_title->y + w->w_title->ysize - w->w_decor->y - 1; // w->w_decor->ysize + w->w_title->ysize
+
+                video_drv->copy( w->w_decor->x, w->w_decor->y, dest_x, dest_y, w->w_decor->xsize, y_size );
+            }
+            else
+                video_drv->copy( w->w_decor->x, w->w_decor->y, dest_x, dest_y, w->w_decor->xsize, w->w_decor->ysize );
+        }
+        else
+            video_drv->copy( w->x, w->y, x, y, w->xsize, w->ysize );
+        //video_drv->clear( w->x, w->y, w->xsize, w->ysize ); // just to tests it - works on vmware
+
+        //SHOW_FLOW( 0, "video accelerator use copy -> %d/%d", x, y ); // recursive mutex lock
+        //lprintf( "done\n" );
+    }
+#else
+    {
+        ui_event_t e_copy;
+        memset( &e_copy, 0, sizeof(e_copy) );
+        e_copy.type = UI_EVENT_TYPE_GLOBAL;
+        e_copy.w.info = UI_EVENT_GLOBAL_COPY_RECT;
+
+        e_copy.w.rect.x = w->x;
+        e_copy.w.rect.y = w->y;
+        e_copy.w.rect.xsize = w->xsize;
+        e_copy.w.rect.ysize = w->ysize;
+
+        e_copy.w.rect2.x = x;
+        e_copy.w.rect2.y = y;
+
+        ev_q_put_global( &e_copy );
+    }
+#endif
 
     memset( &e1, 0, sizeof(e1) );
     memset( &e2, 0, sizeof(e2) );

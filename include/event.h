@@ -59,6 +59,8 @@ struct ui_event
         struct {
             int         	info;           // UI_EVENT_WIN_
             rect_t              rect;           // If relevant...
+            rect_t              rect2;          // If relevant...
+            //rgba_t              color;          // For fill op
         } w;
 
 
@@ -130,7 +132,12 @@ typedef struct ui_event ui_event_t;
 #define UI_EVENT_WIN_BUTTON             6
 
 
-#define UI_EVENT_GLOBAL_REPAINT_RECT    (0xFF00|1) //! Repaint all windows that intersect w. rect
+
+#define UI_EVENT_GLOBAL_REPAINT_RECT    (0xFF00 | 1) //! Repaint all windows that intersect w. rect
+#define UI_EVENT_GLOBAL_COPY_RECT       (0xFF00 | 2) //! Copy part of screen to other place, rect is scr, rect2.x/y is dest pos - FOR 2D ACCELERATOR
+#define UI_EVENT_GLOBAL_FILL_RECT       (0xFF00 | 3) //! Fill part of screen with color, rect is scr pos, color is color        - FOR 2D ACCELERATOR
+
+
 
 /*/ w.info for UI_EVENT_TYPE_MOUSE
 #define UI_EVENT_MOU_CLICK_1            1
