@@ -1,4 +1,11 @@
-ARCH_FLAGS      = -msoft-float 
+ARCH_FLAGS      = -msoft-float -Wno-builtin-declaration-mismatch -marm
+
+# Raspberry PI
+ARCH_FLAGS +=-march=armv6
+#-mtune=arm1176jzf-s
+# -mfloat-abi=hard -mfpu=vfp -mcpu=arm1176jzf-s -march=armv6zk
+
+#-X-mthumb-interwork
 #-mpoke-function-name
 
 

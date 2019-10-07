@@ -7,8 +7,8 @@
  * VMWare 'SVGA' driver.
  *
  **/
-//temp
-//#ifdef ARCH_ia32
+
+#ifdef ARCH_ia32
 
 #define DEBUG_MSG_PREFIX "vmware"
 #include <debug_ext.h>
@@ -1551,4 +1551,4 @@ static void vmware_accel_copy(int src_xpos, int src_ypos, int dst_xpos, int dst_
 
 
 
-//#endif // ARCH_ia32
+#endif // ARCH_ia32

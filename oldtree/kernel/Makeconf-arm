@@ -1,4 +1,4 @@
-ARCH_FLAGS      = -mpoke-function-name
+ARCH_FLAGS      = -mpoke-function-name -marm
 
 HOST_CPU	= i686
 HOST_ARCH	= x86
