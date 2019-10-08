@@ -94,6 +94,9 @@
       "cpu_state.h": "c",
       "arch-cpu_state.h": "c",
       "video_drv_bochs_vbe.h": "c",
-      "phantom_libc.h": "c"
+      "phantom_libc.h": "c",
+      "syscall_net.h": "c",
+      "snap_sync.h": "c",
+      "root.h": "c"
     }
   }
