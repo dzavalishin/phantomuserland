@@ -1,3 +1,5 @@
+#if 0 // moved to video_test.c
+
 #define DEBUG_MSG_PREFIX "vm.vtest"
 #include <debug_ext.h>
 #define debug_level_flow 10
@@ -77,6 +79,7 @@ void videotest(void)
     (void) getchar();
 
 }
+
 
 
 #if 0
@@ -361,4 +364,6 @@ void videotest()
 
 #endif
 
+
+#endif
 
