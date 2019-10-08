@@ -19,6 +19,9 @@
 #include <video/screen.h>
 #include <video/font.h>
 
+#include <unistd.h>
+#include <kunix.h>
+
 #include "winhal.h"
 
 
@@ -143,7 +146,64 @@ void videotest_overlay(void)
 
 
 
+void videotest_pbm()
+{
+//void *bmp_pixels;
+//int bmpxs, bmpys;
 
+    //int ysize = 60;
+    //int xsize = 80;
+    //char win[ysize*xsize*3];
+
+    const char *bpm = "../../plib/resources/backgrounds/phantom_dz_large.pbm";
+
+    int fd;
+    int rc = k_open( &fd, bpm, 0, 0 );
+
+    if( rc )
+        {
+            printf("can't open %s\n", bpm );
+            exit(33);
+        }
+
+        k_seek( 0, fd, 0, SEEK_END );        
+        //long size = ftell( f );
+        int size;
+        k_seek( &size, fd, 0, SEEK_CUR );
+        k_seek( 0, fd, 0, SEEK_SET );
+
+        printf("Size of %s is %d\n", bpm, size );
+
+        char *data = malloc(size);
+
+        rc = k_read( 0, fd, data, size );
+        k_close(fd);
+
+        drv_video_bitmap_t *bmp;
+
+        int i;
+        int result;
+
+        //for( i = 0; i < 1000; i++ )
+            result = bmp_ppm_load( &bmp, data );
+
+        free(data);
+
+        if(result)
+            printf("can't parse %s: %d\n", bpm, result );
+        else
+        {
+            drv_video_window_t *w = drv_video_window_create( 900, 600, 10, 10, COLOR_BLACK, "BMP Test Window", WFLAG_WIN_DECORATED );
+            drv_video_winblt( w );
+
+            drv_video_window_draw_bitmap( w, 0, 0, bmp );
+            drv_video_winblt( w );
+
+            getchar();
+        }
+
+
+}
 
 
 
