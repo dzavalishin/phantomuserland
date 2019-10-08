@@ -35,6 +35,6 @@ break e4c_exception_throw_verbatim_
 #break hdir_add
 
 break longjmp_machdep
-break tt_face_build_cmaps
+#break tt_face_build_cmaps
 
 run
