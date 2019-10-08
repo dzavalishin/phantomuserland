@@ -51,6 +51,8 @@ class weather
         win = new .internal.window();
 
         win.setWinPosition(650,500);
+        //win.setWinSize( 374, 268 );
+
         win.setTitle("Weather");
         //win.setFg(0xFF000000); // black
 		//win.setBg(0xFFcce6ff); // light cyan
