@@ -182,7 +182,7 @@ static void select_accel_driver(void)
 
     if( selected_drv == NULL )
     {
-        SHOW_FLOW0( 1, "No video driver found!");
+        SHOW_FLOW0( 1, "No video accelerator found!");
     }
     else
     {

@@ -120,22 +120,23 @@ static int vmware_video_probe()
 
 // need 4Mbytes aperture
 //#define N_PAGES 1024
-#define N_PAGES 2048
+//#define N_PAGES 2048
 
 static void vmware_map_video(int on_off)
 {
+    int n_pages = BYTES_TO_PAGES(gSVGA.fbSize);
 
     if( video_driver_vmware_svga.screen == 0 )
     {
         void *vva;
 
-        if( hal_alloc_vaddress(&vva, N_PAGES) )
-            panic("Can't alloc vaddress for %d videmem pages", N_PAGES);
+        if( hal_alloc_vaddress(&vva, n_pages) )
+            panic("Can't alloc vaddress for %d videmem pages", n_pages);
 
         video_driver_vmware_svga.screen = vva;
     }
 
-    hal_pages_control( gSVGA.fbMem, video_driver_vmware_svga.screen, N_PAGES, on_off ? page_map_io : page_unmap, page_rw );
+    hal_pages_control( gSVGA.fbMem, video_driver_vmware_svga.screen, n_pages, on_off ? page_map_io : page_unmap, page_rw );
 
 }
 
@@ -228,13 +229,11 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
     //PCI_SetMemEnable(&gSVGA.pciAddr, 1);
     phantom_pci_enable( pci, 1 );
 
-    //gSVGA.ioBase = PCI_GetBARAddr(&gSVGA.pciAddr, 0);
-    //gSVGA.fbMem = (void*) PCI_GetBARAddr(&gSVGA.pciAddr, 1);
-    //gSVGA.fifoMem = (void*) PCI_GetBARAddr(&gSVGA.pciAddr, 2);
-
     gSVGA.ioBase =  pci->base[0];
     gSVGA.fbMem =   pci->base[1];
     gSVGA.fifoPhys = pci->base[2];
+
+    //gSVGA.fbMemSize =   pci->size[1];
 
     SHOW_FLOW( 1, "io %p, framebuf %p, fifo %p", (void *)gSVGA.ioBase, (void *)gSVGA.fbMem, (void *)gSVGA.fifoPhys );
 
