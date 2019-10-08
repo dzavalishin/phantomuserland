@@ -390,7 +390,7 @@ void win_scr_mk_mouse_event(int wParam, int xPos, int yPos )
 
     e.m.buttons = wParam;
     e.abs_x = xPos;
-    e.abs_y = VSCREEN_HEIGHT - yPos - 1;
+    e.abs_y = yPos; //VSCREEN_HEIGHT - yPos - 1;
 
     ev_q_put_any( &e );
     //printf("-ms-");            printf("%d,%d\n", xPos, yPos );
