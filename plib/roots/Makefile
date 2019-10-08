@@ -28,6 +28,7 @@ roots:
 	@$(PLC) src/internal/internal.double.ph
 	@$(PLC) src/internal/internal.class.ph
 	@$(PLC) src/internal/internal.directory.ph
+	@$(PLC) src/internal/internal.io.tty.ph
 
 %.pc: %.ph
 	@echo -:- $< - $@
