@@ -21,7 +21,7 @@
 // TODO if we change memory allocation seriously, change kvtophys()
 // and phystokv() as well
 
-#define TRACE_USED 1
+#define TRACE_USED 0
 
 
 long phantom_phys_stat_arena( physalloc_t *arena );
