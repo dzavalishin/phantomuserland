@@ -95,3 +95,5 @@ $(BINDIR)/test.hier.child1.pc: $(BINDIR)/test.hier.intermediate.pc
 $(BINDIR)/test.hier.intermediate.pc: $(BINDIR)/test.hier.root.pc
 
 $(BINDIR)/test.suite.pc: $(BINDIR)/test.hier.child1.pc
+
+$(BINDIR)/ru.dz.phantom.system.regression_tests.pc: $(BINDIR)/ru.dz.phantom.system.regression_tests_ctor.pc
