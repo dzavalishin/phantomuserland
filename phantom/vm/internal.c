@@ -347,6 +347,19 @@ struct internal_class pvm_internal_classes[] =
     },
 #endif
 
+    {
+        ".internal.tcp",
+        PVM_ROOT_OBJECT_TCP_CLASS,
+        IINIT(tcp),
+        pvm_gc_finalizer_tcp,
+        pvm_restart_tcp,
+        sizeof(struct data_area_4_tcp),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
 
     {
         ".internal.window",

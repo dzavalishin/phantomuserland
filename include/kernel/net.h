@@ -237,7 +237,7 @@ errno_t bootp(ifnet *iface);
 void udp_syslog_send(const char *prefix, const char *message);
 void start_tcp_echo_server(void);
 
-errno_t net_curl( const char *url, char *obuf, size_t obufsize );
+errno_t net_curl( const char *url, char *obuf, size_t obufsize, const char *headers );
 
 
 #endif

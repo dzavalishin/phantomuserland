@@ -203,6 +203,7 @@ pvm_object_t     pvm_get_mutex_class(void);
 pvm_object_t     pvm_get_cond_class(void);
 pvm_object_t     pvm_get_sema_class(void);
 
+pvm_object_t     pvm_get_tcp_class(void);
 
 pvm_object_t     pvm_create_null_object(void);
 pvm_object_t     pvm_create_class_object(pvm_object_t name, pvm_object_t iface, int da_size);

@@ -42,6 +42,14 @@
 
 static int debug_print = 0;
 
+
+// --------- spinlock -------------------------------------------------------
+//
+// NB! This is a persistent memory only, special spinlock.
+// For usual kernel spinlock refer to kernel code.
+//
+// --------- spinlock -------------------------------------------------------
+
 void pvm_spin_init( pvm_spinlock_t *ps )
 {
     assert( ps != 0 );
@@ -87,9 +95,11 @@ void pvm_spin_unlock( pvm_spinlock_t *ps )
 }
 
 // --------- mutex -------------------------------------------------------
-
-// NB - persistent mutexes!
-// TODO have a mark - can this mutex be locked at snapshot? No. All of them can.
+//
+// NB! This is a persistent memory only, special mutex.
+// Regular mutexes are in the threads lib.
+//
+// --------- mutex -------------------------------------------------------
 
 
 void vm_mutex_lock( pvm_object_t me, struct data_area_4_thread *tc )
@@ -241,28 +251,18 @@ DECLARE_SIZE(mutex);
 
 
 
-// --------- cond -------------------------------------------------------
+// --------- cond --------------------------------------------------------
+//
+// NB! This is a persistent memory only, special cond.
+// Regular conds are in the threads lib.
+//
+// --------- cond --------------------------------------------------------
 
-static int si_cond_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+
+void pvm_cond_wait( pvm_object_t me, struct data_area_4_thread *tc, pvm_object_t mutex )
 {
-    (void)me;
-    DEBUG_INFO;
-    SYSCALL_RETURN(pvm_create_string_object( ".internal.cond" ));
-}
-
-
-static int si_cond_8_wait( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
-{
-    DEBUG_INFO;
-
-    CHECK_PARAM_COUNT(1);
-
-    pvm_object_t mutex = args[0];
-
-#if NEW_VM_SLEEP
     struct data_area_4_cond *da = pvm_object_da( me, cond );
-    //SYSCALL_THROW_STRING("Not this way");
-    lprintf("unimplemented vm_cond_wait used\r");
+    lprintf("unfinished vm_cond_wait used\r");
 
     pvm_spin_lock( &(da->lock) );
     pvm_object_t this_thread = pvm_da_to_object(tc);
@@ -277,9 +277,78 @@ static int si_cond_8_wait( pvm_object_t me, pvm_object_t *ret, struct data_area_
     SYSCALL_PUT_THIS_THREAD_ASLEEP(&da->lock);
 
     vm_mutex_unlock( mutex, tc );
-    SYS_FREE_O(mutex);
+}
 
-    //pvm_spin_unlock( &(da->lock) );
+
+void pvm_cond_broadcast( pvm_object_t me ) //, struct data_area_4_thread *tc )
+{
+    struct data_area_4_cond *da = pvm_object_da( me, cond );
+    lprintf("unfinished pvm_cond_broadcast used\r");
+    pvm_spin_lock( &(da->lock) );
+
+    while(da->nwaiting > 0)
+    {
+        // TODO takes last, must take first
+        pvm_object_t next_thread = pvm_get_ofield( da->waiting_threads_array, --da->nwaiting );
+
+        assert(!pvm_isnull(next_thread));
+        assert(pvm_object_class_exactly_is( next_thread, pvm_get_thread_class() ) );
+
+        struct data_area_4_thread *thda = pvm_object_da( next_thread, thread );
+        SYSCALL_WAKE_THREAD_UP( thda );
+    }
+
+    pvm_spin_unlock( &(da->lock) );
+}
+
+void pvm_cond_signal( pvm_object_t me )
+{
+    struct data_area_4_cond *da = pvm_object_da( me, cond );
+
+    lprintf("unfinished pvm_cond_signal used\r");
+    pvm_spin_lock( &(da->lock) );
+
+    if(da->nwaiting > 0)
+    {
+        // TODO takes last, must take first
+        pvm_object_t next_thread = pvm_get_ofield( da->waiting_threads_array, --da->nwaiting );
+
+        assert(!pvm_isnull(next_thread));
+        assert(pvm_object_class_exactly_is( next_thread, pvm_get_thread_class() ) );
+
+        struct data_area_4_thread *thda = pvm_object_da( next_thread, thread );
+        SYSCALL_WAKE_THREAD_UP( thda );
+    }
+
+    pvm_spin_unlock( &(da->lock) );
+}
+
+// --------- cond --------------------------------------------------------
+//
+// Interface
+//
+// --------- cond --------------------------------------------------------
+
+
+static int si_cond_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    (void)me;
+    DEBUG_INFO;
+    SYSCALL_RETURN(pvm_create_string_object( ".internal.cond" ));
+}
+
+
+static int si_cond_8_wait( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    DEBUG_INFO;
+    CHECK_PARAM_COUNT(1);
+
+    pvm_object_t mutex = args[0];
+
+#if NEW_VM_SLEEP
+    pvm_cond_wait( me, tc, mutex );
+
+    SYS_FREE_O(mutex);
     SYSCALL_RETURN_NOTHING;
 #else
     SYS_FREE_O(mutex);
@@ -300,68 +369,25 @@ static int si_cond_9_twait( pvm_object_t me, pvm_object_t *ret, struct data_area
 static int si_cond_10_broadcast( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-
     CHECK_PARAM_COUNT(0);
 
-    //pvm_object_t mutex = args[0];
-
 #if NEW_VM_SLEEP
-    struct data_area_4_cond *da = pvm_object_da( me, cond );
-    //SYSCALL_THROW_STRING("Not this way");
-    lprintf("unimplemented vm_cond_wait used\r");
-    pvm_spin_lock( &(da->lock) );
-
-    while(da->nwaiting > 0)
-    {
-        // TODO takes last, must take first
-        pvm_object_t next_thread = pvm_get_ofield( da->waiting_threads_array, --da->nwaiting );
-
-        assert(!pvm_isnull(next_thread));
-        assert(pvm_object_class_exactly_is( next_thread, pvm_get_thread_class() ) );
-
-        struct data_area_4_thread *thda = pvm_object_da( next_thread, thread );
-        SYSCALL_WAKE_THREAD_UP( thda );
-    }
-
-    pvm_spin_unlock( &(da->lock) );
+    pvm_cond_broadcast( me );
     SYSCALL_RETURN_NOTHING;
 #else
-    //SYS_FREE_O(mutex);
     SYSCALL_THROW_STRING("Not this way");
 #endif
-
 }
 
 static int si_cond_11_signal( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-
     CHECK_PARAM_COUNT(0);
 
-    //pvm_object_t mutex = args[0];
-
 #if NEW_VM_SLEEP
-    struct data_area_4_cond *da = pvm_object_da( me, cond );
-    //SYSCALL_THROW_STRING("Not this way");
-    lprintf("unimplemented vm_cond_wait used\r");
-    pvm_spin_lock( &(da->lock) );
-
-    if(da->nwaiting > 0)
-    {
-        // TODO takes last, must take first
-        pvm_object_t next_thread = pvm_get_ofield( da->waiting_threads_array, --da->nwaiting );
-
-        assert(!pvm_isnull(next_thread));
-        assert(pvm_object_class_exactly_is( next_thread, pvm_get_thread_class() ) );
-
-        struct data_area_4_thread *thda = pvm_object_da( next_thread, thread );
-        SYSCALL_WAKE_THREAD_UP( thda );
-    }
-
-    pvm_spin_unlock( &(da->lock) );
+    pvm_cond_signal( me );
     SYSCALL_RETURN_NOTHING;
 #else
-    //SYS_FREE_O(mutex);
     SYSCALL_THROW_STRING("Not this way");
 #endif
 }

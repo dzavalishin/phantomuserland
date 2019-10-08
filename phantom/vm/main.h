@@ -26,3 +26,4 @@ extern int debug_trace;
 void videotest_truetype(void);
 void videotest_overlay(void);
 void videotest_pbm( void );
+

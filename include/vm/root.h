@@ -80,6 +80,8 @@ struct pvm_root_t
     pvm_object_t           cond_class;
     pvm_object_t           sema_class;
 
+    pvm_object_t           tcp_class;
+
 
     pvm_object_t           null_object;
     pvm_object_t           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return

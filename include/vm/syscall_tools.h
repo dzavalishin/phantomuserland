@@ -26,12 +26,14 @@
 
 // push on object stack
 #define SYSCALL_RETURN(obj)             do { *ret = (obj); return 1; } while(0)
+#define SYSCALL_RETURN_STRING(str)       SYSCALL_RETURN(pvm_create_string_object( str ))
+
 //#define SYSCALL_THROW(obj) do { pvm_ostack_push( tc->_ostack, obj ); return 0; } while(0)
 #define SYSCALL_THROW(obj)              ({ *ret = (obj); return 0; })
 
 #define SYSCALL_RETURN_NOTHING          SYSCALL_RETURN( pvm_create_null_object() )
 
-#define SYSCALL_THROW_STRING(str)       SYSCALL_THROW(pvm_create_string_object( str ));
+#define SYSCALL_THROW_STRING(str)       SYSCALL_THROW(pvm_create_string_object( str ))
 
 //#define POP_ARG ( pvm_ostack_pop( tc->_ostack ))
 //#define POP_ISTACK ( pvm_istack_pop( tc->_istack ))

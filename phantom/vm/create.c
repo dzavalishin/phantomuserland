@@ -539,9 +539,9 @@ void pvm_internal_init_thread(pvm_object_t  os)
 	struct data_area_4_thread *      da = (struct data_area_4_thread *)os->da;
 
 	///hal_spin_init(&da->spin);
-//#if OLD_VM_SLEEP
-//        da->sleep_flag                      = 0;
-//#endif
+#if NEW_VM_SLEEP
+    da->sleep_flag              = 0;
+#endif
 	//hal_cond_init(&(da->wakeup_cond), "VmThrdWake");
 
     pvm_spin_init( &da->lock );
@@ -895,7 +895,7 @@ pvm_object_t pvm_weakref_get_object(pvm_object_t wr )
 
 
 
-void pvm_internal_init_window(pvm_object_t  os)
+void pvm_internal_init_window(pvm_object_t os)
 {
     struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
 
@@ -909,14 +909,13 @@ void pvm_internal_init_window(pvm_object_t  os)
 
     drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
 
-
     {
     pvm_object_t o;
     o = os;
-    //o.interface = pvm_get_default_interface(os).data;
+
 
     da->connector = pvm_create_connection_object();
-    struct data_area_4_connection *cda = (struct data_area_4_connection *)da->connector->da;
+    struct data_area_4_connection *cda = (struct data_area_4_connection *)(da->connector->da);
 
     phantom_connect_object_internal(cda, 0, o, 0);
 
@@ -1148,6 +1147,54 @@ printf("restarting connection");
 
 
 
+
+void pvm_internal_init_tcp(pvm_object_t os)
+{
+    struct data_area_4_tcp      *da = (struct data_area_4_tcp *)os->da;
+
+    da->connected = 0;
+    //memset( da->name, 0, sizeof(da->name) );
+}
+
+pvm_object_t     pvm_create_tcp_object(void)
+{
+    return pvm_create_object( pvm_get_tcp_class() );
+}
+
+void pvm_gc_iter_tcp(gc_iterator_call_t func, pvm_object_t  os, void *arg)
+{
+    struct data_area_4_tcp      *da = (struct data_area_4_tcp *)os->da;
+
+    (void) da;
+
+    //gc_fcall( func, arg, ot );
+    //gc_fcall( func, arg, da->p_kernel_state_object );
+    //gc_fcall( func, arg, da->callback );
+}
+
+
+void pvm_gc_finalizer_tcp( pvm_object_t  os )
+{
+    // is it called?
+    struct data_area_4_tcp *da = (struct data_area_4_tcp *)os->da;
+    if( da->connected )
+    {
+        lprintf("disconnect!\n");
+        //pvm_tcp_disconnect();
+    }
+}
+
+void pvm_restart_tcp( pvm_object_t o )
+{
+    struct data_area_4_tcp *da = pvm_object_da( o, tcp );
+
+    //da->connected = 0;
+    if( da->connected )
+    {
+        printf("restarting TCP - unimpl!");
+    }
+
+}
 
 
 

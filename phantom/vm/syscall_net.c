@@ -1,4 +1,3 @@
-#if 0
 /**
  *
  * Phantom OS
@@ -23,6 +22,7 @@
 #include <phantom_libc.h>
 #include <vm/syscall_net.h>
 #include <vm/alloc.h>
+#include <kernel/snap_sync.h>
 
 
 
@@ -183,6 +183,47 @@ static int si_tcp_accept_23( pvm_object_t me, pvm_object_t *ret, struct data_are
 
 
 
+static int si_tcp_curl_24( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    (void) me;
+    //struct data_area_4_tcp      *da = pvm_data_area( me, tcp );
+
+    DEBUG_INFO;    
+    CHECK_PARAM_COUNT(2);
+
+    pvm_object_t url = args[1];
+    pvm_object_t hdr = args[0];
+
+    size_t url_len = pvm_get_str_len( url );
+    size_t hdr_len = pvm_get_str_len( hdr );
+
+    if( url_len > 1024 ) SYSCALL_THROW_STRING( "URL too long" );
+    if( hdr_len > 1024 ) SYSCALL_THROW_STRING( "HTTP headers too long" );
+
+    char surl[url_len+1]; strlcpy( surl, pvm_get_str_data(url), url_len+1 );
+    char shdr[hdr_len+1]; strlcpy( shdr, pvm_get_str_data(hdr), hdr_len+1 );
+
+    char buf[1024];
+
+    buf[0] = 0;
+
+    SHOW_FLOW( 1, "curl %s (hdr '%s')", surl, shdr );
+
+    vm_unlock_persistent_memory();
+    errno_t rc = net_curl( surl, buf, sizeof(buf), shdr );
+    vm_lock_persistent_memory();
+
+    SHOW_FLOW( 1, "curl ret '%s'", buf );
+
+    if( rc )
+    {
+        // TODO enable me and catch in userland code
+        //SYSCALL_THROW_STRING( "not implemented" );
+        SYSCALL_RETURN_STRING("");
+    }
+
+    SYSCALL_RETURN_STRING(buf);
+}
 
 
 
@@ -190,7 +231,9 @@ static int si_tcp_accept_23( pvm_object_t me, pvm_object_t *ret, struct data_are
 
 
 
-syscall_func_t  syscall_table_4_tcp[24] =
+
+
+syscall_func_t  syscall_table_4_tcp[25] =
 {
     &si_void_0_construct,               &si_void_1_destruct,
     &si_void_2_class,                   &si_void_3_clone,
@@ -206,6 +249,8 @@ syscall_func_t  syscall_table_4_tcp[24] =
     &si_tcp_waitsend_18,                &si_tcp_send_19,
     &si_tcp_waitrecv_20,                &si_tcp_recv_21,
     &si_tcp_waitaccept_22,              &si_tcp_accept_23,
+    // 24
+    &si_tcp_curl_24,
 
 };
 DECLARE_SIZE(tcp);
@@ -249,5 +294,3 @@ DECLARE_SIZE(udp);
 #endif
 
 
-
-#endif

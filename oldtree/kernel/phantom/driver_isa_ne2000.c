@@ -14,6 +14,8 @@
 #if HAVE_NET && defined(ARCH_ia32)
 
 #define NE2000_INTR 1
+//#define INTR_TIMEOUT (20*1000L*1000L)
+#define INTR_TIMEOUT (1*1000L*1000L)
 
 #define DEBUG_MSG_PREFIX "ne2000"
 #include <debug_ext.h>
@@ -825,11 +827,10 @@ static int ne_read( struct phantom_device *dev, void *buf, int len)
     int ret = 0;
     do {
         SHOW_FLOW( 7, "poll %d bytes", len );
-
 #if NE2000_INTR
         //hal_sem_acquire( &(pvt->recv_interrupt_sem) );
         //hal_sem_acquire_etc( &(pvt->recv_interrupt_sem), 1, SEM_FLAG_TIMEOUT, 200*1000L );
-        hal_sem_acquire_etc( &(pvt->recv_interrupt_sem), 1, SEM_FLAG_TIMEOUT, 20*1000L*1000L );
+        hal_sem_acquire_etc( &(pvt->recv_interrupt_sem), 1, SEM_FLAG_TIMEOUT, INTR_TIMEOUT );
         ret = ne_poll(dev, buf, len);
 #else
         (void) pvt;

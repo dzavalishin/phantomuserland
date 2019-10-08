@@ -106,8 +106,17 @@ int main(int argc, char* argv[])
     run_init_functions( INIT_LEVEL_LATE );
 
 #if 0
-    videotest();
-    //getchar();
+    int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers );
+    char buf[102400];
+    net_curl( "http://api.weather.yandex.ru/v1/forecast?extra=true&limit=1", buf, sizeof buf, "X-Yandex-API-Key: 7bdab0b4-2d21-4a51-9def-27793258d55d\r\n" );
+    return 0;
+#endif
+
+#if 0
+    //videotest();
+    videotest_pbm();
+    //videotest_overlay();
+    getchar();
     exit(0);
 #endif
 

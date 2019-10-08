@@ -362,7 +362,7 @@ void start_tcp_echo_server(void)
 
 #define CURL_MAXBUF 512
 
-errno_t net_curl( const char *url, char *obuf, size_t obufsize )
+errno_t net_curl( const char *url, char *obuf, size_t obufsize, const char *headers )
 {
     int nread = 0;
 
@@ -444,7 +444,12 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize )
     //rlcat( buf, "\r\n\r\n", sizeof(buf) );
     strlcat( buf, " HTTP/1.1\r\nHost: ", sizeof(buf) );
     strlcat( buf, host, sizeof(buf) );
-    strlcat( buf, "\r\nUser-Agent: PhantomOSNetTest/0.1 (PhantomOS i686; ru)\r\nAccept: text/html,text/plain\r\nConnection: close\r\n\r\n", sizeof(buf) );
+    strlcat( buf, "\r\nUser-Agent: PhantomOSNetTest/0.1 (PhantomOS i686; ru)\r\nAccept: text/html,text/plain\r\nConnection: close\r\n", sizeof(buf) );
+
+    if(headers)
+        strlcat( buf, headers, sizeof(buf) );
+
+    strlcat( buf, "\r\n", sizeof(buf) );
 
     //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
     int len = strlen(buf);

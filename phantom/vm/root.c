@@ -369,6 +369,8 @@ static void set_root_from_table()
     SET_ROOT_CLASS(mutex,MUTEX);
     SET_ROOT_CLASS(cond,COND);
     SET_ROOT_CLASS(sema,SEMA);
+
+    SET_ROOT_CLASS(tcp,TCP);
 }
 
 
@@ -413,6 +415,8 @@ GCINLINE pvm_object_t     pvm_get_connection_class() { return pvm_root.connectio
 GCINLINE pvm_object_t     pvm_get_mutex_class() { return pvm_root.mutex_class; }
 GCINLINE pvm_object_t     pvm_get_cond_class() { return pvm_root.cond_class; }
 GCINLINE pvm_object_t     pvm_get_sema_class() { return pvm_root.sema_class; }
+
+GCINLINE pvm_object_t     pvm_get_tcp_class() { return pvm_root.sema_class; }
 
 
 #undef GCINLINE

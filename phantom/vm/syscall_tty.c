@@ -33,6 +33,7 @@
 #include <video/screen.h>
 #include <video/font.h>
 
+#include <kernel/snap_sync.h>
 
 static int debug_print = 0;
 

@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Network syscalls?
+ * Network syscalls - Phantom kernel version
  * 
  * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
  * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
@@ -20,5 +20,7 @@
 
 
 #include "vm/syscall_net.h"
+#include "kernel/net.h"
 
+#define debug_print 0
 

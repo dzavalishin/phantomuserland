@@ -8,6 +8,9 @@
  *
 **/
 
+#ifndef VM_INTERNAL_H
+#define VM_INTERNAL_H
+
 #include "vm/root.h"
 #include "vm/syscall.h"
 
@@ -91,6 +94,9 @@ DEF_I(directory)
 DEF_I(connection)
 //DEF_I(hash)
 
+DEF_I(tcp)
+
 #undef DEF_I
 
 
+#endif // VM_INTERNAL_H

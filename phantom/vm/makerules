@@ -23,7 +23,7 @@ endif
 W32GCC = -ffreestanding -I- $(addprefix -I,$(INCDIRS)) -I. -c
 
 nonstandalone.o: nonstandalone.c
-	$(CC) -m32 -c nonstandalone.c
+	$(CC) -m32 -g -c nonstandalone.c
 
 win_screen_win.o: win_screen_win.c
 	$(CC) -m32 -c win_screen_win.c

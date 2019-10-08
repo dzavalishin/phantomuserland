@@ -20,7 +20,6 @@
 #include <vm/p2c.h>
 #include <vm/syscall.h>
 
-
 #include <kernel/net/udp.h>
 
 
@@ -67,7 +66,7 @@ static pvm_object_t cn_url_blocking_syscall_worker( pvm_object_t conn, struct da
         {
         default:
         case CONN_OP_READ:
-            e = net_curl( url, buf, sizeof(buf) );
+            e = net_curl( url, buf, sizeof(buf), 0 );
             break;
 
         case CONN_OP_WRITE:
