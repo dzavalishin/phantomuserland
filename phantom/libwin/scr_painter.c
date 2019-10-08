@@ -45,7 +45,8 @@ pqel_t;
 
 
 // keep list of screen areas to be repainted
-static hal_mutex_t  rect_list_lock;
+//static
+hal_mutex_t  rect_list_lock;
 static queue_head_t rect_list;
 
 static void paint_q_init(void)
@@ -328,6 +329,34 @@ void scr_repaint_win( window_handle_t w )
 
 
 #endif
+
+
+
+
+
+// ------------------------------------------------------------------
+// 2D accelerator use
+//
+// Take same mutex as painter - vmware driver crashes if we access it from different threads
+//
+// ? No - it is mouse repaint conflict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif // VIDEO_NEW_PAINTER
 
