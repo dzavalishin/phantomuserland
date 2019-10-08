@@ -1,0 +1,41 @@
+For https://www.websequencediagrams.com/
+
+title SnapShot Sequence
+
+Kernel->PersistentMemory: Forced page out request
+note right of PersistentMemory: Writes unmodified pages to disk
+note right of Kernel: 1-20 sec
+Kernel->VirtualMachine: Stop all threads
+note right of VirtualMachine: Saves VM states to memory, stops
+note right of Kernel: 10-20 msec
+Kernel->PersistentMemory: Disable write access
+note right of Kernel: 1 msec
+Kernel->VirtualMachine: Continue all threads
+note right of VirtualMachine: Runs as usual, total pause is ~20 msec
+Kernel->PersistentMemory: Page out modified pages
+note right of PersistentMemory: Writes modified pages to disk
+VirtualMachine->PersistentMemory: Write request (page fault)
+note right of PersistentMemory: 
+Makes duplicate of page
+Opens write access to new copy of page
+end note
+PersistentMemory->VirtualMachine: return from page fault, continue
+note right of PersistentMemory: 
+Starts writing unmodified copy of page 
+to disk, on success deletes unmodified copy
+end note
+PersistentMemory->Kernel: Done writing all modified pages
+Kernel->PersistentMemory: Compare snapshot with previous one
+note right of PersistentMemory: 
+Finds out the difference
+Builds list of pages on disk
+Modifies disk superblocks to
+point to new snapshot
+Deletes pre-previous snapshot
+end note
+PersistentMemory->Kernel: Done
+note right of Kernel: 
+We did it.
+Total time is 1-10 seconds,
+Threads were stopped for 1-10 milliseconds.
+end note
