@@ -1,6 +1,6 @@
 include ../../config.mk
 
-SRCDIRS = $(filter-out $(EXCLUDED_SUBDIRS), src/phantom src/ru.dz src/tetris src/test ../roots/src/internal )
+SRCDIRS = $(filter-out $(EXCLUDED_SUBDIRS), src/phantom src/test src/ru.dz src/tetris ../roots/src/internal )
 BINDIR = $(PHANTOM_HOME)/plib/bin
 TARGET = classes
 
