@@ -3,8 +3,18 @@ IDE:
   Java programming - Eclipse
 
 
-Linux:
+Linux (tested on ubuntu 19.x):
   gcc
+
+  apt get install:
+
+    - gcc-multilib
+    - libcunit1 libcunit1-dev
+    - openjdk-8-jdk
+
+  for working on ARM port:
+
+    - gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
 
 Windows:
   X86 - Cygwin gcc. (See etc/cygwin_get.cmd)
