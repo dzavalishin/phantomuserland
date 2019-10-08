@@ -139,7 +139,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 ifdef TARGET_OS_MAC
 	$(LD) $(LD_G_FLAG) $(LD_ADDR) -o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) crtn.o
 else
-	@$(CC) $(LD_G_FLAG) -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
+	@$(CC) $(LD_G_FLAG) -X -n -ffreestanding -nodefaultlibs -nostartfiles $(ARCH_FLAGS) -Xlinker $(LD_ADDR) $(LDFLAGS) $(PHANTOM_LDFLAGS)  \
 		-o $@.pe $(filter-out %.a,$^) $(L386) $(PHANTOM_LIBS) $(CLIB) $(PHANTOM_LIBS) $(CLIB) $(LIBGCC) crtn.o 
 endif
 	$(OBJCOPY) -O $(TARGET_OBJECT_FORMAT) $@.pe $@
