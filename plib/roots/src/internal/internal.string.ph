@@ -53,6 +53,9 @@ class .internal.string
     //float  toFloat() [18] { }
     //double toDouble() [19] { }
 
+
+	.internal.object parseJson() [20] { } // returns tree of arrays/directories/leaf objects
+
 };
 
 

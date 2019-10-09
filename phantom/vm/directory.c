@@ -13,8 +13,8 @@
 #define DEBUG_MSG_PREFIX "vm.dir"
 #include <debug_ext.h>
 #define debug_level_flow 0
-#define debug_level_error 11
-#define debug_level_info 11
+#define debug_level_error 1
+#define debug_level_info 0
 
 #include <hashfunc.h>
 #include <vm/syscall.h>
@@ -102,6 +102,7 @@ errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_objec
     LOCK_DIR(dir);
 
     //hexdump( dir->flags, dir->capacity, "find hdir flags", 0 );
+    if(debug_print) lprintf("hdir find '%.*s'\n", i_key_len, ikey );
 
     int keypos = calc_hash( ikey, ikey+i_key_len ) % dir->capacity;
 
@@ -494,17 +495,19 @@ pvm_object_t     pvm_create_directory_object(void)
 } */
 
 // Unused, not supposed to be called
-void pvm_gc_finalizer_directory( pvm_object_t  os )
+void pvm_gc_finalizer_directory( pvm_object_t  o )
 {
+    (void) o;
     //struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
-    assert(0);
+    //assert(0);
 }
 
 // Unused, not supposed to be called
 void pvm_restart_directory( pvm_object_t o )
 {
+    (void) o;
     //struct data_area_4_directory *da = pvm_object_da( o, directory );
-    assert(0);
+    //assert(0);
 }
 
 

@@ -139,9 +139,8 @@ void pvm_backtrace(struct data_area_4_thread *tda)
         return;
     }
 
-    printf("pvm_backtrace thread IP %d\n", code->IP);
-
-    printf("pvm_backtrace thread this:\n");
+    printf("backtrace thread IP %d, this: ", code->IP);
+    //printf(", this:\n");
     pvm_object_dump(tda->_this_object);
     printf("\n\n");
 
@@ -153,11 +152,9 @@ void pvm_backtrace(struct data_area_4_thread *tda)
 
         struct data_area_4_call_frame *fda = pvm_object_da(sframe,call_frame);
 
-        printf("pvm_backtrace frame:\n");
-        pvm_object_dump(sframe);
-        printf("\n");
+        //printf("pvm_backtrace frame:\n");        pvm_object_dump(sframe);        printf("\n");
 
-        printf("pvm_backtrace frame this:\n");
+        printf("frame this:\n");
         pvm_object_t thiso = fda->this_object;
         pvm_object_dump(thiso);
         printf("\n");
@@ -165,21 +162,19 @@ void pvm_backtrace(struct data_area_4_thread *tda)
         pvm_object_t tclass = thiso->_class;
         int ord = fda->ordinal;
 
-        printf("pvm_backtrace frame IP: %d Method ordinal %d\n", fda->IP, ord );
+        printf("frame IP: %d Method ordinal %d\n", fda->IP, ord );
+        
+        pvm_object_t mname = pvm_get_method_name( tclass, ord );
+        pvm_object_print(mname);
 
         int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
-        if( lineno >= 0 )
-        {
-            pvm_object_t mname = pvm_get_method_name( tclass, ord );
-
-            pvm_object_print(mname);
-            printf(":%d\n", lineno);
-        }
+        //if( lineno >= 0 )
+        printf(":%d\n", lineno);
 
         printf("\n\n");
         sframe = fda->prev;
     }
-
+    printf("--- backtrace END\n" );
 }
 
 
@@ -294,7 +289,7 @@ pvm_object_t pvm_get_method_name( pvm_object_t tclass, int method_ordinal )
     struct data_area_4_class *cda= pvm_object_da( tclass, class );
     pvm_object_t mnames = cda->method_names;
 
-    if( pvm_is_null(mnames))
+    if( pvm_is_null(mnames) )
         return pvm_get_null_object();
 
     pvm_object_t name = pvm_get_ofield( mnames, method_ordinal );

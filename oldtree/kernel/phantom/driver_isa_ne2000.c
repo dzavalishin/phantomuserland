@@ -15,13 +15,14 @@
 
 #define NE2000_INTR 1
 //#define INTR_TIMEOUT (20*1000L*1000L)
-#define INTR_TIMEOUT (1*1000L*1000L)
+//#define INTR_TIMEOUT (1*1000L*1000L)
+#define INTR_TIMEOUT (200L*1000L)
 
 #define DEBUG_MSG_PREFIX "ne2000"
 #include <debug_ext.h>
-#define debug_level_flow 0
-#define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_flow 1
+#define debug_level_error 1
+#define debug_level_info 1
 
 #include <ia32/pio.h>
 #include <kernel/bus/pci.h>

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
+ * Callback for test purposes.
  *
 **/
 
@@ -36,12 +34,12 @@ class shell_callback //extends runnable
 		fio = new .internal.connection();
         fio.connect("fio:/amnt1/fio_log.txt");
 
-        var data : .internal.string;
+        var data : .internal.object;
 
 		data = fio.block(10, 0); // 1st arg is max read len
 
         console.putws("\nfio data: '");
-        console.putws( data );
+        console.putws( data.toString() );
         console.putws("'\n");
 
 		fio.block("written from phantom code", 1);

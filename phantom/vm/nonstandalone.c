@@ -484,29 +484,29 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
     //snprintf( buf, sizeof(buf), "GET / HTTP/1.1\r\nHost: ya.ru\r\nUser-Agent: PhantomOSNetTest/0.1 (PhanomOS i686; ru)\r\nAccept: text/html\r\nConnection: close\r\n\r\n" );
     int len = strlen(buf);
     int nwrite = write( sock, buf, len );
-    printf( "TCP - write = %d, requested %d (%s)\n", nwrite, len, buf );
+    //printf( "TCP - write = %d, requested %d (%s)\n", nwrite, len, buf );
     if( nwrite != len ) goto err;
 
     memset( obuf, 0, obufsize );
-    int bytes_recvd = 0;
+    //int bytes_recvd = 0;
     while(1)
     {
         nread = read( sock, buf, sizeof(buf)-1 ); // , &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*50
         buf[sizeof(buf)-1] = 0;
         
-        printf("TCP - read = %d\n", nread );
+        //printf("TCP - read = %d\n", nread );
 
         if( nread == 0 ) break;
         if( nread < 0 )
         {
-            printf("TCP - err = %d\n", nread );
+            //printf("TCP - err = %d\n", nread );
             close(sock);
             return nread;
         }
         
         buf[nread] = 0;
         strlcat( obuf, buf, obufsize );
-        bytes_recvd += nread;
+        //bytes_recvd += nread;
     }
 
     //printf("TCP - recvd = %d (%s)\n", bytes_recvd, obuf );

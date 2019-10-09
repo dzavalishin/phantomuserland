@@ -245,6 +245,11 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                 pvm_load_method( &mh, ptr, record_data_size );
                 pvm_set_ofield( iface, mh.my_ordinal, mh.my_code );
                 pvm_set_ofield( method_names, mh.my_ordinal, mh.my_name );
+#if 0                
+                lprintf("add to method_names[%d] = ", mh.my_ordinal );
+                pvm_puts(mh.my_name);
+                lprintf("\n");
+#endif
             }
             break;
 

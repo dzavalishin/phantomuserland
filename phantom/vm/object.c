@@ -286,6 +286,9 @@ pvm_set_ofield( pvm_object_t op, unsigned int slot, pvm_object_t value )
 
 int pvm_object_class_exactly_is( pvm_object_t object, pvm_object_t tclass )
 {
+    if( pvm_is_null( tclass ) ) return 0;
+    if( pvm_is_null( object ) ) return 0;
+
     pvm_object_t tested = object->_class;
     //pvm_object_t nullc = pvm_get_null_class();
 
@@ -303,6 +306,8 @@ int pvm_object_class_exactly_is( pvm_object_t object, pvm_object_t tclass )
 
 int pvm_object_class_is_or_parent( pvm_object_t object, pvm_object_t tclass )
 {
+    if( pvm_is_null( object ) ) return 0;
+
     pvm_object_t tested = object->_class;
     pvm_object_t nullc = pvm_get_null_class();
 
@@ -328,10 +333,11 @@ int pvm_object_class_is_or_parent( pvm_object_t object, pvm_object_t tclass )
 
 int pvm_object_class_is_or_child( pvm_object_t object, pvm_object_t tclass )
 {
+    if( pvm_is_null( tclass ) ) return 0;
+    if( pvm_is_null( object ) ) return 0;
+
     pvm_object_t oclass = object->_class;
     pvm_object_t nullc = pvm_get_null_class();
-
-    if( pvm_is_null( tclass ) ) return 0;
 
     while( !pvm_is_null(oclass) )
     {
@@ -402,6 +408,12 @@ pvm_object_t pvm_storage_to_object(pvm_object_storage_t *st)
 
 void pvm_puts(pvm_object_t o )
 {
+    if( pvm_is_null( o ) )
+    {
+        printf( "(null)" );
+        return;
+    }
+
     if(o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING)
     {
         struct data_area_4_string *da = (struct data_area_4_string *)&(o->da);

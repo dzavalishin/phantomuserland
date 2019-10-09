@@ -16,7 +16,7 @@
 
 #define DEBUG_MSG_PREFIX "net.misc"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -441,7 +441,6 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize, const char *head
     memset( buf, 0, sizeof(buf) );
     strlcpy( buf, "GET /", sizeof(buf) );
     strlcat( buf, path, sizeof(buf) );
-    //rlcat( buf, "\r\n\r\n", sizeof(buf) );
     strlcat( buf, " HTTP/1.1\r\nHost: ", sizeof(buf) );
     strlcat( buf, host, sizeof(buf) );
     strlcat( buf, "\r\nUser-Agent: PhantomOSNetTest/0.1 (PhantomOS i686; ru)\r\nAccept: text/html,text/plain\r\nConnection: close\r\n", sizeof(buf) );
@@ -456,22 +455,49 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize, const char *head
     int nwrite = tcp_sendto( prot_data, buf, len, &addr);
     SHOW_FLOW( 3, "TCP - write = %d, requested %d (%s)", nwrite, len, buf);
     if( nwrite != len ) goto err;
+#if 1
+    memset( obuf, 0, obufsize );
+    //int bytes_recvd = 0;
+    while(1)
+    {
+        //nread = read( sock, buf, sizeof(buf)-1 ); // , &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*50
+        nread = tcp_recvfrom( prot_data, buf, sizeof(buf)-1, &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*50 );
+        buf[sizeof(buf)-1] = 0;
+        
+        printf("TCP - read = %d\n", nread );
 
+        if( nread == 0 ) break;
+        if( nread < 0 )
+        {
+            printf("TCP - err = %d\n", nread );
+            //close(sock);
+            tcp_close(prot_data);
+            return nread;
+        }
+        
+        buf[nread] = 0;
+        strlcat( obuf, buf, obufsize );
+        //bytes_recvd += nread;
+    }
+
+#else
     memset( buf, 0, sizeof(buf) );
     nread = tcp_recvfrom( prot_data, buf, sizeof(buf), &addr, SOCK_FLAG_TIMEOUT, 1000L*1000*50 );
     buf[sizeof(buf)-1] = 0;
+    #endif
 
-    SHOW_FLOW( 3, "TCP - read = %d (%s)", nread, buf);
+    //SHOW_FLOW( 3, "TCP - read = %d (%s)", nread, obuf);
+    //lprintf( "TCP - read '%s'\n", obuf);
 err:
     tcp_close(prot_data);
-
+/*
     if( nread <= 0 )
         return EIO;
 
     memset( obuf, 0, obufsize );
     len = umin( obufsize-1, nread );
     strncpy( obuf, buf, len );
-
+*/
     return 0;
 }
 

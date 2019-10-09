@@ -15,7 +15,10 @@ import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
 import .internal.bitmap;
+import .internal.tcp;
 import .internal.connection;
+import .internal.directory;
+import .internal.long;
 //import .ru.dz.phantom.system.runnable;
 
 attribute const * ->!;
@@ -30,10 +33,11 @@ class weather
 
     var win : .internal.window;
     var sleep : .internal.connection;
-    var curl : .internal.connection;
+    //var curl : .internal.connection;
+    var http : .internal.tcp;
 
-	var temperature : .internal.string;
-	var itemp : .internal.int;
+	//var temperature : .internal.string;
+	var itemp : .internal.long;
 
 	var xpos : int;
 	var ypos : int;
@@ -42,8 +46,11 @@ class weather
     {
         var bmp : .internal.bitmap;
         var bmpw : .internal.bitmap;
+        var json_string : .internal.string;
+        var json : .internal.directory;
+        var jtmp : .internal.directory;
 
-		console.putws("Weather win: init\n");
+		//console.putws("Weather win: init\n");
 
         bmp = new .internal.bitmap();
         bmp.loadFromString(getBackgroundImage());
@@ -71,13 +78,14 @@ class weather
 
         win.update();
 
-		console.putws("Weather win: done init\n");
+		//console.putws("Weather win: done init\n");
 
 		sleep = new .internal.connection();
         sleep.connect("tmr:");
 
-		curl = new .internal.connection();
-		curl.connect("url:http://smart.:8080/rest/items/Current_Outdoor_Air_Temp/state");
+        http = new .internal.tcp ();
+		//curl = new .internal.connection();
+		//curl.connect("url:http://smart.:8080/rest/items/Current_Outdoor_Air_Temp/state");
 
 		/*
 		temperature = curl.block(null, 0);
@@ -92,9 +100,19 @@ class weather
         while(1)
         {
 			console.putws("Weather win: curl\n");
-			temperature = curl.block(null, 0);
+            //temperature = curl.block(null, 0);
+
+            json_string = http.curl( "http://api.weather.yandex.ru/v1/forecast?extra=true&limit=1", "X-Yandex-API-Key: 7bdab0b4-2d21-4a51-9def-27793258d55d\r\n" );
+
+            //json = (.internal.directory)json_string.parseJson();
+            json = json_string.parseJson();
+            jtmp = json.get("fact");
+            //temperature = jtmp.get("temp").toString();
+            itemp = jtmp.get("temp");
+                
 			console.putws("Weather win: curl = ");
-			console.putws(temperature);
+            //console.putws(temperature);
+            console.putws(itemp.toString());
 			console.putws("\n");
 
 			//win.drawImage( 0, 0, bmp );
@@ -102,12 +120,14 @@ class weather
             win.drawImagePart( 0, 0, bmp, 250, 240, 120, 22 );
 
 
-			win.drawString( 280, 235, temperature );
+            win.setFg(0); // black
+			win.drawString( 280, 235, itemp.toString() );
 			win.drawString( 250, 235, "T =" );
 
-            itemp = temperature.toInt();
+            //itemp = temperature.toInt();
             ypos = 15 + (itemp * 2);
 
+            win.setFg(0xFF93CDB4); // light green
             if( ypos < 70 )
                 win.fillBox( xpos, ypos, 2, 2 );
 

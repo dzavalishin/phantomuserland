@@ -14,16 +14,19 @@
 
 #define DEBUG_MSG_PREFIX "vm.sysc.net"
 #include <debug_ext.h>
-#define debug_level_flow 6
-#define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_flow 0
+#define debug_level_error 1
+#define debug_level_info 0
 
 
 #include <phantom_libc.h>
 #include <vm/syscall_net.h>
 #include <vm/alloc.h>
 #include <kernel/snap_sync.h>
+#include <kernel/net.h>
+#include <kernel/json.h>
 
+#include <errno.h>
 
 
 static int debug_print = 0;
@@ -191,8 +194,8 @@ static int si_tcp_curl_24( pvm_object_t me, pvm_object_t *ret, struct data_area_
     DEBUG_INFO;    
     CHECK_PARAM_COUNT(2);
 
-    pvm_object_t url = args[1];
-    pvm_object_t hdr = args[0];
+    pvm_object_t url = args[0];
+    pvm_object_t hdr = args[1];
 
     size_t url_len = pvm_get_str_len( url );
     size_t hdr_len = pvm_get_str_len( hdr );
@@ -203,26 +206,43 @@ static int si_tcp_curl_24( pvm_object_t me, pvm_object_t *ret, struct data_area_
     char surl[url_len+1]; strlcpy( surl, pvm_get_str_data(url), url_len+1 );
     char shdr[hdr_len+1]; strlcpy( shdr, pvm_get_str_data(hdr), hdr_len+1 );
 
-    char buf[1024];
-
-    buf[0] = 0;
-
-    SHOW_FLOW( 1, "curl %s (hdr '%s')", surl, shdr );
-
-    vm_unlock_persistent_memory();
-    errno_t rc = net_curl( surl, buf, sizeof(buf), shdr );
-    vm_lock_persistent_memory();
-
-    SHOW_FLOW( 1, "curl ret '%s'", buf );
-
-    if( rc )
+    const int bs = 100*1024;
+    char *buf = malloc(bs);
+    if( 0 == buf )
     {
+        SHOW_ERROR( 1, "out of mem in curl() %d bytes", bs );
         // TODO enable me and catch in userland code
         //SYSCALL_THROW_STRING( "not implemented" );
         SYSCALL_RETURN_STRING("");
     }
 
-    SYSCALL_RETURN_STRING(buf);
+    buf[0] = 0;
+
+    SHOW_FLOW( 10, "curl %s (hdr '%s')", surl, shdr );
+
+    vm_unlock_persistent_memory();
+    errno_t rc = net_curl( surl, buf, bs, shdr );
+    vm_lock_persistent_memory();
+
+    SHOW_FLOW( 10, "curl ret '%s'", buf );
+
+    // TODO need real http protocol request impl
+    if( rc && (rc != -ETIMEDOUT) )
+    {
+        SHOW_ERROR( 1, "curl fail %d", rc );
+        // TODO enable me and catch in userland code
+        //SYSCALL_THROW_STRING( "not implemented" );
+        SYSCALL_RETURN_STRING("");
+    }
+
+    const char *content = http_skip_header( buf );
+
+    SHOW_FLOW( 1, "curl content '%s' ", content );
+
+    pvm_object_t oret = pvm_create_string_object(content);
+    free(buf);
+
+    SYSCALL_RETURN(oret); // TODO need stringBuilder
 }
 
 

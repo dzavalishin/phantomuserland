@@ -28,6 +28,7 @@
 #include <kernel/vm.h>
 #include <kernel/atomic.h>
 #include <kernel/init.h> // cpu reset
+#include <kernel/json.h>
 
 #include <vm/syscall.h>
 #include <vm/object.h>
@@ -37,6 +38,7 @@
 #include <vm/bulk.h>
 #include <vm/alloc.h>
 #include <vm/internal.h>
+#include <vm/json.h>
 
 #include <vm/p2c.h>
 
@@ -300,7 +302,7 @@ static int si_long_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_a
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "%Ld", pvm_get_long(me) ); // TODO right size?
+    snprintf( buf, sizeof(buf), "%lld", pvm_get_long(me) ); // TODO right size?
     SYSCALL_RETURN(pvm_create_string_object( buf ));
 }
 
@@ -308,7 +310,7 @@ static int si_long_6_toXML( pvm_object_t me, pvm_object_t *ret, struct data_area
 {
     DEBUG_INFO;
     char buf[100];
-    snprintf( buf, sizeof(buf), "<long>%Ld</long>", pvm_get_long(me) );
+    snprintf( buf, sizeof(buf), "<long>%lld</long>", pvm_get_long(me) );
         SYSCALL_RETURN(pvm_create_string_object( buf ));
     //SYSCALL_THROW_STRING( "int toXML called" );
 }
@@ -604,30 +606,56 @@ static int si_string_12_find( pvm_object_t me, pvm_object_t *ret, struct data_ar
 
 static int si_string_16_toint( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
-    DEBUG_INFO;
-    
+    DEBUG_INFO;    
     CHECK_PARAM_COUNT(0);
 
     struct data_area_4_string *meda = pvm_object_da( me, string );
-
     SYSCALL_RETURN(pvm_create_int_object( atoin( (char *)meda->data, meda->length ) ) );
 }
 
 
 static int si_string_17_tolong( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
-    DEBUG_INFO;
-    
+    DEBUG_INFO;   
     CHECK_PARAM_COUNT(0);
 
     struct data_area_4_string *meda = pvm_object_da( me, string );
-
     SYSCALL_RETURN(pvm_create_long_object( atoln( (char *)meda->data, meda->length ) ) );
+}
+
+static int si_string_18_tofloat( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    DEBUG_INFO;   
+    CHECK_PARAM_COUNT(0);
+
+    //struct data_area_4_string *meda = pvm_object_da( me, string );
+    //SYSCALL_RETURN(pvm_create_float_object( atofn( (char *)meda->data, meda->length ) ) );
+    SYSCALL_THROW_STRING("not impl tofloat");
+}
+
+static int si_string_19_todouble( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    DEBUG_INFO;   
+    CHECK_PARAM_COUNT(0);
+
+    //struct data_area_4_string *meda = pvm_object_da( me, string );
+    //SYSCALL_RETURN(pvm_create_double_object( atodn( (char *)meda->data, meda->length ) ) );
+    SYSCALL_THROW_STRING("not impl si_string_19_todouble");
 }
 
 
 
-syscall_func_t  syscall_table_4_string[18] =
+static int si_string_20_parse_json( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    DEBUG_INFO;    
+    CHECK_PARAM_COUNT(0);
+    pvm_object_t top = pvm_json_parse_ext( pvm_get_str_data(me), pvm_get_str_len(me) );
+    SYSCALL_RETURN( top );
+}
+
+
+
+syscall_func_t  syscall_table_4_string[21] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_string_3_clone,
@@ -640,7 +668,8 @@ syscall_func_t  syscall_table_4_string[18] =
     &si_void_14_to_immutable,       &si_void_15_hashcode,
     // 16
     &si_string_16_toint,            &si_string_17_tolong,
-    //&si_string_18_tofloat,        &si_string_19_todouble,
+    &si_string_18_tofloat,          &si_string_19_todouble,
+    &si_string_20_parse_json
 };
 DECLARE_SIZE(string);
 
