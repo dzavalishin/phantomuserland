@@ -95,10 +95,11 @@ void json_dump_threads( json_output *jo );
 
 
 //! tokens allocated, must be freed by caller
-errno_t json_parse(const char *js, jsmntok_t **tokens, size_t *o_count );
+//errno_t json_parse(const char *js, jsmntok_t **tokens, size_t *o_count );
+//errno_t json_parse_len(const char *js, int jslen, jsmntok_t **tokens, size_t *o_count );
 
 
-
+#include <bits/udp_json.h>
 
 
 

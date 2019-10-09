@@ -1,7 +1,130 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
+ *
+ * JSON related.
+ *
+ *
+**/
 
+
+#define DEBUG_MSG_PREFIX "vm.json"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 11
+#define debug_level_info 11
+
+//#include <hashfunc.h>
+#include <vm/syscall.h>
+#include <vm/object.h>
+#include <vm/alloc.h>
+#include <vm/internal_da.h>
+#include <vm/spin.h>
 
 #include <kernel/json.h>
 #include <stdio.h>
+
+
+
+/**
+ *
+ * \brief Print JSON-style object tree. 
+ *
+ * Can process array and directory as containers, others will be just printed as
+ * leafs.
+ * 
+ * \param[in]  key        Name to print as header
+ * \param[in]  o          Root of tree to print
+ * \param[in]  tab        Initial shift
+ *
+ * \return 0 if success.
+ *
+ * See also:
+ * 
+ * errno_t pvm_print_json( pvm_object_t root )
+ * 
+**/
+
+errno_t pvm_print_json_ext( pvm_object_t key, pvm_object_t o, int tab )
+{
+    errno_t rc = 0;
+
+    if (o == NULL) return 0;
+
+    int i;
+    for( i = 0; i < tab; i++ ) printf("\t");
+
+    if( key != 0 ) { pvm_object_print( key ); printf(": "); }
+
+    if(o->_class == pvm_get_array_class())
+    {
+        printf("[\n");
+        int asize = get_array_size(o);
+
+            for( i = 0; i < asize; i++ )
+            {
+                pvm_object_t el = pvm_get_array_ofield( o, i );
+                pvm_print_json_ext( key, el, tab+1 );
+            }
+            
+        printf("]\n");
+    }
+    else if(o->_class == pvm_get_directory_class())
+    {
+            struct data_area_4_directory *d = pvm_object_da( o, directory );
+            pvm_object_t keys;
+            rc = hdir_keys( d, &keys );
+            if(rc) return rc;
+
+            int asize = get_array_size(keys);
+            
+            printf("\n");
+
+            int i;
+            for( i = 0; i < asize; i++ )
+            {
+                pvm_object_t key = pvm_get_array_ofield( keys, i );
+                pvm_object_t el;
+                // TODO assert string                
+                rc = hdir_find( d, pvm_get_str_data(key), pvm_get_str_len(key), &el, 0 );
+                if(rc) return rc; // TODO free!
+                pvm_print_json_ext( key, el, tab+1 );
+            }
+    }
+    else 
+    {
+        pvm_object_print(o);
+        printf("\n");
+    }
+
+    return rc;
+}
+
+
+/**
+ *
+ * \brief Print JSON-style object tree. 
+ *
+ * Can process array and directory as containers, others will be just printed as
+ * leafs.
+ * 
+ * \param[in]  root        Root of tree to print
+ *
+ * \return 0 if success.
+ *
+ * 
+**/
+
+errno_t pvm_print_json( pvm_object_t root )
+{
+	return pvm_print_json_ext( 0, root, 0 );
+}
+
+
+
+#if 0
 
 #define MAX_JSON_DEPTH 10
 
@@ -249,6 +372,8 @@ void pvm_json_test()
 
 
 }
+
+#endif
 
 #if 0
 #include <vm/object.h>
