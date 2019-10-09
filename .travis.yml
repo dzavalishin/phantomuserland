@@ -37,9 +37,11 @@ compiler:
 
 before_install:
   - sudo apt-get install libcunit1 libcunit1-dev
-  - sudo apt-get install gcc-multilib
   - sudo apt-get install gcc-arm-linux-gnueabihf
   - sudo apt-get install binutils-arm-linux-gnueabihf
+  - sudo apt-get install gcc-multilib
+  - sudo dpkg --add-architecture i386
+  - sudo apt-get update
 #  - sudo apt-get install -y lua5.1 # no socket
 #  - sudo apt-get -y install luarocks
 

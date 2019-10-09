@@ -507,7 +507,7 @@ int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers 
         bytes_recvd += nread;
     }
 
-    printf("TCP - recvd = %d (%s)\n", bytes_recvd, obuf );
+    //printf("TCP - recvd = %d (%s)\n", bytes_recvd, obuf );
 err:
     close(sock);
 /*

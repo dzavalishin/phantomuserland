@@ -350,7 +350,7 @@ int do_test_tcp_connect(const char *test_parm)
     (void) test_parm;
 
     char buf[1024];
-    errno_t e = net_curl( "http://ya.ru/", buf, sizeof(buf) );
+    errno_t e = net_curl( "http://ya.ru/", buf, sizeof(buf), 0 );
     SHOW_FLOW( 0, "TCP - read = (%s)", buf);
 
     return e;

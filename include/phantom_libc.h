@@ -6,9 +6,6 @@
  *
  * Kernel C library. Derived from Mach/FreeBSD kernels.
  *
- * Kernel ready: yes
- * Preliminary: yes
- *
  *
 **/
 
