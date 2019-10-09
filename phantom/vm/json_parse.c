@@ -23,6 +23,8 @@
 #include <vm/internal_da.h>
 #include <vm/spin.h>
 
+#include <vm/json.h>
+
 #include <kernel/json.h>
 #include <stdio.h>
 
@@ -121,6 +123,152 @@ errno_t pvm_print_json( pvm_object_t root )
 {
 	return pvm_print_json_ext( 0, root, 0 );
 }
+
+
+
+
+
+#define PRINT_PARSED 0
+#define PRINT_ADDED 0
+
+
+/**
+ *
+ * \brief Build JSON-style object tree from output of C JSON parser.
+ *
+ * \param[in]  name       Name to print as header
+ * \param[in]  jv         Root of input JSON tree
+ * \param[in]  tab        Initial shift
+ *
+ * \return Corresponding JSON as tree of objects.
+ * 
+**/
+pvm_object_t pvm_convert_json_to_objects_ext( const char *name, json_value *jv, int tab )
+{
+    if (jv == NULL) return 0;
+
+    int i;
+    for( i = 0; i < tab; i++ ) if(PRINT_PARSED||PRINT_ADDED) printf("\t");
+
+    if(PRINT_PARSED && name) printf("'%s': ", name );
+
+    switch(jv->type)
+    {
+    case json_integer:  if(PRINT_PARSED) printf("%lld\n", jv->u.integer );     return pvm_create_long_object(jv->u.integer); 
+    case json_double:   if(PRINT_PARSED) printf("%g\n", jv->u.dbl );           return pvm_create_double_object(jv->u.dbl); 
+    case json_string:   if(PRINT_PARSED) printf("'%s'\n", jv->u.string.ptr );  return pvm_create_string_object_binary( jv->u.string.ptr, jv->u.string.length );
+    case json_boolean:  if(PRINT_PARSED) printf("%d\n", jv->u.boolean );       return pvm_create_int_object( jv->u.boolean );
+
+    case json_object:        
+        //print_jv( jv->u.object.values->name, jv->u.object.values->value, tab+1 );
+        {
+            pvm_object_t dir = pvm_create_directory_object();
+            struct data_area_4_directory *d = pvm_object_da( dir, directory );
+            if(PRINT_PARSED||PRINT_ADDED) printf("\n" );
+            int length, x;        
+            length = jv->u.object.length;
+            for (x = 0; x < length; x++) 
+            {
+                pvm_object_t ent = pvm_convert_json_to_objects_ext( jv->u.object.values[x].name, jv->u.object.values[x].value, tab+1 );
+                if( ent )
+                {    
+                    if(PRINT_ADDED)
+                    {
+                    printf("hdir_add '%*s' = ", jv->u.object.values[x].name_length, jv->u.object.values[x].name );
+                    pvm_object_print(ent);
+                    printf("\n" );
+                    }
+
+                    errno_t rc = hdir_add( d, jv->u.object.values[x].name, jv->u.object.values[x].name_length, ent );
+                    if( rc ) printf("failed hdir_add %d\n", rc );
+                }
+            }
+
+            if(PRINT_PARSED||PRINT_ADDED) printf("\n");
+            return dir;
+        }
+
+    case json_array:
+        {
+            pvm_object_t arr = pvm_create_array_object();
+            if(PRINT_PARSED||PRINT_ADDED) printf("[ \n" );
+        for( i = 0; i < jv->u.array.length; i++ ) 
+        {
+            pvm_object_t ret = pvm_convert_json_to_objects_ext( 0, jv->u.array.values[i], tab+1 );
+            if(ret != 0)
+                pvm_append_array( arr, ret );
+        }
+        if(PRINT_PARSED||PRINT_ADDED) 
+        {
+            for( i = 0; i < tab; i++ ) printf("\t");
+            printf("]\n" );
+        }
+        return arr;
+        }
+
+    case json_null: return pvm_create_null_object();
+
+    default: break;
+
+    }
+    return 0;
+}
+
+
+
+/**
+ *
+ * \brief Parse JSON string and build JSON-style object tree from output of C JSON parser.
+ *
+ * \param[in]  json       JSON string
+ * \param[in]  json_len   String length
+ *
+ * \return Corresponding JSON as tree of objects.
+ * 
+**/
+pvm_object_t pvm_json_parse_ext( const char *json, size_t json_len )
+{
+    json_value *jv = json_parse( json, json_len );
+    pvm_object_t top = pvm_convert_json_to_objects( jv );
+    json_value_free( jv );
+	return top;
+}
+
+/**
+ *
+ * \brief Parse JSON string and build JSON-style object tree from output of C JSON parser.
+ *
+ * \param[in]  json       JSON string
+ *
+ * \return Corresponding JSON as tree of objects.
+ * 
+**/
+pvm_object_t pvm_json_parse( const char *json )
+{
+	return pvm_json_parse_ext( json, strlen(json) );
+}
+
+
+/**
+ *
+ * \brief Build JSON-style object tree from output of C JSON parser.
+ *
+ * Can process array and directory as containers, others will be just printed as
+ * leafs.
+ * 
+ * \param[in]  jv         Root of input JSON tree
+ *
+ * \return Corresponding JSON as tree of objects.
+ * 
+**/
+pvm_object_t pvm_convert_json_to_objects( json_value *jv )
+{
+	return pvm_convert_json_to_objects_ext( 0, jv, 0 );
+}
+
+
+
+
 
 
 

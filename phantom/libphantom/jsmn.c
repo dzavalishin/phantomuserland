@@ -1,3 +1,4 @@
+#if 0 // KILL ME
 #include <jsmn.h>
 
 #define NULL 0
@@ -311,3 +312,5 @@ void jsmn_init(jsmn_parser *parser) {
 	parser->toknext = 0;
 	parser->toksuper = -1;
 }
+
+#endif

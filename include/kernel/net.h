@@ -2,8 +2,8 @@
 ** Copyright 2002, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.
 */
-#ifndef _NEWOS_NET_H
-#define _NEWOS_NET_H
+#ifndef _KERNEL_NET_H
+#define _KERNEL_NET_H
 
 #include <kernel/config.h>
 
@@ -238,6 +238,7 @@ void udp_syslog_send(const char *prefix, const char *message);
 void start_tcp_echo_server(void);
 
 errno_t net_curl( const char *url, char *obuf, size_t obufsize, const char *headers );
+const char * http_skip_header( const char *buf );
 
+#endif // _KERNEL_NET_H
 
-#endif
