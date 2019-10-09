@@ -399,7 +399,45 @@ static errno_t hdir_init( hashdir_t *dir, size_t initial_size )
 }
 
 
+//! Get all keys as array
+errno_t hdir_keys( hashdir_t *dir, pvm_object_t *out )
+{
+#warning lock    
+    pvm_object_t keys = pvm_create_array_object();
 
+    int kasize1 = get_array_size( dir->keys );
+    int i, j;
+
+    //printf("n keys = %d\n", kasize1 );
+
+    for( i = 0; i < kasize1; i++ )
+    {
+        pvm_object_t okey = pvm_get_array_ofield( dir->keys, i );
+        u_int8_t flags = dir->flags[i];
+
+        if(pvm_is_null(okey)) continue;
+
+        if(!flags) // No indirection
+        {
+            pvm_append_array( keys, okey ); 
+            //pvm_object_print( okey ); printf(" "); 
+        }
+        else
+        {
+            int ksasize = get_array_size( okey );
+            //printf("n sub keys = %d\n", ksasize );
+            for( j = 0; j < ksasize; j++ )
+            {
+                pvm_object_t subkey = pvm_get_array_ofield( okey, j );
+                if(pvm_is_null(subkey)) continue;
+                pvm_append_array( keys, subkey );
+            }
+        }
+    }
+
+    *out = keys;
+    return 0;
+}
 
 
 

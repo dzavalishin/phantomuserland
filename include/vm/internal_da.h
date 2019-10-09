@@ -428,7 +428,8 @@ typedef struct data_area_4_directory hashdir_t;
 // directory.c
 errno_t hdir_add( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t add );
 errno_t hdir_find( hashdir_t *dir, const char *ikey, size_t i_key_len, pvm_object_t *out, int delete_found );
-
+//! Get all keys as array
+errno_t hdir_keys( hashdir_t *dir, pvm_object_t *out );
 
 
 
