@@ -4,7 +4,7 @@
 #  define NO_NETWORK
 #endif
 
-#  define NO_NETWORK
+//#  define NO_NETWORK
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -13,7 +13,7 @@
 
 #include <setjmp.h>
 
-//#include <errno.h>
+#include <errno.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -242,7 +242,7 @@ int get_current_tid()
 
 // TODO FIXME errno.h breaks compile on Linux :(
 // EPIPE
-#define errno 32
+//#define errno 32
 
 int k_open( int *fd, const char *name, int flags, int mode )
 {
@@ -370,10 +370,12 @@ asm("\
 
 #define CURL_MAXBUF 512
 
+/*
 #define	ENOENT 2
 #define	EIO    5
 #define EINVAL 22
 #define	ENOMEM 12
+*/
 
 int net_curl( const char *url, char *obuf, size_t obufsize, const char *headers )
 {
