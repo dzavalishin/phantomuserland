@@ -231,9 +231,9 @@ int main(int argc, char* argv[])
 
     pvm_root_init();
 
-#if 1
+#if 0
     test_json();
-    return 0;
+    //return 0;
 #endif
 
     // Enable multithreading in user mode.

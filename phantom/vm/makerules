@@ -17,6 +17,10 @@ endif
 endif
 endif
 
+vpath %.c . sys
+#vpath %.h . sys
+
+
 ../lib/libwin.a: ../libwin/*.c
 	$(MAKE) -C ../libwin
 

@@ -95,6 +95,19 @@ DEF_I(connection)
 //DEF_I(hash)
 
 DEF_I(tcp)
+DEF_I(udp)
+
+DEF_I(net)
+DEF_I(http)
+
+DEF_I(time)
+DEF_I(stat)
+
+DEF_I(io)
+DEF_I(port)
+DEF_I(ui_control)
+DEF_I(ui_font)
+
 
 #undef DEF_I
 

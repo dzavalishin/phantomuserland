@@ -1,4 +1,6 @@
 #if 0
+// see sys/i_io.c
+
 /**
  *
  * Phantom OS

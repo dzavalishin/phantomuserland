@@ -330,14 +330,12 @@ struct internal_class pvm_internal_classes[] =
         0
     },
 
-#if 0
+
     {
         ".internal.udp",
         PVM_ROOT_OBJECT_UDP_CLASS,
-        syscall_table_4_udp, // &n_syscall_table_4_udp,
-        pvm_internal_init_udp,
-        0 /*pvm_gc_iter_udp*/,
-        pvm_..._udp,
+        IINIT(tcp),
+        pvm_gc_finalizer_udp,
         0, // no restart func
         sizeof(struct data_area_4_udp),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
@@ -345,7 +343,7 @@ struct internal_class pvm_internal_classes[] =
         PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
         0
     },
-#endif
+
 
     {
         ".internal.tcp",
@@ -422,6 +420,109 @@ struct internal_class pvm_internal_classes[] =
         PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE, // removed PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
         0
     },
+
+    {
+        ".internal.net",
+        PVM_ROOT_OBJECT_NET_CLASS,
+        IINIT(net),
+        pvm_gc_finalizer_net,
+        pvm_restart_net,
+        sizeof(struct data_area_4_net),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.http",
+        PVM_ROOT_OBJECT_HTTP_CLASS,
+        IINIT(http),
+        pvm_gc_finalizer_http,
+        pvm_restart_http,
+        sizeof(struct data_area_4_http),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.time",
+        PVM_ROOT_OBJECT_TIME_CLASS,
+        IINIT(time),
+        0, //pvm_gc_finalizer_time,
+        pvm_restart_time, // sounds Asimovesque
+        sizeof(struct data_area_4_time),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
+        0
+    },
+
+    {
+        ".internal.stat",
+        PVM_ROOT_OBJECT_STAT_CLASS,
+        IINIT(stat),
+        0, //pvm_gc_finalizer_stat,
+        pvm_restart_stat,
+        sizeof(struct data_area_4_stat),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
+        0
+    },
+
+    {
+        ".internal.io",
+        PVM_ROOT_OBJECT_IO_CLASS,
+        IINIT(io),
+        pvm_gc_finalizer_io,
+        pvm_restart_io,
+        sizeof(struct data_area_4_io),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.port",
+        PVM_ROOT_OBJECT_PORT_CLASS,
+        IINIT(port),
+        pvm_gc_finalizer_port,
+        pvm_restart_port,
+        sizeof(struct data_area_4_port),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.ui.control",
+        PVM_ROOT_OBJECT_UI_CONTROL_CLASS,
+        IINIT(ui_control),
+        pvm_gc_finalizer_ui_control,
+        pvm_restart_ui_control,
+        sizeof(struct data_area_4_ui_control),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.ui.font",
+        PVM_ROOT_OBJECT_UI_FONT_CLASS,
+        IINIT(ui_font),
+        pvm_gc_finalizer_ui_font,
+        pvm_restart_ui_font,
+        sizeof(struct data_area_4_ui_font),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
 
 };
 

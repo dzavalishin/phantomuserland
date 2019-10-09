@@ -181,7 +181,7 @@ void videotest_pbm()
 
         drv_video_bitmap_t *bmp;
 
-        int i;
+        //int i;
         int result;
 
         //for( i = 0; i < 1000; i++ )

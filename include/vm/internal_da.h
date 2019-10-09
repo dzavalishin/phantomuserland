@@ -4,8 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
+ * Data area structures of internal classes.
  *
  *
 **/
@@ -16,7 +15,6 @@
 
 #include <vm/object.h>
 #include <vm/exception.h>
-//#include <drv_video_screen.h>
 
 #include <video/window.h>
 
@@ -25,8 +23,11 @@
 #include <sys/cdefs.h>
 #include <kernel/atomic.h>
 
-//#include <kernel/timedcall.h>
 #include <kernel/net_timer.h>
+#include <stdint.h>
+
+
+
 
 #if 0
 #define pvm_object_da_tostring( type ) #type
@@ -348,7 +349,20 @@ struct data_area_4_tcp
 {
     //int waiting for recv
     int                                 connected;
+    uint32_t                            ipaddr;
+    uint32_t                            port;
 };
+
+// move to ../phantom/vm/sys/i_udp.h and include
+#include "../phantom/vm/sys/i_udp.h"
+#include "../phantom/vm/sys/i_net.h"
+#include "../phantom/vm/sys/i_http.h"
+#include "../phantom/vm/sys/i_time.h"
+#include "../phantom/vm/sys/i_stat.h"
+#include "../phantom/vm/sys/i_io.h"
+#include "../phantom/vm/sys/i_port.h"
+#include "../phantom/vm/sys/i_ui_control.h"
+#include "../phantom/vm/sys/i_ui_font.h"
 
 
 
@@ -434,35 +448,6 @@ errno_t hdir_keys( hashdir_t *dir, pvm_object_t *out );
 
 
 
-#define IO_DA_BUFSIZE 4
-
-
-struct data_area_4_io
-{
-    u_int32_t                           in_count;       // num of objects waiting for get
-    u_int32_t                           out_count;      // num of objects put and not processed by kernel
-
-    // Buffers are small and we don't bother with cycle, just
-    // move contents. Input is on the right (higher index) side.
-    pvm_object_t                        ibuf[IO_DA_BUFSIZE];
-    pvm_object_t                        obuf[IO_DA_BUFSIZE];
-
-    pvm_object_t                        in_sleep_chain;  // Threads sleeping for input
-    pvm_object_t                        out_sleep_chain; // Threads sleeping for output
-
-    u_int32_t                           in_sleep_count;  // n of threads sleeping for input
-    u_int32_t                           out_sleep_count; // n of threads sleeping for output
-
-#if WEAKREF_SPIN
-    hal_spinlock_t                      lock;
-#else
-#error mutex?
-    hal_mutex_t                         mutex;
-    //pvm_object_t              mutex;          // persistence-compatible mutex
-#endif
-
-    u_int32_t                           reset;          // not operational, unblock waiting threads
-};
 
 
 

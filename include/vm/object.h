@@ -204,7 +204,24 @@ pvm_object_t     pvm_get_mutex_class(void);
 pvm_object_t     pvm_get_cond_class(void);
 pvm_object_t     pvm_get_sema_class(void);
 
+pvm_object_t     pvm_get_udp_class(void);
 pvm_object_t     pvm_get_tcp_class(void);
+
+
+pvm_object_t     pvm_get_net_class(void);
+pvm_object_t     pvm_get_http_class(void);
+
+pvm_object_t     pvm_get_time_class(void);
+pvm_object_t     pvm_get_stat_class(void);
+
+pvm_object_t     pvm_get_port_class(void);
+pvm_object_t     pvm_get_io_class(void);
+
+pvm_object_t     pvm_get_ui_control_class(void);
+pvm_object_t     pvm_get_ui_font_class(void);
+
+
+
 
 pvm_object_t     pvm_create_null_object(void);
 pvm_object_t     pvm_create_class_object(pvm_object_t name, pvm_object_t iface, int da_size);

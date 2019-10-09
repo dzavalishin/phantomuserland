@@ -81,6 +81,19 @@ struct pvm_root_t
     pvm_object_t           sema_class;
 
     pvm_object_t           tcp_class;
+    pvm_object_t           udp_class;
+
+    pvm_object_t           net_class;
+    pvm_object_t           http_class;
+
+    pvm_object_t           time_class;
+    pvm_object_t           stat_class;
+
+    pvm_object_t           port_class;
+    pvm_object_t           io_class;
+
+    pvm_object_t           ui_control_class;
+    pvm_object_t           ui_font_class;
 
 
     pvm_object_t           null_object;
@@ -201,7 +214,29 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_SEMA_CLASS 32
 
+#define PVM_ROOT_OBJECT_NET_CLASS 33
+
+#define PVM_ROOT_OBJECT_HTTP_CLASS 34
+
+#define PVM_ROOT_OBJECT_TIME_CLASS 35
+
+#define PVM_ROOT_OBJECT_STAT_CLASS 36
+
+#define PVM_ROOT_OBJECT_IO_CLASS 37
+
+#define PVM_ROOT_OBJECT_PORT_CLASS 38
+
+#define PVM_ROOT_OBJECT_UI_CONTROL_CLASS 39
+
+#define PVM_ROOT_OBJECT_UI_FONT_CLASS 40
+
+
+
+
 // Runtime restoration facilities
+
+
+
 
 
 // NULL object (is_null() checks against this one)

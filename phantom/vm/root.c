@@ -371,6 +371,16 @@ static void set_root_from_table()
     SET_ROOT_CLASS(sema,SEMA);
 
     SET_ROOT_CLASS(tcp,TCP);
+    SET_ROOT_CLASS(udp,UDP);
+
+    SET_ROOT_CLASS(net,NET);
+    SET_ROOT_CLASS(http,HTTP);
+    SET_ROOT_CLASS(time,TIME);
+    SET_ROOT_CLASS(stat,STAT);
+    SET_ROOT_CLASS(io,IO);
+    SET_ROOT_CLASS(port,PORT);
+    SET_ROOT_CLASS(ui_control,UI_CONTROL);
+    SET_ROOT_CLASS(ui_font,UI_FONT);
 }
 
 
@@ -416,7 +426,17 @@ GCINLINE pvm_object_t     pvm_get_mutex_class() { return pvm_root.mutex_class; }
 GCINLINE pvm_object_t     pvm_get_cond_class() { return pvm_root.cond_class; }
 GCINLINE pvm_object_t     pvm_get_sema_class() { return pvm_root.sema_class; }
 
-GCINLINE pvm_object_t     pvm_get_tcp_class() { return pvm_root.sema_class; }
+GCINLINE pvm_object_t     pvm_get_tcp_class() { return pvm_root.tcp_class; }
+GCINLINE pvm_object_t     pvm_get_udp_class() { return pvm_root.udp_class; }
+
+GCINLINE pvm_object_t     pvm_get_net_class() { return pvm_root.net_class; }
+GCINLINE pvm_object_t     pvm_get_http_class() { return pvm_root.http_class; }
+GCINLINE pvm_object_t     pvm_get_time_class() { return pvm_root.time_class; }
+GCINLINE pvm_object_t     pvm_get_stat_class() { return pvm_root.stat_class; }
+GCINLINE pvm_object_t     pvm_get_io_class() { return pvm_root.io_class; }
+GCINLINE pvm_object_t     pvm_get_port_class() { return pvm_root.port_class; }
+GCINLINE pvm_object_t     pvm_get_ui_control_class() { return pvm_root.ui_control_class; }
+GCINLINE pvm_object_t     pvm_get_ui_font_class() { return pvm_root.ui_font_class; }
 
 
 #undef GCINLINE
