@@ -89,6 +89,9 @@ Easiest way is to [Write e-mail to Dmitry Zavalishin](mailto:dz@dz.ru)
 
 Just for reference there was [Old Google forum](https://groups.google.com/forum/#!forum/phantom-os)
 
+Here is an [Phantom Web Site](http://phantomos.org/), but since you're here you
+better look at [Wiki](https://github.com/dzavalishin/phantomuserland/wiki).
+
 <hr>
 
 Best regards, Dmitry Zavalishin,
