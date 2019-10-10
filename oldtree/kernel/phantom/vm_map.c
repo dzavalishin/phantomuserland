@@ -17,6 +17,7 @@
 
 #include <kernel/config.h>
 #include <sys/syslog.h>
+#include <kernel/debug_graphical.h>
 
 #include <assert.h>
 

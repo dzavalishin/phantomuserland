@@ -122,7 +122,7 @@ hal_free_vaddress(void *addr, int num)
 
 
 
-void paint_vaspace_allocator_memory_map(window_handle_t w, rect_t *r, physalloc_t m )
+void paint_vaspace_allocator_memory_map(window_handle_t w, rect_t *r )
 {
     paint_allocator_memory_map(w, r, &vm_map );
 }
@@ -337,7 +337,7 @@ int low_free_physmem()
     return phantom_phys_free_count( &pm_map ) < 100;
 }
 
-void paint_physmem_allocator_memory_map(window_handle_t w, rect_t *r, physalloc_t m )
+void paint_physmem_allocator_memory_map(window_handle_t w, rect_t *r )
 {
     paint_allocator_memory_map(w, r, &pm_map );
 }

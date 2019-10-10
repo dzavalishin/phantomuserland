@@ -15,6 +15,7 @@
 
 #include <kernel/physalloc.h>
 #include <kernel/debug.h>
+#include <kernel/debug_graphical.h>
 
 // Physical memory allocator, page by page
 
@@ -378,7 +379,7 @@ static rgba_t calc_pixel_color( physalloc_t *m, int elem, int units_per_pixel )
     switch(state)
     {
         case 0: return COLOR_BLUE;
-        
+
         case 1: 
         {
             //return COLOR_LIGHTGREEN;
