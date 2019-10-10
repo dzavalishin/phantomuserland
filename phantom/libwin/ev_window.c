@@ -21,7 +21,7 @@
 
 #include <video/window.h>
 #include <video/internal.h>
-#include <video/button.h>
+#include <video/control.h>
 
 #include <threads.h>
 

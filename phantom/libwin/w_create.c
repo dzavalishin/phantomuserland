@@ -23,7 +23,7 @@
 //#include <kernel/init.h>
 //#include "win_local.h"
 #include <video/window.h>
-#include <video/button.h>
+#include <video/control.h>
 #include <video/internal.h>
 #include <video/screen.h>
 
@@ -148,7 +148,7 @@ void w_restart_init(drv_video_window_t *w)
     w->w_decor = 0;
     w->w_owner = 0;
 
-    w->buttons = 0; // ? TODO how do we resetup 'em?
+    w->controls = 0; // ? TODO how do we resetup 'em?
 
     queue_init(&(w->events));
     w->events_count = 0;
@@ -267,8 +267,8 @@ void drv_video_window_destroy(drv_video_window_t *w)
     ev_q_put_win( w->x, w->y, UI_EVENT_WIN_DESTROYED, focused_window );
 
 
-    if(w->buttons)
-        destroy_buttons_pool(w->buttons);
+    if(w->controls)
+        destroy_controls_pool(w->controls);
 
 #if 1
     request_repaint_all_for_win( w );

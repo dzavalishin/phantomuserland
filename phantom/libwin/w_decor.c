@@ -15,8 +15,8 @@
 #include <video/internal.h>
 #include <video/vops.h>
 #include <video/font.h>
-#include <video/button.h>
-
+//#include <video/button.h>
+#include <video/control.h>
 
 #define border_0_color { .r = 210, .g = 203, .b = 188, .a = 0xFF } // bgr!
 #define border_1_color { .r = 183, .g = 171, .b = 146, .a = 0xFF }

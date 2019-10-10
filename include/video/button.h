@@ -12,15 +12,20 @@
 #ifndef VIDEO_BUTTONS_H
 #define VIDEO_BUTTONS_H
 
+#error I am deprecated
+
 #ifndef VCONFIG_H
 #include <video/vconfig.h>
 #endif // VCONFIG_H
 
 #include <kernel/pool.h>
 #include <sys/types.h>
+#include <stdint.h>
 
-#define BUTTON_FLAG_NOPAINT	(1<<0)
-#define BUTTON_FLAG_NOBORDER	(1<<1)
+#include <video/control.h>
+
+#define BUTTON_FLAG_NOPAINT   CONTROL_FLAG_NOPAINT
+#define BUTTON_FLAG_NOBORDER  CONTROL_FLAG_NOBORDER
 
 typedef void (*button_callback_t)( window_handle_t w, pool_handle_t button_handle, void *arg );
 

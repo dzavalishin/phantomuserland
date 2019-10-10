@@ -215,7 +215,7 @@ typedef struct drv_video_window
     struct drv_video_window     *w_decor; // child window - decorations
     struct drv_video_window     *w_owner; // my parent window
 
-    pool_t              *buttons;
+    pool_t              *controls; //< Attached UI controls
 
     rgba_t       	*r_pixel; // read ptr - for blit to screen
     rgba_t       	*w_pixel; // write ptr - for painting

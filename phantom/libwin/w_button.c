@@ -1,3 +1,4 @@
+#if 0 // controls
 /**
  *
  * Phantom OS
@@ -24,9 +25,10 @@
 #include <video/rect.h>
 #include <video/window.h>
 #include <video/bitmap.h>
-#include <video/button.h>
 #include <video/font.h>
 #include <video/internal.h>
+
+#include <video/control.h>
 
 // negative magic produces negative handles
 //#define BUTTONS_POOL_MAGIC ('b' << 24 | 0xFFEEAA)
@@ -399,3 +401,4 @@ void w_button_set_callback( window_handle_t w, pool_handle_t button_handle, butt
 
 
 
+#endif
