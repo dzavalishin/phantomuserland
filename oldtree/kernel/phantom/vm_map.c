@@ -129,7 +129,7 @@ static size_t           dirty_q_size;
 // keep it in a pagefile.
 
 static void *              vm_map_start_of_virtual_address_space;
-static unsigned long       vm_map_vm_page_count;             // how many pages VM has
+static unsigned long       vm_map_vm_page_count = 0;         // how many pages VM has, if 0 = we are not running yet
 
 static vm_page *           vm_map_map;                       // array of pages
 static vm_page *           vm_map_map_end;                   // a byte after map
@@ -395,6 +395,12 @@ vm_map_init(unsigned long page_count)
 
     vm_map_map = (vm_page *)malloc( mapsize );
     memset( vm_map_map, 0, mapsize );
+    /*
+    unsigned int i;
+    for( i = 0; i < page_count; i++ )
+    {
+        memset( vm_map_map+i, 0, sizeof(vm_page) );
+    }*/
 
     vm_map_map_end = vm_map_map + page_count;
 
@@ -2122,5 +2128,84 @@ static void signal_snap_done_passed( void )
 }
 
 #endif
+
+
+
+
+
+//---------------------------------------------------------------------------
+// Debug window - mem map
+//---------------------------------------------------------------------------
+
+static rgba_t calc_persistent_pixel_color( int elem, int units_per_pixel );
+
+/**
+ * 
+ * \brief Generic painter for any allocator using us.
+ * 
+ * Used in debug window.
+ * 
+ * \param[in] w Window to draw to
+ * \param[in] r Rectangle to paint inside
+ * 
+**/
+void paint_persistent_memory_map(window_handle_t w, rect_t *r )
+{
+    if(!vm_map_vm_page_count) return;
+
+    int pixels = r->xsize * r->ysize;
+    int units_per_pixel =  1 + ((vm_map_vm_page_count-1) / pixels);
+
+    int x, y;
+    for( y = 0; y < r->ysize; y++ )
+    {
+        for( x = 0; x < r->xsize; x++ )
+            w_draw_pixel( w, x + r->x, y + r->y, calc_persistent_pixel_color( x + y * r->xsize, units_per_pixel ));
+    }
+
+}
+
+static rgba_t calc_persistent_pixel_color( int elem, int units_per_pixel )
+{
+    vm_page *ep = vm_map_map + elem;
+
+    int state = 0; // 0 = empty, 1 = partial, 2 = used
+    int bits = 0;
+    int do_io = 0;
+
+    int i;
+    for( i = 0; i < units_per_pixel; i++, ep++ )
+    {
+        if( 0 == ep->flag_phys_mem ) continue; // empty, no change
+        state = 2; // full
+        bits += 1;
+
+        if( ep->flag_pager_io_busy ) 
+        {
+            do_io = 1;
+            //lprintf("io %d ", elem+i);
+        }
+    }
+
+    if(do_io) return COLOR_YELLOW;
+
+    switch(state)
+    {
+        case 0: return COLOR_BLUE;
+        
+        case 1: 
+        {
+            //return COLOR_LIGHTGREEN;
+            rgba_t c = COLOR_LIGHTGREEN;
+            // lighter = less used
+            c.g = 0xFF - (bits * 0xFF / (units_per_pixel * sizeof(map_elem_t) * 8));
+            return c;
+        }
+
+        case 2: return COLOR_LIGHTRED;
+
+        default: return COLOR_BLACK;
+    }
+}
 
 

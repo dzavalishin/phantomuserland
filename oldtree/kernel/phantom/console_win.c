@@ -391,6 +391,7 @@ static void put_progress()
 
 static void paint_memory_map(window_handle_t w);
 static void paint_vaspace_map(window_handle_t w);
+static void paint_persistent_map(window_handle_t w);
 
 static void phantom_debug_window_loop()
 {
@@ -436,6 +437,7 @@ static void phantom_debug_window_loop()
                        "d\t- dump threads to JSON\n"
                        "m\t- show physical memory map\n"
                        "v\t- show virtual address space map\n"
+                       "o\t- show objects (persistent) memory map\n"
                       );
                 break;
             case 'p': // profiler
@@ -444,6 +446,8 @@ static void phantom_debug_window_loop()
             case 's':
             case 'm':
             case 'v':
+            case 'o':
+            case 'a':
                 show = c;
                 break;
 
@@ -474,6 +478,8 @@ static void phantom_debug_window_loop()
                 case 'p': w_set_title( phantom_debug_window,  "Profiler" );        break;
                 case 'm': w_set_title( phantom_debug_window,  "Physical memory" ); break;
                 case 'v': w_set_title( phantom_debug_window,  "Virtual address space" ); break;
+                case 'o': w_set_title( phantom_debug_window,  "Objects memory" );  break;                
+                case 'a': w_set_title( phantom_debug_window,  "Objects allocator (off)" );  break;                
                 }
             }
         }
@@ -516,6 +522,8 @@ static void phantom_debug_window_loop()
         case 'p':           phantom_dump_profiler_buf(bp,len);           break;
         case 'm':           paint_memory_map(phantom_debug_window);      break;
         case 'v':           paint_vaspace_map(phantom_debug_window);     break;
+        case 'a':           
+        case 'o':           paint_persistent_map(phantom_debug_window);  break;
         }
 
         phantom_debug_window_puts(buf);
@@ -594,5 +602,13 @@ static void paint_vaspace_map(window_handle_t w)
     paint_vaspace_allocator_memory_map( w, &memory_map_rect );
 }
 
+
+static void paint_persistent_map(window_handle_t w)
+{
+    memory_map_rect.ysize = w->ysize - HEAD_ROOM;
+    memory_map_rect.xsize = w->xsize - (memory_map_rect.x * 2);
+
+    paint_persistent_memory_map( w, &memory_map_rect );
+}
 
 
