@@ -29,6 +29,7 @@
 #include <kernel/page.h>
 
 #include <video/window.h> // for debug paint
+#include <kernel/debug_graphical.h>
 
 #include "vm_map.h"
 
