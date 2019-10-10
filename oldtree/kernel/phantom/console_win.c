@@ -389,6 +389,7 @@ static void put_progress()
     w_fill_rect( phantom_debug_window, COLOR_LIGHTGREEN, progress_rect );
 }
 
+static void paint_memory_map(window_handle_t phantom_debug_window);
 
 static void phantom_debug_window_loop()
 {
@@ -436,17 +437,9 @@ static void phantom_debug_window_loop()
                 break;
             case 'p': // profiler
             case 't':
-                //w_set_title( phantom_debug_window,  "Threads" );
-                //show = c;
-                //break;
-
             case 'w':
-                //w_set_title( phantom_debug_window,  "Windows" );
-                //show = c;
-                //break;
-
             case 's':
-                //w_set_title( phantom_debug_window,  "Stats" );
+            case 'm':
                 show = c;
                 break;
 
@@ -471,21 +464,11 @@ static void phantom_debug_window_loop()
                 old_show = show;
                 switch(show)
                 {
-                case 't':
-                    w_set_title( phantom_debug_window,  "Threads" );
-                    break;
-
-                case 'w':
-                    w_set_title( phantom_debug_window,  "Windows" );
-                    break;
-
-                case 's':
-                    w_set_title( phantom_debug_window,  "Stats" );
-                    break;
-
-                case 'p':
-                    w_set_title( phantom_debug_window,  "Profiler" );
-                    break;
+                case 't': w_set_title( phantom_debug_window,  "Threads" );         break;
+                case 'w': w_set_title( phantom_debug_window,  "Windows" );         break;
+                case 's': w_set_title( phantom_debug_window,  "Stats" );           break;
+                case 'p': w_set_title( phantom_debug_window,  "Profiler" );        break;
+                case 'm': w_set_title( phantom_debug_window,  "Physical memory" ); break;
                 }
             }
         }
@@ -499,8 +482,6 @@ static void phantom_debug_window_loop()
         ttyd = DEBWIN_YS-20;
         ttxd = 0;
 #endif
-        //put_progress();
-
         void *bp = buf;
         int len = DEBBS;
         int rc;
@@ -524,21 +505,11 @@ static void phantom_debug_window_loop()
         switch(show)
         {
         case 't':
-        default:
-            phantom_dump_threads_buf(bp,len);
-            break;
-
-        case 'w':
-            phantom_dump_windows_buf(bp,len);
-            break;
-
-        case 's':
-            phantom_dump_stats_buf(bp,len);
-            break;
-
-        case 'p':
-            phantom_dump_profiler_buf(bp,len);
-            break;
+        default:            phantom_dump_threads_buf(bp,len);            break;
+        case 'w':           phantom_dump_windows_buf(bp,len);            break;
+        case 's':           phantom_dump_stats_buf(bp,len);              break;
+        case 'p':           phantom_dump_profiler_buf(bp,len);           break;
+        case 'm':           paint_memory_map(phantom_debug_window);      break;
         }
 
         phantom_debug_window_puts(buf);
@@ -596,6 +567,15 @@ static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e)
 }
 
 
+rect_t memory_map_rect = (rect_t){ 5, 10, 100, 100 };
+
+static void paint_memory_map(window_handle_t w)
+{
+    memory_map_rect.ysize = w->ysize - 60;
+    memory_map_rect.xsize = w->xsize - (memory_map_rect.x * 2);
+
+    paint_physmem_allocator_memory_map( w, &memory_map_rect );
+}
 
 
 
