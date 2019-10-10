@@ -361,6 +361,7 @@ static rgba_t calc_pixel_color( physalloc_t *m, int elem, int units_per_pixel )
     map_elem_t *ep = m->map + elem;
 
     int state = 0; // 0 = empty, 1 = partial, 2 = used
+    int bits = 0;
 
     int i;
     for( i = 0; i < units_per_pixel; i++, ep++ )
@@ -370,12 +371,23 @@ static rgba_t calc_pixel_color( physalloc_t *m, int elem, int units_per_pixel )
 
         // partial, if was empty - make partial
         if( state == 0 ) state = 1;
+
+        bits += __builtin_popcount (*ep);
     }
 
     switch(state)
     {
         case 0: return COLOR_BLUE;
-        case 1: return COLOR_LIGHTGREEN;
+        
+        case 1: 
+        {
+            //return COLOR_LIGHTGREEN;
+            rgba_t c = COLOR_LIGHTGREEN;
+            // lighter = less used
+            c.g = 0xFF - (bits * 0xFF / (units_per_pixel * sizeof(map_elem_t) * 8));
+            return c;
+        }
+
         case 2: return COLOR_LIGHTRED;
 
         default: return COLOR_YELLOW;

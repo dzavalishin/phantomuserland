@@ -122,6 +122,10 @@ hal_free_vaddress(void *addr, int num)
 
 
 
+void paint_vaspace_allocator_memory_map(window_handle_t w, rect_t *r, physalloc_t m )
+{
+    paint_allocator_memory_map(w, r, &vm_map );
+}
 
 
 
