@@ -101,7 +101,7 @@ void w_to_top(drv_video_window_t *w)
         }
 
         // must go to most bottom pos?? near to unreal...
-        SHOW_ERROR0( 0, "insert at bottom");
+        LOG_ERROR0( 0, "insert at bottom");
         queue_enter_first(&allwindows, w, drv_video_window_t *, chain);
         if( w->w_decor ) queue_enter_first(&allwindows, w->w_decor, drv_video_window_t *, chain);
         if( w->w_title ) queue_enter_first(&allwindows, w->w_title, drv_video_window_t *, chain);

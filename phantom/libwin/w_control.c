@@ -129,7 +129,7 @@ static void paint_control(window_handle_t w, control_t *cc )
         case ct_submenu:    // 
 
         default:
-            SHOW_ERROR( 1, "unknown control type %d", cc->type);
+            LOG_ERROR( 1, "unknown control type %d", cc->type);
             break;
     }
 }
@@ -233,7 +233,7 @@ static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, vo
 
     if( point_in_rect( env->e.rel_x, env->e.rel_y, &cc->r ) )
     {
-        //SHOW_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cc->id );
+        //LOG_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cc->id );
         cc->mouse_in_bits |= 1;
 
         if(env->e.m.clicked & 0x1) // First button click only
@@ -302,7 +302,7 @@ void w_paint_changed_controls(window_handle_t w)
 
     struct checkb env;
 
-    //SHOW_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
+    //LOG_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
 
     bzero( &env, sizeof(env) );
 
@@ -318,7 +318,7 @@ void w_repaint_controls(window_handle_t w)
 
     struct checkb env;
 
-    //SHOW_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
+    //LOG_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
 
     bzero( &env, sizeof(env) );
 
@@ -347,7 +347,7 @@ void w_check_controls( window_handle_t w, ui_event_t *e )
 
     struct checkb env;
 
-    //SHOW_FLOW( 1, "button check @ %d.%d buttons %x", e->rel_x, e->rel_y, e->m.buttons );
+    //LOG_FLOW( 1, "button check @ %d.%d buttons %x", e->rel_x, e->rel_y, e->m.buttons );
 
     env.e = *e;
     env.w = w;
@@ -401,7 +401,7 @@ void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, 
 
     if( !ref )
     {
-        SHOW_ERROR0( 1, "can't get control" );
+        LOG_ERROR0( 1, "can't get control" );
         return;
     }
 
@@ -459,7 +459,7 @@ static control_handle_t control_to_pool( window_handle_t w, control_t *cc )
     if( ch < 0 )
     {
         free(cc);
-        //SHOW_ERROR0( 0, "out of buttons" );
+        //LOG_ERROR0( 0, "out of buttons" );
         return INVALID_POOL_HANDLE;
     }
 
@@ -548,7 +548,7 @@ control_handle_t w_add_control( window_handle_t w, control_t *c )
     control_t *cc = calloc( 1, sizeof(control_t) );
     if( 0 == cc )
     {
-        //SHOW_ERROR0( 0, "out of buttons" );
+        //LOG_ERROR0( 0, "out of buttons" );
         return INVALID_POOL_HANDLE;
     }
 

@@ -31,7 +31,7 @@
 #include <video/window.h>
 #include <video/font.h>
 #include <video/screen.h>
-#include <video/button.h>
+#include <video/control.h>
 
 #include "console.h"
 #include "misc.h"
@@ -39,6 +39,7 @@
 #include <threads.h>
 #include <kernel/timedcall.h>
 #include <kernel/debug.h>
+#include <kernel/debug_graphical.h>
 #include <kernel/stats.h>
 #include <kernel/profile.h>
 #include <kernel/init.h>
@@ -330,7 +331,7 @@ void phantom_init_console_window()
     //lb_y += slide_switch_on_bmp.ysize + 5;
     lb_y += 8;
 
-    w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_on_bmp, &slide_switch_off_bmp, BUTTON_FLAG_NOBORDER );
+    w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_on_bmp, &slide_switch_off_bmp, CONTROL_FLAG_NOBORDER );
 
     pool_handle_t bh;
 
@@ -344,8 +345,8 @@ void phantom_init_console_window()
         // crashes in some configurations??
         wname[7] = '0' + nwin;
 
-        bh = w_add_button( phantom_launcher_window, nwin, lb_x, 0, &vanilla_task_button_bmp, &vanilla_task_button_bmp, BUTTON_FLAG_NOBORDER );
-        w_button_set_text( phantom_launcher_window, bh, wname, BTEXT_COLOR );
+        bh = w_add_button( phantom_launcher_window, nwin, lb_x, 0, &vanilla_task_button_bmp, &vanilla_task_button_bmp, CONTROL_FLAG_NOBORDER );
+        w_control_set_text( phantom_launcher_window, bh, wname, BTEXT_COLOR );
         lb_x += 5+vanilla_task_button_bmp.xsize;
 
         taskbuttons[nwin] = bh;

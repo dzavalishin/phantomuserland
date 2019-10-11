@@ -35,10 +35,10 @@ void ev_q_put_key( int vkey, int ch, int modifiers )
     switch( vkey )
     {
     case KEY_TAB:
-        SHOW_FLOW( 10, "Tab shifts = %x", modifiers );
+        LOG_FLOW( 10, "Tab shifts = %x", modifiers );
         if( UI_MOD_CTRL_DOWN(modifiers) || UI_MOD_ALT_DOWN(modifiers) )
         {
-            SHOW_FLOW( 9, "Next win shifts = %x", modifiers );
+            LOG_FLOW( 9, "Next win shifts = %x", modifiers );
             window_handle_t later_lost = 0;
             window_handle_t later_gain = 0;
 
@@ -62,16 +62,16 @@ void ev_q_put_key( int vkey, int ch, int modifiers )
         break;
 
     case KEY_F4:
-        SHOW_FLOW( 0, "F4 shifts = %x", modifiers );
+        LOG_FLOW( 0, "F4 shifts = %x", modifiers );
         break;
 
     case KEY_LWIN:
     case KEY_RWIN:
-        SHOW_FLOW( 0, "WIN shifts = %x", modifiers );
+        LOG_FLOW( 0, "WIN shifts = %x", modifiers );
         break;
 
     case KEY_MENU:
-        SHOW_FLOW( 0, "MENU shifts = %x", modifiers );
+        LOG_FLOW( 0, "MENU shifts = %x", modifiers );
         break;
 
     }

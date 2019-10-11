@@ -124,7 +124,7 @@ void ev_put_event(ui_event_t *e)
 {
     if(!ev_engine_active) return; // Just ignore
 
-    SHOW_FLOW(8, "%p", e);
+    LOG_FLOW(8, "%p", e);
     hal_mutex_lock( &ev_main_q_mutex );
     ev_events_in_q++;
     queue_enter(&ev_main_event_q, e, struct ui_event *, echain);
@@ -138,7 +138,7 @@ void ev_put_event(ui_event_t *e)
 
 static void ev_push_event( struct ui_event *e )
 {
-    //SHOW_FLOW( 9, "type %d abs x %d t %d", e->type, e->abs_x, e->abs_y );
+    //LOG_FLOW( 9, "type %d abs x %d t %d", e->type, e->abs_x, e->abs_y );
     //printf("%d,%d\n", e->abs_x, e->abs_y );
     ev_log( 9, e );
 
@@ -179,7 +179,7 @@ static void ev_push_thread()
         ev_events_in_q--;
         hal_mutex_unlock( &ev_main_q_mutex );
 
-        SHOW_FLOW(8, "%p", e);
+        LOG_FLOW(8, "%p", e);
 
         vm_lock_persistent_memory();
         // Deliver to 'em
@@ -205,7 +205,7 @@ static void ev_push_thread()
 
 static int phantom_window_getc(void)
 {
-    //SHOW_FLOW0( 11, "window getc" );
+    //LOG_FLOW0( 11, "window getc" );
     //wtty_t *tty = &(GET_CURRENT_THREAD()->ctty);
 #if CONF_NEW_CTTY
     wtty_t *tty = GET_CURRENT_THREAD()->ctty_w;
@@ -214,7 +214,7 @@ static int phantom_window_getc(void)
 #endif
     if(tty == 0)
     {
-        SHOW_ERROR0( 0, "No wtty, phantom_window_getc loops forever" );
+        LOG_ERROR0( 0, "No wtty, phantom_window_getc loops forever" );
         while(1)
             hal_sleep_msec(10000);
     }

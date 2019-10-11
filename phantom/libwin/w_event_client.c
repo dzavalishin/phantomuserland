@@ -104,13 +104,11 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
     errno_t err = wtty_putc_nowait(wt, ch );
     if(err == ENOMEM)
     {
-        SHOW_ERROR0( 1, "Window keyb buffer overflow" );
-        //printf( "Window keyb buffer overflow" );
+        LOG_ERROR0( 1, "Window keyb buffer overflow" );
     }
     else if(err)
     {
-        SHOW_ERROR( 1, "Window putc error %d", err );
-        //printf( "Window putc error %d", err );
+        LOG_ERROR( 1, "Window putc error %d", err );
     }
     return 1;
 }

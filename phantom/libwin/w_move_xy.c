@@ -283,7 +283,7 @@ w_move( drv_video_window_t *w, int x, int y )
             video_drv->copy( w->x, w->y, x, y, w->xsize, w->ysize );
         //video_drv->clear( w->x, w->y, w->xsize, w->ysize ); // just to tests it - works on vmware
 
-        //SHOW_FLOW( 0, "video accelerator use copy -> %d/%d", x, y ); // recursive mutex lock
+        //LOG_FLOW( 0, "video accelerator use copy -> %d/%d", x, y ); // recursive mutex lock
         //lprintf( "done\n" );
 #else
         rect_t src_r;

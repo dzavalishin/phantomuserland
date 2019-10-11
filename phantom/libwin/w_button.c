@@ -216,7 +216,7 @@ static errno_t do_check_button(pool_t *pool, void *el, pool_handle_t handle, voi
 
     if( point_in_rect( env->e.rel_x, env->e.rel_y, &cb->r ) )
     {
-        //SHOW_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cb->id );
+        //LOG_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cb->id );
         cb->mouse_in_bits |= 1;
 
         if(env->e.m.clicked & 0x1) // First button click only
@@ -277,7 +277,7 @@ void w_paint_changed_buttons(window_handle_t w)
 
     struct checkb env;
 
-    //SHOW_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
+    //LOG_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
 
     bzero( &env, sizeof(env) );
 
@@ -293,7 +293,7 @@ void w_repaint_buttons(window_handle_t w)
 
     struct checkb env;
 
-    //SHOW_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
+    //LOG_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
 
     bzero( &env, sizeof(env) );
 
@@ -322,7 +322,7 @@ void w_check_button( window_handle_t w, ui_event_t *e )
 
     struct checkb env;
 
-    //SHOW_FLOW( 1, "button check @ %d.%d buttons %x", e->rel_x, e->rel_y, e->m.buttons );
+    //LOG_FLOW( 1, "button check @ %d.%d buttons %x", e->rel_x, e->rel_y, e->m.buttons );
 
     env.e = *e;
     env.w = w;
@@ -344,7 +344,7 @@ pool_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_b
     pool_handle_t bh = pool_create_el( w->buttons, calloc( 1, sizeof(button_t) ) );
     if( bh < 0 )
     {
-        //SHOW_ERROR0( 0, "out of buttons" );
+        //LOG_ERROR0( 0, "out of buttons" );
         return INVALID_POOL_HANDLE;
     }
 
@@ -352,7 +352,7 @@ pool_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_b
 
     if( !cb )
     {
-        //SHOW_ERROR0( 0, "can't get just created button??" );
+        //LOG_ERROR0( 0, "can't get just created button??" );
         return INVALID_POOL_HANDLE;
     }
 
@@ -405,7 +405,7 @@ void w_button_set_text( window_handle_t w, pool_handle_t bh, const char *text, c
 
     if( !cb )
     {
-        SHOW_ERROR0( 0, "can't get just button" );
+        LOG_ERROR0( 0, "can't get just button" );
         return;
     }
 
@@ -428,7 +428,7 @@ void w_button_set_callback( window_handle_t w, pool_handle_t button_handle, butt
 
     if( !b )
     {
-        SHOW_ERROR0( 0, "can't get just button" );
+        LOG_ERROR0( 0, "can't get just button" );
         return;
     }
 
