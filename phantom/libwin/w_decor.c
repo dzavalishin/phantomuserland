@@ -106,7 +106,7 @@ void win_make_decorations(drv_video_window_t *w)
 #if VIDEO_T_IN_D
         int bmp_y = w->ysize + bordr_size*2 + 2;
         // close button with id=1
-        w_add_button( w->w_decor, 1, 5, bmp_y, &close_bmp, &close_pressed_bmp, 0 );
+        w_add_button( w->w_decor, WBUTTON_SYS_CLOSE, 5, bmp_y, &close_bmp, &close_pressed_bmp, 0 );
 #endif
 
         // hangs?
@@ -145,7 +145,7 @@ void win_make_decorations(drv_video_window_t *w)
 
         int bwidth = vanilla_cream_close_bmp.xsize;
         int bxp = w->w_title->xsize - bwidth - 3;
-        // close button with id=1
+        // close button 
         w_add_button( w->w_title, WBUTTON_SYS_CLOSE, bxp, 3, &vanilla_cream_close_bmp, &vanilla_cream_close_pressed_bmp, 0 );
         bxp -= bwidth + 0;
         // roll up button

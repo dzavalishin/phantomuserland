@@ -20,10 +20,12 @@
 control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags )
 {
     control_t cb;
+    w_clear_control( &cb );
 
     cb.type = ct_button;
 
     cb.id = id;
+    cb.group_id = 0;
 
     cb.r.x = x;
     cb.r.y = y;
@@ -31,8 +33,10 @@ control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_vide
     cb.flags = flags;
 
     cb.fg_color = COLOR_RED;
+
     cb.bg_image = bmp;
     cb.fg_image = pressed;
+    cb.ho_image = 0;
 
     return w_add_control( w, &cb );
 }

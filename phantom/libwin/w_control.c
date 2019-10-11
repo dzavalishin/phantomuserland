@@ -77,20 +77,12 @@ static void paint_button(window_handle_t win, control_t *cc )
     if(cc->text)
     {
 
-#if CONF_TRUETYPE
-        int t_height = 16;
-        int t_ypos = (cc->r.ysize - t_height) / 2;
-        w_ttfont_draw_string( win, decorations_title_font,
-                              cc->text, cc->fg_color,
-                              cc->r.x+t_ypos+2, cc->r.y+t_ypos ); // +2?
-#else
-        int t_height = 16;
-        int t_ypos = (cc->r.ysize - t_height) / 2;
-        w_font_draw_string( win, &drv_video_8x16san_font,
-                            cc->text, cc->text_color,
-                            COLOR_TRANSPARENT,
-                            cc->r.x+t_ypos+2, cc->r.y+t_ypos ); // +2?
-#endif
+    int t_height = 16;
+    int t_ypos = (cc->r.ysize - t_height) / 2;
+
+    w_ttfont_draw_string( win, decorations_title_font,
+                          cc->text, cc->fg_color,
+                          cc->r.x+t_ypos+2, cc->r.y+t_ypos ); // +2?
     }
 
     //w_update( win );
@@ -515,7 +507,9 @@ static void w_clean_internal_state( window_handle_t w, control_t *cc )
 
     memset( cc->buffer, 0, sizeof(cc->buffer) );
 
-    strlcpy( cc->buffer, cc->text, sizeof(cc->buffer) ); // TODO if buffer is nou enough?
+    if(cc->text)
+        strlcpy( cc->buffer, cc->text, sizeof(cc->buffer) ); // TODO if buffer is nou enough?
+
     cc->text = cc->buffer;
 }
 
@@ -555,8 +549,7 @@ control_handle_t w_add_control( window_handle_t w, control_t *c )
     *cc = *c; // Copy all settings
 
     w_clean_internal_state( w, cc );
-
-    w_add_to_group(w,cc);
+    w_add_to_group( w, cc );
     w_image_defaults( w, cc );
 
     paint_control( w, cc );
@@ -574,4 +567,10 @@ void w_add_controls( window_handle_t w, control_t *c )
     w_add_control( w, c );
     w_add_controls( w, next );
 }
+
+void w_clear_control( control_t *c )
+{
+    memset( c, 0, sizeof(control_t) );
+}
+
 

@@ -74,9 +74,14 @@ typedef pool_handle_t control_handle_t;
 
 typedef void (*control_callback_t)( window_handle_t w, struct control *c );
 
-
-
-typedef struct control // TODO gaps? packed?
+/**
+ * 
+ * \brief General UI control definition.
+ * 
+ * TODO gaps? packed?
+ * 
+**/
+typedef struct control
 {
     control_type_t      type;           //< Type of this control
     u_int32_t           id;             //< Identifier of this control - sent in messages from it
