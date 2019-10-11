@@ -235,6 +235,14 @@ void w_receive_event(ui_event_t *e)
         w_check_controls( w, &ecopy );
     }
 
+    // Controls need it to 'unhover'
+    if( (e->type == UI_EVENT_TYPE_WIN) && (e->w.info == UI_EVENT_WIN_LOST_FOCUS) )
+    {
+        ui_event_t ecopy = *e; // for any case
+        w_check_controls( w, &ecopy );
+    }
+
+
     if( w->events_count < MAX_WINDOW_EVENTS )
     {
     	LOG_FLOW(8, "e %p -> w %p", e, w);

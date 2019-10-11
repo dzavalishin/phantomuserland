@@ -333,7 +333,7 @@ void phantom_init_console_window()
 
     color_t menu_border = (color_t){.r = 20, .g = 20, .b = 20, .a = 255};
 
-    phantom_launcher_menu_window = drv_video_window_create( 200, 200,
+    phantom_launcher_menu_window = drv_video_window_create( 200, 186,
                                                        9, 45, COLOR_WHITE, 
                                                        "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
 
@@ -348,9 +348,9 @@ void phantom_init_console_window()
     w_add_menu_item( phantom_launcher_menu_window, 0, 1, 1+31*2, menu_xsize, "Weather", COLOR_BLACK );
     w_add_menu_item( phantom_launcher_menu_window, 0, 1, 1+31*1, menu_xsize, "Clock", COLOR_BLACK );
 
-    bh = w_add_button( phantom_launcher_menu_window, 0, 2, 2+31*0, &slide_switch_off_bmp, &slide_switch_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    bh = w_add_button( phantom_launcher_menu_window, 0, 128, 2+31*0, &slide_switch_off_bmp, &slide_switch_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_ttfont_draw_string( phantom_launcher_menu_window, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 10, 8 );
     //w_control_set_text( phantom_launcher_menu_window, bh, "Fast Snap", COLOR_BLACK );
-    w_ttfont_draw_string( phantom_launcher_menu_window, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 82, 8 );
 
     // -----------------------------
     // Buttons

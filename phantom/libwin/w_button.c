@@ -17,7 +17,7 @@
 #include <video/control.h>
 
 
-control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags )
+control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *released, drv_video_bitmap_t *pressed, int flags )
 {
     control_t cb;
     w_clear_control( &cb );
@@ -34,9 +34,9 @@ control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_vide
 
     cb.fg_color = COLOR_RED;
 
-    cb.bg_image = bmp;
-    cb.fg_image = pressed;
-    cb.ho_image = 0;
+    cb.pas_bg_image = released;
+    cb.act_bg_image = pressed;
+    cb.hov_bg_image = 0;
 
     return w_add_control( w, &cb );
 }

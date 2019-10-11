@@ -23,6 +23,29 @@
 
 
 
+void w_set_focused( window_handle_t toFocus )
+{
+    window_handle_t later_lost = 0;
+    window_handle_t later_gain = toFocus;
+
+    // Next win
+    if(focused_window != 0)
+        later_lost = focused_window;
+
+    if( later_gain != focused_window )
+    {
+        focused_window = later_gain;
+
+        if(later_lost) ev_q_put_win( 0, 0, UI_EVENT_WIN_LOST_FOCUS, later_lost );
+        if(later_gain)
+        {
+            ev_q_put_win( 0, 0, UI_EVENT_WIN_GOT_FOCUS, later_gain );
+            w_to_top(later_gain);
+        }
+    }
+}
+
+
 
 //! Put key event onto the main e q
 void ev_q_put_key( int vkey, int ch, int modifiers )
@@ -39,24 +62,7 @@ void ev_q_put_key( int vkey, int ch, int modifiers )
         if( UI_MOD_CTRL_DOWN(modifiers) || UI_MOD_ALT_DOWN(modifiers) )
         {
             LOG_FLOW( 9, "Next win shifts = %x", modifiers );
-            window_handle_t later_lost = 0;
-            window_handle_t later_gain = 0;
-
-            // Next win
-            if(focused_window != 0)
-                later_lost = focused_window;
-            later_gain = drv_video_next_window(focused_window);
-            if( later_gain != focused_window )
-            {
-                focused_window = later_gain;
-
-                if(later_lost) ev_q_put_win( 0, 0, UI_EVENT_WIN_LOST_FOCUS, later_lost );
-                if(later_gain)
-                {
-                    ev_q_put_win( 0, 0, UI_EVENT_WIN_GOT_FOCUS, later_gain );
-                    w_to_top(later_gain);
-                }
-            }
+            w_set_focused( drv_video_next_window(focused_window) );
             return;
         }
         break;

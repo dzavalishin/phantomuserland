@@ -58,6 +58,7 @@ typedef enum {
     ct_text        = 2, // text field
     ct_menu        = 3,
     ct_menuitem    = 4,
+    ct_lable       = 5,
 
     ct_group       = 0xFF+0,            //< To store it in an .internal.ui.control we put group in a control union too.
 } control_type_t;
@@ -95,9 +96,11 @@ typedef struct control
     color_t             fg_color;       //< Foreground color to use, where applicable
 
     // TODO image handle!
-    drv_video_bitmap_t *bg_image;       //< Background or passive (non-pressed) image
-    drv_video_bitmap_t *fg_image;       //< Foreground or active (pressed) image
-    drv_video_bitmap_t *ho_image;       //< Mouse over image
+    drv_video_bitmap_t *pas_bg_image;   //< Passive (non-pressed) background image
+    drv_video_bitmap_t *act_bg_image;   //< Active (pressed) background image
+    drv_video_bitmap_t *hov_bg_image;   //< Mouse over background image
+
+    drv_video_bitmap_t *icon_image;     //< Icon image - text is put aside
 
     const char *        text;           //< Text, if applicable. Will be copied.
     //color_t             text_color;     //< Text color

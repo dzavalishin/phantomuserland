@@ -56,21 +56,59 @@ struct checkb
 
 
 
+static void paint_or_replicate(window_handle_t win, control_t *cc, drv_video_bitmap_t *img )
+{
+    if( img->xsize == 1 )
+        w_replicate_hor( win, cc->r.x, cc->r.y, cc->r.xsize, img->pixel, img->ysize );
+    else
+        drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, img );
+}
+
+static void paint_bg( window_handle_t win, control_t *cc )
+{
+    w_fill_rect( win, cc->bg_color, cc->r );
+
+    if( !cc->pas_bg_image ) return;
+
+    switch(cc->state)
+    {
+        case cs_hover:      if( cc->hov_bg_image )
+                            {
+                                //w_draw_bitmap( win, cc->r.x, cc->r.y, cc->hov_bg_image );
+                                paint_or_replicate( win, cc, cc->hov_bg_image );
+                                break;
+                            }
+                            /* FALLTHROUGH */
+        default:
+                            /* FALLTHROUGH */
+        case cs_released:   
+            //w_draw_bitmap( win, cc->r.x, cc->r.y, cc->pas_bg_image );
+            paint_or_replicate( win, cc, cc->pas_bg_image );
+            break;
+
+        case cs_pressed:    
+            //w_draw_bitmap( win, cc->r.x, cc->r.y, cc->act_bg_image );
+            paint_or_replicate( win, cc, cc->act_bg_image );
+            break;
+    }
+}
+
 
 static void paint_button(window_handle_t win, control_t *cc )
 {
-    bool pressed = cc->state == cs_pressed;
+    //bool pressed = cc->state == cs_pressed;
 
-    w_fill_rect( win, cc->bg_color, cc->r );
-
-    if( cc->bg_image && ! (cc->flags & CONTROL_FLAG_NOPAINT) )
-        drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, pressed ? cc->fg_image : cc->bg_image );
+    paint_bg( win, cc );
 
     if(! (cc->flags & CONTROL_FLAG_NOBORDER))
     {
         if( (cc->state = cs_pressed) || (cc->state = cs_hover) )
             w_draw_rect( win, COLOR_WHITE, cc->r );
     }
+
+    // tmp
+    //if( cc->state == cs_hover )        w_draw_rect( win, COLOR_LIGHTRED, cc->r );
+
 
     if(cc->text)
     {
@@ -87,8 +125,8 @@ static void paint_button(window_handle_t win, control_t *cc )
 
 static void paint_menu_item(window_handle_t win, control_t *cc )
 {
-    bool pressed = cc->state == cs_pressed;
-
+    //bool pressed = cc->state == cs_pressed;
+    /*
     w_fill_rect( win, cc->bg_color, cc->r );
 
     if( cc->bg_image )
@@ -102,7 +140,8 @@ static void paint_menu_item(window_handle_t win, control_t *cc )
             w_replicate_hor( win, cc->r.x, cc->r.y, cc->r.xsize, img->pixel, img->ysize );
         else
             drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, img );
-    }
+    }*/
+    paint_bg( win, cc );
 
     if(! (cc->flags & CONTROL_FLAG_NOBORDER))
     {
@@ -121,7 +160,6 @@ static void paint_menu_item(window_handle_t win, control_t *cc )
     }
 
     LOG_FLOW( 1, "paint menu item id %d", cc->id );
-
 }
 
 
@@ -277,7 +315,22 @@ static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, vo
     if(cc->flags & CONTROL_FLAG_DISABLED) 
         return 0;
 
-    if( point_in_rect( env->e.rel_x, env->e.rel_y, &cc->r ) )
+    ui_event_t e = env->e;
+
+    if( (e.type == UI_EVENT_TYPE_WIN) && (e.w.info == UI_EVENT_WIN_LOST_FOCUS) )
+    {
+        if(e.focus != env->w)
+            return 0;
+
+        if(cc->state == cs_hover) // TODO separate hover status from pressed status
+        {
+            cc->state = cs_released;
+            cc->changed = 1;
+        }
+        return 0;
+    }
+
+    if( (e.type == UI_EVENT_TYPE_MOUSE) && point_in_rect( e.rel_x, e.rel_y, &cc->r ) )
     {
         //LOG_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cc->id );
         //cc->mouse_in_bits |= 1;
@@ -290,6 +343,7 @@ static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, vo
                 cc->state = cs_pressed;
 
             w_control_action(env->w, cc, &env->e);
+            return 0;
         }
 
         if(env->e.m.released & 0x1) // First button release only
@@ -297,9 +351,26 @@ static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, vo
             if( !(cc->flags & CONTROL_FLAG_TOGGLE) )
                 cc->state = cs_released;
 
-            w_control_action(env->w, cc, &env->e);
+            w_control_action(env->w, cc, &e);
+            return 0;
         }
 
+        if(cc->state == cs_released ) // TODO separate hover status from pressed status
+        {
+            cc->state = cs_hover;
+            cc->changed = 1;
+        }
+        return 0;
+    }
+
+    if( (e.type == UI_EVENT_TYPE_MOUSE) && !point_in_rect( e.rel_x, e.rel_y, &cc->r ) )
+    {
+        if(cc->state == cs_hover) // TODO separate hover status from pressed status
+        {
+            cc->state = cs_released;
+            cc->changed = 1;
+        }
+        return 0;
     }
 
     return 0;
@@ -524,19 +595,20 @@ static void w_add_to_group( window_handle_t w, control_t *cc )
 
 static void w_image_defaults( window_handle_t w, control_t *cc )
 {
-    if( cc->bg_image || cc->fg_image || cc->ho_image )
+    if( cc->pas_bg_image || cc->act_bg_image )
     {
         // Fill missing ones
-        if(!cc->bg_image) cc->bg_image = cc->fg_image ? cc->fg_image : cc->ho_image;
-        if(!cc->fg_image) cc->fg_image = cc->bg_image ? cc->bg_image : cc->ho_image;
+        if(!cc->pas_bg_image) cc->pas_bg_image = cc->act_bg_image;
+        if(!cc->act_bg_image) cc->act_bg_image = cc->pas_bg_image;
 
-        if(!cc->ho_image) cc->ho_image = cc->bg_image;
+        // No. If we have no hober image we must know
+        //if(!cc->ho_image) cc->ho_image = cc->bg_image;
     }
     
-    if(cc->bg_image)
+    if(cc->pas_bg_image)
     {
-        if( 0 == cc->r.xsize ) cc->r.xsize = cc->bg_image->xsize;
-        if( 0 == cc->r.ysize ) cc->r.ysize = cc->bg_image->ysize;
+        if( 0 == cc->r.xsize ) cc->r.xsize = cc->pas_bg_image->xsize;
+        if( 0 == cc->r.ysize ) cc->r.ysize = cc->pas_bg_image->ysize;
     }
 }
 
@@ -719,9 +791,9 @@ control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int x
     cb.text = text;
     cb.fg_color = text_color;
 
-    cb.bg_image = &menu_normal_center_bmp;
-    cb.fg_image = &menu_selected_center_bmp;
-    cb.ho_image = &menu_selected_center_bmp;
+    cb.pas_bg_image = &menu_normal_center_bmp;
+    cb.act_bg_image = &menu_selected_center_bmp;
+    cb.hov_bg_image = &menu_selected_center_bmp;
 
     return w_add_control( w, &cb );
 }
