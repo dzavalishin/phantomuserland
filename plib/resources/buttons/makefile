@@ -6,6 +6,7 @@ PNGFILES := $(filter %.png,$(FILES))
 CFILES += $(patsubst %.png,%.png.c,$(notdir $(PNGFILES)))
 
 all::     $(CFILES)
+	cp defs.h $(PHANTOM_HOME)/include/video/builtin_bitmaps.h
 
 clean::
 	rm -f $(CFILES) defs.h

@@ -149,6 +149,9 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
     case UI_EVENT_WIN_BUTTON_ON: printf("main w button %x\n", e->extra );
     break;
 
+    case UI_EVENT_WIN_TO_TOP:    w_to_top( w ); break;
+    case UI_EVENT_WIN_TO_BOTTOM: w_to_bottom( w ); break;
+
     default:
         return 0;
 

@@ -133,6 +133,8 @@ typedef struct ui_event ui_event_t;
 #define UI_EVENT_WIN_BUTTON_ON          6
 #define UI_EVENT_WIN_BUTTON_OFF         7
 
+#define UI_EVENT_WIN_TO_TOP             8
+#define UI_EVENT_WIN_TO_BOTTOM          9
 
 
 #define UI_EVENT_GLOBAL_REPAINT_RECT    (0xFF00 | 1) //! Repaint all windows that intersect w. rect

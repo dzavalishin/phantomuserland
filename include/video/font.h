@@ -124,6 +124,9 @@ font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 errno_t w_release_tt_font( font_handle_t font );
 
 
+extern font_handle_t decorations_title_font;
+
+
 #endif // CONF_TRUETYPE
 
 

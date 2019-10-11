@@ -23,7 +23,11 @@
 #include <sys/types.h>
 #include <stdint.h>
 
-#define W_CONTROL_BS 64
+#define W_CONTROL_BS 64 // Size of text buffer iside a control struct - for save in persisten mem
+
+// negative magic produces negative handles
+//#define CONTROLS_POOL_MAGIC ('b' << 24 | 0xFFEEAA)
+#define CONTROLS_POOL_MAGIC ('b')
 
 
 // Control flags - lower 16 bits are generic (any control), 
@@ -35,7 +39,7 @@
 #define CONTROL_FLAG_CALLBACK_KEY      (1<<4)  //< Call callback on any key press
 #define CONTROL_FLAG_TOGGLE            (1<<5)  //< Button or menu item toggles
 #define CONTROL_FLAG_HORIZONTAL        (1<<6)  //< Put children left to right - menu
-//#define CONTROL_FLAG_TEXT_RIGHT        (1<<7)  //< Put button text to the right of image
+#define CONTROL_FLAG_TEXT_RIGHT        (1<<7)  //< Put button text to the right of image
 
 struct control;
 
@@ -158,6 +162,23 @@ typedef struct
 } control_ref_t;
 
 
+// -----------------------------------------------------------------------
+//
+// Used in pool_foreach( w->controls, ...
+//
+// -----------------------------------------------------------------------
+
+
+struct foreach_control_param
+{
+    window_handle_t   w;
+    ui_event_t        e;
+    control_group_t * g;   // used in w_add_to_group()
+    int               gid; // ---""---
+    control_t       * c;
+};
+
+
 
 // -----------------------------------------------------------------------
 //
@@ -197,6 +218,8 @@ void w_clear_control( control_t *c ); //< Prepare structure to fill field by fie
 void w_delete_control( window_handle_t w, control_handle_t c );
 
 void w_control_set_text( window_handle_t w, control_handle_t c, const char *text, color_t text_color );
+void w_control_set_icon( window_handle_t w, control_handle_t ch, drv_video_bitmap_t *icon );
+
 void w_control_set_callback( window_handle_t w, control_handle_t c, control_callback_t cb, void *callback_arg );
 /// If just window is given, switch its visibility. If window and control - switch control visibility.
 void w_control_set_children( window_handle_t w, control_handle_t c, window_handle_t w_child, control_handle_t c_child );
@@ -229,8 +252,10 @@ void destroy_controls_pool(pool_t *controls);
 
 void w_paint_changed_controls(window_handle_t w);
 void w_repaint_controls(window_handle_t w);
-void w_reset_controls(window_handle_t w); // focus lost, mouse off window - make sure all buttons are off
-void w_check_controls( window_handle_t w, ui_event_t *e );
+void w_reset_controls(window_handle_t w); // focus lost, mouse off window - make sure all buttons are off -- TODO used?
+void w_check_controls( window_handle_t w, ui_event_t *e ); // TODO rename - deliver events to controls
+
+void w_paint_control(window_handle_t w, control_t *cc );
 
 
     // -------------------------------------------------------------------
