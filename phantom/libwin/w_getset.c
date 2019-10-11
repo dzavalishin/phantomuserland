@@ -10,7 +10,7 @@
 
 #include <video/window.h>
 #include <video/internal.h>
-//#include <video/vops.h>
+#include <event.h>
 
 #include <phantom_libc.h>
 
@@ -30,10 +30,18 @@ w_get_bounds( window_handle_t w, rect_t *out )
 
 void w_set_title( window_handle_t w, const char *title )
 {
-    // todo static buf or strdup/free
+    // TODO static buf or strdup/free
     w->title = strdup(title);
     
     // Can update just title area of title win
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, w );
 }
 
+
+
+void w_set_visible( window_handle_t w, int v )
+{
+    if(v) w->state |= WSTATE_WIN_VISIBLE;
+    else  w->state &= ~WSTATE_WIN_VISIBLE;
+    ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+}

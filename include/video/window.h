@@ -132,7 +132,7 @@ pool_handle_t 	w_create( int xsize, int ysize );
 //void 		w_resize( pool_handle_t h, int xsize, int ysize );
 //void 		w_moveto( pool_handle_t h, int x, int y );
 void            w_blt( pool_handle_t h );
-void		w_set_visible( pool_handle_t h, int v );
+//void		w_set_visible( pool_handle_t h, int v );
 
 //void 		w_to_top(pool_handle_t h);
 //void 		w_to_bottom(pool_handle_t h);
@@ -292,6 +292,7 @@ void    w_resize( window_handle_t w, int xsize, int ysize );
 void    w_set_title( window_handle_t w,  const char *title );
 void    w_get_bounds( window_handle_t w, rect_t *out );
 
+void    w_set_visible( window_handle_t h, int v );
 
 
 

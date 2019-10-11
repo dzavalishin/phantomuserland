@@ -335,14 +335,14 @@ void phantom_init_console_window()
 
     pool_handle_t bh;
 
-    lb_x = 5;
+    bh = w_add_menu_item( phantom_launcher_window, -2, 5, 0, 50, "Start", COLOR_BLACK );
+
+    lb_x = 60;
 
     int nwin = 0;
     for( nwin = 0; nwin < MAX_LAUNCH_BUTTONS; nwin++ )
     {
         char wname[10] = "Window 1";
-
-        // crashes in some configurations??
         wname[7] = '0' + nwin;
 
         bh = w_add_button( phantom_launcher_window, nwin, lb_x, 0, &vanilla_task_button_bmp, &vanilla_task_button_bmp, CONTROL_FLAG_NOBORDER );
@@ -563,7 +563,7 @@ static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e)
     default:
         return defaultWindowEventProcessor( w, e );
 
-    case UI_EVENT_WIN_BUTTON:
+    case UI_EVENT_WIN_BUTTON_ON:
         printf("launcher button %x\n", e->extra );
         {
             switch(e->extra)

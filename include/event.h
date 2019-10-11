@@ -129,7 +129,9 @@ typedef struct ui_event ui_event_t;
 #define UI_EVENT_WIN_DESTROYED          3
 #define UI_EVENT_WIN_REDECORATE         4 //! Repaint titlebar
 #define UI_EVENT_WIN_REPAINT            5 //! Repaint all
-#define UI_EVENT_WIN_BUTTON             6
+
+#define UI_EVENT_WIN_BUTTON_ON          6
+#define UI_EVENT_WIN_BUTTON_OFF         7
 
 
 

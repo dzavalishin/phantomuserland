@@ -61,7 +61,7 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         }
         break;
 
-    case UI_EVENT_WIN_BUTTON: //printf("title button %x\n", e->extra );
+    case UI_EVENT_WIN_BUTTON_ON: //printf("title button %x\n", e->extra );
     {
         switch(e->extra)
         {

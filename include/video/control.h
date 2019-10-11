@@ -56,7 +56,7 @@ typedef enum {
     ct_button      = 1,
     ct_text        = 2, // text field
     ct_menu        = 3,
-    ct_submenu     = 4,
+    ct_menuitem    = 4,
 
     ct_group       = 0xFF+0,            //< To store it in an .internal.ui.control we put group in a control union too.
 } control_type_t;
@@ -104,7 +104,8 @@ typedef struct control
     control_callback_t  callback;       //< To call if state changed
     void *              callback_arg;   //< User arg to callback
 
-    struct control *    child;          //< Activate child on state == cs_pressed - usually submenu
+    struct control *    c_child;        //< Activate child on state == cs_pressed - usually submenu
+    window_handle_t     w_child;        //< Activate on state == cs_pressed
 
     union {
         uint8_t         _space[64];     //< To provide for growth
@@ -131,12 +132,13 @@ typedef struct control
 
     control_state_t     state;          //< State - for display and action
     uint32_t            focused;        //< Selected in window
+    uint32_t            changed;        //< Needs repaint
 
     control_group_t *   group;          //< Group we belong, if any
     struct control *    next_in_group;  //< linked list of controls in group - radio or menu
 
-    u_int32_t           mouse_in_bits;  //< Rightmost bit is latest state. shifts left.
-    u_int32_t           pressed_bits;   //< Same
+    //u_int32_t           mouse_in_bits;  //< Rightmost bit is latest state. shifts left.
+    //u_int32_t           pressed_bits;   //< Same
 
     char                buffer[W_CONTROL_BS];       //< if in persistent memory, text field text is here
 
@@ -185,6 +187,8 @@ pool_handle_t w_add_control_persistent( window_handle_t w, control_t *c );
 /// Same as w_add_control_persistent(), but assumes we are restarting and tries to use internal state too.
 pool_handle_t w_restart_control_persistent( window_handle_t w, control_t *c );
 
+void w_clear_control( control_t *c ); //< Prepare structure to fill field by field
+
 
 void w_delete_control( window_handle_t w, control_handle_t c );
 
@@ -192,7 +196,6 @@ void w_control_set_text( window_handle_t w, control_handle_t c, const char *text
 
 void w_control_set_callback( window_handle_t w, control_handle_t c, control_callback_t cb, void *callback_arg );
 
-void w_clear_control( control_t *c ); //< Prepare structure to fill field by field
 
 // -----------------------------------------------------------------------
 //
@@ -203,6 +206,7 @@ void w_clear_control( control_t *c ); //< Prepare structure to fill field by fie
 
 control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags );
 
+control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int xsize, const char*text, color_t text_color );
 
 
 // -----------------------------------------------------------------------
@@ -222,6 +226,15 @@ void w_repaint_controls(window_handle_t w);
 void w_reset_controls(window_handle_t w); // focus lost, mouse off window - make sure all buttons are off
 void w_check_controls( window_handle_t w, ui_event_t *e );
 
+void w_cc_set_visible( control_t *c, int visible ); // Internal, called from inside of controls code
+
+
+
+    // -------------------------------------------------------------------
+    //
+    // Menu window
+    //
+    // -------------------------------------------------------------------
 
 
 

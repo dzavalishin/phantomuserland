@@ -45,8 +45,8 @@
 
 
 // negative magic produces negative handles
-//#define BUTTONS_POOL_MAGIC ('b' << 24 | 0xFFEEAA)
-#define BUTTONS_POOL_MAGIC ('b')
+//#define CONTROLS_POOL_MAGIC ('b' << 24 | 0xFFEEAA)
+#define CONTROLS_POOL_MAGIC ('b')
 
 struct checkb
 {
@@ -59,18 +59,16 @@ struct checkb
 
 static void paint_button(window_handle_t win, control_t *cc )
 {
-    bool pressed = !! (cc->pressed_bits & 1);
+    bool pressed = cc->state == cs_pressed;
 
     w_fill_rect( win, cc->bg_color, cc->r );
 
     if( cc->bg_image && ! (cc->flags & CONTROL_FLAG_NOPAINT) )
-    {
         drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, pressed ? cc->fg_image : cc->bg_image );
-    }
 
     if(! (cc->flags & CONTROL_FLAG_NOBORDER))
     {
-        if( cc->mouse_in_bits & 1 )
+        if( (cc->state = cs_pressed) || (cc->state = cs_hover) )
             w_draw_rect( win, COLOR_WHITE, cc->r );
     }
 
@@ -84,21 +82,48 @@ static void paint_button(window_handle_t win, control_t *cc )
                               cc->r.x+t_ypos+2, cc->r.y+t_ypos ); // +2?
     }
 
-    //w_update( win );
-    ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, win );
 }
 
-static void paint_changed_button(window_handle_t win, control_t *cc)
+
+static void paint_menu_item(window_handle_t win, control_t *cc )
 {
-    if(
-       ((cc->mouse_in_bits & 1) == ( (cc->mouse_in_bits>>1) & 1 ))
-        &&
-       ((cc->pressed_bits & 1) == ( (cc->pressed_bits>>1) & 1 ))
-      )
-        return;
+    bool pressed = cc->state == cs_pressed;
 
-    paint_button( win, cc );
+    w_fill_rect( win, cc->bg_color, cc->r );
+
+    if( cc->bg_image && ! (cc->flags & CONTROL_FLAG_NOPAINT) )
+    {
+        //drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, pressed ? cc->fg_image : cc->bg_image ); // left
+        //drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, pressed ? cc->fg_image : cc->bg_image ); // right
+
+        drv_video_bitmap_t *img = pressed ? cc->fg_image : cc->bg_image;
+
+        if( img->xsize == 1 )
+            w_replicate_hor( win, cc->r.x, cc->r.y, cc->r.xsize, img->pixel, img->ysize );
+        else
+            drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, img );
+    }
+
+    if(! (cc->flags & CONTROL_FLAG_NOBORDER))
+    {
+        if( (cc->state = cs_pressed) || (cc->state = cs_hover) )
+            w_draw_rect( win, COLOR_WHITE, cc->r );
+    }
+
+    if(cc->text)
+    {
+        int t_height = 16;
+        int t_ypos = (cc->r.ysize - t_height) / 2;
+
+        w_ttfont_draw_string( win, decorations_title_font,
+                              cc->text, cc->fg_color,
+                              cc->r.x+t_ypos+2, cc->r.y+t_ypos ); // +2?
+    }
+
+    LOG_FLOW( 1, "paint menu item id %d", cc->id );
+
 }
+
 
 
 
@@ -112,32 +137,28 @@ static void paint_changed_button(window_handle_t win, control_t *cc)
 
 static void paint_control(window_handle_t w, control_t *cc )
 {
+    if(!(cc->flags & CONTROL_FLAG_DISABLED) )
+    {
     switch(cc->type)
     {
-        case ct_button:     paint_button( w, cc ); return;
+        case ct_button:     paint_button( w, cc ); break;
+        case ct_menu:       /* FALLTHROUGH */
+        case ct_menuitem:   paint_menu_item( w, cc ); break;
         case ct_text:       //
-        case ct_menu:       //
-        case ct_submenu:    // 
 
         default:
             LOG_ERROR( 1, "unknown control type %d", cc->type);
             break;
     }
+    }
+    //w_update( win );
+    ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
+    cc->changed = 0;
 }
 
 static void paint_changed_control(window_handle_t w, control_t *cc)
 {
-    switch(cc->type)
-    {
-        case ct_button:     paint_changed_button( w, cc ); return;
-        case ct_text:       //
-        case ct_menu:       //
-        case ct_submenu:    //
-
-        default:
-            // Ignore
-            break;
-    }
+    if(cc->changed) paint_control( w, cc );
 }
 
 
@@ -205,8 +226,9 @@ static errno_t do_reset_control(pool_t *pool, void *el, pool_handle_t handle, vo
     struct checkb *env = arg;   assert(env);
 
     // Zero lower bits
-    cc->mouse_in_bits <<= 1;
-    cc->pressed_bits  <<= 1;
+    //cc->mouse_in_bits <<= 1;
+    //cc->pressed_bits  <<= 1;
+    cc->state = cs_released;
 
     // And repaint
     paint_control( env->w, cc );
@@ -214,6 +236,32 @@ static errno_t do_reset_control(pool_t *pool, void *el, pool_handle_t handle, vo
 }
 
 
+
+/// Perform an action for control (button pressed, enter in text field, etc)
+/// TODO release action?
+static void w_control_action(window_handle_t w, control_t *cc, ui_event_t *ie)
+{
+    int isPressed = cc->state == cs_pressed;
+
+    if( cc->callback )
+        cc->callback( w, cc );
+
+    if( cc->c_child ) w_cc_set_visible( cc->c_child, isPressed );
+    if( cc->w_child ) w_set_visible( cc->w_child, isPressed );
+
+    ui_event_t e = *ie;
+
+    e.type = UI_EVENT_TYPE_WIN;
+    e.w.info = isPressed ? UI_EVENT_WIN_BUTTON_ON : UI_EVENT_WIN_BUTTON_OFF;
+    e.extra = cc->id;
+    e.focus = w;
+
+    ev_q_put_any( &e );
+
+    cc->changed = 1;
+}
+
+/// Process event for controls
 static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     (void) pool;
@@ -223,30 +271,35 @@ static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, vo
     control_t *cc = ref->c;     assert(cc);
     struct checkb *env = arg;   assert(env);
 
-    cc->mouse_in_bits <<= 1;
-    cc->pressed_bits  <<= 1;
+// TODO this is processing for button or menu item, need switch
+    //cc->mouse_in_bits <<= 1;
+    //cc->pressed_bits  <<= 1;
+    if(cc->flags & CONTROL_FLAG_DISABLED) 
+        return 0;
 
     if( point_in_rect( env->e.rel_x, env->e.rel_y, &cc->r ) )
     {
         //LOG_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cc->id );
-        cc->mouse_in_bits |= 1;
+        //cc->mouse_in_bits |= 1;
 
         if(env->e.m.clicked & 0x1) // First button click only
         {
-            cc->pressed_bits |= 1;
+            if( cc->flags & CONTROL_FLAG_TOGGLE)
+                cc->state = (cc->state == cs_pressed) ? cs_released : cs_pressed; // toggle
+            else
+                cc->state = cs_pressed;
 
-            ui_event_t e = env->e;
-
-            e.type = UI_EVENT_TYPE_WIN;
-            e.w.info = UI_EVENT_WIN_BUTTON;
-            e.extra = cc->id;
-            e.focus = env->w;
-
-            ev_q_put_any( &e );
-
-            if( cc->callback )
-                cc->callback( env->w, cc );
+            w_control_action(env->w, cc, &env->e);
         }
+
+        if(env->e.m.released & 0x1) // First button release only
+        {
+            if( !(cc->flags & CONTROL_FLAG_TOGGLE) )
+                cc->state = cs_released;
+
+            w_control_action(env->w, cc, &env->e);
+        }
+
     }
 
     return 0;
@@ -272,14 +325,14 @@ pool_t *create_controls_pool(void)
     controls->flag_autoclean = 1;
     controls->flag_autodestroy = 1;
 
-    controls->magic = BUTTONS_POOL_MAGIC;
+    controls->magic = CONTROLS_POOL_MAGIC;
 
     return controls;
 }
 
 void destroy_controls_pool(pool_t *controls)
 {
-    assert( controls->magic == BUTTONS_POOL_MAGIC );
+    assert( controls->magic == CONTROLS_POOL_MAGIC );
     destroy_pool(controls);
 }
 
@@ -334,17 +387,13 @@ void w_check_controls( window_handle_t w, ui_event_t *e )
     if(w->controls == 0)
         return;
 
-    struct checkb env;
-
     //LOG_FLOW( 1, "button check @ %d.%d buttons %x", e->rel_x, e->rel_y, e->m.buttons );
-
+    struct checkb env;
     env.e = *e;
     env.w = w;
 
-    assert( w->controls->magic == BUTTONS_POOL_MAGIC );
-
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
     pool_foreach( w->controls, do_check_control, &env );
-
     w_paint_changed_controls(w);
 }
 
@@ -362,7 +411,7 @@ void w_delete_control( window_handle_t w, int id )
     if(w->controls == 0)
         return;
 
-    assert( w->controls->magic == BUTTONS_POOL_MAGIC );
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
 
     pool_foreach( w->controls, kill_button_by_id, (void *)id );
 }
@@ -385,7 +434,7 @@ void w_delete_control( window_handle_t w, pool_handle_t ch )
 void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, color_t text_color )
 {
     if(w->controls == 0)        return;
-    assert( w->controls->magic == BUTTONS_POOL_MAGIC );
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
     control_ref_t *ref = pool_get_el( w->controls, ch );
 
     if( !ref )
@@ -414,7 +463,7 @@ void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, 
 void w_control_set_callback( window_handle_t w, pool_handle_t ch, control_callback_t cb, void *arg )
 {
     if(w->controls == 0)        return;
-    assert( w->controls->magic == BUTTONS_POOL_MAGIC );
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
     control_ref_t *ref = pool_get_el( w->controls, ch );
     assert(ref);
     control_t *cc = ref->c;
@@ -496,11 +545,9 @@ static void w_clean_internal_state( window_handle_t w, control_t *cc )
     cc->group = 0;
     cc->next_in_group = 0;
 
-    cc->state = cs_default;
+    cc->state = cs_released;
     cc->focused = 0;        //< Selected in window
-
-    cc->mouse_in_bits = 0;  // TODO KILLME
-    cc->pressed_bits = 0;   // TODO KILLME
+    cc->changed = 1;
 
     memset( cc->buffer, 0, sizeof(cc->buffer) );
 
@@ -518,7 +565,8 @@ control_handle_t w_restart_control_persistent( window_handle_t w, control_t *cc 
     w_image_defaults( w, cc );
 
     // Make sure caller will reassign
-    cc->child = 0;
+    cc->c_child = 0;
+    cc->w_child = 0;
     cc->callback = 0;
     cc->callback_arg = 0;
 
@@ -571,4 +619,54 @@ void w_clear_control( control_t *c )
     memset( c, 0, sizeof(control_t) );
 }
 
+
+// -----------------------------------------------------------------------
+//
+// Getters/Setters
+//
+// -----------------------------------------------------------------------
+
+
+void w_cc_set_visible( control_t *cc, int visible )
+{
+    // TODO des not know my window, do not repaint. Store window ptr in control?
+    cc->flags |= CONTROL_FLAG_DISABLED;
+    if( visible ) cc->flags &= ~CONTROL_FLAG_DISABLED;    
+}
+
+
+// -----------------------------------------------------------------------
+//
+// Shortcuts for typical cases
+//
+// -----------------------------------------------------------------------
+
+extern drv_video_bitmap_t menu_selected_center_bmp;
+extern drv_video_bitmap_t menu_normal_center_bmp;
+
+control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int xsize, const char*text, color_t text_color )
+{
+    control_t cb;
+    w_clear_control( &cb );
+
+    cb.type = ct_menuitem;
+
+    cb.id = id;
+    cb.group_id = (0xFF << 16) + 0; // Make some default group ID, so that all of them will stick to group
+
+    cb.r.x = x;
+    cb.r.y = y;
+    cb.r.xsize = xsize;
+
+    cb.flags = CONTROL_FLAG_NOBORDER;
+
+    cb.text = text;
+    cb.fg_color = text_color;
+
+    cb.bg_image = &menu_normal_center_bmp;
+    cb.fg_image = &menu_selected_center_bmp;
+    cb.ho_image = &menu_selected_center_bmp;
+
+    return w_add_control( w, &cb );
+}
 
