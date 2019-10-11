@@ -146,6 +146,9 @@ int w_titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
 #endif
     case UI_EVENT_TYPE_WIN:     return titleWinEventProcessor(w, e);
 
+    // Pass keys to main window
+    case UI_EVENT_TYPE_KEY:     return w->w_owner->inKernelEventProcess( w->w_owner, e );
+
     default:
         break;
     }
