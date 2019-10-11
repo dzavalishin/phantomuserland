@@ -137,7 +137,6 @@ void win_make_decorations(drv_video_window_t *w)
         //wtitle->flags |= WFLAG_WIN_NOTINALL; // On destroy don't try to remove from allwindows
         iw_enter_allwq(wtitle);
 
-
         wtitle->inKernelEventProcess = w_titleWindowEventProcessor;
 
         wtitle->w_owner = w;
@@ -231,7 +230,8 @@ void win_make_decorations(drv_video_window_t *w)
     window_basic_border( w->w_decor, brdr, bordr_size );
 
 
-    if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) )
+    //if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) )
+    if( w->state & WSTATE_WIN_VISIBLE )
         iw_winblt_locked(w->w_decor);
 
 

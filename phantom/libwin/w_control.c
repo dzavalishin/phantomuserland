@@ -173,8 +173,9 @@ static errno_t do_paint_changed_control(pool_t *pool, void *el, pool_handle_t ha
     (void) pool;
     (void) handle;
 
-    control_t *cc = el;
-    struct checkb *env = arg;
+    control_ref_t *ref = el;    assert(ref);
+    control_t *cc = ref->c;     assert(cc);
+    struct checkb *env = arg;   assert(env);
 
     paint_changed_control( env->w, cc);
     return 0;
@@ -185,8 +186,9 @@ static errno_t do_repaint_control(pool_t *pool, void *el, pool_handle_t handle, 
     (void) pool;
     (void) handle;
 
-    control_t *cc = el;
-    struct checkb *env = arg;
+    control_ref_t *ref = el;    assert(ref);
+    control_t *cc = ref->c;     assert(cc);
+    struct checkb *env = arg;   assert(env);
 
     paint_control( env->w, cc );
     return 0;
@@ -198,8 +200,9 @@ static errno_t do_reset_control(pool_t *pool, void *el, pool_handle_t handle, vo
     (void) pool;
     (void) handle;
 
-    control_t *cc = el;
-    struct checkb *env = arg;
+    control_ref_t *ref = el;    assert(ref);
+    control_t *cc = ref->c;     assert(cc);
+    struct checkb *env = arg;   assert(env);
 
     // Zero lower bits
     cc->mouse_in_bits <<= 1;
@@ -216,8 +219,9 @@ static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, vo
     (void) pool;
     (void) handle;
 
-    control_t *cc = el;
-    struct checkb *env = arg;
+    control_ref_t *ref = el;    assert(ref);
+    control_t *cc = ref->c;     assert(cc);
+    struct checkb *env = arg;   assert(env);
 
     cc->mouse_in_bits <<= 1;
     cc->pressed_bits  <<= 1;
@@ -291,12 +295,9 @@ void w_paint_changed_controls(window_handle_t w)
     if(w->controls == 0)
         return;
 
-    struct checkb env;
-
     //LOG_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
-
+    struct checkb env;
     bzero( &env, sizeof(env) );
-
     env.w = w;
 
     pool_foreach( w->controls, do_paint_changed_control, &env );
@@ -307,12 +308,9 @@ void w_repaint_controls(window_handle_t w)
     if(w->controls == 0)
         return;
 
+    LOG_FLOW( 1, " @ %p", w );
     struct checkb env;
-
-    //LOG_FLOW( 1, "button check @ %d.%d buttons %x", x, y, mouseb );
-
     bzero( &env, sizeof(env) );
-
     env.w = w;
 
     pool_foreach( w->controls, do_repaint_control, &env );
