@@ -71,7 +71,7 @@ typedef struct drv_video_window * window_handle_t;
 #define WSTATE_WIN_INFB                 (1<<9)
 
 
-
+// Default button ids
 #define WBUTTON_SYS(id) (0xFFFF|((id)<<16))
 
 #define WBUTTON_SYS_ROLLUP 				WBUTTON_SYS(0)

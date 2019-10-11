@@ -76,13 +76,12 @@ static void paint_button(window_handle_t win, control_t *cc )
 
     if(cc->text)
     {
+        int t_height = 16;
+        int t_ypos = (cc->r.ysize - t_height) / 2;
 
-    int t_height = 16;
-    int t_ypos = (cc->r.ysize - t_height) / 2;
-
-    w_ttfont_draw_string( win, decorations_title_font,
-                          cc->text, cc->fg_color,
-                          cc->r.x+t_ypos+2, cc->r.y+t_ypos ); // +2?
+        w_ttfont_draw_string( win, decorations_title_font,
+                              cc->text, cc->fg_color,
+                              cc->r.x+t_ypos+2, cc->r.y+t_ypos ); // +2?
     }
 
     //w_update( win );
@@ -508,9 +507,10 @@ static void w_clean_internal_state( window_handle_t w, control_t *cc )
     memset( cc->buffer, 0, sizeof(cc->buffer) );
 
     if(cc->text)
+    {
         strlcpy( cc->buffer, cc->text, sizeof(cc->buffer) ); // TODO if buffer is nou enough?
-
-    cc->text = cc->buffer;
+        cc->text = cc->buffer;
+    }
 }
 
 control_handle_t w_restart_control_persistent( window_handle_t w, control_t *cc )
