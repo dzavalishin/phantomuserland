@@ -133,7 +133,7 @@ typedef struct control // TODO gaps? packed?
     u_int32_t           mouse_in_bits;  //< Rightmost bit is latest state. shifts left.
     u_int32_t           pressed_bits;   //< Same
 
-    int8_t              buffer[W_CONTROL_BS];       //< if in persistent memory, text field text is here
+    char                buffer[W_CONTROL_BS];       //< if in persistent memory, text field text is here
 
 } control_t;
 
@@ -162,7 +162,7 @@ typedef struct
  * Structure passed is not stored but copied. You can modify it
  * and pass again for next control.
  * 
- * \param[in] w Window
+ * \param[in] w Window to add to
  * \param[in] c control_t structure to copy control properties from
  * 
  * \return Handle for a control
@@ -188,6 +188,16 @@ void w_control_set_text( window_handle_t w, control_handle_t c, const char *text
 void w_control_set_callback( window_handle_t w, control_handle_t c, control_callback_t cb, void *callback_arg );
 
 void w_clear_control( control_t *c ); //< Prepare structure to fill field by field
+
+// -----------------------------------------------------------------------
+//
+// Shortcuts for typical cases
+//
+// -----------------------------------------------------------------------
+
+
+control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags );
+
 
 
 // -----------------------------------------------------------------------

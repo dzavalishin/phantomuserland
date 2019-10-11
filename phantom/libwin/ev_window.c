@@ -232,7 +232,7 @@ void w_receive_event(ui_event_t *e)
     if( e->type == UI_EVENT_TYPE_MOUSE )
     {
         ui_event_t ecopy = *e; // for any case
-        w_check_button( w, &ecopy );
+        w_check_controls( w, &ecopy );
     }
 
     if( w->events_count < MAX_WINDOW_EVENTS )

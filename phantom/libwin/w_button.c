@@ -1,3 +1,42 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Simple buttons.
+ *
+**/
+
+#define DEBUG_MSG_PREFIX "button"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
+#include <video/control.h>
+
+
+control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags )
+{
+    control_t cb;
+
+    cb.type = ct_button;
+
+    cb.id = id;
+
+    cb.r.x = x;
+    cb.r.y = y;
+
+    cb.flags = flags;
+
+    cb.fg_color = COLOR_RED;
+    cb.bg_image = bmp;
+    cb.fg_image = pressed;
+
+    return w_add_control( w, &cb );
+}
+
 #if 0 // controls
 /**
  *

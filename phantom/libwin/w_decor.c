@@ -225,11 +225,8 @@ void win_make_decorations(drv_video_window_t *w)
 */
 #endif
 
-    w_repaint_buttons(w->w_decor);
-    w_repaint_buttons(w->w_title);
-
-    //drv_video_window_draw_bitmap( w->w_decor, 5, bmp_y, &close_bmp );
-
+    w_repaint_controls(w->w_decor);
+    w_repaint_controls(w->w_title);
 
     window_basic_border( w->w_decor, brdr, bordr_size );
 
