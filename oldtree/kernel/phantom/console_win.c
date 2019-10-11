@@ -64,6 +64,7 @@ window_handle_t phantom_debug_window = 0;
 #else
 drv_video_window_t *phantom_console_window = 0;
 drv_video_window_t *phantom_debug_window = 0;
+drv_video_window_t *phantom_launcher_menu_window = 0;
 #endif
 
 static window_handle_t phantom_launcher_window = 0;
@@ -324,6 +325,37 @@ void phantom_init_console_window()
     phantom_launcher_window->inKernelEventProcess = phantom_launcher_event_process;
     w_fill( phantom_launcher_window, la_bg );
 
+    // -----------------------------
+    // Start Menu
+    // -----------------------------
+
+    pool_handle_t bh;
+
+    color_t menu_border = (color_t){.r = 20, .g = 20, .b = 20, .a = 255};
+
+    phantom_launcher_menu_window = drv_video_window_create( 200, 200,
+                                                       9, 45, COLOR_WHITE, 
+                                                       "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
+
+    //w_set_bg_color( phantom_launcher_menu_window, COLOR_WHITE );
+    w_fill_box(phantom_launcher_menu_window, 0, 0, 200, 200, COLOR_WHITE );
+    w_draw_box( phantom_launcher_menu_window, 0, 0, 200, 200, menu_border );
+    int menu_xsize = phantom_launcher_menu_window->xsize-2;
+    
+    w_add_menu_item( phantom_launcher_menu_window, 0, 1, 1+31*5, menu_xsize, "Debug mode", COLOR_BLACK );
+    w_add_menu_item( phantom_launcher_menu_window, 0, 1, 1+31*4, menu_xsize, "Settings", COLOR_BLACK );
+    w_add_menu_item( phantom_launcher_menu_window, 0, 1, 1+31*3, menu_xsize, "Kernel stats", COLOR_BLACK );
+    w_add_menu_item( phantom_launcher_menu_window, 0, 1, 1+31*2, menu_xsize, "Weather", COLOR_BLACK );
+    w_add_menu_item( phantom_launcher_menu_window, 0, 1, 1+31*1, menu_xsize, "Clock", COLOR_BLACK );
+
+    bh = w_add_button( phantom_launcher_menu_window, 0, 2, 2+31*0, &slide_switch_off_bmp, &slide_switch_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    //w_control_set_text( phantom_launcher_menu_window, bh, "Fast Snap", COLOR_BLACK );
+    w_ttfont_draw_string( phantom_launcher_menu_window, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 82, 8 );
+
+    // -----------------------------
+    // Buttons
+    // -----------------------------
+
     int lb_x = scr_get_xsize();
     int lb_y = 0;
 
@@ -333,11 +365,11 @@ void phantom_init_console_window()
 
     w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_on_bmp, &slide_switch_off_bmp, CONTROL_FLAG_NOBORDER );
 
-    pool_handle_t bh;
-
     bh = w_add_menu_item( phantom_launcher_window, -2, 10, 7, 80, "Start", COLOR_BLACK );
     rect_t start_r = { .x = 10-1, .y = 7-2, .xsize = 80+2, .ysize = 31+2 };
     w_draw_rect( phantom_launcher_window, COLOR_LIGHTGRAY, start_r );
+    w_control_set_children( phantom_launcher_window, bh, phantom_launcher_menu_window, 0 );
+    w_control_set_flags( phantom_launcher_window, bh, CONTROL_FLAG_TOGGLE, 0 );
 
     lb_x = 100;
 

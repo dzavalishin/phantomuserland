@@ -275,7 +275,7 @@ void	w_pixel( window_handle_t w, int x, int y, rgba_t color );
 
 void    drv_video_window_draw_bitmap( window_handle_t w, int x, int y, drv_video_bitmap_t *bmp );
 
-
+#define w_draw_bitmap drv_video_window_draw_bitmap
 
 
 void    w_draw_line( window_handle_t w, int x1, int y1, int x2, int y2, rgba_t c);
@@ -291,10 +291,8 @@ void    w_resize( window_handle_t w, int xsize, int ysize );
 
 void    w_set_title( window_handle_t w,  const char *title );
 void    w_get_bounds( window_handle_t w, rect_t *out );
-
 void    w_set_visible( window_handle_t h, int v );
-
-
+void	w_set_bg_color( window_handle_t w, rgba_t color );
 
 
 

@@ -45,3 +45,8 @@ void w_set_visible( window_handle_t w, int v )
     else  w->state &= ~WSTATE_WIN_VISIBLE;
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
 }
+
+void w_set_bg_color( window_handle_t w, rgba_t color ) 
+{ 
+    w->bg = color; 
+}

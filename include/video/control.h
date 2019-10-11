@@ -35,6 +35,7 @@
 #define CONTROL_FLAG_CALLBACK_KEY      (1<<4)  //< Call callback on any key press
 #define CONTROL_FLAG_TOGGLE            (1<<5)  //< Button or menu item toggles
 #define CONTROL_FLAG_HORIZONTAL        (1<<6)  //< Put children left to right - menu
+//#define CONTROL_FLAG_TEXT_RIGHT        (1<<7)  //< Put button text to the right of image
 
 struct control;
 
@@ -104,7 +105,7 @@ typedef struct control
     control_callback_t  callback;       //< To call if state changed
     void *              callback_arg;   //< User arg to callback
 
-    struct control *    c_child;        //< Activate child on state == cs_pressed - usually submenu
+    control_handle_t    c_child;        //< Activate child on state == cs_pressed - usually submenu
     window_handle_t     w_child;        //< Activate on state == cs_pressed
 
     union {
@@ -193,9 +194,11 @@ void w_clear_control( control_t *c ); //< Prepare structure to fill field by fie
 void w_delete_control( window_handle_t w, control_handle_t c );
 
 void w_control_set_text( window_handle_t w, control_handle_t c, const char *text, color_t text_color );
-
 void w_control_set_callback( window_handle_t w, control_handle_t c, control_callback_t cb, void *callback_arg );
-
+/// If just window is given, switch its visibility. If window and control - switch control visibility.
+void w_control_set_children( window_handle_t w, control_handle_t c, window_handle_t w_child, control_handle_t c_child );
+void w_control_set_visible( window_handle_t w, control_handle_t ch, int visible ); // unimpl yet
+void w_control_set_flags( window_handle_t w, control_handle_t ch, int toSet, int toReset );
 
 // -----------------------------------------------------------------------
 //
@@ -225,9 +228,6 @@ void w_paint_changed_controls(window_handle_t w);
 void w_repaint_controls(window_handle_t w);
 void w_reset_controls(window_handle_t w); // focus lost, mouse off window - make sure all buttons are off
 void w_check_controls( window_handle_t w, ui_event_t *e );
-
-void w_cc_set_visible( control_t *c, int visible ); // Internal, called from inside of controls code
-
 
 
     // -------------------------------------------------------------------

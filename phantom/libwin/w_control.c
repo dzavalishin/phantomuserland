@@ -246,8 +246,8 @@ static void w_control_action(window_handle_t w, control_t *cc, ui_event_t *ie)
     if( cc->callback )
         cc->callback( w, cc );
 
-    if( cc->c_child ) w_cc_set_visible( cc->c_child, isPressed );
-    if( cc->w_child ) w_set_visible( cc->w_child, isPressed );
+    if( cc->c_child ) w_control_set_visible( cc->w_child, cc->c_child, isPressed );
+    else if( cc->w_child ) w_set_visible( cc->w_child, isPressed );
 
     ui_event_t e = *ie;
 
@@ -627,13 +627,69 @@ void w_clear_control( control_t *c )
 // -----------------------------------------------------------------------
 
 
-void w_cc_set_visible( control_t *cc, int visible )
+void w_control_set_visible( window_handle_t w, control_handle_t ch, int visible )
 {
-    // TODO des not know my window, do not repaint. Store window ptr in control?
+    if(w->controls == 0)        return;
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
+    control_ref_t *ref = pool_get_el( w->controls, ch );
+
+    if( !ref )
+    {
+        LOG_ERROR0( 1, "can't get control" );
+        return;
+    }
+
+    control_t *cc = ref->c;
+    assert(cc);
+
     cc->flags |= CONTROL_FLAG_DISABLED;
     if( visible ) cc->flags &= ~CONTROL_FLAG_DISABLED;    
+
+    pool_release_el( w->controls, ch );
 }
 
+
+void w_control_set_children( window_handle_t w, control_handle_t ch, window_handle_t w_child, control_handle_t c_child )
+{
+    if(w->controls == 0)        return;
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
+    control_ref_t *ref = pool_get_el( w->controls, ch );
+
+    if( !ref )
+    {
+        LOG_ERROR0( 1, "can't get control" );
+        return;
+    }
+
+    control_t *cc = ref->c;
+    assert(cc);
+
+    cc->c_child = c_child;
+    cc->w_child = w_child;
+
+    pool_release_el( w->controls, ch );
+}
+
+void w_control_set_flags( window_handle_t w, control_handle_t ch, int toSet, int toReset )
+{
+    if(w->controls == 0)        return;
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
+    control_ref_t *ref = pool_get_el( w->controls, ch );
+
+    if( !ref )
+    {
+        LOG_ERROR0( 1, "can't get control" );
+        return;
+    }
+
+    control_t *cc = ref->c;
+    assert(cc);
+
+    cc->flags |= toSet;
+    cc->flags &= ~toReset;
+
+    pool_release_el( w->controls, ch );
+}
 
 // -----------------------------------------------------------------------
 //
