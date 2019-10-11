@@ -335,9 +335,11 @@ void phantom_init_console_window()
 
     pool_handle_t bh;
 
-    bh = w_add_menu_item( phantom_launcher_window, -2, 5, 0, 50, "Start", COLOR_BLACK );
+    bh = w_add_menu_item( phantom_launcher_window, -2, 10, 7, 80, "Start", COLOR_BLACK );
+    rect_t start_r = { .x = 10-1, .y = 7-2, .xsize = 80+2, .ysize = 31+2 };
+    w_draw_rect( phantom_launcher_window, COLOR_LIGHTGRAY, start_r );
 
-    lb_x = 60;
+    lb_x = 100;
 
     int nwin = 0;
     for( nwin = 0; nwin < MAX_LAUNCH_BUTTONS; nwin++ )

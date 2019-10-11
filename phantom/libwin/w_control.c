@@ -91,7 +91,7 @@ static void paint_menu_item(window_handle_t win, control_t *cc )
 
     w_fill_rect( win, cc->bg_color, cc->r );
 
-    if( cc->bg_image && ! (cc->flags & CONTROL_FLAG_NOPAINT) )
+    if( cc->bg_image )
     {
         //drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, pressed ? cc->fg_image : cc->bg_image ); // left
         //drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, pressed ? cc->fg_image : cc->bg_image ); // right
@@ -137,7 +137,7 @@ static void paint_menu_item(window_handle_t win, control_t *cc )
 
 static void paint_control(window_handle_t w, control_t *cc )
 {
-    if(!(cc->flags & CONTROL_FLAG_DISABLED) )
+    if(!(cc->flags & (CONTROL_FLAG_DISABLED|CONTROL_FLAG_NOPAINT)) ) 
     {
     switch(cc->type)
     {
