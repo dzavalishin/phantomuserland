@@ -62,7 +62,7 @@ typedef enum {
     ct_text        = 2, // text field
     ct_menu        = 3,
     ct_menuitem    = 4,
-    ct_lable       = 5,
+    ct_label       = 5,
 
     ct_group       = 0xFF+0,            //< To store it in an .internal.ui.control we put group in a control union too.
 } control_type_t;
@@ -129,6 +129,13 @@ typedef struct control
         struct {
             uint32_t    vkey;           //< Hotkey for menu item
         };                              //< Specific for menu item
+
+        struct { // text field
+            uint32_t    vis_shift;      //< First character we see in edit window
+            uint32_t    vis_len;        //< Num of chars we see in window
+            uint32_t    str_len;        //< Num of bytes in buffer
+            uint32_t    cursor_shift;   //< cursor position in bytes - TODO UTF-8!
+        };
 
     };
 
@@ -237,6 +244,7 @@ control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_vide
 
 control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int xsize, const char*text, color_t text_color );
 
+control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
 
 // -----------------------------------------------------------------------
 //

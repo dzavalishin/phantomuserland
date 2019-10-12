@@ -40,10 +40,6 @@
 
 #define CACHE_FT_FACE 0
 
-// user mode debug - TODO debug_ext.h does not work in user mode
-#define lprintf printf
-
-
 static FT_Library ftLibrary = 0;
 static int running = 0;
 
@@ -217,7 +213,7 @@ void w_ttfont_draw_char(
     struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
     if( 0 == pe )
     {
-        lprintf("\ncan't get font for handle %x\n", font);
+        LOG_ERROR( 1, "can't get font for handle %x", font);
         return;
     }
 
@@ -271,46 +267,51 @@ void w_ttfont_draw_char(
 }
 
 
-
 void w_ttfont_draw_string(
                           window_handle_t win,
                           font_handle_t font,
-                          const char *str, const rgba_t color, //const rgba_t bg,
+                          const char *str, const rgba_t color,
                           int win_x, int win_y )
 {
+    size_t strLen = strnlen( str, MAX_SYMBOLS_COUNT*4 ); // TODO document it
+    w_ttfont_draw_string_ext( win, font,
+                          str, strLen,
+                          color,
+                          win_x, win_y,
+                          0, 0 );
+}
+
+/**
+ * 
+ * \param[out] find_x Return x coordinate for the end (right margin) of given character in a string we print
+ * \param[in] find_for_char Position in str of character we look x coordinate for
+ * 
+ * Coordinate returned in find_x is window relative, it includes win_x parameter value.
+ * 
+**/
+void w_ttfont_draw_string_ext(
+                          window_handle_t win,
+                          font_handle_t font,
+                          const char *str, size_t strLen,
+                          const rgba_t color,
+                          int win_x, int win_y,
+                          int *find_x, int find_for_char )
+{
+    int rc;
 
     if(!running) return;
-
-    int rc;
-    /*
-    FT_Face ftFace = 0;
-    rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
-    if( rc )
-    {
-        lprintf("\ncan't load font\n");
-        return;
-    }
-
-    FT_Set_Pixel_Sizes(ftFace, 200, 0);
-    //FT_Set_Pixel_Sizes(ftFace, 100, 0);
-    //FT_Set_Pixel_Sizes(ftFace, 50, 0);
-    */
-
+ 
     struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
     if( 0 == pe )
     {
-        lprintf("\ncan't get font for handle %x\n", font);
-        //printf("\ncan't get font for handle %x\n", font);
+        LOG_ERROR( 0, "can't get font for handle %x", font);
         return;
     }
-    //printf( "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
+    LOG_FLOW( 1, "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
 
-    FT_Face ftFace = pe->face;;
+    FT_Face ftFace = pe->face;
 
     //dump_face( ftFace );
-
-    //const char *str = s;
-    const size_t strLen = strlen(str);
 
     struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
     size_t numSymbols = 0;
@@ -375,6 +376,10 @@ void w_ttfont_draw_string(
     {
         const struct ttf_symbol *symb = symbols + i;
         w_tt_paint_char( win, symb, win_x, win_y, top, color );
+        if( find_for_char == i-1 )
+        {
+            if(find_x) *find_x = symb->posX+win_x;
+        }
     }
 
 
@@ -410,6 +415,108 @@ FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
 }
 
 
+
+
+// -----------------------------------------------------------------------
+//
+// Get metrics for string, as if we printed it
+//
+// -----------------------------------------------------------------------
+
+/**
+ * 
+ * \brief Calculate bounding rectangle for string.
+ * 
+ * 
+ * 
+ * 
+**/
+void w_ttfont_string_size(
+                          font_handle_t font,
+                          const char *str, size_t strLen,
+                          rect_t *r )
+{
+    int i, rc;
+
+    if(!running) return;
+ 
+    struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
+    if( 0 == pe )
+    {
+        LOG_ERROR( 0, "can't get font for handle %x", font);
+        return;
+    }
+    LOG_FLOW( 1, "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
+
+    FT_Face ftFace = pe->face;
+
+    struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
+    size_t numSymbols = 0;
+
+    int32_t left = INT_MAX;
+    int32_t top = INT_MAX;
+    int32_t bottom = INT_MIN;
+    uint32_t prevCharcode = 0;
+
+    int32_t posX = 0;
+    int skip_total = 0;
+
+    while( (skip_total < strLen) && (numSymbols < MAX_SYMBOLS_COUNT))
+    {
+        int32_t charcode;
+        ssize_t skip = utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
+
+        skip_total += skip;
+
+        FT_Glyph glyph = getGlyph(ftFace, charcode);
+
+        if (!glyph)
+            continue;
+
+        if (prevCharcode)
+            posX += getKerning(ftFace, prevCharcode, charcode);
+
+        prevCharcode = charcode;
+
+        struct ttf_symbol *symb = &(symbols[numSymbols++]);
+
+        FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) glyph;
+        symb->posX = (posX >> 6) + bitmapGlyph->left;
+        symb->posY = -bitmapGlyph->top;
+        symb->width = bitmapGlyph->bitmap.width;
+        symb->height = bitmapGlyph->bitmap.rows;
+        symb->glyph = glyph;
+
+        posX += glyph->advance.x >> 10;
+
+        left = MIN(left, symb->posX);
+        top = MIN(top, symb->posY);
+        bottom = MAX(bottom, symb->posY + symb->height);
+    }
+
+
+    const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
+    const int32_t imageW = lastSymbol->posX + lastSymbol->width;
+    //const int32_t imageH = bottom - top;
+
+    r->x = left;
+    r->y = bottom;
+    r->xsize = imageW - r->x;
+    r->ysize = bottom - top;
+
+    LOG_INFO_( 0, "left %d top %d bottom %d imageW %d", left, top, bottom, imageW );
+    LOG_INFO_( 0, "x %d y %d xsize %d ysize %d", r->x, r->y, r->xsize, r->ysize );
+
+    for (i = 0; i < numSymbols; ++i)
+    {
+        FT_Done_Glyph(symbols[i].glyph);
+    }
+
+    rc = pool_release_el( tt_font_pool, font );
+    if( rc )
+        lprintf("\ncan't release font for handle %x\n", font);
+
+}
 
 
 // -----------------------------------------------------------------------

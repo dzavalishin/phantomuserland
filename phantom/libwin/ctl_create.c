@@ -311,6 +311,29 @@ control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int x
     return w_add_control( w, &cb );
 }
 
+control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color )
+{
+    control_t cb;
+    w_clear_control( &cb );
+
+    cb.type = ct_label;
+
+    cb.r.x = x;
+    cb.r.y = y;
+    cb.r.xsize = xsize;
+    cb.r.xsize = ysize;
+
+    cb.flags = CONTROL_FLAG_NOBORDER;
+
+    cb.text = text;
+    cb.fg_color = text_color;
+
+    cb.pas_bg_image = &menu_normal_center_bmp;
+    //cb.act_bg_image = &menu_selected_center_bmp;
+    //cb.hov_bg_image = &menu_selected_center_bmp;
+
+    return w_add_control( w, &cb );
+}
 
 
 // -----------------------------------------------------------------------

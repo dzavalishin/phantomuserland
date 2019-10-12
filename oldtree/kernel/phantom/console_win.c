@@ -345,15 +345,24 @@ void phantom_init_console_window()
     w_draw_box( lmw, 0, 0, 200, 200, menu_border );
     int menu_xsize = lmw->xsize-2;
     
-    w_add_menu_item( lmw, 0, 1, 1+31*5, menu_xsize, "Debug mode", COLOR_BLACK );
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*5, menu_xsize, "Shell", COLOR_BLACK );
+    w_control_set_icon( lmw, bh, &icon_home_bmp );
+
     bh = w_add_menu_item( lmw, 0, 1, 1+31*4, menu_xsize, "Settings", COLOR_BLACK );
     w_control_set_icon( lmw, bh, &icon_settings_bmp );
-    w_add_menu_item( lmw, 0, 1, 1+31*3, menu_xsize, "Kernel stats", COLOR_BLACK );
-    w_add_menu_item( lmw, 0, 1, 1+31*2, menu_xsize, "Weather", COLOR_BLACK );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*3, menu_xsize, "Kernel stats", COLOR_BLACK );
+    w_control_set_icon( lmw, bh, &icon_key_bmp );
+    
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*2, menu_xsize, "Weather", COLOR_BLACK );
+    w_control_set_icon( lmw, bh, &icon_heart_bmp );
+
     w_add_menu_item( lmw, 0, 1, 1+31*1, menu_xsize, "Clock", COLOR_BLACK );
 
     bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_off_bmp, &slide_switch_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    w_ttfont_draw_string( lmw, decorations_title_font, "Fast Snap", COLOR_BLACK, 10, 8 );    
+    //w_ttfont_draw_string( lmw, decorations_title_font, "Fast Snap", COLOR_BLACK, 10, 8 );    
+    //w_add_label( lmw, 10, 8, lmw->xsize, 32, "Fast Snap", COLOR_BLACK );
+    w_add_label( lmw, 1, 1, 130, 32, "Fast Snap", COLOR_BLACK );
     //w_ttfont_draw_string( lmw, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 10, 8 );
     //w_control_set_text( lmw, bh, "Fast Snap", COLOR_BLACK );
 

@@ -95,12 +95,20 @@ typedef enum w_font_type { ft_none = 0, ft_bitmap = 1, ft_truetype = 2 } font_ty
 
 typedef pool_handle_t font_handle_t;
 
-/// truetype fonts - in progress
+/// truetype fonts
 void w_ttfont_draw_string(
                           window_handle_t win,
                           font_handle_t font,
-                          const char *s, const rgba_t color, //const rgba_t bg,
+                          const char *s, const rgba_t color,
                           int x, int y );
+
+void w_ttfont_draw_string_ext(
+                          window_handle_t win,
+                          font_handle_t font,
+                          const char *str, size_t strLen,
+                          const rgba_t color,
+                          int win_x, int win_y,
+                          int *find_x, int find_for_char );
 
 
 void w_ttfont_draw_char(
@@ -109,6 +117,10 @@ void w_ttfont_draw_char(
                           const char *str, const rgba_t color,
                           int win_x, int win_y );
 
+/// Calculate bounding rectangle for string.
+void w_ttfont_string_size( font_handle_t font,
+                          const char *str, size_t strLen,
+                          rect_t *r );
 
 font_handle_t w_get_system_font_ext( int font_size );
 font_handle_t w_get_system_font( void );
