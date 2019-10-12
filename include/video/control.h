@@ -227,6 +227,10 @@ void w_delete_control( window_handle_t w, control_handle_t c );
 void w_control_set_text( window_handle_t w, control_handle_t c, const char *text, color_t text_color );
 void w_control_set_icon( window_handle_t w, control_handle_t ch, drv_video_bitmap_t *icon );
 
+void w_control_set_background( window_handle_t w, control_handle_t ch, 
+    drv_video_bitmap_t *normal, drv_video_bitmap_t *pressed, drv_video_bitmap_t *hover  );
+
+
 void w_control_set_callback( window_handle_t w, control_handle_t c, control_callback_t cb, void *callback_arg );
 /// If just window is given, switch its visibility. If window and control - switch control visibility.
 void w_control_set_children( window_handle_t w, control_handle_t c, window_handle_t w_child, control_handle_t c_child );
@@ -245,6 +249,8 @@ control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_vide
 control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int xsize, const char*text, color_t text_color );
 
 control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
+
+control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
 
 // -----------------------------------------------------------------------
 //

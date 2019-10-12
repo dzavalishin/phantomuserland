@@ -249,7 +249,7 @@ static struct console_ops win_ops =
 #define DEBWIN_YS 600
 
 //#define MAX_LAUNCH_BUTTONS 64
-#define MAX_LAUNCH_BUTTONS 5
+#define MAX_LAUNCH_BUTTONS 3
 
 static pool_handle_t taskbuttons[MAX_LAUNCH_BUTTONS];
 
@@ -379,13 +379,19 @@ void phantom_init_console_window()
 
     w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_on_bmp, &slide_switch_off_bmp, CONTROL_FLAG_NOBORDER );
 
-    bh = w_add_menu_item( phantom_launcher_window, -2, 10, 7, 80, "Start", COLOR_BLACK );
+    bh = w_add_menu_item( phantom_launcher_window, -2, 5, 3, 39, 0, COLOR_BLACK );
     rect_t start_r = { .x = 10-1, .y = 7-2, .xsize = 80+2, .ysize = 31+2 };
-    w_draw_rect( phantom_launcher_window, COLOR_LIGHTGRAY, start_r );
+    //w_draw_rect( phantom_launcher_window, COLOR_LIGHTGRAY, start_r );
     w_control_set_children( phantom_launcher_window, bh, phantom_launcher_menu_window, 0 );
     w_control_set_flags( phantom_launcher_window, bh, CONTROL_FLAG_TOGGLE, 0 );
+    w_control_set_background( phantom_launcher_window, bh, 
+        &start_button_normal_bmp, &start_button_selected_bmp, &start_button_hover_bmp  );
 
-    lb_x = 100;
+
+    bh = w_add_text_field( phantom_launcher_window, 100, 0, 100, 31, "Hello There Edit Field", COLOR_BLACK );
+
+
+    lb_x = 300;
 
     int nwin = 0;
     for( nwin = 0; nwin < MAX_LAUNCH_BUTTONS; nwin++ )

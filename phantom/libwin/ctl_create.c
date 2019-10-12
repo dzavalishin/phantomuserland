@@ -335,6 +335,34 @@ control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ys
     return w_add_control( w, &cb );
 }
 
+// TODO remove xy size, add backg pic
+control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color )
+{
+    control_t cb;
+    w_clear_control( &cb );
+
+    cb.type = ct_text;
+
+    cb.r.x = x;
+    cb.r.y = y;
+    cb.r.xsize = xsize;
+    cb.r.xsize = ysize;
+
+    cb.flags = CONTROL_FLAG_NOBORDER;
+
+    cb.text = text;
+    cb.fg_color = text_color;
+
+    cb.str_len = strnlen( text, 1024 ); // TODO define and describe
+    cb.vis_len = cb.str_len;
+
+    cb.pas_bg_image = &menu_normal_center_bmp;
+    //cb.act_bg_image = &menu_selected_center_bmp;
+    //cb.hov_bg_image = &menu_selected_center_bmp;
+
+    return w_add_control( w, &cb );
+}
+
 
 // -----------------------------------------------------------------------
 //

@@ -136,10 +136,39 @@ void w_control_set_icon( window_handle_t w, control_handle_t ch, drv_video_bitma
 
     cc->icon_image = icon;
     w_paint_control( w, cc );
-    
+
     pool_release_el( w->controls, ch );
 }
 
+
+void w_control_set_background( 
+    window_handle_t w, control_handle_t ch, 
+    drv_video_bitmap_t *normal,
+    drv_video_bitmap_t *pressed,
+    drv_video_bitmap_t *hover  )
+{
+    if(w->controls == 0)        return;
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
+    control_ref_t *ref = pool_get_el( w->controls, ch );
+
+    if( !ref )
+    {
+        LOG_ERROR( 1, "can't get control 0x%d", ch );
+        return;
+    }
+
+    control_t *cc = ref->c;
+    assert(cc);
+
+    cc->pas_bg_image = normal;
+    cc->act_bg_image = pressed,
+    cc->hov_bg_image = hover;
+
+    // TODO w_image_defaults( w, cc ); ?
+    w_paint_control( w, cc );
+    
+    pool_release_el( w->controls, ch );
+}
 
 
 
