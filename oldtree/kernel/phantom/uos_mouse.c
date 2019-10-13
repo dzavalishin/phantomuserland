@@ -8,6 +8,13 @@
  * at http://www.computer-engineering.org/ps2mouse/
  */
 
+#define DEBUG_MSG_PREFIX "ps2m"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 8
+
+
 #include <spinlock.h>
 
 #include <ia32/pio.h>
@@ -36,6 +43,10 @@
 
 static mouse_ps2_t ps2m;
 static hal_sem_t mouse_sem;
+
+static int state_xpos = 0;
+static int state_ypos = 0;
+static int ps2m_buttons = 0;
 
 //---------------------------------------------------------------------------
 // Local compat defs
@@ -132,6 +143,8 @@ again:
     while (u->in_first == u->in_last)
         hal_sem_acquire( &mouse_sem );
 
+    LOG_INFO_( 9, "got evnt, u->in_first = %d", u->in_first - u->in_buf );
+
     mutex_lock (&u->lock);
 
     if((u->in_first == u->in_last))
@@ -180,8 +193,29 @@ make_move (mouse_ps2_t *u, mouse_move_t *m)
         m->dz = 0;
 
     /* Invert vertical axis. */
-    m->dy = -m->dy;
+    //m->dy = -m->dy;
     /*debug_printf ("mouse: (%d, %d) %d\n", m->dx, m->dy, m->buttons);*/
+
+    state_xpos += m->dx;
+    state_ypos += m->dy;
+    // TODO dz
+
+    if(0 != video_drv)
+    {
+        video_drv->mouse_x = state_xpos;
+        video_drv->mouse_y = state_ypos;
+
+        if(video_drv->mouse_redraw_cursor != NULL)
+            video_drv->mouse_redraw_cursor();
+
+        if( state_xpos > video_drv->xsize ) state_xpos = video_drv->xsize;
+        if( state_ypos > video_drv->ysize ) state_ypos = video_drv->ysize;
+    }
+
+    if( state_xpos < 0 ) state_xpos = 0;
+    if( state_ypos < 0 ) state_ypos = 0;
+
+    ps2m_buttons = u->buf[0];
 }
 
 /*
@@ -251,6 +285,8 @@ mouse_ps2_interrupt (void *arg)
     unsigned char c, sts, strobe;
     //int event_generated = 0;
 
+    LOG_INFO0( 10, "" );
+
     /* Read the pending information. */
     for (;;) {
         sts = inb (KBDC_AT_CTL);
@@ -296,8 +332,6 @@ mouse_ps2_task(void)
             u->wheel = 1;
     }
 
-    int state_xpos = 0;
-    int state_ypos = 0;
 
     for (;;) {
         //mutex_wait (&u->lock);		/* Nothing to do. */
@@ -307,20 +341,13 @@ mouse_ps2_task(void)
 
         mouse_ps2_wait_move( u, &data);
 
-        state_xpos += data.dx;
-        state_ypos += data.dy; // TODO dz
+        // TODO eat all possible moves
+        // TODO direct from ms interrupt?
 
-        if(0 != video_drv)
-        {
-            video_drv->mouse_x = state_xpos;
-            video_drv->mouse_y = state_ypos;
-
-            if(video_drv->mouse_redraw_cursor != NULL)
-                video_drv->mouse_redraw_cursor();
-        }
+        LOG_INFO_( 5, "send evnt, x %d, y %d,buttons %x", state_xpos, state_ypos, ps2m_buttons );
 
         struct ui_event e;
-        ev_make_mouse_event( &e, state_xpos, state_ypos, data.buttons );
+        ev_make_mouse_event( &e, state_xpos, state_ypos, ps2m_buttons );
 
         /* TODO
         if( peek_buf( &e1 ) )
@@ -376,6 +403,8 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
 
     if( hal_irq_alloc( irq, mouse_ps2_interrupt, &ps2m, HAL_IRQ_SHAREABLE ) )
         return 0;
+
+    LOG_INFO_( 1, "got IRQ %d", irq );
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = "ps2-mouse";

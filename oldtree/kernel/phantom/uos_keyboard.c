@@ -7,6 +7,13 @@
  * at http://www.computer-engineering.org/ps2keyboard/
  */
 
+#define DEBUG_MSG_PREFIX "ps2.k"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
+
 #include <spinlock.h>
 
 #include <ia32/pio.h>
@@ -441,6 +448,8 @@ keyboard_ps2_interrupt (void *a)
     unsigned char c, sts, strobe;
     //int event_generated = 0;
 
+    LOG_INFO0( 10, "" );
+
     /* Read the pending information. */
     for (;;) {
         sts = inb (KBDC_AT_CTL);
@@ -539,6 +548,8 @@ again:
     /* Wait until receive data available. */
     while (u->in_first == u->in_last)
         hal_sem_acquire( &keybd_sem );
+
+    LOG_INFO_( 9, "got evnt, u->in_first = %d", u->in_first - u->in_buf );
 
     mutex_lock (&u->lock);
 
@@ -715,6 +726,7 @@ phantom_device_t * driver_isa_ps2k_probe( int port, int irq, int stage )
     hal_sem_init( &keybd_sem, "MouseDrv" );
 
     hal_irq_alloc( irq, keyboard_ps2_interrupt, &ps2k, HAL_IRQ_SHAREABLE );
+    LOG_INFO_( 1, "got IRQ %d", irq );
 
     phantom_device_t * dev = malloc(sizeof(phantom_device_t));
     dev->name = "ps2-keyboard";

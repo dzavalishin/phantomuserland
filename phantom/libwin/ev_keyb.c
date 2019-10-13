@@ -1,3 +1,4 @@
+#if 0 // !CONF_NEW_PS2
 /**
  *
  * Phantom OS
@@ -174,3 +175,5 @@ void ev_keyboard_read_thread(void)
         ev_send_key_event_to_q(&ke);
     }
 }
+
+#endif
