@@ -10,9 +10,9 @@
 
 #define DEBUG_MSG_PREFIX "ps2m"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 2
 #define debug_level_error 10
-#define debug_level_info 8
+#define debug_level_info 1
 
 
 #include <spinlock.h>
@@ -40,6 +40,9 @@
 #include "uos_mouse.h"
 #include "uos_i8042.h"
 
+
+// Crashes
+#define DIRECT_FROM_INTERRPUT 0
 
 static mouse_ps2_t ps2m;
 static hal_sem_t mouse_sem;
@@ -215,7 +218,16 @@ make_move (mouse_ps2_t *u, mouse_move_t *m)
     if( state_xpos < 0 ) state_xpos = 0;
     if( state_ypos < 0 ) state_ypos = 0;
 
-    ps2m_buttons = u->buf[0];
+    ps2m_buttons = u->buf[0] & 0x7;
+
+#if DIRECT_FROM_INTERRPUT
+    LOG_INFO_( 5, "send evnt, x %d, y %d,buttons %x", state_xpos, state_ypos, ps2m_buttons );
+
+    struct ui_event e;
+    ev_make_mouse_event( &e, state_xpos, state_ypos, ps2m_buttons );
+    ev_q_put_any( &e );
+#endif
+
 }
 
 /*
@@ -343,8 +355,9 @@ mouse_ps2_task(void)
 
         // TODO eat all possible moves
         // TODO direct from ms interrupt?
+#if !DIRECT_FROM_INTERRPUT
 
-        LOG_INFO_( 5, "send evnt, x %d, y %d,buttons %x", state_xpos, state_ypos, ps2m_buttons );
+        LOG_FLOW( 2, "send evnt, x %d, y %d,buttons %x", state_xpos, state_ypos, ps2m_buttons );
 
         struct ui_event e;
         ev_make_mouse_event( &e, state_xpos, state_ypos, ps2m_buttons );
@@ -359,6 +372,7 @@ mouse_ps2_task(void)
         } */
 
         ev_q_put_any( &e );
+#endif
 
     }
 }
