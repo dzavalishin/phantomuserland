@@ -121,7 +121,9 @@ static int getwc_16( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thre
     // wtty_getc( tty );
 
     vm_unlock_persistent_memory();
-    c[0] = phantom_dev_keyboard_getc(); // TODO need to read from local window? wtty?
+    //c[0] = phantom_dev_keyboard_getc(); // TODO need to read from local window? wtty?
+#warning fix me
+c[0] = 0;
     vm_lock_persistent_memory();
 
     SYSCALL_RETURN( pvm_create_string_object_binary( c, 1 ));

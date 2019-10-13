@@ -26,11 +26,16 @@
 //#include <kernel/config.h>
 //#include <time.h>
 
+#include <event.h>
+
 
 #include <compat/uos.h>
 #include <compat/uos/keyboard.h>
 #include "uos_keyboard.h"
 #include "uos_i8042.h"
+
+
+static void keyboard_ps2_wait_event (keyboard_ps2_t *u, keyboard_event_t *data);
 
 
 //---------------------------------------------------------------------------
@@ -481,14 +486,32 @@ keyboard_ps2_task (void)
 
     for (;;) {
         //mutex_wait (&u->lock);        /* Nothing to do. */
-        hal_sleep_msec( 1000 );
+
+        keyboard_event_t data;
+
+        keyboard_ps2_wait_event( u, &data );
+
+        int shifts = data.release ? 0 : UI_MODIFIER_KEYUP;
+
+        if( data.modifiers & KEYMOD_CTRL )      shifts |= UI_MODIFIER_CTRL;
+        if( data.modifiers & KEYMOD_SHIFT )     shifts |= UI_MODIFIER_SHIFT;
+        if( data.modifiers & KEYMOD_ALT )       shifts |= UI_MODIFIER_ALT;
+        if( data.modifiers & KEYMOD_META )      shifts |= UI_MODIFIER_WIN;
+
+        // TODO left/right keys - JUST REDEFINE OS defines accordoing to this driver's and assign
+
+        vm_lock_persistent_memory();
+        //LOG_FLOW( 0, "vk=%d, ch=%c, shifts 0x%x ", 0, event->keychar, shifts );
+        //ev_q_put_key( event->keycode, event->keychar, shifts );
+        ev_q_put_key( 0, data.key, shifts );
+        vm_unlock_persistent_memory();
     }
 }
 
 /*
  * Read mouse movement data. Return immediately, do not wait.
  * Return 1 if data available, 0 if no data.
- */
+ * /
 static int
 keyboard_ps2_get_event (keyboard_ps2_t *u, keyboard_event_t *data)
 {
@@ -503,7 +526,7 @@ keyboard_ps2_get_event (keyboard_ps2_t *u, keyboard_event_t *data)
         mutex_unlock (&u->lock);
         return 1;
     }
-}
+} */
 
 /*
  * Wait for the mouse movement and return it.
@@ -707,5 +730,31 @@ phantom_device_t * driver_isa_ps2k_probe( int port, int irq, int stage )
     keyb_init = 1;
 
     return dev;
+}
+
+
+//---------------------------------------------------------------------------
+// Direct access for wait for keypress
+//---------------------------------------------------------------------------
+
+#define K_OBUF_FUL 	0x01		/* output (from keybd) buffer full */
+
+int board_boot_console_getc(void)
+{
+    // TODO PIECE OF JUNK!
+    // just waits for some key - REDO!
+
+	// [dz] erra reports that this code does not wait. Added attempt to read from both
+	// registers to clear possible existing byte
+	inb(0x64); inb(0x60);
+
+
+    do {
+
+        while((inb(0x64) & K_OBUF_FUL) == 0)
+            ;
+    } while( inb(0x60) & 0x80 );
+
+    return 0;
 }
 
