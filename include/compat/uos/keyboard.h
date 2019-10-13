@@ -11,7 +11,7 @@ typedef struct _keyboard_event_t {
 } keyboard_event_t;
 
 
-#define KEY_IS_FUNC(key) (((key) & 0xFF00) == 0xF8 )
+#define KEY_IS_FUNC(key) (((key) & 0xFF00) == 0xF800 )
 
 /*
  * Keysyms 0..126 are mapped to ASCII
