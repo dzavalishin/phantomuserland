@@ -22,6 +22,9 @@
 #define COMPILE_UHCI 1
 #define COMPILE_OHCI 1
 
+// Use PS/2 driver from uOS
+#define CONF_NEW_PS2 1
+
 // Keep two different pagetables to swich access to persistent memory on and off
 #define CONF_DUAL_PAGEMAP 1
 

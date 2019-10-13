@@ -10,9 +10,9 @@
 
 #define DEBUG_MSG_PREFIX "vesa"
 #include "debug_ext.h"
-#define debug_level_flow 3
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 1
+#define debug_level_info 0
 
 
 #include <phantom_libc.h>

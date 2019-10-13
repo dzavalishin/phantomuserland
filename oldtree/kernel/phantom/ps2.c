@@ -1,3 +1,5 @@
+#if !CONF_NEW_PS2
+
 /**
  *
  * Phantom OS
@@ -48,6 +50,9 @@
 
 // data words
 #define PS2_CMD_DEV_INIT         0x43
+//#define PS2_CMD_DEV_INIT         0x03 // Disable keyb translation
+
+
 #define PS2_CMD_ENABLE_MOUSE     0xF4
 #define PS2_CMD_DISABLE_MOUSE    0xF5
 #define PS2_CMD_RESET_MOUSE      0xFF
@@ -371,9 +376,6 @@ static errno_t ps2ms_purge_buffer(int msec)
 {
     errno_t rc = ENODEV;
 
-    //int tries = 10000;
-    //bigtime_t start = hal_system_time() / 1000;
-
     // Purge buffer
     while( msec-- > 0 )
     {
@@ -385,8 +387,6 @@ static errno_t ps2ms_purge_buffer(int msec)
             rc = 0;
         }
 
-        //bigtime_t now = hal_system_time() / 1000;
-        //if( now+msec > start )            break;
         phantom_spinwait(1);
     }
 
@@ -396,28 +396,9 @@ static errno_t ps2ms_purge_buffer(int msec)
 
 static int ps2ms_do_init( void )
 {
-
     ps2ms_purge_buffer(2);
-/*
-    int tries = 10000;
-    // Purge buffer
-    while( tries-- > 0 && inb( PS2_CTRL_ADDR ) & 0x01 )
-        inb( PS2_DATA_ADDR );
 
-    if( tries <= 0 ) goto notfound;
-*/
-
-    ps2ms_send_cmd(PS2_CMD_DEV_INIT);
-
-    // hangs
-    //ps2ms_send_aux(PS2_CMD_RESET_MOUSE);    ps2ms_aux_wait_ack(); // ignore result
-#if 0
-
-    ps2ms_send_aux(PS2_CMD_ENABLE_MOUSE);
-    if( ps2ms_aux_wait_ack() ) goto notfound;
-
-    // allright, we have some mouse
-#else
+    ps2ms_send_cmd(PS2_CMD_DEV_INIT); // NB sets up keyboard mode too
 
     SHOW_FLOW0( 2, "PS/2 mouse reset" );
     ps2ms_send_aux( PS2_CMD_RESET_MOUSE );
@@ -449,7 +430,6 @@ static int ps2ms_do_init( void )
     if( ps2ms_aux_wait_ack() ) goto notfound;
     //ps2ms_purge_buffer(10); // todo make func to wait for ACK for n msec
 
-#endif
     return 0;
 
 notfound:
@@ -465,9 +445,6 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
     (void) port;
     (void) stage;
 
-    //dpc_request_init( &mouse_dpc, push_event );
-    //hal_mutex_init( &mouse_mutex, "MouseDrv" );
-    //hal_cond_init( &mouse_cond );
     hal_sem_init( &mouse_sem, "MouseDrv" );
     hal_spin_init( &elock );
 
@@ -499,117 +476,6 @@ phantom_device_t * driver_isa_ps2m_probe( int port, int irq, int stage )
 
 
 
-
-
-
-
-
-#if 0 /*FOLD00*/
-//Mouse.inc by SANiK
-//License: Use as you wish, except to cause damage
-byte mouse_cycle=0;     //unsigned char
-sbyte mouse_byte[3];    //signed char
-sbyte mouse_x=0;         //signed char
-sbyte mouse_y=0;         //signed char
-
-//Mouse functions
-void mouse_handler(struct regs *a_r) //struct regs *a_r (not used but just there)
-{
-    switch(mouse_cycle)
-    {
-    case 0:
-        mouse_byte[0]=inportb(0x60);
-        mouse_cycle++;
-        break;
-    case 1:
-        mouse_byte[1]=inportb(0x60);
-        mouse_cycle++;
-        break;
-    case 2:
-        mouse_byte[2]=inportb(0x60);
-        mouse_x=mouse_byte[1];
-        mouse_y=mouse_byte[2];
-        mouse_cycle=0;
-        break;
-    }
-}
-
-inline void mouse_wait(byte a_type) //unsigned char
-{
-    dword _time_out=100000; //unsigned int
-    if(a_type==0)
-    {
-        while(_time_out--) //Data
-        {
-            if((inportb(0x64) & 1)==1)
-            {
-                return;
-            }
-        }
-        return;
-    }
-    else
-    {
-        while(_time_out--) //Signal
-        {
-            if((inportb(0x64) & 2)==0)
-            {
-                return;
-            }
-        }
-        return;
-    }
-}
-
-inline void mouse_write(byte a_write) //unsigned char
-{
-    //Wait to be able to send a command
-    mouse_wait(1);
-    //Tell the mouse we are sending a command
-    outportb(0x64, 0xD4);
-    //Wait for the final part
-    mouse_wait(1);
-    //Finally write
-    outportb(0x60, a_write);
-}
-
-byte mouse_read()
-{
-    //Get's response from mouse
-    mouse_wait(0);
-    return inportb(0x60);
-}
-
-void mouse_install()
-{
-    byte _status;  //unsigned char
-
-    //Enable the auxiliary mouse device
-    mouse_wait(1);
-    outportb(0x64, 0xA8);
-
-    //Enable the interrupts
-    mouse_wait(1);
-    outportb(0x64, 0x20);
-    mouse_wait(0);
-    _status=(inportb(0x60) | 2);
-    mouse_wait(1);
-    outportb(0x64, 0x60);
-    mouse_wait(1);
-    outportb(0x60, _status);
-
-    //Tell the mouse to use default settings
-    mouse_write(0xF6);
-    mouse_read();  //Acknowledge
-
-    //Enable the mouse
-    mouse_write(0xF4);
-    mouse_read();  //Acknowledge
-
-    //Setup the mouse handler
-    irq_install_handler(12, mouse_handler);
-}
-#endif
 
 
 /**
@@ -719,4 +585,7 @@ http://lxr.free-electrons.com/source/drivers/input/mouse/psmouse-base.c
 
 
 #endif // ARCH_ia32
+
+
+#endif // !CONF_NEW_PS2
 

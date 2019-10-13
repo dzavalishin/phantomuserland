@@ -81,8 +81,6 @@ void board_interrupt_disable(int irq)
 // -----------------------------------------------------------------------
 
 
-
-
 // NB! No network drivers on stage 0!
 static isa_probe_t board_drivers[] =
 {
@@ -98,8 +96,9 @@ static isa_probe_t board_drivers[] =
     { "CGA", 		driver_isa_vga_probe, 	0, 0x3D4, -1 },
     { "MDA", 		driver_isa_vga_probe, 	0, 0x3B4, -1 },
 
-    { "PS2 Keyboard", 	driver_isa_ps2k_probe, 	1, -1, 1 },
-    { "PS2 Mouse", 	driver_isa_ps2m_probe, 	1, -1, 12 },
+    { "PS2 Keybd", 	driver_isa_ps2k_probe, 	1, 0x60,  1 },
+    { "PS2 Mouse", 	driver_isa_ps2m_probe, 	1, 0x60, 12 },
+
 
 #if HAVE_NET && 0
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x280, 11 },
@@ -110,17 +109,17 @@ static isa_probe_t board_drivers[] =
 #endif
 
 #if 0
-    { "SB16",          driver_isa_sb16_probe,  2, 0x210, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x220, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x230, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x240, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x250, 5 },
-    { "SB16",          driver_isa_sb16_probe,  2, 0x260, 5 },
+    { "SB16",           driver_isa_sb16_probe,  2, 0x210, 5 },
+    { "SB16",           driver_isa_sb16_probe,  2, 0x220, 5 },
+    { "SB16",           driver_isa_sb16_probe,  2, 0x230, 5 },
+    { "SB16",           driver_isa_sb16_probe,  2, 0x240, 5 },
+    { "SB16",           driver_isa_sb16_probe,  2, 0x250, 5 },
+    { "SB16",           driver_isa_sb16_probe,  2, 0x260, 5 },
 #endif
 //    { "AdLib",         driver_isa_sdlib_probe, 3, 0x388, 8 },
 
-    { "floppy",        driver_isa_floppy_probe,  3, 0, 0 }, // hardcoded in driver
-    { "floppy",        driver_isa_floppy_probe,  3, 0, 0 }, // two of them!
+    { "floppy",         driver_isa_floppy_probe,  3, 0, 0 }, // hardcoded in driver
+    { "floppy",         driver_isa_floppy_probe,  3, 0, 0 }, // two of them!
 
     { "Beep",           driver_isa_beep_probe,  0, 0x42, -1 },
 

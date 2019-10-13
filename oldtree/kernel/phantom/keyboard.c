@@ -1,3 +1,4 @@
+#if !CONF_NEW_PS2
 /**
  *
  * Phantom OS
@@ -130,7 +131,7 @@ static int _keyboard_read(_key_event *buf, u_int32_t len)
 
     if( !keyb_init )
     {
-        hal_sleep_msec(2000);
+        hal_sleep_msec(500);
         return 0;
     }
 
@@ -342,7 +343,10 @@ get_key:
 
 static void handle_keyboard_interrupt(void)
 {
-    unsigned char key;
+    unsigned char key, status;
+
+    status = inb(0x64);
+    if( !(status & 0x01) ) return;
 
     key = inb(0x60);
 
@@ -490,6 +494,7 @@ int phantom_dev_keyboard_getc(void)
 void phantom_dev_keyboard_get_key( _key_event *out)
 {
     _keyboard_read( out, 1);
+    lprintf("get key %d ch '%c' mod 0x%x ", out->keycode, out->keychar, out->modifiers );
 }
 
 
@@ -548,3 +553,5 @@ int board_boot_console_getc(void)
 
 #endif // ARCH_ia32
 
+
+#endif // !CONF_NEW_PS2
