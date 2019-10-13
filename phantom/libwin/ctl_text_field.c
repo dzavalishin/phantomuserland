@@ -132,9 +132,9 @@ int ctl_text_field_events(control_t *cc, struct foreach_control_param *env)
     {
         LOG_FLOW( 1, "key ev vk=%d, ch=%d", e.k.vk, e.k.ch );
         cc->changed = 1;
-        switch (e.k.vk)
+        switch (e.k.ch)
         {
-        case KEY_ARROW_RIGHT:
+        case KEY_RIGHT:
             cc->cursor_shift++;
 
 check_cursor_right:
@@ -142,7 +142,7 @@ check_cursor_right:
                 cc->cursor_shift = cc->str_len;
             break;
 
-        case KEY_ARROW_LEFT:
+        case KEY_LEFT:
             cc->cursor_shift--;
             if( cc->cursor_shift < 0 )                
                 cc->cursor_shift = 0;
@@ -155,8 +155,11 @@ check_cursor_right:
         case KEY_END:
             cc->cursor_shift = cc->str_len;
             break;
-
-        case KEY_DEL:
+        case KEY_BACKSPACE:
+            if(cc->cursor_shift <= 0) break;
+            cc->cursor_shift--;
+            /* FALLTHROUGH */
+        case KEY_DELETE:
             if( cc->cursor_shift >= cc->str_len )
                 break;
             {
@@ -170,7 +173,7 @@ check_cursor_right:
         default:
             cc->changed = 0;
 
-            if( e.k.ch != 0 )
+            if( !KEY_IS_FUNC(e.k.ch) )
             {
                 cc->changed = 1;
 

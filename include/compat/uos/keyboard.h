@@ -1,3 +1,6 @@
+#ifndef _UOS_KEYB_H
+#define _UOS_KEYB_H
+
 /*
  * Generic keyboard interface.
  */
@@ -6,6 +9,9 @@ typedef struct _keyboard_event_t {
 	unsigned short modifiers;	/* ctrl, alt etc. */
 	unsigned short release;		/* 0 - press, 1 - release */
 } keyboard_event_t;
+
+
+#define KEY_IS_FUNC(key) (((key) & 0xFF00) == 0xF8 )
 
 /*
  * Keysyms 0..126 are mapped to ASCII
@@ -217,14 +223,15 @@ typedef struct _keyboard_event_t {
 #define KEYLED_NUM		02
 #define KEYLED_SCROLL		04
 
+/*
 typedef struct _keyboard_t {
 	struct _keyboard_interface_t *interface;
-#ifdef __KERNEL_UOS_H_
-	mutex_t lock;
-#endif
-} keyboard_t;
 
-/*
+	mutex_t lock;
+
+} keyboard_t;
+*/
+#if 0
 typedef struct _keyboard_interface_t {
 	void (*wait_event) (keyboard_t *u, keyboard_event_t *data);
 	int (*get_event) (keyboard_t *u, keyboard_event_t *data);
@@ -253,9 +260,13 @@ typedef struct _keyboard_interface_t {
 #define keyboard_get_delay(x)	(x)->interface->get_delay(to_kbd (x))
 #define keyboard_set_delay(x,s)	(x)->interface->set_delay(to_kbd (x), s)
 */
+#endif
 /*
  * Translate input key, processing control chars,
  * shift and caps lock, and num lock modifiers.
  * Do not process alt and meta modifiers.
  */
 void keyboard_translate (keyboard_event_t *m);
+
+#endif // _UOS_KEYB_H
+

@@ -94,7 +94,7 @@ START_O_FILE=entry.o
 
 #isa_sb16.o
 phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
-    uos_mouse.o uos_keyboard.o uos_i8042.o \
+    uos_mouse.o uos_keyboard.o uos_i8042.o uos_translate.o \
 	acpi_main.o acpi_os.o acpi_video.o acpi_buttons.o video_drv_vmware.o \
 	$(USB_O) floppy.o ide_io.o vm_connect.o \
 	disk_cache.o properties.o mem_disk.o \

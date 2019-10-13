@@ -1,17 +1,21 @@
-/*
- * Driver for PS/2 keyboard.
+/**
+ *
+ * Phantom OS
  *
  * Copyright (C) 2005 Serge Vakulenko
  *
+ * Driver for PS/2 keyboard.
+ *
  * Specifications of PS/2 keyboard interface are available
  * at http://www.computer-engineering.org/ps2keyboard/
- */
+ * 
+**/
 
 #define DEBUG_MSG_PREFIX "ps2.k"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 2
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 1
 
 
 #include <spinlock.h>
@@ -20,21 +24,13 @@
 #include <phantom_libc.h>
 
 #include <kernel/device.h>
+#include <kernel/snap_sync.h>
 #include <kernel/drivers.h>
 #include <hal.h>
 #include <errno.h>
 
-//#include <video/screen.h>
-
-//#include <event.h>
-//#include <queue.h>
-
 #include <threads.h>
-//#include <kernel/config.h>
-//#include <time.h>
-
 #include <event.h>
-
 
 #include <compat/uos.h>
 #include <compat/uos/keyboard.h>
@@ -61,9 +57,9 @@ static void keyboard_ps2_wait_event (keyboard_ps2_t *u, keyboard_event_t *data);
 
 static keyboard_ps2_t ps2k;
 static hal_sem_t keybd_sem;
-static int keyb_init = 0;
+//static int keyb_init = 0;
 
-
+#if 0
 #define SCAN_CTRL	0x1D	/* Control */
 #define SCAN_LSHIFT	0x2A	/* Left shift */
 #define SCAN_RSHIFT	0x36	/* Right shift */
@@ -73,78 +69,15 @@ static int keyb_init = 0;
 #define SCAN_NUM	0x45	/* Num lock */
 #define SCAN_LGUI	0x5B	/* Left Windows */
 #define SCAN_RGUI	0x5C	/* Right Windows */
+#endif
 
 #define STATE_BASE	0
 #define STATE_E0	1	/* got E0 */
 #define STATE_E1	2	/* got E1 */
-#define STATE_E11D	3	/* got E1-1D or E1-9D */
+//#define STATE_E11D	3	/* got E1-1D or E1-9D */
+//#define STATE_E114	4	/* got E1-1D or E1-9D */
 
-static const unsigned short scan_to_key [256] = {
-    /* 00 */	0,		KEY_ESCAPE,	'1',		'2',
-    /* 04 */	'3',		'4',		'5',		'6',
-    /* 08 */	'7',		'8',		'9',		'0',
-    /* 0C */	'-',		'=',		KEY_BACKSPACE,	KEY_TAB,
-    /* 10 */	'Q',		'W',		'E',		'R',
-    /* 14 */	'T',		'Y',		'U',		'I',
-    /* 18 */	'O',		'P',		'[',		']',
-    /* 1C */	KEY_ENTER,	KEY_LCTRL,	'A',		'S',
-    /* 20 */	'D',		'F',		'G',		'H',
-    /* 24 */	'J',		'K',		'L',		';',
-    /* 28 */	'\'',		'`',		KEY_LSHIFT,	'\\',
-    /* 2C */	'Z',		'X',		'C',		'V',
-    /* 30 */	'B',		'N',		'M',		',',
-    /* 34 */	'.',		'/',		KEY_RSHIFT,	KEY_KP_MULTIPLY,
-    /* 38 */	KEY_LALT,	' ',		KEY_CAPSLOCK,	KEY_F1,
-    /* 3C */	KEY_F2,		KEY_F3,		KEY_F4,		KEY_F5,
-    /* 40 */	KEY_F6,		KEY_F7,		KEY_F8,		KEY_F9,
-    /* 44 */	KEY_F10,	KEY_NUMLOCK,	KEY_SCROLLOCK,	KEY_KP7,
-    /* 48 */	KEY_KP8,	KEY_KP9,	KEY_KP_MINUS,	KEY_KP4,
-    /* 4C */	KEY_KP5,	KEY_KP6,	KEY_KP_PLUS,	KEY_KP1,
-    /* 50 */	KEY_KP2,	KEY_KP3,	KEY_KP0,	KEY_KP_PERIOD,
-    /* 54 */	0,		0,		0,		KEY_F11,
-    /* 58 */	KEY_F12,	0,		0,		0,
-    /* 5C */	0,		0,		0,		0,
-    /* 60 */	0,		0,		0,		0,
-    /* 64 */	0,		0,		0,		0,
-    /* 68 */	0,		0,		0,		0,
-    /* 6C */	0,		0,		0,		0,
-    /* 70 */	0,		0,		0,		0,
-    /* 74 */	0,		0,		0,		0,
-    /* 78 */	0,		0,		0,		0,
-    /* 7C */	0,		0,		0,		0,
-    /* E0,00 */	0,		0,		0,		0,
-    /* E0,04 */	0,		0,		0,		0,
-    /* E0,08 */	0,		0,		0,		0,
-    /* E0,0C */	0,		0,		0,		0,
-    /* E0,10 */	KEY_TRACK_PREV,	0,		0,		0,
-    /* E0,14 */	0,		0,		0,		0,
-    /* E0,18 */	0,		KEY_TRACK_NEXT,	0,		0,
-    /* E0,1C */	KEY_KP_ENTER,	KEY_RCTRL,	0,		0,
-    /* E0,20 */	KEY_MUTE,	/*Calc*/ 0,	KEY_PLAY,	0,
-    /* E0,24 */	KEY_STOP,	0,		0,		0,
-    /* E0,28 */	0,		0,		0,		0,
-    /* E0,2C */	0,		0,		KEY_VOLUME_DOWN, 0,
-    /* E0,30 */	KEY_VOLUME_UP,	0,		/*WWWHome*/ 0,	0,
-    /* E0,34 */	0,		KEY_KP_DIVIDE,	0,		KEY_PRINT,
-    /* E0,38 */	KEY_RALT,	0,		0,		0,
-    /* E0,3C */	0,		0,		0,		0,
-    /* E0,40 */	0,		0,		0,		0,
-    /* E0,44 */	0,		0,		0,		KEY_HOME,
-    /* E0,48 */	KEY_UP,		KEY_PAGEUP,	0,		KEY_LEFT,
-    /* E0,4C */	0,		KEY_RIGHT,	0,		KEY_END,
-    /* E0,50 */	KEY_DOWN,	KEY_PAGEDOWN,	KEY_INSERT,	KEY_DELETE,
-    /* E0,54 */	0,		0,		0,		0,
-    /* E0,58 */	0,		0,		0,		KEY_LMETA,
-    /* E0,5C */	KEY_RMETA,	KEY_MENU,	KEY_POWER,	/*Sleep*/ 0,
-    /* E0,60 */	0,		0,		0,		/* Wake */ 0,
-    /* E0,64 */	0,		/*WWWSearch*/0,	/*WWWFavor*/ 0,	/*WWWRefresh*/0,
-    /* E0,68 */	/*WWWStop*/ 0,	/*WWWForw*/ 0,	/*WWWBack*/ 0,	/*MyComp*/ 0,
-    /* E0,6C */	/*EMail*/ 0,	/*MediaSel*/ 0,	0,		0,
-    /* E0,70 */	0,		0,		0,		0,
-    /* E0,74 */	0,		0,		0,		0,
-    /* E0,78 */	0,		0,		0,		0,
-    /* E0,7C */	0,		0,		0,		0,
-};
+#include "keyboard_mode2_tab.h"
 
 static int
 set_rate_delay (int cps, int msec)
@@ -193,64 +126,114 @@ set_leds (int leds)
 static int
 make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
 {
-    switch (u->state) {
-    case STATE_BASE:
-        m->key = scan_to_key [byte & 0x7f];
-        switch (byte) {
-        case 0xE0:
-            /* First part of two-byte sequence. */
-            u->state = STATE_E0;
-            return 0;
-        case 0xE1:
-            /* First byte of Pause sequence. */
-            u->state = STATE_E1;
-            return 0;
-        case SCAN_CTRL:
-            if (u->modifiers & KEYMOD_LCTRL)
-                return 0;
-            u->modifiers |= KEYMOD_LCTRL;
+    LOG_FLOW( 2, "-k %X ", byte);
+
+    switch (byte) {
+    case 0xE0:
+        /* First part of two-byte sequence. */
+        u->state = STATE_E0;
+        return 0;
+    case 0xE1:
+        /* First byte of Pause sequence. */
+        u->state = STATE_E1;
+        return 0;
+
+    case 0xF0: // Release prefix
+        u->state_F0 = 1;
+        return 0;
+    }
+
+    if( u->state == STATE_E1 )
+    {
+        // Note that there was F0 passing inside the 
+        // sequence and it triggered u->state_F0
+        u->state_F0 = 0; // reset it - we don't need
+
+        if( byte == 0x14 ) u->state_E114 = 1;
+
+        // ignore other keys in ths state?
+        u->state = STATE_BASE;
+        return 0;
+    }
+
+    if(u->state_E114)
+    {
+        if( u->state_F0 && (byte == 0x77) )
+        {
+            u->state_E114 = 0;
+            u->state_F0 = 0;
+
+            m->key = KEY_PAUSE;
+            m->release = 0;
+            return 1;
+        }
+        return 0;
+    }
+
+    switch(u->state)
+    {
+        default:
+        case STATE_BASE: 
+            //if( byte > sizeof(scan_to_key))     m->key = 0;            else                                
+            m->key =  scan_to_key    [byte]; 
             break;
-        case SCAN_CTRL | 0x80:
-            if (! (u->modifiers & KEYMOD_LCTRL))
-                return 0;
-            u->modifiers &= ~KEYMOD_LCTRL;
-            //u->ctrl_alt_del = 0;
+        case STATE_E0:   
+            //if( byte > sizeof(scan_to_key_e0))  m->key = 0;            else                                
+            m->key =  scan_to_key_e0 [byte]; 
             break;
-        case SCAN_LSHIFT:
-            if (u->modifiers & KEYMOD_LSHIFT)
-                return 0;
-            u->modifiers |= KEYMOD_LSHIFT;
-            break;
-        case SCAN_RSHIFT:
-            if (u->modifiers & KEYMOD_RSHIFT)
-                return 0;
-            u->modifiers |= KEYMOD_RSHIFT;
-            break;
-        case SCAN_LSHIFT | 0x80:
-            if (! (u->modifiers & KEYMOD_LSHIFT))
-                return 0;
-            u->modifiers &= ~KEYMOD_LSHIFT;
-            break;
-        case SCAN_RSHIFT | 0x80:
-            if (! (u->modifiers & KEYMOD_RSHIFT))
-                return 0;
-            u->modifiers &= ~KEYMOD_RSHIFT;
-            break;
-        case SCAN_ALT:
-            if (u->modifiers & KEYMOD_LALT)
-                return 0;
-            u->modifiers |= KEYMOD_LALT;
-            break;
-        case SCAN_ALT | 0x80:
-            if (! (u->modifiers & KEYMOD_LALT))
-                return 0;
-            u->modifiers &= ~KEYMOD_LALT;
-            //u->ctrl_alt_del = 0;
-            break;
-        case SCAN_CAPS:
-            if (u->capslock)
-                return 0;
+    }
+    u->state = STATE_BASE;
+
+    switch (m->key) {
+    case KEY_LCTRL:
+        if(u->state_F0)  u->modifiers &= ~KEYMOD_LCTRL;
+        else             u->modifiers |= KEYMOD_LCTRL;
+        break;
+
+    case KEY_RCTRL:
+        if(u->state_F0)  u->modifiers &= ~KEYMOD_RCTRL;
+        else             u->modifiers |= KEYMOD_RCTRL;
+        break;
+        
+    case KEY_LSHIFT:
+        if(u->state_F0)  u->modifiers &= ~KEYMOD_LSHIFT;
+        else             u->modifiers |= KEYMOD_LSHIFT;
+        break;
+
+    case KEY_RSHIFT:
+        if(u->state_F0)  u->modifiers &= ~KEYMOD_RSHIFT;
+        else             u->modifiers |= KEYMOD_RSHIFT;
+        break;
+        
+    case KEY_LALT:
+        if(u->state_F0)  u->modifiers &= ~KEYMOD_LALT;
+        else             u->modifiers |= KEYMOD_LALT;
+        break;
+
+    case KEY_RALT:
+        if(u->state_F0)  u->modifiers &= ~KEYMOD_RALT;
+        else             u->modifiers |= KEYMOD_RALT;
+        break;
+
+    case KEY_LMETA:
+        if(u->state_F0)  u->modifiers &= ~KEYMOD_LMETA;
+        else             u->modifiers |= KEYMOD_LMETA;
+        break;
+
+    case KEY_RMETA:
+        if(u->state_F0)  u->modifiers &= ~KEYMOD_RMETA;
+        else             u->modifiers |= KEYMOD_RMETA;
+        break;
+        
+        
+    // TODO scroll lock - national keytable?
+
+        case KEY_CAPSLOCK:
+            if(u->state_F0) return 0; // ignore release
+
+            if (u->capslock) return 0;
             u->capslock = 1;
+
             if (u->modifiers & KEYMOD_CAPS) {
                 u->modifiers &= ~KEYMOD_CAPS;
                 u->leds &= ~KEYLED_CAPS;
@@ -260,14 +243,13 @@ make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
             }
             set_leds (u->leds);
             break;
-        case SCAN_CAPS | 0x80:
-            /* Caps lock released - ignore. */
-            u->capslock = 0;
-            return 0;
-        case SCAN_NUM:
-            if (u->numlock)
-                return 0;
+
+        case KEY_NUMLOCK:
+            if(u->state_F0) return 0; // ignore release
+
+            if (u->numlock) return 0;
             u->numlock = 1;
+
             if (u->modifiers & KEYMOD_NUM) {
                 u->modifiers &= ~KEYMOD_NUM;
                 u->leds &= ~KEYLED_NUM;
@@ -277,122 +259,18 @@ make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
             }
             set_leds (u->leds);
             break;
-        case SCAN_NUM | 0x80:
-            /* Num lock released - ignore. */
-            u->numlock = 0;
-            return 0;
-/*
-        case SCAN_DEL:
-            if ((u->modifiers & KEYMOD_CTRL) &&
-                (u->modifiers & KEYMOD_ALT)) {
-                // Reboot on Ctrl-Alt-Del.
-                ++u->ctrl_alt_del;
-                if (u->ctrl_alt_del >= 3) {
-                    debug_printf ("Rebooting...\n");
-                    i386_reboot (0x1234);
-                }
-            }
-            break;
-        case SCAN_DEL | 0x80:
-            u->ctrl_alt_del = 0;
-            break;
-*/
-        }
-        break;
 
-    case STATE_E0:
-        /* Second part of two-byte sequence. */
-        m->key = scan_to_key [byte | 0x80];
-        u->state = STATE_BASE;
-        switch (byte) {
-        case SCAN_CTRL:
-            if (u->modifiers & KEYMOD_RCTRL)
-                return 0;
-            u->modifiers |= KEYMOD_RCTRL;
-            break;
-        case SCAN_CTRL | 0x80:
-            if (! (u->modifiers & KEYMOD_RCTRL))
-                return 0;
-            u->modifiers &= ~KEYMOD_RCTRL;
-            //u->ctrl_alt_del = 0;
-            break;
-        case SCAN_ALT:
-            if (u->modifiers & KEYMOD_RALT)
-                return 0;
-            u->modifiers |= KEYMOD_RALT;
-            break;
-        case SCAN_ALT | 0x80:
-            if (! (u->modifiers & KEYMOD_RALT))
-                return 0;
-            u->modifiers &= ~KEYMOD_RALT;
-            //u->ctrl_alt_del = 0;
-            break;
-        case SCAN_LSHIFT:
-        case SCAN_LSHIFT | 0x80:
-            /* Part of Print Screen sequence - ignore. */
-            return 0;
-        case SCAN_LGUI:
-            if (u->modifiers & KEYMOD_LMETA)
-                return 0;
-            u->modifiers |= KEYMOD_LMETA;
-            break;
-        case SCAN_LGUI | 0x80:
-            if (! (u->modifiers & KEYMOD_LMETA))
-                return 0;
-            u->modifiers &= ~KEYMOD_LMETA;
-            //u->ctrl_alt_del = 0;
-            break;
-        case SCAN_RGUI:
-            if (u->modifiers & KEYMOD_RMETA)
-                return 0;
-            u->modifiers |= KEYMOD_RMETA;
-            break;
-        case SCAN_RGUI | 0x80:
-            if (! (u->modifiers & KEYMOD_RMETA))
-                return 0;
-            u->modifiers &= ~KEYMOD_RMETA;
-            //u->ctrl_alt_del = 0;
-            break;
-/*
-        case SCAN_DEL:
-            if ((u->modifiers & KEYMOD_CTRL) &&
-                (u->modifiers & KEYMOD_ALT)) {
-                // Reboot on Ctrl-Alt-Del.
-                ++u->ctrl_alt_del;
-                if (u->ctrl_alt_del >= 3) {
-                    debug_printf ("Rebooting...\n");
-                    i386_reboot (0x1234);
-                }
-            }
-            break;
-        case SCAN_DEL | 0x80:
-            u->ctrl_alt_del = 0;
-            break;
-*/
-        }
-        break;
+        default:
+        m->release = u->state_F0;
+        u->state_F0 = 0;
 
-    case STATE_E1:
-        if (byte == 0x1D || byte == 0x9D) {
-            /* Second byte of Pause sequence. */
-            u->state = STATE_E11D;
-        } else
-            u->state = STATE_BASE;
-        return 0;
+        if (! m->key)        return 0;
 
-    case STATE_E11D:
-        u->state = STATE_BASE;
-        if (byte == 0x45 || byte == 0xC5) {
-            /* Third byte of Pause sequence. */
-            m->key = KEY_PAUSE;
-            break;
-        }
-        return 0;
+        return 1;
     }
-    if (! m->key)
-        return 0;
-    m->release = (byte > 0x7f);
-    return 1;
+
+    u->state_F0 = 0;
+    return 0;
 }
 
 /*
@@ -404,8 +282,7 @@ receive_byte (keyboard_ps2_t *u, unsigned char byte)
 {
     keyboard_event_t *newlast;
 
-    if (byte == KBDR_TEST_OK && ! (u->modifiers & KEYMOD_LSHIFT) &&
-        u->state == STATE_BASE) {
+    if( ((byte == KBDR_TEST_OK) || (byte == KBDR_ACK)) && u->state == STATE_BASE) {
         /* New device connected. */
         set_leds (u->leds);
         set_rate_delay (u->rate, u->delay);
@@ -500,7 +377,9 @@ keyboard_ps2_task (void)
 
         keyboard_ps2_wait_event( u, &data );
 
-        int shifts = data.release ? 0 : UI_MODIFIER_KEYUP;
+        keyboard_translate( &data );
+
+        int shifts = data.release ? UI_MODIFIER_KEYUP : 0;
 
         if( data.modifiers & KEYMOD_CTRL )      shifts |= UI_MODIFIER_CTRL;
         if( data.modifiers & KEYMOD_SHIFT )     shifts |= UI_MODIFIER_SHIFT;
@@ -510,7 +389,7 @@ keyboard_ps2_task (void)
         // TODO left/right keys - JUST REDEFINE OS defines accordoing to this driver's and assign
 
         vm_lock_persistent_memory();
-        //LOG_FLOW( 0, "vk=%d, ch=%c, shifts 0x%x ", 0, event->keychar, shifts );
+        LOG_FLOW( 0, "vk=0x%x, ch=%c, shifts 0x%x ", data.key, data.key, shifts );
         //ev_q_put_key( event->keycode, event->keychar, shifts );
         ev_q_put_key( 0, data.key, shifts );
         vm_unlock_persistent_memory();
@@ -739,7 +618,7 @@ phantom_device_t * driver_isa_ps2k_probe( int port, int irq, int stage )
 
     hal_start_kernel_thread((void*)keyboard_ps2_task);
 
-    keyb_init = 1;
+    //keyb_init = 1;
 
     return dev;
 }

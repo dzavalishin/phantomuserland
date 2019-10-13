@@ -206,7 +206,8 @@ void
 i8042_kbd_enable ()
 {
 	/* Enable keyboard and AUX port. */
-	i8042_command (KBCB_ENINTR | KBCB_AUXINTR | KBCB_SYSFLG | KBCB_TRANSL);
+	//i8042_command (KBCB_ENINTR | KBCB_AUXINTR | KBCB_SYSFLG | KBCB_TRANSL);
+	i8042_command (KBCB_ENINTR | KBCB_AUXINTR | KBCB_SYSFLG );
 }
 
 /*
@@ -222,6 +223,7 @@ i8042_aux_enable ()
 	i8042_aux_write (KBDK_ENABLE);
 
 	/* Enable keyboard and AUX port. */
-	i8042_command (KBCB_ENINTR | KBCB_AUXINTR | KBCB_SYSFLG | KBCB_TRANSL);
+	//i8042_command (KBCB_ENINTR | KBCB_AUXINTR | KBCB_SYSFLG | KBCB_TRANSL);
+	i8042_command (KBCB_ENINTR | KBCB_AUXINTR | KBCB_SYSFLG );
 }
 

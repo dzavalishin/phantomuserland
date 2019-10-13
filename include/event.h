@@ -19,6 +19,7 @@
 #include <queue.h>
 #include <video/rect.h>
 
+#include <compat/uos/keyboard.h>
 
 struct ui_event
 {

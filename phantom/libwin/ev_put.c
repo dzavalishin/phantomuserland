@@ -71,10 +71,10 @@ void ev_q_put_key( int vkey, int ch, int modifiers )
         LOG_FLOW( 0, "F4 shifts = %x", modifiers );
         break;
 
-    case KEY_LWIN:
-    case KEY_RWIN:
-        LOG_FLOW( 0, "WIN shifts = %x", modifiers );
-        break;
+//    case KEY_LWIN:
+//    case KEY_RWIN:
+//        LOG_FLOW( 0, "WIN shifts = %x", modifiers );
+//        break;
 
     case KEY_MENU:
         LOG_FLOW( 0, "MENU shifts = %x", modifiers );
