@@ -377,7 +377,10 @@ keyboard_ps2_task (void)
 
         keyboard_ps2_wait_event( u, &data );
 
+        // todo -  data.key = ascii_to_UTF_cyrillic[data.key], if(!shifts) tolower_cyrillic: keyboard_cyrillic_tab.h
+
         keyboard_translate( &data );
+
 
         int shifts = data.release ? UI_MODIFIER_KEYUP : 0;
 
