@@ -13,4 +13,5 @@ clean::
 
 %.png.c: %.png
 	$(CONV) $<
-	 gawk -f defs.awk $@ >>defs.h
+	gawk -f defs.awk $@ >>defs.h
+	cp $(patsubst %.png,%.png.c,$<) ../../../phantom/libwin/resources 

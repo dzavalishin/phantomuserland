@@ -239,8 +239,10 @@ void handle_keycode(unsigned char key)
     }
     else if(seen_e1)
     {
-        // if( seen_e1 == 2 ) e1_byte1 = key;
-        // if( seen_e1 == 1 ) key |= (e1_byte1 << 8); // compose 16-bit keycode
+#if 0
+        if( seen_e1 == 2 ) e1_byte1 = key;
+        if( seen_e1 == 1 ) key |= (e1_byte1 << 8); // compose 16-bit keycode
+#endif
         seen_e1--;
     }
     else

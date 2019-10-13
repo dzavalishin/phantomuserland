@@ -18,9 +18,9 @@
 
 #define DEBUG_MSG_PREFIX "w.ttf"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 0
 
 
 #include <stdint.h>
@@ -283,7 +283,7 @@ void w_ttfont_draw_string(
 
 /**
  * 
- * \param[out] find_x Return x coordinate for the end (right margin) of given character in a string we print
+ * \param[out] find_x Return x coordinate for the start (left margin) of given character in a string we print
  * \param[in] find_for_char Position in str of character we look x coordinate for
  * 
  * Coordinate returned in find_x is window relative, it includes win_x parameter value.
@@ -371,17 +371,22 @@ void w_ttfont_draw_string_ext(
     //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
     //const int32_t imageH = bottom - top;
 
-
+    //*find_x = -1;
+    int fx = -1;
     for (i = 0; i < numSymbols; ++i)
     {
         const struct ttf_symbol *symb = symbols + i;
         w_tt_paint_char( win, symb, win_x, win_y, top, color );
-        if( find_for_char == i-1 )
+        if( find_for_char == i )
         {
-            if(find_x) *find_x = symb->posX+win_x;
+            fx = symb->posX + win_x;
         }
     }
+    
+    // After lash char
+    if(fx == -1) fx = symbols[numSymbols-1].posX + symbols[numSymbols-1].width + win_x + 2;
 
+    if(find_x) *find_x = fx;
 
     for (i = 0; i < numSymbols; ++i)
     {
@@ -446,7 +451,7 @@ void w_ttfont_string_size(
         LOG_ERROR( 0, "can't get font for handle %x", font);
         return;
     }
-    LOG_FLOW( 1, "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
+    LOG_FLOW( 10, " f '%s' sz %d\n", pe->font_name, pe->font_size );
 
     FT_Face ftFace = pe->face;
 
@@ -504,8 +509,8 @@ void w_ttfont_string_size(
     r->xsize = imageW - r->x;
     r->ysize = bottom - top;
 
-    LOG_INFO_( 0, "left %d top %d bottom %d imageW %d", left, top, bottom, imageW );
-    LOG_INFO_( 0, "x %d y %d xsize %d ysize %d", r->x, r->y, r->xsize, r->ysize );
+    LOG_INFO_( 10, "left %d top %d bottom %d imageW %d", left, top, bottom, imageW );
+    LOG_INFO_( 10, "x %d y %d xsize %d ysize %d", r->x, r->y, r->xsize, r->ysize );
 
     for (i = 0; i < numSymbols; ++i)
     {
@@ -514,7 +519,7 @@ void w_ttfont_string_size(
 
     rc = pool_release_el( tt_font_pool, font );
     if( rc )
-        lprintf("\ncan't release font for handle %x\n", font);
+        LOG_ERROR( 1, "can't release font for handle %x", font);
 
 }
 

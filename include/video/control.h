@@ -131,10 +131,10 @@ typedef struct control
         };                              //< Specific for menu item
 
         struct { // text field
-            uint32_t    vis_shift;      //< First character we see in edit window
-            uint32_t    vis_len;        //< Num of chars we see in window
-            uint32_t    str_len;        //< Num of bytes in buffer
-            uint32_t    cursor_shift;   //< cursor position in bytes - TODO UTF-8!
+            int32_t     vis_shift;      //< First character we see in edit window
+            int32_t     vis_len;        //< Num of chars we see in window
+            int32_t     str_len;        //< Num of bytes in buffer
+            int32_t     cursor_shift;   //< cursor position in bytes - TODO UTF-8!
         };
 
     };
@@ -175,7 +175,6 @@ typedef struct
 //
 // -----------------------------------------------------------------------
 
-
 struct foreach_control_param
 {
     window_handle_t   w;
@@ -183,6 +182,8 @@ struct foreach_control_param
     control_group_t * g;   // used in w_add_to_group()
     int               gid; // ---""---
     control_t       * c;
+    int               focus_flag;
+    int               focus_success;
 };
 
 
@@ -267,9 +268,18 @@ void destroy_controls_pool(pool_t *controls);
 void w_paint_changed_controls(window_handle_t w);
 void w_repaint_controls(window_handle_t w);
 void w_reset_controls(window_handle_t w); // focus lost, mouse off window - make sure all buttons are off -- TODO used?
-void w_check_controls( window_handle_t w, ui_event_t *e ); // TODO rename - deliver events to controls
+int w_event_to_controls( window_handle_t w, ui_event_t *e ); // Deliver events to controls - return nonzero if event consumed
 
 void w_paint_control(window_handle_t w, control_t *cc );
+
+
+int ctl_text_field_events(control_t *cc, struct foreach_control_param *env);
+void ctl_text_field_paint(window_handle_t win, control_t *cc );
+
+// Bits to combine in control paint function
+
+void ctl_paint_bg( window_handle_t win, control_t *cc );
+void ctl_paint_border( window_handle_t win, control_t *cc );
 
 
     // -------------------------------------------------------------------

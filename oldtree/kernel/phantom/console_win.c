@@ -334,7 +334,7 @@ void phantom_init_console_window()
 
     color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
-    phantom_launcher_menu_window = drv_video_window_create( 200, 186,
+    phantom_launcher_menu_window = drv_video_window_create( 200, 186+32,
                                                        9, 45, COLOR_WHITE, 
                                                        "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
     window_handle_t lmw = phantom_launcher_menu_window;
@@ -366,6 +366,9 @@ void phantom_init_console_window()
     //w_ttfont_draw_string( lmw, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 10, 8 );
     //w_control_set_text( lmw, bh, "Fast Snap", COLOR_BLACK );
 
+    bh = w_add_text_field( lmw, 1, 1+31*6, 80, 31, "Hello There Edit Field", COLOR_BLACK );
+
+
     // -----------------------------
     // Buttons
     // -----------------------------
@@ -388,7 +391,6 @@ void phantom_init_console_window()
         &start_button_normal_bmp, &start_button_selected_bmp, &start_button_hover_bmp  );
 
 
-    bh = w_add_text_field( phantom_launcher_window, 100, 0, 100, 31, "Hello There Edit Field", COLOR_BLACK );
 
 
     lb_x = 300;

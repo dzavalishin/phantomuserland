@@ -232,14 +232,24 @@ void w_receive_event(ui_event_t *e)
     if( e->type == UI_EVENT_TYPE_MOUSE )
     {
         ui_event_t ecopy = *e; // for any case
-        w_check_controls( w, &ecopy );
+        if( w_event_to_controls( w, &ecopy ) )
+            goto ret;
     }
 
     // Controls need it to 'unhover'
     if( (e->type == UI_EVENT_TYPE_WIN) && (e->w.info == UI_EVENT_WIN_LOST_FOCUS) )
     {
         ui_event_t ecopy = *e; // for any case
-        w_check_controls( w, &ecopy );
+        if( w_event_to_controls( w, &ecopy ) )
+            goto ret;
+    }
+
+    // Edit field
+    if( e->type == UI_EVENT_TYPE_KEY )
+    {
+        ui_event_t ecopy = *e; // for any case
+        if( w_event_to_controls( w, &ecopy ) )
+            goto ret;
     }
 
 

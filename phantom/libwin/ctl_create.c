@@ -29,6 +29,8 @@
 
 #include <video/control.h>
 
+#include <video/builtin_bitmaps.h>
+
 
 // --------------------------------------------------------
 //
@@ -356,7 +358,8 @@ control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, i
     cb.str_len = strnlen( text, 1024 ); // TODO define and describe
     cb.vis_len = cb.str_len;
 
-    cb.pas_bg_image = &menu_normal_center_bmp;
+    cb.pas_bg_image = &text_field_x200_bmp;
+    //cb.pas_bg_image = &menu_normal_center_bmp;
     //cb.act_bg_image = &menu_selected_center_bmp;
     //cb.hov_bg_image = &menu_selected_center_bmp;
 

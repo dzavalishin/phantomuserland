@@ -27,8 +27,7 @@
 
 static void ev_send_key_event_to_q(_key_event *event)
 {
-
-    static int shifts;
+    static int shifts = 0;
 
     int dn = event->modifiers & KEY_MODIFIER_DOWN;
 
@@ -151,6 +150,7 @@ static void ev_send_key_event_to_q(_key_event *event)
     }
 
     vm_lock_persistent_memory();
+    LOG_FLOW( 0, "vk=%d, ch=%c, shifts 0x%x ", event->keycode, event->keychar, shifts );
     ev_q_put_key( event->keycode, event->keychar, shifts );
     vm_unlock_persistent_memory();
 

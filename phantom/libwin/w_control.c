@@ -10,9 +10,9 @@
 
 #define DEBUG_MSG_PREFIX "ui.ctl"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 1
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 1
 
 
 #include <phantom_types.h>
@@ -28,6 +28,10 @@
 #include <video/internal.h>
 
 #include <video/control.h>
+
+#include <dev/key_event.h>
+
+#include "ctl_private.h"
 
 /**
  * 
@@ -59,7 +63,7 @@ static void paint_or_replicate(window_handle_t win, control_t *cc, drv_video_bit
         drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, img );
 }
 
-static void paint_bg( window_handle_t win, control_t *cc )
+void ctl_paint_bg( window_handle_t win, control_t *cc )
 {
     w_fill_rect( win, cc->bg_color, cc->r );
 
@@ -89,7 +93,7 @@ static void paint_bg( window_handle_t win, control_t *cc )
 }
 
 /// \return X shift for text
-static int paint_icon( window_handle_t win, control_t *cc )
+int ctl_paint_icon( window_handle_t win, control_t *cc )
 {
     if(!cc->icon_image) return 0;
 
@@ -110,7 +114,7 @@ static int paint_icon( window_handle_t win, control_t *cc )
     
 }
 
-static void paint_text( window_handle_t win, control_t *cc, int shift )
+void ctl_paint_text( window_handle_t win, control_t *cc, int shift )
 {
     if(!cc->text) return;
     
@@ -123,7 +127,7 @@ static void paint_text( window_handle_t win, control_t *cc, int shift )
     
 }
 
-static void paint_border( window_handle_t win, control_t *cc )
+void ctl_paint_border( window_handle_t win, control_t *cc )
 {
     if(! (cc->flags & CONTROL_FLAG_NOBORDER))
     {
@@ -141,92 +145,30 @@ static void paint_border( window_handle_t win, control_t *cc )
 // -----------------------------------------------------------------------
 
 
-static void paint_button(window_handle_t win, control_t *cc )
+static void ctl_button_paint(window_handle_t win, control_t *cc )
 {
-    paint_bg( win, cc );
-    int shift = paint_icon( win, cc );
-    paint_text( win, cc, shift );
-    paint_border( win, cc );
+    ctl_paint_bg( win, cc );
+    int shift = ctl_paint_icon( win, cc );
+    ctl_paint_text( win, cc, shift );
+    ctl_paint_border( win, cc );
 }
 
 
-static void paint_menu_item(window_handle_t win, control_t *cc )
+static void ctl_menu_item_paint(window_handle_t win, control_t *cc )
 {
-    paint_bg( win, cc );
-    int shift = paint_icon( win, cc );
-    paint_text( win, cc, shift );
-    paint_border( win, cc );
+    ctl_paint_bg( win, cc );
+    int shift = ctl_paint_icon( win, cc );
+    ctl_paint_text( win, cc, shift );
+    ctl_paint_border( win, cc );
     LOG_FLOW( 10, "paint menu item id %d", cc->id );
 }
 
-static void paint_label(window_handle_t win, control_t *cc )
+static void ctl_label_paint(window_handle_t win, control_t *cc )
 {
-    paint_bg( win, cc );
-    int shift = paint_icon( win, cc );
-    paint_text( win, cc, shift );
-    paint_border( win, cc );
-    //LOG_FLOW( 10, "paint label id %d", cc->id );
-}
-
-
-static void ctl_text_shift_for_cursor( control_t *cc )
-{
-    if( cc->cursor_shift < cc->vis_shift )
-        cc->vis_shift = cc->cursor_shift;
-
-    if( cc->cursor_shift > (cc->vis_shift + cc->vis_len) )
-        cc->vis_shift = cc->cursor_shift - cc->vis_len;
-}
-
-// TODO rewrite all this in UTF code points, not bytes!
-// Add ttf render func for UTF
-
-static void find_visible_text_len( control_t *cc )
-{
-    int vis_width_pixels = 0;
-    // TODO we must cut off not byte but UTF-8 char
-    while(1) {
-        rect_t r;
-
-        if( cc->vis_len > cc->str_len - cc->vis_shift )
-            cc->vis_len = cc->str_len - cc->vis_shift;
-
-        w_ttfont_string_size( decorations_title_font,
-                          cc->buffer + cc->vis_shift, cc->vis_len,
-                           &r );
-
-        if (vis_width_pixels <= cc->r.xsize )
-            break;
-
-        // sanity
-        if( cc->vis_len <= 1 )
-            break;
-    }     
-}
-
-static void paint_text_ctl(window_handle_t win, control_t *cc )
-{
-    paint_bg( win, cc );    
-    
-    int t_height = 16;
-    int t_ypos = (cc->r.ysize - t_height) / 2;
-
-    ctl_text_shift_for_cursor( cc );
-    find_visible_text_len( cc );
-    ctl_text_shift_for_cursor( cc ); // Width could change
-
-    size_t cursor_x_pos = 0;
-
-    w_ttfont_draw_string_ext( win, decorations_title_font,
-                          cc->buffer+cc->vis_shift, cc->vis_len,
-                          cc->fg_color,
-                          cc->r.x + t_ypos + 2, cc->r.y+t_ypos,
-                          &cursor_x_pos, cc->cursor_shift ); // +2?
-    
-    //w_draw_v_line( win, COLOR_GREEN, cursor_x_pos, cc->r.y, cc->r.ysize );
-    w_draw_line( win, cursor_x_pos, cc->r.y, cursor_x_pos, cc->r.y+cc->r.ysize, COLOR_LIGHTGREEN );
-
-    paint_border( win, cc );
+    ctl_paint_bg( win, cc );
+    int shift = ctl_paint_icon( win, cc );
+    ctl_paint_text( win, cc, shift );
+    ctl_paint_border( win, cc );
     //LOG_FLOW( 10, "paint label id %d", cc->id );
 }
 
@@ -246,12 +188,12 @@ void w_paint_control(window_handle_t w, control_t *cc )
     {
     switch(cc->type)
     {
-        case ct_label:      paint_label( w, cc ); break;
-        case ct_button:     paint_button( w, cc ); break;
-        case ct_menu:       /* FALLTHROUGH */
-        case ct_menuitem:   paint_menu_item( w, cc ); break;
-        case ct_text:       paint_text_ctl( w, cc ); break;
+        case ct_label:      ctl_label_paint( w, cc ); break;
+        case ct_button:     ctl_button_paint( w, cc ); break;
+        case ct_menuitem:   ctl_menu_item_paint( w, cc ); break;
+        case ct_text:       ctl_text_field_paint( w, cc ); break;
 
+        case ct_menu:       /* FALLTHROUGH */
         default:
             LOG_ERROR( 1, "unknown control type %d", cc->type);
             break;
@@ -348,27 +290,27 @@ static void w_control_action(window_handle_t w, control_t *cc, ui_event_t *ie)
 }
 
 
-/// Process event for control - called for all win controls
-static void do_button_events(control_t *cc, struct foreach_control_param *env)
-{
-    if(cc->flags & CONTROL_FLAG_DISABLED) 
-        return;
 
+
+/// Process event for button or menu item
+static int do_button_events(control_t *cc, struct foreach_control_param *env)
+{
     ui_event_t e = env->e;
 
     if( (e.type == UI_EVENT_TYPE_WIN) && (e.w.info == UI_EVENT_WIN_LOST_FOCUS) )
     {
         if(e.focus != env->w)
-            return;
+            return 0;
 
         if(cc->state == cs_hover) // TODO separate hover status from pressed status
         {
             cc->state = cs_released;
             cc->changed = 1;
         }
-        return;
+        return 0; // Don't consume
     }
-
+    
+    // Event is for us
     if( (e.type == UI_EVENT_TYPE_MOUSE) && point_in_rect( e.rel_x, e.rel_y, &cc->r ) )
     {
         //LOG_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cc->id );
@@ -382,7 +324,7 @@ static void do_button_events(control_t *cc, struct foreach_control_param *env)
                 cc->state = cs_pressed;
 
             w_control_action(env->w, cc, &env->e);
-            return;
+            return 1; // Consume
         }
 
         if(env->e.m.released & 0x1) // First button release only
@@ -391,7 +333,7 @@ static void do_button_events(control_t *cc, struct foreach_control_param *env)
                 cc->state = cs_released;
 
             w_control_action(env->w, cc, &e);
-            return;
+            return 1; // Consume
         }
 
         if(cc->state == cs_released ) // TODO separate hover status from pressed status
@@ -399,9 +341,10 @@ static void do_button_events(control_t *cc, struct foreach_control_param *env)
             cc->state = cs_hover;
             cc->changed = 1;
         }
-        return;
+        return 0; // Do not eat events on just hover - prevents others from loosing hover status
     }
 
+    // Not ours, but take in account
     if( (e.type == UI_EVENT_TYPE_MOUSE) && !point_in_rect( e.rel_x, e.rel_y, &cc->r ) )
     {
         if(cc->state == cs_hover) // TODO separate hover status from pressed status
@@ -409,9 +352,12 @@ static void do_button_events(control_t *cc, struct foreach_control_param *env)
             cc->state = cs_released;
             cc->changed = 1;
         }
-        return;
+        return 0; // Do not consume
     }
+
+    return 0; // Not ours
 }
+
 
 
 /// Process event for control - called for all win controls
@@ -421,14 +367,20 @@ static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, vo
     control_t *cc = ref->c;                    assert(cc);
     struct foreach_control_param *env = arg;   assert(env);
 
+    if(cc->flags & CONTROL_FLAG_DISABLED) 
+        return 0; // Event is not seen by me
+
     switch( cc->type )
     {
         case ct_menuitem: /* FALLTHROUGH */
         case ct_button: 
-            do_button_events(cc, env);
+            return do_button_events(cc, env);
             break;
 
         case ct_label: // No reaction
+            break;
+
+        case ct_text: ctl_text_field_events(cc,env);
             break;
     }
 
@@ -464,7 +416,7 @@ void w_repaint_controls(window_handle_t w)
     if(w->controls == 0)
         return;
 
-    LOG_FLOW( 1, " @ %p", w );
+    LOG_FLOW( 10, " @ %p", w );
     struct foreach_control_param env;
     bzero( &env, sizeof(env) );
     env.w = w;
@@ -495,26 +447,86 @@ void w_reset_controls(window_handle_t w) // focus lost, mouse off window - make 
 }
 
 
+//static int do_pass_focus(control_t *cc, struct foreach_control_param *env)
+static errno_t do_pass_focus(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    control_ref_t *ref = el;                   assert(ref);
+    control_t *cc = ref->c;                    assert(cc);
+    struct foreach_control_param *env = arg;   assert(env);
+
+    LOG_FLOW0( 0, "enter");
+
+    if( cc->focused )
+    {
+        env->focus_flag = 1; // Pass flag to next control
+        cc->focused = 0;
+        LOG_FLOW0( 0, "gave out");
+    }
+
+    // Label does not need focus, pass forward
+    if( cc->type == ct_label ) return 0;
+
+    if( env->focus_flag )
+    {
+        cc->focused = 1; // Get flag from prev control
+        env->focus_flag = 0;
+        env->focus_success = 1; // tell that someone got focus
+        LOG_FLOW0( 0, "took in");
+    }
+
+    return 0;
+}
+
+#include <dev/key_event.h>
+
 /**
  * 
  * Deliver event to controls. Mouse and focus loss events accepted.
  * 
  * \param[in] e Event to deliver.
  * 
+ * \return True (non-zero) if event is consumed, and should not be delivered to containing window and other controls.
+ * 
 **/
-void w_check_controls( window_handle_t w, ui_event_t *e )
+int w_event_to_controls( window_handle_t w, ui_event_t *e )
 {
     if(w->controls == 0)
-        return;
+        return  0;
 
-    //LOG_FLOW( 1, "button check @ %d.%d buttons %x", e->rel_x, e->rel_y, e->m.buttons );
+    //LOG_FLOW( 1, "control event check @ %d.%d buttons %x", e->rel_x, e->rel_y, e->m.buttons );
     struct foreach_control_param env;
     env.e = *e;
     env.w = w;
 
     assert( w->controls->magic == CONTROLS_POOL_MAGIC );
-    pool_foreach( w->controls, do_check_control, &env );
+    int rc;
+
+    if( (e->type == UI_EVENT_TYPE_KEY) && (e->k.vk == KEY_TAB) && UI_MOD_DOWN(e->modifiers) )
+    {
+        // Select next control to be focused
+        env.focus_flag = 0;
+        env.focus_success = 0;
+        rc = pool_foreach( w->controls, do_pass_focus, &env );
+
+        if(!env.focus_success) // No one got focus
+        {
+            // Select next control to be focused
+            env.focus_flag = 1;
+            env.focus_success = 0;
+            rc = pool_foreach( w->controls, do_pass_focus, &env );
+            // Do not check again
+        }
+        w_paint_changed_controls(w);
+        return 1;
+    }
+    else
+    {
+        // Just deliver event to all of them
+        rc = pool_foreach( w->controls, do_check_control, &env );
+    }
+
     w_paint_changed_controls(w);
+    return rc;
 }
 
 
