@@ -301,6 +301,12 @@ void w_ttfont_draw_string_ext(
 
     if(!running) return;
  
+    if(strLen == 0)
+    {
+        if( find_x ) *find_x = 0;
+        return;
+    }
+
     struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
     if( 0 == pe )
     {
@@ -444,7 +450,17 @@ void w_ttfont_string_size(
     int i, rc;
 
     if(!running) return;
- 
+
+    if(strLen == 0)
+    {
+        if( r ) 
+        {
+            r->x = r->y = 0;
+            r->xsize = r->ysize = 0;
+        }
+        return;
+    }
+
     struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
     if( 0 == pe )
     {
