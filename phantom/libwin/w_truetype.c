@@ -581,12 +581,12 @@ errno_t w_ttfont_resetup_string_w(
                         )
 {
     if(!running) return EFAULT;
+    assert( strLen <= nSymbols );
  
     FT_Face ftFace = s->pe->face;
 
     //dump_face( ftFace );
     //struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
-    size_t numSymbols = 0;
 
     int32_t left = INT_MAX;
     int32_t top = INT_MAX;
@@ -600,6 +600,7 @@ errno_t w_ttfont_resetup_string_w(
     for( i = 0; i < nSymbols; i++ )
         symbols[i].glyph = 0;
 
+    size_t numSymbols = 0;
     while( (skip_total < strLen) && (numSymbols < nSymbols))
     {
         //const uint32_t charcode = str[i];
@@ -722,6 +723,74 @@ void w_ttfont_dismiss_string_w(
     if( rc )
         LOG_ERROR( 1, "Can't release font for handle %x", s->font);
 }
+
+
+
+/**
+ * 
+ * \brief Calculate bounding rectangle for string.
+ * 
+ * NB! Calcs for current state, strLen is checked just for zero.
+ * 
+ * 
+**/
+void w_ttfont_string_size_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        size_t strLen,                 //< wchars to count
+                        rect_t *r )
+{
+    int i, rc;
+
+    if(!running) return;
+
+    if(strLen == 0)
+    {
+        if( r ) 
+        {
+            r->x = r->y = 0;
+            r->xsize = r->ysize = 0;
+        }
+        return;
+    }
+
+    r->x = s->left;
+    r->y = s->bottom;
+    r->xsize = s->right - r->x;
+    r->ysize = s->bottom - s->top;
+
+    LOG_INFO_( 10, "left %d top %d bottom %d imageW %d", s->left, s->top, s->bottom, s->right );
+    LOG_INFO_( 2, "x %d y %d xsize %d ysize %d", r->x, r->y, r->xsize, r->ysize );
+}
+
+/**
+ * 
+ * Find char by x pos (mouse click to char index)
+ * 
+ * \param[in] xpos - x coord position (from the beginning of string)
+ * 
+ * \returns Index of char or -1 for error.
+ * 
+**/
+int w_ttfont_char_by_x_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t strLen,                 //< wchars to check
+                        int xpos
+                        )
+{
+    int i;
+    for( i = 0; i < strLen; i++ )
+    {
+        if( xpos < symbols[i].posX ) continue;
+        //if( xpos > symbols[i].posX + symbols[i].width ) continue;
+        // get first that is to the left from mouse 
+        return i;
+    }
+
+    return -1;
+}
+
+
 
 
 // -----------------------------------------------------------------------

@@ -91,6 +91,7 @@ typedef enum w_font_type { ft_none = 0, ft_bitmap = 1, ft_truetype = 2 } font_ty
 typedef pool_handle_t font_handle_t;
 
 struct ttf_pool_el;
+struct ttf_symbol;
 
 struct ttf_paint_state
 {
@@ -151,6 +152,76 @@ errno_t w_release_tt_font( font_handle_t font );
 
 
 extern font_handle_t decorations_title_font;
+
+
+// -----------------------------------------------------------------------
+//
+// UTF-32 version
+//
+// * w_ttfont_setup_string_w    - allocate data, open font, preprocess sizes
+// * w_ttfont_resetup_string_w  - do not allocate, just preprocess sizes for a new string
+// * w_ttfont_string_size_w     - get bounding rectangle
+// * w_ttfont_draw_string_w     - actually paint
+// * w_ttfont_dismiss_string_w  - free data
+//
+// -----------------------------------------------------------------------
+
+errno_t w_ttfont_setup_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols,               //< sizeof symbols
+                        size_t strLen,                 //< Num of characters we process
+                        const wchar_t *str,            //< String to preprocess
+                        font_handle_t font             //< Font
+                        );
+
+errno_t w_ttfont_resetup_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols,               //< sizeof symbols
+                        size_t strLen,                 //< Num of characters we process
+                        const wchar_t *str             //< String to preprocess
+                        );
+
+
+
+void w_ttfont_draw_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t strLen,                 //< Num of characters we process
+
+                        window_handle_t win,
+                        const rgba_t color,
+                        int win_x, int win_y
+                        );
+
+
+void w_ttfont_dismiss_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols );              //< sizeof symbols
+
+void w_ttfont_string_size_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        size_t strLen,                 //< wchars to count
+                        rect_t *r );
+
+
+/**
+ * 
+ * Find char by x pos (mouse click to char index)
+ * 
+ * \param[in] xpos - x coord position (from the beginning of string)
+ * 
+ * \returns Index of char or -1 for error.
+ * 
+**/
+int w_ttfont_char_by_x_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t strLen,                 //< wchars to check
+                        int xpos
+                        );
 
 
 #endif // CONF_TRUETYPE
