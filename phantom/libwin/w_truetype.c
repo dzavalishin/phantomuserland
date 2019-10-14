@@ -271,7 +271,7 @@ void w_ttfont_draw_char(
     int32_t posX = 0;
     int skip_total = 0;
 
-    int32_t charcode;
+    int32_t charcode = 0;
     //ssize_t skip =
     utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
 
@@ -375,6 +375,7 @@ void w_ttfont_draw_string_ext(
         //const uint32_t charcode = str[i];
         int32_t charcode;
         ssize_t skip = utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
+        if( skip < 0 ) break; // paint partial str
 
         skip_total += skip;
 
@@ -507,6 +508,7 @@ void w_ttfont_string_size(
     {
         int32_t charcode;
         ssize_t skip = utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
+        if( skip < 0) break; // TODO LOG_ERR?
 
         skip_total += skip;
 
@@ -739,8 +741,6 @@ void w_ttfont_string_size_w(
                         size_t strLen,                 //< wchars to count
                         rect_t *r )
 {
-    int i, rc;
-
     if(!running) return;
 
     if(strLen == 0)
@@ -791,6 +791,51 @@ int w_ttfont_char_by_x_w(
 }
 
 
+// -----------------------------------------------------------------------
+//
+// UTF-8 to UTF-32 and back
+//
+// -----------------------------------------------------------------------
+
+// count = num of CHARS, excl zero
+errno_t utf8to32( wchar_t *dest, const char *src, size_t destSize, size_t srcSize, size_t *count )
+{
+    int skip_total = 0;
+    int numSymbols = 0;
+    while( (skip_total < srcSize) && (numSymbols < destSize-1))
+    {
+        //const uint32_t charcode = str[i];
+        int32_t charcode;
+        ssize_t skip = utf8proc_iterate( (const uint8_t *)(skip_total+src), srcSize-skip_total, &charcode); // TODO check err code!!
+        if( skip < 0) return EINVAL;
+
+        skip_total += skip;
+
+        dest[numSymbols++] = charcode;
+    }
+
+    dest[numSymbols] = 0;
+
+    if(count) *count = numSymbols;
+    return 0;
+}
+
+errno_t utf32to8( char *dest, const wchar_t *src, size_t destSize, size_t srcSize, size_t *count )
+{
+    int skip_total = 0;
+    int numSymbols = 0;
+    while( (skip_total < destSize-4) && (numSymbols < srcSize))
+    {   
+        ssize_t rc =  utf8proc_encode_char( *src++, (uint8_t *)(dest + skip_total));
+        if( rc <= 0) return EINVAL;
+        skip_total += rc;
+    }
+
+    dest[skip_total] = 0;
+    if(count) *count = skip_total;
+
+    return 0;
+}
 
 
 // -----------------------------------------------------------------------

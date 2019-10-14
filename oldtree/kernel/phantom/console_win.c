@@ -366,7 +366,7 @@ void phantom_init_console_window()
     //w_ttfont_draw_string( lmw, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 10, 8 );
     //w_control_set_text( lmw, bh, "Fast Snap", COLOR_BLACK );
 
-    bh = w_add_text_field( lmw, 1, 1+31*6, 80, 31, "Hello There Edit Field", COLOR_BLACK );
+    bh = w_add_text_field( lmw, 1, 1+31*6, 170, 31, "Hell", COLOR_BLACK );
 
 
     // -----------------------------
@@ -383,7 +383,7 @@ void phantom_init_console_window()
     w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_on_bmp, &slide_switch_off_bmp, CONTROL_FLAG_NOBORDER );
 
     bh = w_add_menu_item( phantom_launcher_window, -2, 5, 3, 39, 0, COLOR_BLACK );
-    rect_t start_r = { .x = 10-1, .y = 7-2, .xsize = 80+2, .ysize = 31+2 };
+    //rect_t start_r = { .x = 10-1, .y = 7-2, .xsize = 80+2, .ysize = 31+2 };
     //w_draw_rect( phantom_launcher_window, COLOR_LIGHTGRAY, start_r );
     w_control_set_children( phantom_launcher_window, bh, phantom_launcher_menu_window, 0 );
     w_control_set_flags( phantom_launcher_window, bh, CONTROL_FLAG_TOGGLE, 0 );

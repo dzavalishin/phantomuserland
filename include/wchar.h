@@ -2,6 +2,7 @@
 #define _WCHAR_H_
 
 #include <sys/types.h>
+#include <errno.h>
 
 size_t	wcslen (const wchar_t *);
 
@@ -13,6 +14,10 @@ int	wcsncmp (const wchar_t *, const wchar_t *, size_t);
 
 wchar_t	*wmemset (wchar_t *, wchar_t, size_t);
 wchar_t	*wmemchr (const wchar_t *, wchar_t, size_t);
+
+
+errno_t utf8to32( wchar_t *dest, const char *src, size_t destSize, size_t srcSize, size_t *count ); //! count = wchars excl zero
+errno_t utf32to8( char *dest, const wchar_t *src, size_t destSize, size_t srcSize, size_t *count ); //! count = chars excl zero
 
 
 #endif /* _WCHAR_H_ */

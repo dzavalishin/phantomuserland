@@ -134,7 +134,7 @@ typedef struct control
             int32_t     vis_shift;      //< First character we see in edit window
             int32_t     vis_len;        //< Num of chars we see in window
             int32_t     str_len;        //< Num of bytes in buffer
-            int32_t     cursor_shift;   //< cursor position in bytes - TODO UTF-8!
+            int32_t     cursor_pos;     //< Cursor position in bytes - TODO UTF-32!
         };
 
     };
