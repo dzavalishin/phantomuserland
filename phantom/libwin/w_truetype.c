@@ -144,6 +144,46 @@ struct ttf_symbol
     )
 
 
+
+
+// -----------------------------------------------------------------------
+//
+// Helpers
+//
+// -----------------------------------------------------------------------
+
+
+FT_Glyph getGlyph(FT_Face face, uint32_t charcode)
+{
+    FT_Load_Char(face, charcode, FT_LOAD_RENDER);
+    FT_Glyph glyph = 0;
+    FT_Get_Glyph(face->glyph, &glyph);
+    return glyph;
+}
+
+
+FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
+{
+    FT_UInt leftIndex = FT_Get_Char_Index(face, leftCharcode);
+    FT_UInt rightIndex = FT_Get_Char_Index(face, rightCharcode);
+
+    FT_Vector delta;
+    FT_Get_Kerning(face, leftIndex, rightIndex, FT_KERNING_DEFAULT, &delta);
+    return delta.x;
+}
+
+
+
+
+
+// -----------------------------------------------------------------------
+//
+// UTF-8 versions
+//
+// -----------------------------------------------------------------------
+
+
+
 static void w_tt_paint_char(window_handle_t win, const struct ttf_symbol *symb, int win_x, int win_y, int top, const rgba_t color )
 {
     FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) symb->glyph;
@@ -406,25 +446,6 @@ void w_ttfont_draw_string_ext(
 }
 
 
-FT_Glyph getGlyph(FT_Face face, uint32_t charcode)
-{
-    FT_Load_Char(face, charcode, FT_LOAD_RENDER);
-    FT_Glyph glyph = 0;
-    FT_Get_Glyph(face->glyph, &glyph);
-    return glyph;
-}
-
-
-FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
-{
-    FT_UInt leftIndex = FT_Get_Char_Index(face, leftCharcode);
-    FT_UInt rightIndex = FT_Get_Char_Index(face, rightCharcode);
-
-    FT_Vector delta;
-    FT_Get_Kerning(face, leftIndex, rightIndex, FT_KERNING_DEFAULT, &delta);
-    return delta.x;
-}
-
 
 
 
@@ -537,6 +558,169 @@ void w_ttfont_string_size(
     if( rc )
         LOG_ERROR( 1, "can't release font for handle %x", font);
 
+}
+
+// -----------------------------------------------------------------------
+//
+// UTF-32 version
+//
+// * w_ttfont_setup_string_w    - allocate data, open font, preprocess sizes
+// * w_ttfont_resetup_string_w  - do not allocate, just preprocess sizes for a new string
+// * w_ttfont_draw_string_w     - actually paint
+// * w_ttfont_dismiss_string_w  - free data
+//
+// -----------------------------------------------------------------------
+
+
+errno_t w_ttfont_resetup_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols,               //< sizeof symbols
+                        size_t strLen,                 //< Num of characters we process
+                        const wchar_t *str             //< String to preprocess
+                        )
+{
+    if(!running) return EFAULT;
+ 
+    FT_Face ftFace = s->pe->face;
+
+    //dump_face( ftFace );
+    //struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
+    size_t numSymbols = 0;
+
+    int32_t left = INT_MAX;
+    int32_t top = INT_MAX;
+    int32_t bottom = INT_MIN;
+    uint32_t prevCharcode = 0;
+
+    int32_t posX = 0;
+    int skip_total = 0;
+    
+    int i;
+    for( i = 0; i < nSymbols; i++ )
+        symbols[i].glyph = 0;
+
+    while( (skip_total < strLen) && (numSymbols < nSymbols))
+    {
+        //const uint32_t charcode = str[i];
+        int32_t charcode = str[skip_total];
+
+        skip_total += 1;
+
+        FT_Glyph glyph = getGlyph(ftFace, charcode);
+
+        if (!glyph)
+            continue;
+
+        if (prevCharcode)
+            posX += getKerning(ftFace, prevCharcode, charcode);
+
+        prevCharcode = charcode;
+
+        struct ttf_symbol *symb = &(symbols[numSymbols++]);
+
+        FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) glyph;
+        symb->posX = (posX >> 6) + bitmapGlyph->left;
+        symb->posY = -bitmapGlyph->top;
+        symb->width = bitmapGlyph->bitmap.width;
+        symb->height = bitmapGlyph->bitmap.rows;
+
+        if(symb->glyph) FT_Done_Glyph( symb->glyph );
+        symb->glyph = glyph;
+
+        posX += glyph->advance.x >> 10;
+
+        left = MIN(left, symb->posX);
+        top = MIN(top, symb->posY);
+        bottom = MAX(bottom, symb->posY + symb->height);
+    }
+
+    for (i = 0; i < numSymbols; ++i)
+    {
+        symbols[i].posX -= left;
+    }
+
+    const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
+    const int32_t imageW = lastSymbol->posX + lastSymbol->width;
+
+    s->left = left;
+    s->top = top;
+    s->bottom = bottom;
+    s->right = imageW;
+
+    return 0;
+}
+
+
+
+
+errno_t w_ttfont_setup_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols,               //< sizeof symbols
+                        size_t strLen,                 //< Num of characters we process
+                        const wchar_t *str,            //< String to preprocess
+                        font_handle_t font             //< Font
+                        )
+{
+    s->font = font;
+    s->pe = pool_get_el( tt_font_pool, font );
+    if( 0 == s->pe )
+    {
+        LOG_ERROR( 0, "can't get font for handle %x", font);
+        return EINVAL;
+    }
+    LOG_FLOW( 1, "w_ttfont_draw_string f '%s' sz %d\n", s->pe->font_name, s->pe->font_size );
+
+    //FT_Face ftFace = s->pe->face;
+    errno_t rc = w_ttfont_resetup_string_w( s, symbols, nSymbols, strLen, str );
+
+    if(rc)
+        pool_release_el( tt_font_pool, font );
+
+    return rc;
+}
+
+/**
+ * 
+ * 
+ * 
+**/
+void w_ttfont_draw_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t strLen,                 //< Num of characters we process
+
+                        window_handle_t win,
+                        const rgba_t color,
+                        int win_x, int win_y
+                        )
+{
+    int i;
+    for (i = 0; i < strLen; ++i)
+    {
+        const struct ttf_symbol *symb = symbols + i;
+        w_tt_paint_char( win, symb, win_x, win_y, s->top, color );
+    }   
+}
+
+
+
+void w_ttfont_dismiss_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols )              //< sizeof symbols
+{
+    int i;
+    for (i = 0; i < nSymbols; ++i)
+    {
+        if(symbols[i].glyph)
+            FT_Done_Glyph(symbols[i].glyph);
+    }
+
+    int rc = pool_release_el( tt_font_pool, s->font );
+    if( rc )
+        LOG_ERROR( 1, "Can't release font for handle %x", s->font);
 }
 
 

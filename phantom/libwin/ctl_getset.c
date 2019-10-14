@@ -29,6 +29,24 @@
 
 #include <video/control.h>
 
+
+#define GET_CONTROL \
+    if(w->controls == 0)        return;                   \
+    assert( w->controls->magic == CONTROLS_POOL_MAGIC );  \
+    control_ref_t *ref = pool_get_el( w->controls, ch );  \
+                                                          \
+    if( !ref )                                            \
+    {                                                     \
+        LOG_ERROR0( 1, "can't get control" );             \
+        return;                                           \
+    }                                                     \
+                                                          \
+    control_t *cc = ref->c;                               \
+    assert(cc);                                           \
+
+
+#define RELEASE_CONTROL pool_release_el( w->controls, ch );
+
 // -----------------------------------------------------------------------
 //
 // Getters/Setters
@@ -38,23 +56,12 @@
 
 void w_control_set_visible( window_handle_t w, control_handle_t ch, int visible )
 {
-    if(w->controls == 0)        return;
-    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
-    control_ref_t *ref = pool_get_el( w->controls, ch );
-
-    if( !ref )
-    {
-        LOG_ERROR0( 1, "can't get control" );
-        return;
-    }
-
-    control_t *cc = ref->c;
-    assert(cc);
+    GET_CONTROL
 
     cc->flags |= CONTROL_FLAG_DISABLED;
     if( visible ) cc->flags &= ~CONTROL_FLAG_DISABLED;    
 
-    pool_release_el( w->controls, ch );
+    RELEASE_CONTROL
 }
 
 
@@ -68,23 +75,12 @@ void w_control_set_visible( window_handle_t w, control_handle_t ch, int visible 
 **/
 void w_control_set_children( window_handle_t w, control_handle_t ch, window_handle_t w_child, control_handle_t c_child )
 {
-    if(w->controls == 0)        return;
-    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
-    control_ref_t *ref = pool_get_el( w->controls, ch );
-
-    if( !ref )
-    {
-        LOG_ERROR0( 1, "can't get control" );
-        return;
-    }
-
-    control_t *cc = ref->c;
-    assert(cc);
+    GET_CONTROL
 
     cc->c_child = c_child;
     cc->w_child = w_child;
 
-    pool_release_el( w->controls, ch );
+    RELEASE_CONTROL
 }
 
 
@@ -98,46 +94,24 @@ void w_control_set_children( window_handle_t w, control_handle_t ch, window_hand
 **/
 void w_control_set_flags( window_handle_t w, control_handle_t ch, int toSet, int toReset )
 {
-    if(w->controls == 0)        return;
-    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
-    control_ref_t *ref = pool_get_el( w->controls, ch );
-
-    if( !ref )
-    {
-        LOG_ERROR0( 1, "can't get control" );
-        return;
-    }
-
-    control_t *cc = ref->c;
-    assert(cc);
+    GET_CONTROL
 
     cc->flags |= toSet;
     cc->flags &= ~toReset;
 
-    pool_release_el( w->controls, ch );
+    RELEASE_CONTROL
 }
 
 
 
 void w_control_set_icon( window_handle_t w, control_handle_t ch, drv_video_bitmap_t *icon )
 {
-    if(w->controls == 0)        return;
-    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
-    control_ref_t *ref = pool_get_el( w->controls, ch );
-
-    if( !ref )
-    {
-        LOG_ERROR0( 1, "can't get control" );
-        return;
-    }
-
-    control_t *cc = ref->c;
-    assert(cc);
+    GET_CONTROL
 
     cc->icon_image = icon;
     w_paint_control( w, cc );
 
-    pool_release_el( w->controls, ch );
+    RELEASE_CONTROL
 }
 
 
@@ -147,19 +121,8 @@ void w_control_set_background(
     drv_video_bitmap_t *pressed,
     drv_video_bitmap_t *hover  )
 {
-    if(w->controls == 0)        return;
-    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
-    control_ref_t *ref = pool_get_el( w->controls, ch );
-
-    if( !ref )
-    {
-        LOG_ERROR( 1, "can't get control 0x%d", ch );
-        return;
-    }
-
-    control_t *cc = ref->c;
-    assert(cc);
-
+    GET_CONTROL
+    
     cc->pas_bg_image = normal;
     cc->act_bg_image = pressed,
     cc->hov_bg_image = hover;
@@ -167,38 +130,39 @@ void w_control_set_background(
     // TODO w_image_defaults( w, cc ); ?
     w_paint_control( w, cc );
     
-    pool_release_el( w->controls, ch );
+    RELEASE_CONTROL
 }
 
 
 
 void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, color_t text_color )
 {
-    if(w->controls == 0)        return;
-    assert( w->controls->magic == CONTROLS_POOL_MAGIC );
-    control_ref_t *ref = pool_get_el( w->controls, ch );
-
-    if( !ref )
-    {
-        LOG_ERROR0( 1, "can't get control" );
-        return;
-    }
-
-    control_t *cc = ref->c;
-    assert(cc);
+    GET_CONTROL
 
     //const char *old = cc->text;
     //cc->text = strdup(text);
     //if( old ) free((void *)old);
 
-    strlcpy( cc->buffer, text, sizeof(cc->buffer) );
+    strlcpy( cc->buffer, text, sizeof(cc->buffer) ); // TODO wchar_t
     cc->text = cc->buffer;
 
     cc->fg_color = text_color;
     w_paint_control( w, cc );
 
-    pool_release_el( w->controls, ch );
+    RELEASE_CONTROL
 }
+
+void w_control_get_text( window_handle_t w, control_handle_t ch, char *text_buf, size_t buf_size )
+{
+    GET_CONTROL
+    
+    strlcpy( text_buf, cc->buffer, buf_size ); // TODO wchar_t
+
+    w_paint_control( w, cc );
+
+    RELEASE_CONTROL
+}
+
 
 /**
  * 
@@ -222,5 +186,5 @@ void w_control_set_callback( window_handle_t w, pool_handle_t ch, control_callba
     cc->callback = cb;
     cc->callback_arg = arg;
 
-    pool_release_el( w->controls, ch );
+    RELEASE_CONTROL
 }

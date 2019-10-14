@@ -46,7 +46,7 @@ static void ctl_text_shift_for_cursor( control_t *cc )
     if( cc->cursor_shift < cc->vis_shift )
         cc->vis_shift = cc->cursor_shift;
 
-    if( cc->cursor_shift > (cc->vis_shift + cc->vis_len) )
+    if( cc->cursor_shift > (cc->vis_shift + cc->vis_len - 2) )
         cc->vis_shift = cc->cursor_shift - cc->vis_len;
 }
 

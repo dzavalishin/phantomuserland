@@ -86,14 +86,28 @@ void 	w_font_tty_string(
 // TrueType support
 // ------------------------------------------------------------------------
 
+typedef enum w_font_type { ft_none = 0, ft_bitmap = 1, ft_truetype = 2 } font_type_t;
+
+typedef pool_handle_t font_handle_t;
+
+struct ttf_pool_el;
+
+struct ttf_paint_state
+{
+    struct ttf_pool_el * pe;
+    font_handle_t        font;
+
+    int                  top;
+    int                  bottom;
+    int                  left;
+    int                  right;
+
+};
+
 
 //#include <ft2build.h>
 //#include FT_FREETYPE_H
 
-typedef enum w_font_type { ft_none = 0, ft_bitmap = 1, ft_truetype = 2 } font_type_t;
-//extern FT_Library ftLibrary;
-
-typedef pool_handle_t font_handle_t;
 
 /// truetype fonts
 void w_ttfont_draw_string(

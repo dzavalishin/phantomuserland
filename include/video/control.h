@@ -225,7 +225,10 @@ void w_clear_control( control_t *c ); //< Prepare structure to fill field by fie
 
 void w_delete_control( window_handle_t w, control_handle_t c );
 
+//! UTF-8
 void w_control_set_text( window_handle_t w, control_handle_t c, const char *text, color_t text_color );
+//! UTF-8
+void w_control_get_text( window_handle_t w, control_handle_t c, char *text_buf, size_t buf_size );
 void w_control_set_icon( window_handle_t w, control_handle_t ch, drv_video_bitmap_t *icon );
 
 void w_control_set_background( window_handle_t w, control_handle_t ch, 
