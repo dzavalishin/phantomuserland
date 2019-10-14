@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "events"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 4
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -58,19 +58,24 @@ void ev_q_put_key( int vkey, int ch, int modifiers )
     switch( vkey )
     {
     case KEY_TAB:
-        LOG_FLOW( 10, "Tab shifts = %x", modifiers );
+        LOG_FLOW( 4, "Tab shifts = %x", modifiers );
         if( UI_MOD_CTRL_DOWN(modifiers) || UI_MOD_ALT_DOWN(modifiers) )
         {
-            LOG_FLOW( 9, "Next win shifts = %x", modifiers );
+            LOG_FLOW( 3, "Next win shifts = %x", modifiers );
             w_set_focused( drv_video_next_window(focused_window) );
             return;
         }
         break;
-
+    /*
     case KEY_F4:
         LOG_FLOW( 0, "F4 shifts = %x", modifiers );
-        break;
+        if( UI_MOD_CTRL_DOWN(modifiers) || UI_MOD_ALT_DOWN(modifiers) )
+        {
+            LOG_FLOW( 9, "Alt-F4 close win? = %x", modifiers );
 
+        }
+        break;
+    */
 //    case KEY_LWIN:
 //    case KEY_RWIN:
 //        LOG_FLOW( 0, "WIN shifts = %x", modifiers );

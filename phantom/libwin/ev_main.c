@@ -156,14 +156,8 @@ static void ev_push_thread()
     // +1 so that it is a bit higher than regular sys threads
     t_current_set_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
-    //vm_lock_persistent_memory(); // We access persistent memory now and then
-
-#if EVENTS_ENABLED && 1
     while(1)
     {
-        //if(phantom_virtual_machine_snap_request) // Check if we need release access to persistent memory
-        //    phantom_thread_wait_4_snap();
-
         ev_remove_extra_unused();
 
         struct ui_event *e;
@@ -189,13 +183,6 @@ static void ev_push_thread()
         // window code will return when done
         //return_unused_event(e);
     }
-#else
-    while(1)
-    {
-    	hal_sleep_msec(20000);
-    }
-#endif
-
 
 }
 

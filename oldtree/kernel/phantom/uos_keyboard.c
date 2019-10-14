@@ -399,7 +399,7 @@ keyboard_ps2_task (void)
         vm_lock_persistent_memory();
         LOG_FLOW( 4, "vk=0x%x, ch=%c, shifts 0x%x ", data.key, data.key, shifts );
         //ev_q_put_key( event->keycode, event->keychar, shifts );
-        ev_q_put_key( 0, data.key, shifts );
+        ev_q_put_key( data.key, data.key, shifts ); // TODO remove vey from event struct
         vm_unlock_persistent_memory();
     }
 }

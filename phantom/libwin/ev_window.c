@@ -298,14 +298,11 @@ void w_explode_event(ui_event_t *e)
 {
     window_handle_t w;
 
-#if 1
     if( e->w.info == UI_EVENT_GLOBAL_REPAINT_RECT )
     {
         w_request_async_repaint( &(e->w.rect) );
         return;
     }
-
-#endif
 
     w_lock();
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
