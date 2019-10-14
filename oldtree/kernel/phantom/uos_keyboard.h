@@ -14,7 +14,8 @@ typedef struct _keyboard_ps2_t {
 	int delay;				/* milliseconds */
 	int leds;				/* num, caps, scroll locks */
 	int state;				/* state of scan decoder */
-	int state_E012; // print screen prefix
+	//int state_E012; // print screen prefix
+	//int state_E012_7C; // print screen prefix
 	int state_E114; // pause prefix
 	int state_F0; // break modifier
 	int modifiers;				/* state of modifiers */
