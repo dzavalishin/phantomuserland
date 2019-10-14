@@ -16,29 +16,21 @@
 
 
 #include <spinlock.h>
-
 #include <ia32/pio.h>
 #include <phantom_libc.h>
-
 #include <kernel/device.h>
 #include <kernel/drivers.h>
 #include <hal.h>
 #include <errno.h>
-
 #include <video/screen.h>
-
 #include <event.h>
-//#include <queue.h>
-
 #include <threads.h>
-//#include <kernel/config.h>
-//#include <time.h>
 
 
 #include <compat/uos.h>
 #include <compat/uos/mouse.h>
-#include "uos_mouse.h"
-#include "uos_i8042.h"
+#include <ia32/pc/uos_mouse.h>
+#include <ia32/pc/uos_i8042.h>
 
 
 // Crashes

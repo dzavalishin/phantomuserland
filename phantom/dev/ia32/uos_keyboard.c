@@ -19,23 +19,20 @@
 
 
 #include <spinlock.h>
-
 #include <ia32/pio.h>
 #include <phantom_libc.h>
-
 #include <kernel/device.h>
 #include <kernel/snap_sync.h>
 #include <kernel/drivers.h>
 #include <hal.h>
 #include <errno.h>
-
 #include <threads.h>
 #include <event.h>
 
 #include <compat/uos.h>
 #include <compat/uos/keyboard.h>
-#include "uos_keyboard.h"
-#include "uos_i8042.h"
+#include <ia32/pc/uos_keyboard.h>
+#include <ia32/pc/uos_i8042.h>
 
 
 static void keyboard_ps2_wait_event (keyboard_ps2_t *u, keyboard_event_t *data);

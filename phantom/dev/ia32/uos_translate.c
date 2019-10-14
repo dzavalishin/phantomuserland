@@ -6,9 +6,6 @@
  * Specifications of PS/2 keyboard interface are available
  * at http://www.computer-engineering.org/ps2keyboard/
  */
-//#include "runtime/lib.h"
-//#include "kernel/uos.h"
-//#include "input/keyboard.h"
 
 #include <compat/uos.h>
 #include <compat/uos/keyboard.h>
