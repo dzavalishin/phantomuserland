@@ -40,8 +40,20 @@
 //
 // -----------------------------------------------------------------------
 
+static void ctl_text_modify_shift( control_t *cc )
+{
+    LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d", cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len );
 
-static void ctl_text_check_state( control_t *cc )
+    if( cc->cursor_pos > (cc->vis_shift + (cc->vis_len - 2) ) )
+        cc->vis_shift = cc->cursor_pos - (cc->vis_len - 2);
+
+    if( cc->cursor_pos < cc->vis_shift )
+        cc->vis_shift = cc->cursor_pos;
+
+}
+
+
+static void ctl_text_clip_state( control_t *cc )
 {
     LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d", cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len );
 
@@ -57,16 +69,16 @@ static void ctl_text_check_state( control_t *cc )
         cc->str_len = sizeof(cc->buffer) - 1;
     }
 
-    if( cc->vis_shift < 0 )
-    {
-        LOG_ERROR( 1, "vis_shift = %d, < 0", cc->vis_shift );
-        cc->vis_shift = 0;
-    }
-
     if( cc->vis_shift >= cc->str_len )
     {
         LOG_ERROR( 1, "vis_shift = %d, >= cc->str_len", cc->vis_shift );
         cc->vis_shift = cc->str_len - 1;
+    }
+
+    if( cc->vis_shift < 0 )
+    {
+        LOG_ERROR( 1, "vis_shift = %d, < 0", cc->vis_shift );
+        cc->vis_shift = 0;
     }
 
 
@@ -82,17 +94,18 @@ static void ctl_text_check_state( control_t *cc )
         cc->cursor_pos = cc->str_len;
     }
 
-    if( cc->cursor_pos > (cc->vis_shift + (cc->vis_len - 2) ) )
-        cc->vis_shift = cc->cursor_pos - (cc->vis_len - 2);
-
-    if( cc->cursor_pos < cc->vis_shift )
-        cc->vis_shift = cc->cursor_pos;
 
     // Clip again
-    if(cc->vis_shift < 0) cc->vis_shift = 0;
-    if( cc->vis_shift >= cc->str_len )
-        cc->vis_shift = cc->str_len - 1;
+    //if(cc->vis_shift < 0) cc->vis_shift = 0;
 
+    //if( cc->vis_shift >= cc->str_len )
+    //    cc->vis_shift = cc->str_len - 1;
+
+    if( cc->vis_len > cc->str_len - cc->vis_shift )
+        cc->vis_len = cc->str_len - cc->vis_shift;
+
+    if( cc->vis_len < 0 )
+        cc->vis_len = 0;
 }
 
 // TODO rewrite all this in UTF code points, not bytes!
@@ -100,12 +113,13 @@ static void ctl_text_check_state( control_t *cc )
 
 static void find_visible_text_len( control_t *cc )
 {
+    rect_t r = { 0, 0, 0, 0 };
+
     // start from max possible
     cc->vis_len = cc->str_len - cc->vis_shift;
 
     // TODO we must cut off not byte but UTF-8 char
     while(1) {
-        rect_t r;
 
 //        if( cc->vis_len > cc->str_len - cc->vis_shift )
 //            cc->vis_len = cc->str_len - cc->vis_shift;
@@ -115,7 +129,7 @@ static void find_visible_text_len( control_t *cc )
                            &r );
 
         int vis_width_pixels = r.xsize;
-        LOG_FLOW(0, " vis_width_pixels %d, cc->r.xsize %d ", vis_width_pixels, cc->r.xsize );
+        LOG_FLOW(4, " vis_width_pixels %d, cc->r.xsize %d ", vis_width_pixels, cc->r.xsize );
         if (vis_width_pixels <= cc->r.xsize - 6 )
             break;
 
@@ -125,6 +139,8 @@ static void find_visible_text_len( control_t *cc )
         if( cc->vis_len <= 1 )
             break;
     }     
+
+    cc->text_height = r.ysize;
 }
 
 
@@ -140,15 +156,19 @@ void ctl_text_field_paint(window_handle_t win, control_t *cc )
 {
     ctl_paint_bg( win, cc );    
     
-    int t_height = 16;
-    int t_ypos = (cc->r.ysize - t_height) / 2;
-
-    ctl_text_check_state( cc );
+    ctl_text_clip_state( cc );
+    ctl_text_modify_shift( cc );
+    ctl_text_clip_state( cc );
     find_visible_text_len( cc );
-    ctl_text_check_state( cc ); // Width could change
+    ctl_text_clip_state( cc ); // Width could change
+
+    int t_height = cc->text_height; //16;
+    int t_ypos = (cc->r.ysize - t_height) / 2;
 
     int cursor_x_pos = 0;
 
+    LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d", cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len );
+        
     w_ttfont_draw_string_ext( win, decorations_title_font,
                           cc->buffer+cc->vis_shift, cc->vis_len,
                           cc->fg_color,
@@ -216,6 +236,7 @@ check_cursor_right:
             if( cc->cursor_pos >= cc->str_len )
                 break;
             {
+                LOG_FLOW( 2, "Delete ch @%d", cc->cursor_pos );
                 const char *from = cc->buffer + cc->cursor_pos + 1;
                 char *to = cc->buffer + cc->cursor_pos;
                 size_t len = cc->str_len - (cc->cursor_pos + 1);
@@ -232,6 +253,8 @@ check_cursor_right:
             if( !KEY_IS_FUNC(e.k.ch) )
             {
                 cc->changed = 1;
+
+                LOG_FLOW( 2, "Insert ch '%c' (%d)", e.k.ch, e.k.ch );
 
                 if( cc->cursor_pos >= sizeof(cc->buffer)-1 )
                     break;

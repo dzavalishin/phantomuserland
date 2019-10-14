@@ -135,6 +135,7 @@ typedef struct control
             int32_t     vis_len;        //< Num of chars we see in window
             int32_t     str_len;        //< Num of bytes in buffer
             int32_t     cursor_pos;     //< Cursor position in bytes - TODO UTF-32!
+            int32_t     text_height;    //< Rendered text height in pixels, max possible
         };
 
     };

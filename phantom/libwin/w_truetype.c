@@ -19,8 +19,8 @@
 #define DEBUG_MSG_PREFIX "w.ttf"
 #include <debug_ext.h>
 #define debug_level_flow 0
-#define debug_level_error 10
-#define debug_level_info 2
+#define debug_level_error 1
+#define debug_level_info 0
 
 
 #include <stdint.h>
