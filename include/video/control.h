@@ -273,15 +273,6 @@ int w_event_to_controls( window_handle_t w, ui_event_t *e ); // Deliver events t
 void w_paint_control(window_handle_t w, control_t *cc );
 
 
-int ctl_text_field_events(control_t *cc, struct foreach_control_param *env);
-void ctl_text_field_paint(window_handle_t win, control_t *cc );
-
-// Bits to combine in control paint function
-
-void ctl_paint_bg( window_handle_t win, control_t *cc );
-void ctl_paint_border( window_handle_t win, control_t *cc );
-
-
     // -------------------------------------------------------------------
     //
     // Menu window

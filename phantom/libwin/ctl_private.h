@@ -17,11 +17,21 @@
 #endif // VCONFIG_H
 
 
+// -------------------------------------------------------------------
+//
+// Text field control specific processing
+//
+// -------------------------------------------------------------------
+
 
 int ctl_text_field_events(control_t *cc, struct foreach_control_param *env);
 void ctl_text_field_paint(window_handle_t win, control_t *cc );
 
+// -------------------------------------------------------------------
+//
 // Bits to combine in control paint function
+//
+// -------------------------------------------------------------------
 
 void ctl_paint_bg( window_handle_t win, control_t *cc );
 void ctl_paint_border( window_handle_t win, control_t *cc );

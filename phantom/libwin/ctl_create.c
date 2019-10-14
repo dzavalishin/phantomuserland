@@ -323,7 +323,7 @@ control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ys
     cb.r.x = x;
     cb.r.y = y;
     cb.r.xsize = xsize;
-    cb.r.xsize = ysize;
+    cb.r.ysize = ysize;
 
     cb.flags = CONTROL_FLAG_NOBORDER;
 
@@ -348,7 +348,7 @@ control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, i
     cb.r.x = x;
     cb.r.y = y;
     cb.r.xsize = xsize;
-    cb.r.xsize = ysize;
+    cb.r.ysize = ysize;
 
     cb.flags = CONTROL_FLAG_NOBORDER;
 

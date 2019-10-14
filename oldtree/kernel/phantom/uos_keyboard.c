@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "ps2.k"
 #include <debug_ext.h>
-#define debug_level_flow 2
+#define debug_level_flow 1
 #define debug_level_error 10
 #define debug_level_info 1
 
@@ -126,7 +126,7 @@ set_leds (int leds)
 static int
 make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
 {
-    LOG_FLOW( 2, "-k %X ", byte);
+    LOG_FLOW( 5, "-k %X ", byte);
 
     switch (byte) {
     case 0xE0:
@@ -392,7 +392,7 @@ keyboard_ps2_task (void)
         // TODO left/right keys - JUST REDEFINE OS defines accordoing to this driver's and assign
 
         vm_lock_persistent_memory();
-        LOG_FLOW( 0, "vk=0x%x, ch=%c, shifts 0x%x ", data.key, data.key, shifts );
+        LOG_FLOW( 4, "vk=0x%x, ch=%c, shifts 0x%x ", data.key, data.key, shifts );
         //ev_q_put_key( event->keycode, event->keychar, shifts );
         ev_q_put_key( 0, data.key, shifts );
         vm_unlock_persistent_memory();

@@ -20,7 +20,7 @@
 #include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 0
+#define debug_level_info 2
 
 
 #include <stdint.h>
@@ -451,7 +451,7 @@ void w_ttfont_string_size(
         LOG_ERROR( 0, "can't get font for handle %x", font);
         return;
     }
-    LOG_FLOW( 10, " f '%s' sz %d\n", pe->font_name, pe->font_size );
+    LOG_FLOW( 2, " f '%s' sz %d\n", pe->font_name, pe->font_size );
 
     FT_Face ftFace = pe->face;
 
@@ -510,7 +510,7 @@ void w_ttfont_string_size(
     r->ysize = bottom - top;
 
     LOG_INFO_( 10, "left %d top %d bottom %d imageW %d", left, top, bottom, imageW );
-    LOG_INFO_( 10, "x %d y %d xsize %d ysize %d", r->x, r->y, r->xsize, r->ysize );
+    LOG_INFO_( 2, "x %d y %d xsize %d ysize %d", r->x, r->y, r->xsize, r->ysize );
 
     for (i = 0; i < numSymbols; ++i)
     {

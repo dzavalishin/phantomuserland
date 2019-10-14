@@ -55,7 +55,7 @@ static void ctl_text_shift_for_cursor( control_t *cc )
 
 static void find_visible_text_len( control_t *cc )
 {
-    int vis_width_pixels = 0;
+    
     // TODO we must cut off not byte but UTF-8 char
     while(1) {
         rect_t r;
@@ -67,8 +67,12 @@ static void find_visible_text_len( control_t *cc )
                           cc->buffer + cc->vis_shift, cc->vis_len,
                            &r );
 
-        if (vis_width_pixels <= cc->r.xsize - 5 )
+        int vis_width_pixels = r.xsize;
+        LOG_FLOW(0, " vis_width_pixels %d, cc->r.xsize %d ", vis_width_pixels, cc->r.xsize );
+        if (vis_width_pixels <= cc->r.xsize - 6 )
             break;
+
+        cc->vis_len--;
 
         // sanity
         if( cc->vis_len <= 1 )
@@ -130,7 +134,7 @@ int ctl_text_field_events(control_t *cc, struct foreach_control_param *env)
 
     if( (e.type == UI_EVENT_TYPE_KEY) && UI_MOD_DOWN(e.modifiers) )
     {
-        LOG_FLOW( 1, "key ev vk=%d, ch=%d", e.k.vk, e.k.ch );
+        LOG_FLOW( 10, "key ev vk=%d, ch=%d", e.k.vk, e.k.ch );
         cc->changed = 1;
         switch (e.k.ch)
         {
@@ -155,6 +159,7 @@ check_cursor_right:
         case KEY_END:
             cc->cursor_shift = cc->str_len;
             break;
+
         case KEY_BACKSPACE:
             if(cc->cursor_shift <= 0) break;
             cc->cursor_shift--;
@@ -167,6 +172,9 @@ check_cursor_right:
                 char *to = cc->buffer + cc->cursor_shift;
                 size_t len = cc->str_len - (cc->cursor_shift + 1);
                 strncpy( to, from, len );
+                assert(cc->str_len > 0);
+                cc->str_len--;
+                cc->buffer[cc->str_len] = 0;
             }
             break;
 
@@ -184,8 +192,8 @@ check_cursor_right:
                 char *to = cc->buffer + cc->cursor_shift + 1;
                 size_t len = cc->str_len - (cc->cursor_shift + 1);
                 // if(insert_mode)
-                //strncpy( to, from, len );
-                memmove( to, from, len );
+                if(cc->str_len) // Can't extend empty string
+                    memmove( to, from, len );
 
                 *from = e.k.ch;
                 if( cc->str_len == cc->cursor_shift) // extend line
@@ -193,6 +201,7 @@ check_cursor_right:
                     cc->str_len++;
                     if( cc->str_len >= sizeof(cc->buffer)-1 )
                         cc->str_len = sizeof(cc->buffer)-1;
+                    cc->buffer[cc->str_len] = 0;
                 }
 
                 cc->cursor_shift++;
@@ -202,7 +211,7 @@ check_cursor_right:
             break;
         }
         
-        LOG_FLOW( 1, "cursor pos = %d", cc->cursor_shift );
+        LOG_FLOW( 9, "cursor pos = %d", cc->cursor_shift );
         return 1; // eat event
     }
 
