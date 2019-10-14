@@ -391,6 +391,11 @@ keyboard_ps2_task (void)
 
         // TODO left/right keys - JUST REDEFINE OS defines accordoing to this driver's and assign
 
+        // This is a kernel level, not UI level hook
+        // For UI level hook see libwin/ev_put and around
+        if( kernel_keyboard_hook(data.key, shifts) )
+            continue;
+
         vm_lock_persistent_memory();
         LOG_FLOW( 4, "vk=0x%x, ch=%c, shifts 0x%x ", data.key, data.key, shifts );
         //ev_q_put_key( event->keycode, event->keychar, shifts );

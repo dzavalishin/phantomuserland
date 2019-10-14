@@ -205,6 +205,11 @@ int defaultWindowEventProcessor( struct drv_video_window *w, struct ui_event *e 
 //! Just for debug
 int ev_get_n_events_in_q(void);
 
+//! Called early in driver for debugging and UI independent keyboard actions
+int kernel_keyboard_hook( unsigned key, unsigned shifts);
+
+
+
 #endif // KERNEL
 
 
