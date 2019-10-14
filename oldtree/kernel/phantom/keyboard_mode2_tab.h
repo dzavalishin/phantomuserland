@@ -44,7 +44,7 @@ static const unsigned short scan_to_key_e0 [256] = {
     /* E0,04 */	0,	0,	0,	0,
     /* E0,08 */	0,	0,	0,	0,
     /* E0,0C */	0,	0,	0,	0,
-    /* E0,10 */	/*www search*/0,	KEY_RALT,	/* prefix for print screen*/0,	0,
+    /* E0,10 */	/*www search*/0,	KEY_RALT,	/* prefix for print screen  we just ignore 7C part*/KEY_PRINT,	0,
     /* E0,14 */	KEY_RCTRL,	KEY_TRACK_PREV,	0,	0,
     /* E0,18 */	/*www favor*/0,	0,	0,	0,
     /* E0,1C */	0,	0,	KEY_LMETA,	0,
@@ -71,5 +71,5 @@ static const unsigned short scan_to_key_e0 [256] = {
     /* E0,70 */	KEY_INSERT,	KEY_DELETE,	KEY_DOWN,	0,
     /* E0,74 */	KEY_RIGHT,	KEY_UP,	0,	0,
     /* E0,78 */	0,	0,	KEY_PAGEDOWN,	0,
-    /* E0,7C */	/* print screen */0,	KEY_PAGEUP,	0,	0,
+    /* E0,7C */	/* print screen - inner part - ignore */0,	KEY_PAGEUP,	0,	0,
 };

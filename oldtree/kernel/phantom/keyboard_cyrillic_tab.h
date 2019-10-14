@@ -41,3 +41,25 @@ static const u_int32_t ascii_to_UTF_cyrillic [256] = {
 
 // todo wchar_t cyrillic_translate( wchar_t key, int tolower )
 // if returns 0 use basic translation
+
+wchar_t ascii_to_UTF32_cyrillic_translate( wchar_t key, int tolower )
+{
+    if( key >= 256 ) return key;
+
+    wchar_t n = ascii_to_UTF_cyrillic[ (unsigned char)key ];
+
+    LOG_FLOW( 4, "cyr %x -> %x", key, n );
+
+    if( !n ) return key;
+
+    key = n;
+
+    if( !tolower ) return key;
+
+    if( key == 0x0401 ) return 0x0451;
+
+    if( (key >= 0x410) && (key <= 0x42F) )
+        return key + 0x20;
+
+    return key;
+}

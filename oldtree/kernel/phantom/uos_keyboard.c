@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "ps2.k"
 #include <debug_ext.h>
-#define debug_level_flow 1
+#define debug_level_flow 5
 #define debug_level_error 10
 #define debug_level_info 1
 
@@ -143,6 +143,7 @@ make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
         return 0;
     }
 
+    // Decode crazy PAUSE: E1,14,77,E1,F0,14,F0,77
     if( u->state == STATE_E1 )
     {
         // Note that there was F0 passing inside the 
@@ -169,6 +170,20 @@ make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
         }
         return 0;
     }
+
+    // Decode crazy PRNT SCRN: Make: E0,12,E0,7C Break: E0,F0,7C,E0,F0,12
+    /* NO - just put key to usual table for E0, 12 and ignore E0, 7C
+    if( (u->state == STATE_E0) && (byte == 0x12) )
+    {
+        u->state = STATE_BASE;
+        return 0;
+    }
+    else if( u->state_E012 && (u->state == STATE_E0) && (byte = 0x7C))
+    {
+        u->state = STATE_BASE;
+        return 0;
+    }*/
+    
 
     switch(u->state)
     {
@@ -229,10 +244,14 @@ make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
     // TODO scroll lock - national keytable?
 
         case KEY_CAPSLOCK:
-            if(u->state_F0) return 0; // ignore release
+            if(u->state_F0) 
+            {
+                u->state_F0 = 0;
+                return 0; // ignore release
+            }
 
-            if (u->capslock) return 0;
-            u->capslock = 1;
+            //if (u->capslock) return 0;
+            //u->capslock = 1;
 
             if (u->modifiers & KEYMOD_CAPS) {
                 u->modifiers &= ~KEYMOD_CAPS;
@@ -245,10 +264,14 @@ make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
             break;
 
         case KEY_NUMLOCK:
-            if(u->state_F0) return 0; // ignore release
+            if(u->state_F0) 
+            {
+                u->state_F0 = 0;
+                return 0; // ignore release
+            }
 
-            if (u->numlock) return 0;
-            u->numlock = 1;
+            //if (u->numlock) return 0;
+            //u->numlock = 1;
 
             if (u->modifiers & KEYMOD_NUM) {
                 u->modifiers &= ~KEYMOD_NUM;
@@ -354,6 +377,8 @@ keyboard_ps2_interrupt (void *a)
     }
 }
 
+#include "keyboard_cyrillic_tab.h"
+
 /*
  * Keyb task.
  */
@@ -378,6 +403,11 @@ keyboard_ps2_task (void)
         keyboard_ps2_wait_event( u, &data );
 
         // todo -  data.key = ascii_to_UTF_cyrillic[data.key], if(!shifts) tolower_cyrillic: keyboard_cyrillic_tab.h
+
+        u->national_keymap = u->modifiers & KEYMOD_NUM; // TEMP?
+
+        if( u->national_keymap )
+            data.key = ascii_to_UTF32_cyrillic_translate( data.key, ! (data.modifiers & (KEYMOD_SHIFT | KEYMOD_CAPS)) );
 
         keyboard_translate( &data );
 

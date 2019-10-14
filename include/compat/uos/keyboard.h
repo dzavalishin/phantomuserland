@@ -16,10 +16,10 @@ typedef struct _keyboard_event_t {
 /*
  * Keysyms 0..126 are mapped to ASCII
  */
-#define KEY_BACKSPACE		8
-#define KEY_TAB			9
-#define KEY_ENTER		13
-#define KEY_ESCAPE		27
+#define KEY_BACKSPACE   8
+#define KEY_TAB         9
+#define KEY_ENTER       '\n'
+#define KEY_ESCAPE      27
 
 #define KEY_UNKNOWN           	0xFFFF
 

@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "ui.ctl.txt"
 #include <debug_ext.h>
-#define debug_level_flow 1
+#define debug_level_flow 3
 #define debug_level_error 10
 #define debug_level_info 1
 
@@ -202,7 +202,7 @@ int ctl_text_field_events(control_t *cc, struct foreach_control_param *env)
 
     if( (e.type == UI_EVENT_TYPE_KEY) && UI_MOD_DOWN(e.modifiers) )
     {
-        LOG_FLOW( 10, "key ev vk=%d, ch=%d", e.k.vk, e.k.ch );
+        LOG_FLOW( 3, "key ev vk=%d, ch=%d", e.k.vk, e.k.ch );
         cc->changed = 1;
         switch (e.k.ch)
         {

@@ -21,6 +21,7 @@ typedef struct _keyboard_ps2_t {
 	//int ctrl_alt_del;			/* reboot flag */
 	int capslock;				/* caps lock pressed */
 	int numlock;				/* num lock pressed */
+	int national_keymap;        // National (such as cyrillic) key map selected
 } keyboard_ps2_t;
 
 //void keyboard_ps2_init (keyboard_ps2_t *u, int prio);

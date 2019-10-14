@@ -48,9 +48,11 @@ keyboard_translate (keyboard_event_t *m)
 			m->key = 0x7f;		/* Backspace -> Del */
 		break;
 
-	case '\r':
+	//case '\r':
+	case '\n':
 		if (m->modifiers & KEYMOD_CTRL)
-			m->key = '\n';		/* Enter -> Newline */
+			//m->key = '\n';		/* Enter -> Newline */
+			m->key = '\r';		/* much better to me [dz] */
 		break;
 
         case '1':
