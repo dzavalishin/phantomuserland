@@ -232,6 +232,7 @@ void w_control_set_text( window_handle_t w, control_handle_t c, const char *text
 void w_control_get_text( window_handle_t w, control_handle_t c, char *text_buf, size_t buf_size );
 void w_control_set_icon( window_handle_t w, control_handle_t ch, drv_video_bitmap_t *icon );
 
+//! NB! Allocates new bitmaps and does alpha blending with basic window background
 void w_control_set_background( window_handle_t w, control_handle_t ch, 
     drv_video_bitmap_t *normal, drv_video_bitmap_t *pressed, drv_video_bitmap_t *hover  );
 
@@ -254,6 +255,8 @@ control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_vide
 control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int xsize, const char*text, color_t text_color );
 
 control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
+control_handle_t w_add_label_transparent( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
+control_handle_t w_add_label_bg( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color, drv_video_bitmap_t *bg );
 
 control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
 

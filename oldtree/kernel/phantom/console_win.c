@@ -257,9 +257,9 @@ static pool_handle_t taskbuttons[MAX_LAUNCH_BUTTONS];
 static void phantom_debug_window_loop();
 //static void phantom_launcher_window_loop();
 
-extern drv_video_bitmap_t vanilla_task_button_bmp;
-extern drv_video_bitmap_t slide_switch_on_bmp;
-extern drv_video_bitmap_t slide_switch_off_bmp;
+//extern drv_video_bitmap_t vanilla_task_button_bmp;
+//extern drv_video_bitmap_t slide_switch_on_bmp;
+//extern drv_video_bitmap_t slide_switch_off_bmp;
 
 void phantom_init_console_window()
 {
@@ -360,10 +360,13 @@ void phantom_init_console_window()
 
     w_add_menu_item( lmw, 0, 1, 1+31*1, menu_xsize, "Clock", COLOR_BLACK );
 
-    bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_off_bmp, &slide_switch_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    // before slide for it to paint over us
+    w_add_label( lmw, 1, 1, 200, 32, "Fast Snap", COLOR_BLACK );
+
+    bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
     //w_ttfont_draw_string( lmw, decorations_title_font, "Fast Snap", COLOR_BLACK, 10, 8 );    
     //w_add_label( lmw, 10, 8, lmw->xsize, 32, "Fast Snap", COLOR_BLACK );
-    w_add_label( lmw, 1, 1, 130, 32, "Fast Snap", COLOR_BLACK );
     //w_ttfont_draw_string( lmw, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 10, 8 );
     //w_control_set_text( lmw, bh, "Fast Snap", COLOR_BLACK );
 
@@ -382,7 +385,8 @@ void phantom_init_console_window()
     //lb_y += slide_switch_on_bmp.ysize + 5;
     lb_y += 8;
 
-    w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_on_bmp, &slide_switch_off_bmp, CONTROL_FLAG_NOBORDER );
+    w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_off_bmp, CONTROL_FLAG_NOBORDER );
+    w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
     bh = w_add_menu_item( phantom_launcher_window, -2, 5, 3, 39, 0, COLOR_BLACK );
     //rect_t start_r = { .x = 10-1, .y = 7-2, .xsize = 80+2, .ysize = 31+2 };
@@ -679,15 +683,16 @@ void test_controls( void )
 {
     pool_handle_t bh;
 
-    color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
+    //color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
     window_handle_t w = drv_video_window_create( WXY, WXY, 20, 500, COLOR_WHITE, "Controls", WFLAG_WIN_DECORATED );
     
     //w_set_visible( lmw, 0 );
 
+    w_draw_bitmap( w, 0, 0, &vanilla_background_bmp );
     
-    w_fill_box( w, 0, 0, WXY, WXY, COLOR_WHITE );
-    w_draw_box( w, 0, 0, WXY, WXY, menu_border );
+    //w_fill_box( w, 0, 0, WXY, WXY, COLOR_WHITE );
+    //w_draw_box( w, 0, 0, WXY, WXY, menu_border );
 
     
     bh = w_add_button( w, '0', 20, 350, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
@@ -698,10 +703,14 @@ void test_controls( void )
     bh = w_add_menu_item( w, '1', 20, 300, 200, "Settings", COLOR_BLACK );
     w_control_set_icon( w, bh, &icon_settings_bmp );
 
-    bh = w_add_button( w, '2', 128, 250, &slide_switch_off_bmp, &slide_switch_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    
-    w_add_label( w, 20, 250, 130, 32, "Fast Snap", COLOR_BLACK );
+    // slide must paint over
+    //w_add_label( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
+    w_add_label_transparent( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
 
+    bh = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+        
+ 
     bh = w_add_text_field( w, 20, 200, 170, 31, "Hell", COLOR_BLACK );
 
 

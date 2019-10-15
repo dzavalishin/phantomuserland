@@ -313,7 +313,7 @@ control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int x
     return w_add_control( w, &cb );
 }
 
-control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color )
+control_handle_t w_add_label_bg( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color, drv_video_bitmap_t *bg )
 {
     control_t cb;
     w_clear_control( &cb );
@@ -330,12 +330,28 @@ control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ys
     cb.text = text;
     cb.fg_color = text_color;
 
-    cb.pas_bg_image = &menu_normal_center_bmp;
+    cb.pas_bg_image = bg;
+    //cb.pas_bg_image = &menu_normal_center_bmp;
     //cb.act_bg_image = &menu_selected_center_bmp;
     //cb.hov_bg_image = &menu_selected_center_bmp;
 
     return w_add_control( w, &cb );
 }
+
+
+control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color )
+{
+    return w_add_label_bg( w, x, y, xsize, ysize, text, text_color, &menu_normal_center_bmp );
+}
+
+control_handle_t w_add_label_transparent( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color )
+{
+    return w_add_label_bg( w, x, y, xsize, ysize, text, text_color, 0 );
+}
+
+
+
+
 
 // TODO remove xy size, add backg pic
 control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color )

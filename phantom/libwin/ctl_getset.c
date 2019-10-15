@@ -116,6 +116,24 @@ void w_control_set_icon( window_handle_t w, control_handle_t ch, drv_video_bitma
 }
 
 
+drv_video_bitmap_t * copy_and_blend(drv_video_bitmap_t *src, window_handle_t w, control_t *cc )
+{
+    if( src == 0 ) return 0;
+
+    drv_video_bitmap_t *bg;
+
+    errno_t rc = w_duplicate_bitmap( &bg, src);
+    if( rc )
+        return src;
+    else
+    {
+        w_blend_bg_to_bitmap( bg, w, cc->r.x, cc->r.y );
+        return bg;
+    }
+
+}
+
+
 void w_control_set_background( 
     window_handle_t w, control_handle_t ch, 
     drv_video_bitmap_t *normal,
@@ -125,9 +143,7 @@ void w_control_set_background(
     GET_CONTROL
     
     // TODO who deletes bitmaps?
-    drv_video_bitmap_t *bg;
-    errno_t rc;
-
+/*
     rc = w_duplicate_bitmap( &bg, normal );
     if( rc )
         cc->pas_bg_image = normal;
@@ -146,7 +162,11 @@ void w_control_set_background(
     assert(rc == 0);
     //w_blend_bg_to_bitmap( bg, w, cc->r.x, cc->r.y );
     cc->hov_bg_image = bg;
+*/
 
+    cc->pas_bg_image = copy_and_blend( normal, w, cc );
+    cc->act_bg_image = copy_and_blend( pressed, w, cc );
+    cc->hov_bg_image = copy_and_blend( hover, w, cc );
 
     //cc->pas_bg_image = normal;
     //cc->act_bg_image = pressed,
