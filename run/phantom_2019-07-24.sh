@@ -24,7 +24,7 @@ Q_DISK_A="-boot a -no-fd-bootchk -drive file=img/grubfloppy-hd0.img,index=0,if=f
 
 # Q_NET="-net nic,model=pcnet -net nic,model=rtl8139 -net user,tftp=tftp "
 Q_PORTS=" -serial file:serial0.log -soundhw es1370"
-Q_PORTS="-serial stdio -soundhw pcspk "
+#Q_PORTS="-serial stdio -soundhw pcspk "
 
 # VIO="-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio"
 
@@ -32,6 +32,8 @@ Q_PORTS="-serial stdio -soundhw pcspk "
 Q_NET=" -net nic,model=ne2k_pci -net user"
 
 
-../../tmp/phantom_run_qemu/2019.02.18/qemu-system-i386 $Q_KVM $Q_DEBUG $Q_EFI -m 256M $Q_PORTS $Q_BOOT $Q_CD $Q_DISK_A $Q_DISK_B $Q_NET $VIO $Q_VGA
+#../../qemu/2019-07-24/qemu-system-i386 $Q_KVM $Q_DEBUG $Q_EFI -m 256M $Q_PORTS $Q_BOOT $Q_CD $Q_DISK_A $Q_DISK_B $Q_NET $VIO $Q_VGA
+../../qemu/2019-07-24/qemu-system-x86_64w $Q_KVM $Q_DEBUG $Q_EFI -m 256M $Q_PORTS $Q_BOOT $Q_CD $Q_DISK_A $Q_DISK_B $Q_NET $VIO $Q_VGA
+
 
 exit
