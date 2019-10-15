@@ -207,6 +207,10 @@ int ctl_text_field_events(control_t *cc, struct foreach_control_param *env)
         cc->changed = 1;
         switch (e.k.ch)
         {
+        case KEY_ENTER:
+            w_control_action(env->w, cc, &e);
+            break;
+
         case KEY_RIGHT:
             cc->cursor_pos++;
 

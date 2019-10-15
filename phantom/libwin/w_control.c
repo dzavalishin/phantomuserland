@@ -265,7 +265,7 @@ static errno_t do_reset_control(pool_t *pool, void *el, pool_handle_t handle, vo
 
 /// Perform an action for control (button pressed, enter in text field, etc)
 /// TODO release action?
-static void w_control_action(window_handle_t w, control_t *cc, ui_event_t *ie)
+void w_control_action(window_handle_t w, control_t *cc, ui_event_t *ie)
 {
     int isPressed = cc->state == cs_pressed;
 
@@ -333,9 +333,11 @@ static int do_button_events(control_t *cc, struct foreach_control_param *env)
         if(env->e.m.released & 0x1) // First button release only
         {
             if( !(cc->flags & CONTROL_FLAG_TOGGLE) )
+            {
                 cc->state = cs_released;
-
-            w_control_action(env->w, cc, &e);
+                w_control_action(env->w, cc, &e);
+            }
+            
             return 1; // Consume
         }
 

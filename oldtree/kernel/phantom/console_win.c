@@ -677,7 +677,19 @@ static void paint_persistent_map(window_handle_t w)
 
 
 
-#define WXY 400
+static void consoleOnOff(window_handle_t w, struct control *c) { 
+    (void)w;
+    int on = c->state == cs_pressed;
+    w_set_visible( phantom_console_window, on );    
+    }
+
+static void debugOnOff(window_handle_t w, struct control *c) { 
+    (void)w;
+    int on = c->state == cs_pressed;
+    w_set_visible( phantom_debug_window, on );    
+    }
+
+
 
 void test_controls( void )
 {
@@ -685,7 +697,7 @@ void test_controls( void )
 
     //color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
-    window_handle_t w = drv_video_window_create( WXY, WXY, 20, 500, COLOR_WHITE, "Controls", WFLAG_WIN_DECORATED );
+    window_handle_t w = drv_video_window_create( 400, 350, 20, 500, COLOR_WHITE, "Controls", WFLAG_WIN_DECORATED );
     
     //w_set_visible( lmw, 0 );
 
@@ -695,10 +707,6 @@ void test_controls( void )
     //w_draw_box( w, 0, 0, WXY, WXY, menu_border );
 
     
-    bh = w_add_button( w, '0', 20, 350, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
-    w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
-    w_control_set_text( w, bh, "Button", COLOR_BLACK );
-
 
     bh = w_add_menu_item( w, '1', 20, 300, 200, "Settings", COLOR_BLACK );
     w_control_set_icon( w, bh, &icon_settings_bmp );
@@ -709,9 +717,37 @@ void test_controls( void )
 
     bh = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
     w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
-        
- 
+
     bh = w_add_text_field( w, 20, 200, 170, 31, "Hell", COLOR_BLACK );
+
+
+    bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
+    w_control_set_callback( w, bh, consoleOnOff, 0 );
+    w_control_set_state( w, bh, 1 );
+
+    w_add_label_transparent( w, 240, 300, 50, 32, "Console", COLOR_BLACK );
+
+
+
+    bh = w_add_button( w, '4', 350, 250, &checkbox_square_off_bmp, &checkbox_square_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, bh, &checkbox_square_off_bmp, &checkbox_square_on_bmp, 0 );
+    w_control_set_callback( w, bh, debugOnOff, 0 );
+    w_control_set_state( w, bh, 1 );
+
+    w_add_label_transparent( w, 240, 250, 50, 32, "Debug", COLOR_BLACK );        
+
+
+
+
+
+    bh = w_add_button( w, 'o', 20, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
+    w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
+    w_control_set_text( w, bh, "Ok", COLOR_BLACK );
+
+    bh = w_add_button( w, '0', 220, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
+    w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
+    w_control_set_text( w, bh, "Cancel", COLOR_BLACK );
 
 
 }

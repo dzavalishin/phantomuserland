@@ -199,12 +199,28 @@ void w_control_set_text( window_handle_t w, pool_handle_t ch, const char *text, 
 
 void w_control_get_text( window_handle_t w, control_handle_t ch, char *text_buf, size_t buf_size )
 {
-    GET_CONTROL
-    
+    GET_CONTROL    
     strlcpy( text_buf, cc->buffer, buf_size ); // TODO wchar_t
-
     w_paint_control( w, cc );
+    RELEASE_CONTROL
+}
 
+
+
+void w_control_set_state( window_handle_t w, control_handle_t ch, int selected ) //< Is checkbox checked or switch turned on?
+{
+    GET_CONTROL
+    cc->state = selected ? cs_pressed : cs_released;    
+    w_paint_control( w, cc );
+    RELEASE_CONTROL
+}
+
+
+void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ) //< Is checkbox checked or switch turned on?
+{
+    GET_CONTROL
+    if( ret ) *ret = cc->state == cs_pressed;
+    //w_paint_control( w, cc );
     RELEASE_CONTROL
 }
 

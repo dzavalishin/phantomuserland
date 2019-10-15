@@ -39,7 +39,14 @@ void ctl_paint_text( window_handle_t win, control_t *cc, int shift );
 /// \return X shift for text
 int ctl_paint_icon( window_handle_t win, control_t *cc );
 
+// -------------------------------------------------------------------
+//
+// Workers for different controls to use
+//
+// -------------------------------------------------------------------
 
+/// Do assigned action - inform caller about control state change
+void w_control_action(window_handle_t w, control_t *cc, ui_event_t *ie);
 
 
 #endif // W_CONTROL_PRIVATE_H
