@@ -179,8 +179,9 @@ void ctl_text_field_paint(window_handle_t win, control_t *cc )
     //if(cc->focused)
     {
     //w_draw_v_line( win, COLOR_GREEN, cursor_x_pos, cc->r.y, cc->r.ysize );
-        w_draw_line( win, cursor_x_pos - 1, cc->r.y + 2, cursor_x_pos - 1, cc->r.y+cc->r.ysize - 4, 
-        cc->focused ? COLOR_RED : COLOR_DARKGRAY );
+        w_draw_line( win, cursor_x_pos - 1, cc->r.y + 3, cursor_x_pos - 1, cc->r.y+cc->r.ysize - 6, 
+        COLOR_DARKGRAY );
+        //cc->focused ? COLOR_GREEN : COLOR_LIGHTGRAY );
     }
 
     ctl_paint_border( win, cc );

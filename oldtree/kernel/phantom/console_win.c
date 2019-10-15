@@ -13,6 +13,7 @@
 // looses characters :(
 #define NET_TIMED_FLUSH 1
 
+void test_controls( void ); // tmp
 
 #define DEBUG_MSG_PREFIX "console"
 #include <debug_ext.h>
@@ -334,7 +335,7 @@ void phantom_init_console_window()
 
     color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
-    phantom_launcher_menu_window = drv_video_window_create( 200, 186+32,
+    phantom_launcher_menu_window = drv_video_window_create( 200, 186 /*+32*/,
                                                        9, 45, COLOR_WHITE, 
                                                        "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
     window_handle_t lmw = phantom_launcher_menu_window;
@@ -366,8 +367,9 @@ void phantom_init_console_window()
     //w_ttfont_draw_string( lmw, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 10, 8 );
     //w_control_set_text( lmw, bh, "Fast Snap", COLOR_BLACK );
 
-    bh = w_add_text_field( lmw, 1, 1+31*6, 170, 31, "Hell", COLOR_BLACK );
+    //bh = w_add_text_field( lmw, 1, 1+31*6, 170, 31, "Hell", COLOR_BLACK );
 
+    test_controls();
 
     // -----------------------------
     // Buttons
@@ -669,3 +671,38 @@ static void paint_persistent_map(window_handle_t w)
 }
 
 
+
+
+#define WXY 400
+
+void test_controls( void )
+{
+    pool_handle_t bh;
+
+    color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
+
+    window_handle_t w = drv_video_window_create( WXY, WXY, 20, 500, COLOR_WHITE, "Controls", WFLAG_WIN_DECORATED );
+    
+    //w_set_visible( lmw, 0 );
+
+    
+    w_fill_box( w, 0, 0, WXY, WXY, COLOR_WHITE );
+    w_draw_box( w, 0, 0, WXY, WXY, menu_border );
+
+    
+    bh = w_add_button( w, '0', 20, 350, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
+    w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
+    w_control_set_text( w, bh, "Button", COLOR_BLACK );
+
+
+    bh = w_add_menu_item( w, '1', 20, 300, 200, "Settings", COLOR_BLACK );
+    w_control_set_icon( w, bh, &icon_settings_bmp );
+
+    bh = w_add_button( w, '2', 128, 250, &slide_switch_off_bmp, &slide_switch_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    
+    w_add_label( w, 20, 250, 130, 32, "Fast Snap", COLOR_BLACK );
+
+    bh = w_add_text_field( w, 20, 200, 170, 31, "Hell", COLOR_BLACK );
+
+
+}

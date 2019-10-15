@@ -192,3 +192,17 @@ int drv_video_string2bmp( struct data_area_4_bitmap *bmp, void *_from )
     return 0;
 }
 
+
+
+// Returns nonzero on failure
+errno_t w_duplicate_bitmap( drv_video_bitmap_t **to, drv_video_bitmap_t *from )
+{
+    size_t bytes = drv_video_bitmap_bytes( from->xsize, from->ysize );
+
+    *to = malloc(bytes);
+    if( *to == NULL ) return ENOMEM;
+
+    memcpy( *to, from, bytes );
+    
+    return 0;
+}

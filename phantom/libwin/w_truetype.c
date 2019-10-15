@@ -30,6 +30,7 @@
 #include <video/screen.h>
 #include <video/internal.h>
 #include <video/font.h>
+#include <video/vops.h>
 
 #include <kernel/init.h>
 #include <kernel/debug.h>
@@ -133,7 +134,7 @@ struct ttf_symbol
 
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
-
+/*
 #define W_BLEND_PIXEL( old, new, newalpha ) \
     ((unsigned char) \
       ( \
@@ -142,7 +143,7 @@ struct ttf_symbol
         ( ((unsigned char)(old)) * (1.0f - (newalpha)) ) \
       )\
     )
-
+*/
 
 
 

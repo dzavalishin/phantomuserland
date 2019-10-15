@@ -36,11 +36,13 @@ typedef struct drv_video_cursor
 
 static __inline__ int drv_video_bitmap_bytes( int xsize, int ysize ) { return (sizeof(rgba_t) * xsize * ysize) + sizeof(drv_video_bitmap_t); }
 
+errno_t w_duplicate_bitmap( drv_video_bitmap_t **to, drv_video_bitmap_t *from );
+
 
 errno_t bmp_ppm_load( drv_video_bitmap_t **to, void *from );
 
 
-
+// TODO kill me and use generated header
 extern drv_video_bitmap_t		close_bmp;
 extern drv_video_bitmap_t		close_pressed_bmp;
 extern drv_video_bitmap_t		pin_bmp;

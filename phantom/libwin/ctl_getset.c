@@ -26,6 +26,7 @@
 #include <video/bitmap.h>
 #include <video/font.h>
 #include <video/internal.h>
+#include <video/vops.h>
 
 #include <video/control.h>
 
@@ -123,9 +124,33 @@ void w_control_set_background(
 {
     GET_CONTROL
     
-    cc->pas_bg_image = normal;
-    cc->act_bg_image = pressed,
-    cc->hov_bg_image = hover;
+    // TODO who deletes bitmaps?
+    drv_video_bitmap_t *bg;
+    errno_t rc;
+
+    rc = w_duplicate_bitmap( &bg, normal );
+    if( rc )
+        cc->pas_bg_image = normal;
+    else
+    {
+        //w_blend_bg_to_bitmap( bg, w, cc->r.x, cc->r.y );
+        cc->pas_bg_image = bg;
+    }
+
+    rc = w_duplicate_bitmap( &bg, pressed );
+    assert(rc == 0);
+    //w_blend_bg_to_bitmap( bg, w, cc->r.x, cc->r.y );
+    cc->act_bg_image = bg;
+
+    rc = w_duplicate_bitmap( &bg, hover );
+    assert(rc == 0);
+    //w_blend_bg_to_bitmap( bg, w, cc->r.x, cc->r.y );
+    cc->hov_bg_image = bg;
+
+
+    //cc->pas_bg_image = normal;
+    //cc->act_bg_image = pressed,
+    //cc->hov_bg_image = hover;
 
     // TODO w_image_defaults( w, cc ); ?
     w_paint_control( w, cc );

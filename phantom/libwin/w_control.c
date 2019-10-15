@@ -69,24 +69,26 @@ void ctl_paint_bg( window_handle_t win, control_t *cc )
 
     if( !cc->pas_bg_image ) return;
 
+    if( cc->focused && (cc->state != cs_pressed) ) 
+        goto hover;
+
     switch(cc->state)
     {
-        case cs_hover:      if( cc->hov_bg_image )
-                            {
-                                //w_draw_bitmap( win, cc->r.x, cc->r.y, cc->hov_bg_image );
-                                paint_or_replicate( win, cc, cc->hov_bg_image );
-                                break;
-                            }
+        case cs_hover:      
+hover:        
+        if( cc->hov_bg_image )
+        {
+            paint_or_replicate( win, cc, cc->hov_bg_image );
+            break;
+        }
                             /* FALLTHROUGH */
         default:
                             /* FALLTHROUGH */
         case cs_released:   
-            //w_draw_bitmap( win, cc->r.x, cc->r.y, cc->pas_bg_image );
             paint_or_replicate( win, cc, cc->pas_bg_image );
             break;
 
         case cs_pressed:    
-            //w_draw_bitmap( win, cc->r.x, cc->r.y, cc->act_bg_image );
             paint_or_replicate( win, cc, cc->act_bg_image );
             break;
     }
@@ -129,7 +131,8 @@ void ctl_paint_text( window_handle_t win, control_t *cc, int shift )
 
 void ctl_paint_border( window_handle_t win, control_t *cc )
 {
-    if(! (cc->flags & CONTROL_FLAG_NOBORDER))
+    //if( cc->focused || (! (cc->flags & CONTROL_FLAG_NOBORDER)) )
+    if( ! (cc->flags & CONTROL_FLAG_NOBORDER) )
     {
         if( (cc->state == cs_pressed) || (cc->state == cs_hover) )
             w_draw_rect( win, COLOR_WHITE, cc->r );
@@ -460,7 +463,9 @@ static errno_t do_pass_focus(pool_t *pool, void *el, pool_handle_t handle, void 
     {
         env->focus_flag = 1; // Pass flag to next control
         cc->focused = 0;
+        cc->changed = 1;
         LOG_FLOW0( 0, "gave out");
+        return 0;
     }
 
     // Label does not need focus, pass forward
@@ -469,6 +474,7 @@ static errno_t do_pass_focus(pool_t *pool, void *el, pool_handle_t handle, void 
     if( env->focus_flag )
     {
         cc->focused = 1; // Get flag from prev control
+        cc->changed = 1;
         env->focus_flag = 0;
         env->focus_success = 1; // tell that someone got focus
         LOG_FLOW0( 0, "took in");
@@ -510,6 +516,7 @@ int w_event_to_controls( window_handle_t w, ui_event_t *e )
 
         if(!env.focus_success) // No one got focus
         {
+            LOG_FLOW0( 4, "no focus, bring in");
             // Select next control to be focused
             env.focus_flag = 1;
             env.focus_success = 0;
