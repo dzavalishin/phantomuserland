@@ -58,5 +58,7 @@ int ctl_paint_icon( window_handle_t win, control_t *cc );
 /// Do assigned action - inform caller about control state change
 void w_control_action(window_handle_t w, control_t *cc, ui_event_t *ie);
 
+void ctl_img_copy_and_blend( drv_video_bitmap_t **dst, uint32_t *alloc_flag, drv_video_bitmap_t *src, window_handle_t w, control_t *cc );
+
 
 #endif // W_CONTROL_PRIVATE_H

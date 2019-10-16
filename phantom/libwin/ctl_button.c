@@ -15,6 +15,7 @@
 #define debug_level_info 10
 
 #include <video/control.h>
+#include <video/builtin_bitmaps.h>
 #include "ctl_private.h"
 
 
@@ -41,6 +42,50 @@ control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_vide
 
     return w_add_control( w, &cb );
 }
+
+
+control_handle_t w_add_radio_button( window_handle_t w, int id, int group_id, int x, int y )
+{
+    control_t cb;
+    w_clear_control( &cb );
+
+    cb.type = ct_button;
+
+    cb.id = id;
+    cb.group_id = group_id;
+
+    cb.r.x = x;
+    cb.r.y = y;
+
+    cb.flags = CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE;
+
+    cb.fg_color = COLOR_RED;
+
+    cb.pas_bg_image = &checkbox_round_off_a_x30_bmp; // to get size
+    cb.act_bg_image = &checkbox_round_on_a_x30_bmp;
+    cb.hov_bg_image = 0;
+
+    //ctl_img_copy_and_blend( &cb.pas_bg_image, &cb.pas_bg_alloc, &checkbox_round_off_a_x30_bmp, w, &cb );
+    //ctl_img_copy_and_blend( &cb.act_bg_image, &cb.act_bg_alloc, &checkbox_round_on_a_x30_bmp, w, &cb );
+
+    control_handle_t bh = w_add_control( w, &cb );
+
+    w_control_set_background( w, bh, &checkbox_round_off_a_x30_bmp, &checkbox_round_on_a_x30_bmp, 0 );
+
+    return bh;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /// Click or button press which must turn us on or toggle

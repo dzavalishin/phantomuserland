@@ -121,7 +121,11 @@ typedef struct control
     //color_t             text_color;     //< Text color
 
     control_callback_t  callback;       //< To call if state changed
-    void *              callback_arg;   //< User arg to callback
+    union {
+        void *          callback_arg;   //< User arg to callback
+        void *          callback_arg_p; //< User arg to callback
+        int             callback_arg_i;
+    };
 
     control_handle_t    c_child;        //< Activate child on state == cs_pressed - usually submenu
     window_handle_t     w_child;        //< Activate on state == cs_pressed
@@ -267,6 +271,8 @@ void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ); //
 
 
 control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *bmp, drv_video_bitmap_t *pressed, int flags );
+
+control_handle_t w_add_radio_button( window_handle_t w, int id, int group_id, int x, int y );
 
 control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int xsize, const char*text, color_t text_color );
 

@@ -13,7 +13,7 @@
 // looses characters :(
 #define NET_TIMED_FLUSH 1
 
-void test_controls( void ); // tmp
+void create_settings_window( void ); // tmp
 
 #define DEBUG_MSG_PREFIX "console"
 #include <debug_ext.h>
@@ -72,6 +72,8 @@ drv_video_window_t *phantom_settings_window = 0;
 
 static window_handle_t phantom_launcher_window = 0;
 static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e);
+
+int volatile debug_mode_selector = 's';
 
 
 static rgba_t console_fg;
@@ -263,12 +265,17 @@ static void phantom_debug_window_loop();
 //extern drv_video_bitmap_t slide_switch_off_bmp;
 static void cc_arg_win_OnOff(window_handle_t w, struct control *cc) { 
     (void)w;
-    LOG_FLOW( 0, "toggle %x", cc->callback_arg );
+    LOG_FLOW( 0, "toggle %x", cc->callback_arg_p );
     int on = cc->state == cs_pressed;
-    w_set_visible( cc->callback_arg, on );    
+    w_set_visible( cc->callback_arg_p, on );    
     }
 
 
+static void debug_mode(window_handle_t w, struct control *cc) { 
+    (void)w;
+    char debug_mode_selector = (char)((int)cc->callback_arg);
+    LOG_FLOW( 0, "set mode '%c'", debug_mode_selector );
+    }
 
 void phantom_init_console_window()
 {
@@ -383,7 +390,7 @@ void phantom_init_console_window()
 
     //bh = w_add_text_field( lmw, 1, 1+31*6, 170, 31, "Hell", COLOR_BLACK );
 
-    test_controls();
+    create_settings_window();
 
     // -----------------------------
     // Buttons
@@ -494,7 +501,6 @@ static void phantom_debug_window_loop()
     static char buf[DEBBS+1];
     int step = 0;
 
-    int show = 's';
 
     t_current_set_name("Debug Win");
     // Which thread will receive typein for this window
@@ -526,25 +532,17 @@ static void phantom_debug_window_loop()
                 printf(
                        "Commands:\n"
                        "---------\n"
-                       "w\t- show windows list\n"
-                       "t\t- show threads list\n"
-                       "s\t- show stats\n"
-                       "p\t- show profiler\n"
-                       "d\t- dump threads to JSON\n"
-                       "m\t- show physical memory map\n"
-                       "v\t- show virtual address space map\n"
-                       "o\t- show objects (persistent) memory map\n"
+                       "w\t- show windows list\n"     "t\t- show threads list\n"
+                       "s\t- show stats\n"            "p\t- show profiler\n"
+                       "d\t- dump threads to JSON\n"  "m\t- show physical memory map\n"
+                       "v\t- show virtual address space map\n" "o\t- show objects (persistent) memory map\n"
                       );
                 break;
-            case 'p': // profiler
-            case 't':
-            case 'w':
-            case 's':
-            case 'm':
-            case 'v':
-            case 'o':
-            case 'a':
-                show = c;
+            case 'p':            case 't':
+            case 'w':            case 's':
+            case 'm':            case 'v':
+            case 'o':            case 'a':
+                debug_mode_selector = c;
                 break;
 
             case 'd':
@@ -554,7 +552,6 @@ static void phantom_debug_window_loop()
                     json_start( &jo );
                     json_dump_threads( &jo );
                     json_stop( &jo );
-
                 }
                 break;
             }
@@ -562,11 +559,11 @@ static void phantom_debug_window_loop()
 
 
         {
-            static char old_show = 0;
-            if( old_show != show )
+            static char old_debug_mode_selector = 0;
+            if( old_debug_mode_selector != debug_mode_selector )
             {
-                old_show = show;
-                switch(show)
+                old_debug_mode_selector = debug_mode_selector;
+                switch(debug_mode_selector)
                 {
                 case 't': w_set_title( phantom_debug_window,  "Threads" );         break;
                 case 'w': w_set_title( phantom_debug_window,  "Windows" );         break;
@@ -609,7 +606,7 @@ static void phantom_debug_window_loop()
         bp += rc;
         len -= rc;
 
-        switch(show)
+        switch(debug_mode_selector)
         {
         case 't':
         default:            phantom_dump_threads_buf(bp,len);            break;
@@ -725,7 +722,7 @@ static void debugOnOff(window_handle_t w, struct control *c) {
 #endif
 
 
-void test_controls( void )
+void create_settings_window( void )
 {
     pool_handle_t bh;
 
@@ -765,12 +762,37 @@ void test_controls( void )
 
 
 
-    bh = w_add_button( w, '4', 350, 250, &checkbox_square_off_bmp, &checkbox_square_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    w_control_set_background( w, bh, &checkbox_square_off_bmp, &checkbox_square_on_bmp, 0 );
+    bh = w_add_button( w, '4', 350, 250, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
     w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_debug_window );
     w_control_set_state( w, bh, 1 );
 
     w_add_label_transparent( w, 240, 250, 50, 32, "Debug", COLOR_BLACK );        
+
+
+
+
+    bh = w_add_radio_button( w, 'x', 'g', 350, 200 );
+    w_control_set_callback( w, bh, debug_mode, (void *)'t' );
+    w_control_set_state( w, bh, 1 );
+
+    w_add_label_transparent( w, 240, 200, 50, 32, "Threads", COLOR_BLACK );        
+
+
+    bh = w_add_radio_button( w, 'x', 'g', 350, 150 );
+    w_control_set_callback( w, bh, debug_mode, (void *)'s' );
+    w_control_set_state( w, bh, 1 );
+
+    w_add_label_transparent( w, 240, 150, 50, 32, "Stats", COLOR_BLACK );        
+
+
+    bh = w_add_radio_button( w, 'x', 'g', 350, 100 );
+    w_control_set_callback( w, bh, debug_mode, (void *)'p' );
+    w_control_set_state( w, bh, 1 );
+
+    w_add_label_transparent( w, 240, 100, 50, 32, "Profiler", COLOR_BLACK );        
+
+
 
 
 

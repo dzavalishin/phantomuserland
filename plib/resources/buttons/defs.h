@@ -96,3 +96,5 @@ extern drv_video_bitmap_t		win_decor_dl_bmp;
 extern drv_video_bitmap_t		win_decor_ljoin_bmp;
 extern drv_video_bitmap_t		win_decor_dr_bmp;
 extern drv_video_bitmap_t		win_decor_ur_bmp;
+extern drv_video_bitmap_t		checkbox_round_on_a_x30_bmp;
+extern drv_video_bitmap_t		checkbox_round_off_a_x30_bmp;
