@@ -99,6 +99,8 @@ static errno_t do_check_group(pool_t *pool, void *el, pool_handle_t handle, void
     control_t *cc = ref->c;     assert(cc);
     struct foreach_control_param *env = arg;   assert(env);
 
+    LOG_FLOW( 5, "w %p", env->w );
+
     //control_group_t g
     if( cc->group && (env->gid == cc->group_id) ) 
     {
@@ -117,6 +119,8 @@ static errno_t do_set_group(pool_t *pool, void *el, pool_handle_t handle, void *
     control_ref_t *ref = el;    assert(ref);
     control_t *cc = ref->c;     assert(cc);
     struct foreach_control_param *env = arg;   assert(env);
+
+    LOG_FLOW( 5, "w %p", env->w );
 
     if( env->gid == cc->group_id ) 
     {

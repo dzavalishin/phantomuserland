@@ -349,7 +349,7 @@ void w_replicate_hor( window_handle_t dest, int destX, int destY,
                        int nSteps, const rgba_t *src, int srcSize );
 
 
-void window_basic_border( window_handle_t dest, const rgba_t *src, int srcSize );
+void window_basic_border( window_handle_t dest, const rgba_t *src, int srcSize, int isTitle );
 
 #endif
 

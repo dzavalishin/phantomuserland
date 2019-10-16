@@ -15,8 +15,9 @@
 #include <video/internal.h>
 #include <video/vops.h>
 #include <video/font.h>
-//#include <video/button.h>
 #include <video/control.h>
+#include <video/builtin_bitmaps.h>
+
 
 #define border_0_color { .r = 210, .g = 203, .b = 188, .a = 0xFF } // bgr!
 #define border_1_color { .r = 183, .g = 171, .b = 146, .a = 0xFF }
@@ -50,7 +51,7 @@ extern drv_video_bitmap_t title_deselected_bmp;
 
 
 
-void window_basic_border( drv_video_window_t *dest, const struct rgba_t *src, int srcSize )
+void window_basic_border( window_handle_t dest, const rgba_t *src, int srcSize, int isTitle )
 {
     int stepOff = srcSize;
     w_replicate_ver( dest, 0, stepOff, dest->ysize-(2*stepOff), src, srcSize );
@@ -62,18 +63,26 @@ void window_basic_border( drv_video_window_t *dest, const struct rgba_t *src, in
     rect_t r;
     r.xsize = r.ysize = stepOff;
 
+    // TODO win_decor_ljoin_bmp win_decor_rjoin_bmp
+
     r.x = r.y = 0;
-    w_fill_rect( dest, brdr[1], r );
+    //w_fill_rect( dest, brdr[1], r );
+    if(isTitle)  w_draw_bitmap( dest, r.x, r.y, &win_decor_ljoin_bmp );
+    else         w_draw_bitmap( dest, r.x, r.y, &win_decor_dl_bmp );
 
     r.x = 0; r.y = dest->ysize-(stepOff);
-    w_fill_rect( dest, brdr[1], r );
+    //w_fill_rect( dest, brdr[1], r );
+    w_draw_bitmap( dest, r.x, r.y, &win_decor_ul_bmp );
 
     r.y = 0; r.x = dest->xsize-(stepOff);
-    w_fill_rect( dest, brdr[1], r );
+    //w_fill_rect( dest, brdr[1], r );
+    if(isTitle)  w_draw_bitmap( dest, r.x, r.y, &win_decor_rjoin_bmp );
+    else         w_draw_bitmap( dest, r.x, r.y, &win_decor_dr_bmp );
 
     r.x = dest->xsize-(stepOff);
     r.y = dest->ysize-(stepOff);
-    w_fill_rect( dest, brdr[1], r );
+    //w_fill_rect( dest, brdr[1], r );
+    w_draw_bitmap( dest, r.x, r.y, &win_decor_ur_bmp );
 }
 
 
@@ -173,7 +182,7 @@ void win_make_decorations(drv_video_window_t *w)
     //if( focused )
     w_replicate_hor( w->w_title, 3, 3, w->w_title->xsize, tbmp->pixel, tbmp->ysize );
 
-    window_basic_border( w->w_title, brdr, bordr_size );
+    window_basic_border( w->w_title, brdr, bordr_size, 1 );
 
     // BUG! It must be +3, not -1 on Y coord!
 #if CONF_TRUETYPE
@@ -227,7 +236,7 @@ void win_make_decorations(drv_video_window_t *w)
     w_repaint_controls(w->w_decor);
     w_repaint_controls(w->w_title);
 
-    window_basic_border( w->w_decor, brdr, bordr_size );
+    window_basic_border( w->w_decor, brdr, bordr_size, 0 );
 
 
     //if( (!(w->state & WSTATE_WIN_ROLLEDUP)) && (w->state & WSTATE_WIN_VISIBLE) )
