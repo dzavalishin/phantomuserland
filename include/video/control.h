@@ -50,12 +50,12 @@ struct control;
  * 
  * Group of controls, used for menu items and radiobuttons.
  * 
-**/
+** /
 typedef struct 
 {
     struct control  *siblings;
 } control_group_t;
-
+*/
 
 
 /// Type of visual control - button, text box, etc
@@ -67,7 +67,7 @@ typedef enum {
     ct_menuitem    = 4,
     ct_label       = 5,
 
-    ct_group       = 0xFF+0,            //< To store it in an .internal.ui.control we put group in a control union too.
+    //ct_group       = 0xFF+0,            //< To store it in an .internal.ui.control we put group in a control union too.
 } control_type_t;
 
 
@@ -166,8 +166,8 @@ typedef struct control
     uint32_t            focused;        //< Selected in window
     uint32_t            changed;        //< Needs repaint
 
-    control_group_t *   group;          //< Group we belong, if any
-    struct control *    next_in_group;  //< linked list of controls in group - radio or menu
+    //control_group_t *   group;          //< Group we belong, if any
+    //struct control *    next_in_group;  //< linked list of controls in group - radio or menu
 
     uint32_t            pas_bg_alloc;   //< Must free on finish or reload
     uint32_t            act_bg_alloc;   //< Must free on finish or reload
@@ -186,23 +186,6 @@ typedef struct
     control_t         * c;              //< Control
 } control_ref_t;
 
-
-// -----------------------------------------------------------------------
-//
-// Used in pool_foreach( w->controls, ...
-//
-// -----------------------------------------------------------------------
-
-struct foreach_control_param
-{
-    window_handle_t   w;
-    ui_event_t        e;
-    control_group_t * g;   // used in w_add_to_group()
-    int               gid; // ---""---
-    control_t       * c;
-    int               focus_flag;
-    int               focus_success;
-};
 
 
 
@@ -228,7 +211,7 @@ struct foreach_control_param
 control_handle_t w_add_control( window_handle_t w, control_t *c );
 
 /// Same as w_add_control(), but you can pass list of controls linked by next_in_group field.
-void w_add_controls( window_handle_t w, control_t *c );
+//void w_add_controls( window_handle_t w, control_t *c );
 
 control_handle_t w_get_control_by_id( window_handle_t w, uint32_t id ); // To be able to access mass added controls
 

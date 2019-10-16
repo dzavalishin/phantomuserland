@@ -27,8 +27,9 @@
 #include <video/font.h>
 #include <video/internal.h>
 #include <video/vops.h>
-
 #include <video/control.h>
+
+#include "ctl_private.h"
 
 
 #define GET_CONTROL \
@@ -116,7 +117,7 @@ void w_control_set_icon( window_handle_t w, control_handle_t ch, drv_video_bitma
 }
 
 
-void copy_and_blend( drv_video_bitmap_t **dst, uint32_t *alloc_flag, drv_video_bitmap_t *src, window_handle_t w, control_t *cc )
+void ctl_img_copy_and_blend( drv_video_bitmap_t **dst, uint32_t *alloc_flag, drv_video_bitmap_t *src, window_handle_t w, control_t *cc )
 {
     drv_video_bitmap_t *bg;
 
@@ -178,9 +179,9 @@ void w_control_set_background(
     cc->hov_bg_image = bg;
 */
 
-    copy_and_blend( &cc->pas_bg_image, &cc->pas_bg_alloc, normal, w, cc );
-    copy_and_blend( &cc->act_bg_image, &cc->act_bg_alloc, pressed, w, cc );
-    copy_and_blend( &cc->hov_bg_image, &cc->hov_bg_alloc, hover, w, cc );
+    ctl_img_copy_and_blend( &cc->pas_bg_image, &cc->pas_bg_alloc, normal, w, cc );
+    ctl_img_copy_and_blend( &cc->act_bg_image, &cc->act_bg_alloc, pressed, w, cc );
+    ctl_img_copy_and_blend( &cc->hov_bg_image, &cc->hov_bg_alloc, hover, w, cc );
 
     //cc->pas_bg_image = normal;
     //cc->act_bg_image = pressed,

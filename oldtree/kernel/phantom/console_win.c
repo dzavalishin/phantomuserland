@@ -273,7 +273,7 @@ static void cc_arg_win_OnOff(window_handle_t w, struct control *cc) {
 
 static void debug_mode(window_handle_t w, struct control *cc) { 
     (void)w;
-    char debug_mode_selector = (char)((int)cc->callback_arg);
+    debug_mode_selector = (char)((int)cc->callback_arg);
     LOG_FLOW( 0, "set mode '%c'", debug_mode_selector );
     }
 
@@ -725,6 +725,8 @@ static void debugOnOff(window_handle_t w, struct control *c) {
 void create_settings_window( void )
 {
     pool_handle_t bh;
+    int cc_y = 0;
+    int cc_x = 0;
 
     //color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
@@ -769,32 +771,59 @@ void create_settings_window( void )
 
     w_add_label_transparent( w, 240, 250, 50, 32, "Debug", COLOR_BLACK );        
 
+    // -------------------------------------------------------------------
+    // Radio
+    // -------------------------------------------------------------------
 
+#define RADIO_SHIFT 35    
+    cc_y = 150;
+    cc_x = 240;
 
-
-    bh = w_add_radio_button( w, 'x', 'g', 350, 200 );
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
     w_control_set_callback( w, bh, debug_mode, (void *)'t' );
-    w_control_set_state( w, bh, 1 );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "Threads", COLOR_BLACK );        
 
-    w_add_label_transparent( w, 240, 200, 50, 32, "Threads", COLOR_BLACK );        
+    cc_y -= RADIO_SHIFT;
 
-
-    bh = w_add_radio_button( w, 'x', 'g', 350, 150 );
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
     w_control_set_callback( w, bh, debug_mode, (void *)'s' );
     w_control_set_state( w, bh, 1 );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "Stats", COLOR_BLACK );        
 
-    w_add_label_transparent( w, 240, 150, 50, 32, "Stats", COLOR_BLACK );        
+    cc_y -= RADIO_SHIFT;
 
-
-    bh = w_add_radio_button( w, 'x', 'g', 350, 100 );
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
     w_control_set_callback( w, bh, debug_mode, (void *)'p' );
-    w_control_set_state( w, bh, 1 );
-
-    w_add_label_transparent( w, 240, 100, 50, 32, "Profiler", COLOR_BLACK );        
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "Profiler", COLOR_BLACK );        
 
 
 
 
+    cc_y = 150;
+    cc_x = 20;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'m' );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "PhysMem", COLOR_BLACK );        
+
+    cc_y -= RADIO_SHIFT;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'v' );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "VAddr", COLOR_BLACK );        
+
+    cc_y -= RADIO_SHIFT;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'o' );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "ObjMem", COLOR_BLACK );        
+
+
+
+
+    // -------------------------------------------------------------------
+    // Ok/Cancel
+    // -------------------------------------------------------------------
 
 
 

@@ -26,11 +26,10 @@
 #include <video/bitmap.h>
 #include <video/font.h>
 #include <video/internal.h>
-
 #include <video/control.h>
-
 #include <video/builtin_bitmaps.h>
 
+#include "ctl_private.h"
 
 // --------------------------------------------------------
 //
@@ -89,7 +88,7 @@ static control_handle_t control_to_pool( window_handle_t w, control_t *cc )
     return ch;
 }
 
-
+#if 0 // crashes
 static errno_t do_check_group(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     (void) pool;
@@ -141,7 +140,7 @@ static void w_add_to_group( window_handle_t w, control_t *cc )
     cc->next_in_group = 0;
 
     if( !cc->group_id ) return;
-#if 0 // crashes
+
     // TODO take some mutex
 
     //control_group_t *   group;          //< Group we belong, if any
@@ -175,9 +174,9 @@ static void w_add_to_group( window_handle_t w, control_t *cc )
 
     env.g->siblings = env.c; // start of list
     // TODO need test!
-#endif    
 }
 
+#endif    
 
 
 
@@ -202,8 +201,8 @@ static void w_image_defaults( window_handle_t w, control_t *cc )
 
 static void w_clean_internal_state( window_handle_t w, control_t *cc )
 {
-    cc->group = 0;
-    cc->next_in_group = 0;
+    //cc->group = 0;
+    //cc->next_in_group = 0;
 
     cc->state = cs_released;
     cc->hovered = ch_normal;
@@ -225,7 +224,7 @@ static void w_clean_internal_state( window_handle_t w, control_t *cc )
 control_handle_t w_restart_control_persistent( window_handle_t w, control_t *cc )
 {
 
-    w_add_to_group(w,cc);
+    //w_add_to_group(w,cc);
     w_image_defaults( w, cc );
 
     // Make sure caller will reassign
@@ -259,7 +258,7 @@ control_handle_t w_add_control( window_handle_t w, control_t *c )
     *cc = *c; // Copy all settings
 
     w_clean_internal_state( w, cc );
-    w_add_to_group( w, cc );
+    //w_add_to_group( w, cc );
     w_image_defaults( w, cc );
 
     w_paint_control( w, cc );
@@ -269,14 +268,14 @@ control_handle_t w_add_control( window_handle_t w, control_t *c )
     return ch;
 }
 
-
+/*
 /// Same as w_add_control(), but you can pass list of controls linked by next_in_group field.
 void w_add_controls( window_handle_t w, control_t *c )
 {
     control_t *next = c->next_in_group; // w_add_conrtrol will use or clear it
     w_add_control( w, c );
     w_add_controls( w, next );
-}
+}*/
 
 void w_clear_control( control_t *c )
 {

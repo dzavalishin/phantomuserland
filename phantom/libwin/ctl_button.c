@@ -91,6 +91,9 @@ control_handle_t w_add_radio_button( window_handle_t w, int id, int group_id, in
 /// Click or button press which must turn us on or toggle
 static void ctl_button_click_on(window_handle_t w, control_t *cc, ui_event_t *e)
 {
+    if( cc->group_id != 0 )
+        ctl_reset_group( w, cc->group_id );
+
     if( cc->flags & CONTROL_FLAG_TOGGLE)
         cc->state = (cc->state == cs_pressed) ? cs_released : cs_pressed; // toggle
     else
@@ -103,6 +106,8 @@ static void ctl_button_click_on(window_handle_t w, control_t *cc, ui_event_t *e)
 /// Click or button press which must turn us of or be ignored
 static void ctl_button_click_off(window_handle_t w, control_t *cc, ui_event_t *e)
 {
+    if( cc->group_id != 0 ) return;
+
     if( !(cc->flags & CONTROL_FLAG_TOGGLE) )
         {
             cc->state = cs_released;

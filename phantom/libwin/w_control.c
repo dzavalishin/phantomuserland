@@ -333,6 +333,9 @@ static errno_t do_event_to_control(pool_t *pool, void *el, pool_handle_t handle,
 */
         case ct_text: ctl_text_field_events(cc,env);
             break;
+
+        default:
+            LOG_ERROR( 1, "unknown ctl type %d", cc->type );
     }
 
     return 0;
@@ -514,3 +517,46 @@ static void ctl_reset_focus( window_handle_t w )
     env.w = w;
     pool_foreach( w->controls, do_clear_focus, &env );
 }
+
+
+
+
+
+
+
+
+
+
+static errno_t do_reset_group(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    control_ref_t *ref = el;                   assert(ref);
+    control_t *cc = ref->c;                    assert(cc);
+    struct foreach_control_param *env = arg;   assert(env);    
+
+    if( (cc->group_id == env->gid) && (cc->state != cs_released) )
+    {
+        cc->state = cs_released;
+        cc->changed = 1;
+        LOG_FLOW( 0, "reset cc %p gid %d", cc, env->gid );
+    }
+
+    return 0;
+}
+
+
+void ctl_reset_group( window_handle_t w, int group_id )
+{
+    struct foreach_control_param env;
+    bzero( &env, sizeof(env) );
+    env.w = w;
+    env.gid = group_id;
+    pool_foreach( w->controls, do_reset_group, &env );
+}
+
+
+
+
+
+
+
+
