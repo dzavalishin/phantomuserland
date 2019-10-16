@@ -157,9 +157,11 @@ typedef struct control
 
     // -------------------------------------------------------------------
     //
-    // Private part, passed values will be ignored
+    // Private part, passed values will be ignored / reset up
     //
     // -------------------------------------------------------------------
+
+    window_handle_t     w;              //< My window
 
     control_state_t     state;          //< State - for display and action
     hover_state_t       hovered;        //< Hovered by mouse
@@ -248,7 +250,7 @@ void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ); //
 
 // -----------------------------------------------------------------------
 //
-// Shortcuts for typical cases
+// Control creation: Shortcuts for typical cases
 //
 // -----------------------------------------------------------------------
 
@@ -283,7 +285,7 @@ void w_repaint_controls(window_handle_t w);
 void w_reset_controls(window_handle_t w); // focus lost, mouse off window - make sure all buttons are off -- TODO used?
 int w_event_to_controls( window_handle_t w, ui_event_t *e ); // Deliver events to controls - return nonzero if event consumed
 
-void w_paint_control(window_handle_t w, control_t *cc );
+void w_paint_control( window_handle_t w, control_t *cc );
 
 
     // -------------------------------------------------------------------

@@ -204,6 +204,7 @@ static void w_clean_internal_state( window_handle_t w, control_t *cc )
     //cc->group = 0;
     //cc->next_in_group = 0;
 
+    cc->w = w;
     cc->state = cs_released;
     cc->hovered = ch_normal;
     cc->focused = 0;        //< Selected in window
