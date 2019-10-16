@@ -15,6 +15,7 @@
 #define debug_level_info 10
 
 #include <video/control.h>
+#include "ctl_private.h"
 
 
 control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_video_bitmap_t *released, drv_video_bitmap_t *pressed, int flags )

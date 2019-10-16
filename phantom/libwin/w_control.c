@@ -67,8 +67,11 @@ static void paint_or_replicate(window_handle_t win, control_t *cc, drv_video_bit
 
 void ctl_paint_bg( window_handle_t win, control_t *cc )
 {
-    w_fill_rect( win, cc->bg_color, cc->r );
-
+#if 0 //
+    if( !(cc->flags & CONTROL_FLAG_NOBACKGROUND) )
+        w_fill_rect( win, cc->bg_color, cc->r );
+#endif
+    //if( (cc->flags & CONTROL_FLAG_NOBACKGROUND) || !cc->pas_bg_image ) return;
     if( !cc->pas_bg_image ) return;
 
     switch(cc->state)

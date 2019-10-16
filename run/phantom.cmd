@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 rem http://dietpc.org/windows/qemu/
 rem http://lassauge.free.fr/qemu/
 

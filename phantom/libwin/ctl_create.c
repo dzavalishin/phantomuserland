@@ -317,7 +317,9 @@ control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int x
     return w_add_control( w, &cb );
 }
 
-control_handle_t w_add_label_bg( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color, drv_video_bitmap_t *bg )
+control_handle_t w_add_label_ext( window_handle_t w, int x, int y, int xsize, int ysize, 
+    const char *text, color_t text_color, 
+    drv_video_bitmap_t *bg, uint32_t flags )
 {
     control_t cb;
     w_clear_control( &cb );
@@ -329,7 +331,7 @@ control_handle_t w_add_label_bg( window_handle_t w, int x, int y, int xsize, int
     cb.r.xsize = xsize;
     cb.r.ysize = ysize;
 
-    cb.flags = CONTROL_FLAG_NOBORDER|CONTROL_FLAG_NOFOCUS;
+    cb.flags = CONTROL_FLAG_NOBORDER|CONTROL_FLAG_NOFOCUS|flags;
 
     cb.text = text;
     cb.fg_color = text_color;
@@ -345,12 +347,12 @@ control_handle_t w_add_label_bg( window_handle_t w, int x, int y, int xsize, int
 
 control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color )
 {
-    return w_add_label_bg( w, x, y, xsize, ysize, text, text_color, &menu_normal_center_bmp );
+    return w_add_label_ext( w, x, y, xsize, ysize, text, text_color, &menu_normal_center_bmp, 0 );
 }
 
 control_handle_t w_add_label_transparent( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color )
 {
-    return w_add_label_bg( w, x, y, xsize, ysize, text, text_color, 0 );
+    return w_add_label_ext( w, x, y, xsize, ysize, text, text_color, 0, CONTROL_FLAG_NOBACKGROUND );
 }
 
 

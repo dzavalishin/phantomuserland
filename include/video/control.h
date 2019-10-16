@@ -40,8 +40,9 @@
 #define CONTROL_FLAG_TOGGLE            (1<<5)  //< Button or menu item toggles
 #define CONTROL_FLAG_HORIZONTAL        (1<<6)  //< Put children left to right - menu
 #define CONTROL_FLAG_TEXT_RIGHT        (1<<7)  //< Put button text to the right of image
-#define CONTROL_FLAG_NOFOCUS           (1<<8)  //< This control is passive - no events, no focus - UNIMPL yet
-// todo CONTROL_FLAG_NOBACKGROUND ?
+#define CONTROL_FLAG_NOFOCUS           (1<<8)  //< This control is passive - no events, no focus
+// NB - unused - convert to NOBGFILL to turn off just painting rectangle with bg color?
+#define CONTROL_FLAG_NOBACKGROUND      (1<<9)  //< Do not paint control background - TODO check me
 
 struct control;
 
@@ -87,7 +88,8 @@ typedef enum {
 
 typedef pool_handle_t control_handle_t;
 
-typedef void (*control_callback_t)( window_handle_t w, struct control *c );
+// Take callback rg directly from cc
+typedef void (*control_callback_t)( window_handle_t w, struct control *cc );
 
 /**
  * 
@@ -270,7 +272,8 @@ control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int x
 
 control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
 control_handle_t w_add_label_transparent( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
-control_handle_t w_add_label_bg( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color, drv_video_bitmap_t *bg );
+control_handle_t w_add_label_ext( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color, 
+                                  drv_video_bitmap_t *bg, uint32_t flags );
 
 control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
 

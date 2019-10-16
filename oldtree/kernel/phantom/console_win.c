@@ -67,6 +67,7 @@ window_handle_t phantom_debug_window = 0;
 drv_video_window_t *phantom_console_window = 0;
 drv_video_window_t *phantom_debug_window = 0;
 drv_video_window_t *phantom_launcher_menu_window = 0;
+drv_video_window_t *phantom_settings_window = 0;
 #endif
 
 static window_handle_t phantom_launcher_window = 0;
@@ -260,6 +261,14 @@ static void phantom_debug_window_loop();
 //extern drv_video_bitmap_t vanilla_task_button_bmp;
 //extern drv_video_bitmap_t slide_switch_on_bmp;
 //extern drv_video_bitmap_t slide_switch_off_bmp;
+static void cc_arg_win_OnOff(window_handle_t w, struct control *cc) { 
+    (void)w;
+    LOG_FLOW( 0, "toggle %x", cc->callback_arg );
+    int on = cc->state == cs_pressed;
+    w_set_visible( cc->callback_arg, on );    
+    }
+
+
 
 void phantom_init_console_window()
 {
@@ -307,22 +316,24 @@ void phantom_init_console_window()
     // Launcher window
     // -------------------------------------------------------------------
 
-    //    color_t la_bg = { 0x19, 0x19, 0x19, 0xFF };
-    //color_t la_b1 = { 68, 66, 62, 0xFF  };
-    //color_t la_b2 = { 88, 84, 79, 0xFF  };
+    //color_t la_bg = { 214, 227, 231, 0xFF };
+    //color_t la_b1 = { 214, 227, 231, 0xFF };
+    //color_t la_b2 = { .r = 183, .g = 171, .b = 146, .a = 0xFF  };
 
-    color_t la_bg = { 214, 227, 231, 0xFF };
-
-    color_t la_b1 = { 214, 227, 231, 0xFF };
-    color_t la_b2 = { .r = 183, .g = 171, .b = 146, .a = 0xFF  };
+    color_t la_b2 = { 214, 227, 231, 0xFF };
+    color_t la_b1 = { .r = 183, .g = 171, .b = 146, .a = 0xFF  };
+    //color_t la_bg = la_b1;
+    //color_t la_bg = { .r = 210, .g = 204, .b = 189, .a = 0xFF };
+    color_t la_bg = { .r = 209, .g = 202, .b = 186, .a = 0xFF };
 
     //color_t la_txt = { 0x11, 0xd5, 0xff, 0xFF };
     //color_t la_txt = { 0x0, 0x0, 0x0, 0xFF };
-//#define BTEXT_COLOR COLOR_YELLOW
-//#define BTEXT_COLOR la_txt
 
-    phantom_launcher_window = drv_video_window_create( scr_get_xsize(), 45,
+#define LW_HEIGHT 47 // was 45
+
+    phantom_launcher_window = drv_video_window_create( scr_get_xsize(), LW_HEIGHT,
                                                        0, 0, la_bg, "Launcher", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
+    window_handle_t plw = phantom_launcher_window;
 
     phantom_launcher_window->inKernelEventProcess = phantom_launcher_event_process;
     w_fill( phantom_launcher_window, la_bg );
@@ -336,7 +347,7 @@ void phantom_init_console_window()
     color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
     phantom_launcher_menu_window = drv_video_window_create( 200, 186 /*+32*/,
-                                                       9, 45, COLOR_WHITE, 
+                                                       9, LW_HEIGHT, COLOR_WHITE, 
                                                        "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
     window_handle_t lmw = phantom_launcher_menu_window;
     w_set_visible( lmw, 0 );
@@ -389,7 +400,7 @@ void phantom_init_console_window()
     w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
     //bh = w_add_menu_item( phantom_launcher_window, -2, 5, 3, 39, 0, COLOR_BLACK );
-    bh = w_add_button( phantom_launcher_window, -2, 5, 3, &start_button_normal_bmp, &start_button_selected_bmp, CONTROL_FLAG_NOBORDER );
+    bh = w_add_button( phantom_launcher_window, -2, 5, 5, &start_button_normal_bmp, &start_button_selected_bmp, CONTROL_FLAG_NOBORDER );
     w_control_set_children( phantom_launcher_window, bh, phantom_launcher_menu_window, 0 );
     w_control_set_flags( phantom_launcher_window, bh, CONTROL_FLAG_TOGGLE, 0 );
     w_control_set_background( phantom_launcher_window, bh, 
@@ -413,24 +424,32 @@ void phantom_init_console_window()
         taskbuttons[nwin] = bh;
     }
 #else
-        window_handle_t plw = phantom_launcher_window;
+        // Launcher task icons
+        lb_y = 3;
 
-        bh = w_add_button( plw, 'a', lb_x, 0, &toolbar_icon_shell_normal_bmp, &toolbar_icon_shell_pressed_bmp, CONTROL_FLAG_NOBORDER );
+        bh = w_add_button( plw, 'a', lb_x, lb_y, &toolbar_icon_shell_normal_bmp, &toolbar_icon_shell_pressed_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
         w_control_set_background( plw, bh, &toolbar_icon_shell_normal_bmp, &toolbar_icon_shell_pressed_bmp, &toolbar_icon_shell_hover_bmp );
         lb_x += 5+toolbar_icon_shell_normal_bmp.xsize;
+        w_control_set_callback( plw, bh, cc_arg_win_OnOff, phantom_console_window );
+        w_control_set_state( plw, bh, 1 );
 
-        bh = w_add_button( plw, 'b', lb_x, 0, &toolbar_icon_debug_normal_bmp, &toolbar_icon_debug_pressed_bmp, CONTROL_FLAG_NOBORDER );
+
+        bh = w_add_button( plw, 'b', lb_x, lb_y, &toolbar_icon_debug_normal_bmp, &toolbar_icon_debug_pressed_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
         w_control_set_background( plw, bh, &toolbar_icon_debug_normal_bmp, &toolbar_icon_debug_pressed_bmp, &toolbar_icon_debug_hover_bmp );
         lb_x += 5+toolbar_icon_debug_normal_bmp.xsize;
+        w_control_set_callback( plw, bh, cc_arg_win_OnOff, phantom_debug_window );
+        w_control_set_state( plw, bh, 1 );
 
-        bh = w_add_button( plw, 'b', lb_x, 0, &toolbar_icon_settings_normal_bmp, &toolbar_icon_settings_pressed_bmp, CONTROL_FLAG_NOBORDER );
+        bh = w_add_button( plw, 'b', lb_x, lb_y, &toolbar_icon_settings_normal_bmp, &toolbar_icon_settings_pressed_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
         w_control_set_background( plw, bh, &toolbar_icon_settings_normal_bmp, &toolbar_icon_settings_pressed_bmp, &toolbar_icon_settings_hover_bmp );
         lb_x += 5+toolbar_icon_settings_normal_bmp.xsize;
+        w_control_set_callback( plw, bh, cc_arg_win_OnOff, phantom_settings_window );
+        w_control_set_state( plw, bh, 1 );
 
 #endif
 
-    w_draw_line( phantom_launcher_window, 0, 44, scr_get_xsize(), 44, la_b1 );
-    w_draw_line( phantom_launcher_window, 0, 43, scr_get_xsize(), 43, la_b2 );
+    w_draw_line( phantom_launcher_window, 0, LW_HEIGHT-1, scr_get_xsize(), LW_HEIGHT-1, la_b1 );
+    w_draw_line( phantom_launcher_window, 0, LW_HEIGHT-2, scr_get_xsize(), LW_HEIGHT-2, la_b2 );
 
     w_update( phantom_launcher_window );
 }
@@ -690,7 +709,7 @@ static void paint_persistent_map(window_handle_t w)
 
 
 
-
+# if 0
 static void consoleOnOff(window_handle_t w, struct control *c) { 
     (void)w;
     int on = c->state == cs_pressed;
@@ -702,7 +721,8 @@ static void debugOnOff(window_handle_t w, struct control *c) {
     int on = c->state == cs_pressed;
     w_set_visible( phantom_debug_window, on );    
     }
-
+#else
+#endif
 
 
 void test_controls( void )
@@ -712,6 +732,7 @@ void test_controls( void )
     //color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
     window_handle_t w = drv_video_window_create( 400, 350, 20, 500, COLOR_WHITE, "Controls", WFLAG_WIN_DECORATED );
+    phantom_settings_window = w;
     
     //w_set_visible( lmw, 0 );
 
@@ -737,7 +758,7 @@ void test_controls( void )
 
     bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
     w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
-    w_control_set_callback( w, bh, consoleOnOff, 0 );
+    w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_console_window );
     w_control_set_state( w, bh, 1 );
 
     w_add_label_transparent( w, 240, 300, 50, 32, "Console", COLOR_BLACK );
@@ -746,7 +767,7 @@ void test_controls( void )
 
     bh = w_add_button( w, '4', 350, 250, &checkbox_square_off_bmp, &checkbox_square_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
     w_control_set_background( w, bh, &checkbox_square_off_bmp, &checkbox_square_on_bmp, 0 );
-    w_control_set_callback( w, bh, debugOnOff, 0 );
+    w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_debug_window );
     w_control_set_state( w, bh, 1 );
 
     w_add_label_transparent( w, 240, 250, 50, 32, "Debug", COLOR_BLACK );        
