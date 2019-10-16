@@ -202,8 +202,12 @@ static void w_clean_internal_state( window_handle_t w, control_t *cc )
     cc->next_in_group = 0;
 
     cc->state = cs_released;
+    cc->hovered = ch_normal;
     cc->focused = 0;        //< Selected in window
     cc->changed = 1;
+
+    if( 0 == memcmp( &cc->bg_color, &((color_t){0, 0, 0, 0}), sizeof(color_t) ) )
+        cc->bg_color = (color_t){ .r = 237, .g = 235, .b = 232, .a = 0xFF };
 
     memset( cc->buffer, 0, sizeof(cc->buffer) );
 
@@ -325,7 +329,7 @@ control_handle_t w_add_label_bg( window_handle_t w, int x, int y, int xsize, int
     cb.r.xsize = xsize;
     cb.r.ysize = ysize;
 
-    cb.flags = CONTROL_FLAG_NOBORDER;
+    cb.flags = CONTROL_FLAG_NOBORDER|CONTROL_FLAG_NOFOCUS;
 
     cb.text = text;
     cb.fg_color = text_color;

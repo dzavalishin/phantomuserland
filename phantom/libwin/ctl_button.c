@@ -41,3 +41,110 @@ control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_vide
     return w_add_control( w, &cb );
 }
 
+
+/// Click or button press which must turn us on or toggle
+static void ctl_button_click_on(window_handle_t w, control_t *cc, ui_event_t *e)
+{
+    if( cc->flags & CONTROL_FLAG_TOGGLE)
+        cc->state = (cc->state == cs_pressed) ? cs_released : cs_pressed; // toggle
+    else
+        cc->state = cs_pressed;
+
+    w_control_action(w, cc, e);
+}
+
+
+/// Click or button press which must turn us of or be ignored
+static void ctl_button_click_off(window_handle_t w, control_t *cc, ui_event_t *e)
+{
+    if( !(cc->flags & CONTROL_FLAG_TOGGLE) )
+        {
+            cc->state = cs_released;
+            w_control_action(w, cc, e);
+        }
+}
+
+/// Process event for button or menu item
+int ctl_button_events(control_t *cc, struct foreach_control_param *env)
+{
+    ui_event_t e = env->e;
+
+    if( (e.type == UI_EVENT_TYPE_KEY) && (cc->focused) )
+    {
+        switch( e.k.ch )
+        {
+            case KEY_ENTER:
+            /* FALLTHROUGH */
+            case ' ':
+                if( e.modifiers & UI_MODIFIER_KEYUP)  
+                    ctl_button_click_off(env->w, cc, &env->e);
+                else                                  
+                    ctl_button_click_on(env->w, cc, &env->e);
+        }
+    }
+
+    if( (e.type == UI_EVENT_TYPE_WIN) && (e.w.info == UI_EVENT_WIN_LOST_FOCUS) )
+    {
+        if(e.focus != env->w)
+            return 0;
+
+        if(cc->hovered == ch_hover) // TODO separate hover status from pressed status
+        {
+            cc->hovered = ch_normal;
+            cc->changed = 1;
+        }
+        return 0; // Don't consume
+    }
+    
+    // Event is for us
+    if( (e.type == UI_EVENT_TYPE_MOUSE) && point_in_rect( e.rel_x, e.rel_y, &cc->r ) )
+    {
+        //LOG_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cc->id );
+        //cc->mouse_in_bits |= 1;
+
+        if(env->e.m.clicked & 0x1) // First button click only
+        {
+/*            
+            if( cc->flags & CONTROL_FLAG_TOGGLE)
+                cc->state = (cc->state == cs_pressed) ? cs_released : cs_pressed; // toggle
+            else
+                cc->state = cs_pressed;
+
+            w_control_action(env->w, cc, &env->e);
+*/
+            ctl_button_click_on( env->w, cc, &env->e );
+            return 1; // Consume
+        }
+
+        if(env->e.m.released & 0x1) // First button release only
+        {
+            /*if( !(cc->flags & CONTROL_FLAG_TOGGLE) )
+            {
+                cc->state = cs_released;
+                w_control_action(env->w, cc, &e);
+            }*/
+            ctl_button_click_off( env->w, cc, &env->e );
+            return 1; // Consume
+        }
+
+        if(cc->hovered == ch_normal )
+        {
+            cc->hovered = ch_hover;
+            cc->changed = 1;
+        }
+        return 0; // Do not eat events on just hover - prevents others from loosing hover status
+    }
+
+    // Not ours, but take in account
+    if( (e.type == UI_EVENT_TYPE_MOUSE) && !point_in_rect( e.rel_x, e.rel_y, &cc->r ) )
+    {
+        if(cc->hovered == ch_hover) // TODO separate hover status from pressed status
+        {
+            cc->hovered = ch_normal;
+            cc->changed = 1;
+        }
+        return 0; // Do not consume
+    }
+
+    return 0; // Not ours
+}

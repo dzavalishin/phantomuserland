@@ -317,9 +317,9 @@ void phantom_init_console_window()
     color_t la_b2 = { .r = 183, .g = 171, .b = 146, .a = 0xFF  };
 
     //color_t la_txt = { 0x11, 0xd5, 0xff, 0xFF };
-    color_t la_txt = { 0x0, 0x0, 0x0, 0xFF };
+    //color_t la_txt = { 0x0, 0x0, 0x0, 0xFF };
 //#define BTEXT_COLOR COLOR_YELLOW
-#define BTEXT_COLOR la_txt
+//#define BTEXT_COLOR la_txt
 
     phantom_launcher_window = drv_video_window_create( scr_get_xsize(), 45,
                                                        0, 0, la_bg, "Launcher", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
@@ -388,9 +388,8 @@ void phantom_init_console_window()
     w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_off_bmp, CONTROL_FLAG_NOBORDER );
     w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
-    bh = w_add_menu_item( phantom_launcher_window, -2, 5, 3, 39, 0, COLOR_BLACK );
-    //rect_t start_r = { .x = 10-1, .y = 7-2, .xsize = 80+2, .ysize = 31+2 };
-    //w_draw_rect( phantom_launcher_window, COLOR_LIGHTGRAY, start_r );
+    //bh = w_add_menu_item( phantom_launcher_window, -2, 5, 3, 39, 0, COLOR_BLACK );
+    bh = w_add_button( phantom_launcher_window, -2, 5, 3, &start_button_normal_bmp, &start_button_selected_bmp, CONTROL_FLAG_NOBORDER );
     w_control_set_children( phantom_launcher_window, bh, phantom_launcher_menu_window, 0 );
     w_control_set_flags( phantom_launcher_window, bh, CONTROL_FLAG_TOGGLE, 0 );
     w_control_set_background( phantom_launcher_window, bh, 
@@ -400,7 +399,7 @@ void phantom_init_console_window()
 
 
     lb_x = 300;
-
+#if 0
     int nwin = 0;
     for( nwin = 0; nwin < MAX_LAUNCH_BUTTONS; nwin++ )
     {
@@ -413,7 +412,22 @@ void phantom_init_console_window()
 
         taskbuttons[nwin] = bh;
     }
+#else
+        window_handle_t plw = phantom_launcher_window;
 
+        bh = w_add_button( plw, 'a', lb_x, 0, &toolbar_icon_shell_normal_bmp, &toolbar_icon_shell_pressed_bmp, CONTROL_FLAG_NOBORDER );
+        w_control_set_background( plw, bh, &toolbar_icon_shell_normal_bmp, &toolbar_icon_shell_pressed_bmp, &toolbar_icon_shell_hover_bmp );
+        lb_x += 5+toolbar_icon_shell_normal_bmp.xsize;
+
+        bh = w_add_button( plw, 'b', lb_x, 0, &toolbar_icon_debug_normal_bmp, &toolbar_icon_debug_pressed_bmp, CONTROL_FLAG_NOBORDER );
+        w_control_set_background( plw, bh, &toolbar_icon_debug_normal_bmp, &toolbar_icon_debug_pressed_bmp, &toolbar_icon_debug_hover_bmp );
+        lb_x += 5+toolbar_icon_debug_normal_bmp.xsize;
+
+        bh = w_add_button( plw, 'b', lb_x, 0, &toolbar_icon_settings_normal_bmp, &toolbar_icon_settings_pressed_bmp, CONTROL_FLAG_NOBORDER );
+        w_control_set_background( plw, bh, &toolbar_icon_settings_normal_bmp, &toolbar_icon_settings_pressed_bmp, &toolbar_icon_settings_hover_bmp );
+        lb_x += 5+toolbar_icon_settings_normal_bmp.xsize;
+
+#endif
 
     w_draw_line( phantom_launcher_window, 0, 44, scr_get_xsize(), 44, la_b1 );
     w_draw_line( phantom_launcher_window, 0, 43, scr_get_xsize(), 43, la_b2 );
@@ -718,7 +732,7 @@ void test_controls( void )
     bh = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
     w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
-    bh = w_add_text_field( w, 20, 200, 170, 31, "Hell", COLOR_BLACK );
+    bh = w_add_text_field( w, 20, 200, 200, 31, "Hell", COLOR_BLACK );
 
 
     bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );

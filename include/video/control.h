@@ -40,6 +40,8 @@
 #define CONTROL_FLAG_TOGGLE            (1<<5)  //< Button or menu item toggles
 #define CONTROL_FLAG_HORIZONTAL        (1<<6)  //< Put children left to right - menu
 #define CONTROL_FLAG_TEXT_RIGHT        (1<<7)  //< Put button text to the right of image
+#define CONTROL_FLAG_NOFOCUS           (1<<8)  //< This control is passive - no events, no focus - UNIMPL yet
+// todo CONTROL_FLAG_NOBACKGROUND ?
 
 struct control;
 
@@ -72,9 +74,16 @@ typedef enum {
 typedef enum {
     cs_default     = 0,
     cs_released    = 1,
-    cs_hover       = 2,
+    //cs_hover       = 2,
     cs_pressed     = 3,
 } control_state_t;
+
+/// Current state of control
+typedef enum {
+    ch_normal      = 0,
+    ch_hover       = 1,
+} hover_state_t; 
+
 
 typedef pool_handle_t control_handle_t;
 
@@ -147,14 +156,16 @@ typedef struct control
     // -------------------------------------------------------------------
 
     control_state_t     state;          //< State - for display and action
+    hover_state_t       hovered;        //< Hovered by mouse
     uint32_t            focused;        //< Selected in window
     uint32_t            changed;        //< Needs repaint
 
     control_group_t *   group;          //< Group we belong, if any
     struct control *    next_in_group;  //< linked list of controls in group - radio or menu
 
-    //u_int32_t           mouse_in_bits;  //< Rightmost bit is latest state. shifts left.
-    //u_int32_t           pressed_bits;   //< Same
+    uint32_t            pas_bg_alloc;   //< Must free on finish or reload
+    uint32_t            act_bg_alloc;   //< Must free on finish or reload
+    uint32_t            hov_bg_alloc;   //< Must free on finish or reload
 
     char                buffer[W_CONTROL_BS];       //< if in persistent memory, text field text is here
 

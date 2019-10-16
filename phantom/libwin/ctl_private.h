@@ -27,6 +27,16 @@
 int ctl_text_field_events(control_t *cc, struct foreach_control_param *env);
 void ctl_text_field_paint(window_handle_t win, control_t *cc );
 
+
+// -------------------------------------------------------------------
+//
+// Button and menu item control specific processing
+//
+// -------------------------------------------------------------------
+
+/// Process event for button or menu item
+int ctl_button_events(control_t *cc, struct foreach_control_param *env);
+
 // -------------------------------------------------------------------
 //
 // Bits to combine in control paint function

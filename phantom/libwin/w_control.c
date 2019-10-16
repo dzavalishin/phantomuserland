@@ -33,6 +33,8 @@
 
 #include "ctl_private.h"
 
+static void ctl_reset_focus( window_handle_t w );
+
 /**
  * 
  * Design notes.
@@ -69,22 +71,18 @@ void ctl_paint_bg( window_handle_t win, control_t *cc )
 
     if( !cc->pas_bg_image ) return;
 
-    if( cc->focused && (cc->state != cs_pressed) ) 
-        goto hover;
-
     switch(cc->state)
     {
-        case cs_hover:      
-hover:        
-        if( cc->hov_bg_image )
-        {
-            paint_or_replicate( win, cc, cc->hov_bg_image );
-            break;
-        }
-                            /* FALLTHROUGH */
         default:
                             /* FALLTHROUGH */
         case cs_released:   
+
+            if( cc->hov_bg_image && ( cc->focused || (cc->hovered == ch_hover) ) )
+            {
+                paint_or_replicate( win, cc, cc->hov_bg_image );
+                break;
+            }
+
             paint_or_replicate( win, cc, cc->pas_bg_image );
             break;
 
@@ -131,11 +129,12 @@ void ctl_paint_text( window_handle_t win, control_t *cc, int shift )
 
 void ctl_paint_border( window_handle_t win, control_t *cc )
 {
-    //if( cc->focused || (! (cc->flags & CONTROL_FLAG_NOBORDER)) )
-    if( ! (cc->flags & CONTROL_FLAG_NOBORDER) )
+    if( (cc->focused) || (cc->hovered == ch_hover) )
+        w_draw_rect( win, COLOR_WHITE, cc->r );
+    else 
     {
-        if( (cc->state == cs_pressed) || (cc->state == cs_hover) )
-            w_draw_rect( win, COLOR_WHITE, cc->r );
+        if( ! (cc->flags & CONTROL_FLAG_NOBORDER) )
+            w_draw_rect( win, cc->bg_color, cc->r );
     }
     // tmp
     //if( cc->state == cs_hover )        w_draw_rect( win, COLOR_LIGHTRED, cc->r );
@@ -295,96 +294,40 @@ void w_control_action(window_handle_t w, control_t *cc, ui_event_t *ie)
 
 
 
-/// Process event for button or menu item
-static int do_button_events(control_t *cc, struct foreach_control_param *env)
-{
-    ui_event_t e = env->e;
-
-    if( (e.type == UI_EVENT_TYPE_WIN) && (e.w.info == UI_EVENT_WIN_LOST_FOCUS) )
-    {
-        if(e.focus != env->w)
-            return 0;
-
-        if(cc->state == cs_hover) // TODO separate hover status from pressed status
-        {
-            cc->state = cs_released;
-            cc->changed = 1;
-        }
-        return 0; // Don't consume
-    }
-    
-    // Event is for us
-    if( (e.type == UI_EVENT_TYPE_MOUSE) && point_in_rect( e.rel_x, e.rel_y, &cc->r ) )
-    {
-        //LOG_FLOW( 1, "button @ %d.%d in range id %x", env->e.rel_x, env->e.rel_y, cc->id );
-        //cc->mouse_in_bits |= 1;
-
-        if(env->e.m.clicked & 0x1) // First button click only
-        {
-            if( cc->flags & CONTROL_FLAG_TOGGLE)
-                cc->state = (cc->state == cs_pressed) ? cs_released : cs_pressed; // toggle
-            else
-                cc->state = cs_pressed;
-
-            w_control_action(env->w, cc, &env->e);
-            return 1; // Consume
-        }
-
-        if(env->e.m.released & 0x1) // First button release only
-        {
-            if( !(cc->flags & CONTROL_FLAG_TOGGLE) )
-            {
-                cc->state = cs_released;
-                w_control_action(env->w, cc, &e);
-            }
-            
-            return 1; // Consume
-        }
-
-        if(cc->state == cs_released ) // TODO separate hover status from pressed status
-        {
-            cc->state = cs_hover;
-            cc->changed = 1;
-        }
-        return 0; // Do not eat events on just hover - prevents others from loosing hover status
-    }
-
-    // Not ours, but take in account
-    if( (e.type == UI_EVENT_TYPE_MOUSE) && !point_in_rect( e.rel_x, e.rel_y, &cc->r ) )
-    {
-        if(cc->state == cs_hover) // TODO separate hover status from pressed status
-        {
-            cc->state = cs_released;
-            cc->changed = 1;
-        }
-        return 0; // Do not consume
-    }
-
-    return 0; // Not ours
-}
 
 
 
 /// Process event for control - called for all win controls
-static errno_t do_check_control(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+static errno_t do_event_to_control(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 {
     control_ref_t *ref = el;                   assert(ref);
     control_t *cc = ref->c;                    assert(cc);
     struct foreach_control_param *env = arg;   assert(env);
 
-    if(cc->flags & CONTROL_FLAG_DISABLED) 
+    if(cc->flags & (CONTROL_FLAG_DISABLED|CONTROL_FLAG_NOFOCUS) ) 
         return 0; // Event is not seen by me
+
+    if( (env->e.type == UI_EVENT_TYPE_MOUSE) && point_in_rect( env->e.rel_x, env->e.rel_y, &cc->r ) )
+    {
+        if(!cc->focused)
+        {
+            ctl_reset_focus(env->w);
+            cc->focused = 1;
+            cc->changed = 1;
+        }
+    }
 
     switch( cc->type )
     {
         case ct_menuitem: /* FALLTHROUGH */
         case ct_button: 
-            return do_button_events(cc, env);
+            return ctl_button_events(cc, env);
             break;
-
+/*
         case ct_label: // No reaction
+            // TODO use CONTROL_FLAG_NOFOCUS and kill this case
             break;
-
+*/
         case ct_text: ctl_text_field_events(cc,env);
             break;
     }
@@ -471,7 +414,8 @@ static errno_t do_pass_focus(pool_t *pool, void *el, pool_handle_t handle, void 
     }
 
     // Label does not need focus, pass forward
-    if( cc->type == ct_label ) return 0;
+    //if( cc->type == ct_label ) return 0; // TODO kill me
+    if( cc->flags & CONTROL_FLAG_NOFOCUS) return 0;
 
     if( env->focus_flag )
     {
@@ -503,6 +447,7 @@ int w_event_to_controls( window_handle_t w, ui_event_t *e )
 
     //LOG_FLOW( 1, "control event check @ %d.%d buttons %x", e->rel_x, e->rel_y, e->m.buttons );
     struct foreach_control_param env;
+    bzero( &env, sizeof(env) );
     env.e = *e;
     env.w = w;
 
@@ -531,7 +476,7 @@ int w_event_to_controls( window_handle_t w, ui_event_t *e )
     else
     {
         // Just deliver event to all of them
-        rc = pool_foreach( w->controls, do_check_control, &env );
+        rc = pool_foreach( w->controls, do_event_to_control, &env );
     }
 
     w_paint_changed_controls(w);
@@ -543,3 +488,26 @@ int w_event_to_controls( window_handle_t w, ui_event_t *e )
 
 
 
+static errno_t do_clear_focus(pool_t *pool, void *el, pool_handle_t handle, void *arg)
+{
+    control_ref_t *ref = el;                   assert(ref);
+    control_t *cc = ref->c;                    assert(cc);
+    struct foreach_control_param *env = arg;   assert(env);
+
+    LOG_FLOW0( 0, "enter");
+
+    if( cc->focused )
+        cc->changed = 1;
+
+    cc->focused = 0;
+    return 0;
+}
+
+
+static void ctl_reset_focus( window_handle_t w )
+{
+    struct foreach_control_param env;
+    bzero( &env, sizeof(env) );
+    env.w = w;
+    pool_foreach( w->controls, do_clear_focus, &env );
+}

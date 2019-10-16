@@ -176,7 +176,7 @@ void ctl_text_field_paint(window_handle_t win, control_t *cc )
                           &cursor_x_pos, cc->cursor_pos - cc->vis_shift ); // +2?
     
     // Cursor
-    //if(cc->focused)
+    if(cc->focused || (cc->hovered == ch_hover))
     {
     //w_draw_v_line( win, COLOR_GREEN, cursor_x_pos, cc->r.y, cc->r.ysize );
         w_draw_line( win, cursor_x_pos - 1, cc->r.y + 3, cursor_x_pos - 1, cc->r.y+cc->r.ysize - 6, 
@@ -198,8 +198,8 @@ int ctl_text_field_events(control_t *cc, struct foreach_control_param *env)
 {
     ui_event_t e = env->e;
 
-    // TODO need to check if current control is focused
-    //if( !cc->focused ) return;
+    // Not focused - ignore key events
+    if( !cc->focused ) return 0;
 
     if( (e.type == UI_EVENT_TYPE_KEY) && UI_MOD_DOWN(e.modifiers) )
     {
