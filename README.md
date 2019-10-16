@@ -24,6 +24,12 @@ second :), amd64 port is incomplete and does not compile at all.
 
 [How to take part](https://github.com/dzavalishin/phantomuserland/wiki/HowToTakePart)
 
+## Current state ##
+
+See [[ChangeLog]], look at [[ScreenShots]], and kere is the last one:
+
+![](https://github.com/dzavalishin/phantomuserland/blob/master/doc/images/phantom_screen_08_10_2019_new_UI.png?raw=true)
+
 ## Build ##
 
   Set '''PHANTOM_HOME''' environment variable to the path to Phantom repository root directory,
