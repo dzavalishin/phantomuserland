@@ -42,7 +42,8 @@
 
 static void ctl_text_modify_shift( control_t *cc )
 {
-    LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d", cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len );
+    LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d, buf='%s'", 
+    cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len, cc->buffer );
 
     if( cc->cursor_pos > (cc->vis_shift + (cc->vis_len - 2) ) )
         cc->vis_shift = cc->cursor_pos - (cc->vis_len - 2);
@@ -55,7 +56,8 @@ static void ctl_text_modify_shift( control_t *cc )
 
 static void ctl_text_clip_state( control_t *cc )
 {
-    LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d", cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len );
+    LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d, buf='%s'", 
+    cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len, cc->buffer );
 
     if( cc->str_len < 0 )
     {
@@ -167,7 +169,8 @@ void ctl_text_field_paint(window_handle_t win, control_t *cc )
 
     int cursor_x_pos = 0;
 
-    LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d", cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len );
+    LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d, buf='%s'", 
+    cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len, cc->buffer );
         
     w_ttfont_draw_string_ext( win, decorations_title_font,
                           cc->buffer+cc->vis_shift, cc->vis_len,
@@ -203,7 +206,7 @@ int ctl_text_field_events(control_t *cc, struct foreach_control_param *env)
 
     if( (e.type == UI_EVENT_TYPE_KEY) && UI_MOD_DOWN(e.modifiers) )
     {
-        LOG_FLOW( 3, "key ev vk=%d, ch=%d", e.k.vk, e.k.ch );
+        LOG_FLOW( 3, "key ev vk=%d, ch=%d, buf='%s'", e.k.vk, e.k.ch, cc->buffer );
         cc->changed = 1;
         switch (e.k.ch)
         {
@@ -241,7 +244,7 @@ check_cursor_right:
             if( cc->cursor_pos >= cc->str_len )
                 break;
             {
-                LOG_FLOW( 2, "Delete ch @%d", cc->cursor_pos );
+                LOG_FLOW( 2, "Delete ch @%d buf='%s'", cc->cursor_pos, cc->buffer );
                 const char *from = cc->buffer + cc->cursor_pos + 1;
                 char *to = cc->buffer + cc->cursor_pos;
                 size_t len = cc->str_len - (cc->cursor_pos + 1);
@@ -249,6 +252,7 @@ check_cursor_right:
                 assert(cc->str_len > 0);
                 cc->str_len--;
                 cc->buffer[cc->str_len] = 0;
+                LOG_FLOW( 2, "Delete ch done @%d buf='%s'", cc->cursor_pos, cc->buffer );
             }
             break;
 
@@ -259,28 +263,35 @@ check_cursor_right:
             {
                 cc->changed = 1;
 
-                LOG_FLOW( 2, "Insert ch '%c' (%d)", e.k.ch, e.k.ch );
+                LOG_FLOW( 2, "Insert ch '%c' (%d) buf = '%s'", e.k.ch, e.k.ch, cc->buffer );
+                LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d", 
+                    cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len );
 
                 if( cc->cursor_pos >= sizeof(cc->buffer)-1 )
                     break;
 
+                assert(cc->str_len < (sizeof(cc->buffer)-1));
+
                 char *from = cc->buffer + cc->cursor_pos;
                 char *to = cc->buffer + cc->cursor_pos + 1;
-                size_t len = cc->str_len - (cc->cursor_pos + 1);
+                ssize_t len = cc->str_len - (cc->cursor_pos + 1);
                 // if(insert_mode)
-                if(cc->str_len > 0) // Can't extend empty string
-                    memmove( to, from, len );
-
-                *from = e.k.ch;
-                //if( cc->str_len == cc->cursor_pos) // extend line
+                if( (cc->str_len > 0) && (cc->cursor_pos < cc->str_len) ) // Can't extend empty string
                 {
-                    cc->str_len++;
-                    if( cc->str_len >= sizeof(cc->buffer)-1 )
-                        cc->str_len = sizeof(cc->buffer)-1;
-                    cc->buffer[cc->str_len] = 0;
+                    assert( len > 0 );
+                    memmove( to, from, len );
                 }
 
+                *from = e.k.ch;
+                //if(cc->cursor_pos == cc->str_len)                    *to = 0; // added at and of string, add zero
+
+                cc->str_len++;
+                if( cc->str_len >= sizeof(cc->buffer)-1 )
+                    cc->str_len = sizeof(cc->buffer)-1;
+                cc->buffer[cc->str_len] = 0;
+
                 cc->cursor_pos++;
+                LOG_FLOW( 2, "Insert ch done buf = '%s'", cc->buffer );
                 goto check_cursor_right;
             }
 
