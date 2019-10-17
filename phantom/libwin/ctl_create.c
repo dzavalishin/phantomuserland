@@ -393,6 +393,14 @@ control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, i
 }
 
 
+control_handle_t w_add_checkbox( window_handle_t w, int x, int y )
+{
+    control_handle_t bh = w_add_button( w, 0, x, y, 
+            &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
+    return bh;
+}
+
 // -----------------------------------------------------------------------
 //
 // Deletion

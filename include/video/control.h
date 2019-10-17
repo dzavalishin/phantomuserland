@@ -259,6 +259,8 @@ control_handle_t w_add_button( window_handle_t w, int id, int x, int y, drv_vide
 
 control_handle_t w_add_radio_button( window_handle_t w, int id, int group_id, int x, int y );
 
+control_handle_t w_add_checkbox( window_handle_t w, int x, int y );
+
 control_handle_t w_add_menu_item( window_handle_t w, int id, int x, int y, int xsize, const char*text, color_t text_color );
 
 control_handle_t w_add_label( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
