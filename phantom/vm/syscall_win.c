@@ -52,15 +52,20 @@ static int si_window_5_tostring( pvm_object_t o, pvm_object_t *ret, struct data_
 static int win_getXSize( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
+
     DEBUG_INFO;
-    SYSCALL_RETURN(pvm_create_int_object( da->w.xsize ));
+    SYSCALL_RETURN(pvm_create_int_object( w->xsize ));
 }
 
 static int win_getYSize( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
     DEBUG_INFO;
-    SYSCALL_RETURN(pvm_create_int_object( da->w.ysize ));
+    SYSCALL_RETURN(pvm_create_int_object( w->ysize ));
 }
 
 static int win_getX( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
@@ -84,13 +89,15 @@ static int win_getY( pvm_object_t o, pvm_object_t *ret, struct data_area_4_threa
 static int win_clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     DEBUG_INFO;
 
     da->x = da->y = 0;
 
-    w_fill( &(da->w), da->bg );
-    w_update( &(da->w) );
+    w_fill( w, da->bg );
+    w_update( w );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -98,6 +105,9 @@ static int win_clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_
 static int win_fill_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
+
     DEBUG_INFO;
 
     CHECK_PARAM_COUNT(1);
@@ -105,7 +115,7 @@ static int win_fill_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_t
 
     rgba_t c;
     INT32_TO_RGBA(c, color);
-    w_fill( &(da->w), c );
+    w_fill( w, c );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -148,7 +158,9 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
 {
     DEBUG_INFO;
 
-    struct data_area_4_tty      *da = pvm_data_area( me, tty );
+    struct data_area_4_window *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
     
     CHECK_PARAM_COUNT(3);
 
@@ -176,8 +188,8 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
     struct rgba_t bg = da->bg;
 
     // TODO make a version of drv_video_font_tty_string that accepts non-zero terminated strings with len
-    w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &x, &y );
-    w_update( &(da->w) );
+    w_font_tty_string( w, tty_font, buf, fg, bg, &x, &y );
+    w_update( w );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -201,13 +213,16 @@ static int win_putImage_25( pvm_object_t me, pvm_object_t *ret, struct data_area
     //struct data_area_4_tty *tty = pvm_object_da( _tty, tty );
     struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
 
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w_and_pixels = (void *)&bda->data;
+
     bitmap2bitmap(
-                da->pixel, da->w.xsize, da->w.ysize, x, y,
+                w_and_pixels->pixels, w_and_pixels->xsize, w_and_pixels->ysize, x, y,
                 (rgba_t *)pixels, _bmp->xsize, _bmp->ysize, 0, 0,
                 _bmp->xsize, _bmp->ysize
     );
-    // Sure? Have flag for window - autoUpdate! and method setAutoUpdate( false )
-    w_update( &(da->w) );
+    // Sure? Make flag for window - autoUpdate! and method setAutoUpdate( false )
+    w_update( w_and_pixels );
 
     SYS_FREE_O(_img);
 
@@ -219,6 +234,8 @@ static int win_setSize_26( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(2);
 
@@ -228,7 +245,7 @@ static int win_setSize_26( pvm_object_t me, pvm_object_t *ret, struct data_area_
     if(x*y > PVM_MAX_WIN_PIXELS)
         SYSCALL_THROW_STRING( "new win size > PVM_MAX_WIN_PIXELS" );
 
-    w_resize( &(da->w), x, y );
+    w_resize( w, x, y );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -237,13 +254,15 @@ static int win_setPos_27( pvm_object_t me, pvm_object_t *ret, struct data_area_4
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(2);
 
     int y = AS_INT(args[1]);
     int x = AS_INT(args[0]);
 
-    w_move( &(da->w), x, y );
+    w_move( w, x, y );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -252,6 +271,8 @@ static int win_drawLine_28( pvm_object_t me, pvm_object_t *ret, struct data_area
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(4);
 
@@ -260,7 +281,7 @@ static int win_drawLine_28( pvm_object_t me, pvm_object_t *ret, struct data_area
     int y  = AS_INT(args[1]);
     int x  = AS_INT(args[0]);
 
-    w_draw_line( &(da->w), x, y, x+xs, y+ys, da->fg );
+    w_draw_line( w, x, y, x+xs, y+ys, da->fg );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -271,6 +292,8 @@ static int win_drawBox_29( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(4);
 
@@ -279,7 +302,7 @@ static int win_drawBox_29( pvm_object_t me, pvm_object_t *ret, struct data_area_
     int y  = AS_INT(args[1]);
     int x  = AS_INT(args[0]);
 
-    w_draw_box( &(da->w), x, y, xs, ys, da->fg );
+    w_draw_box( w, x, y, xs, ys, da->fg );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -290,6 +313,8 @@ static int win_fillBox_30( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(4);
 
@@ -298,7 +323,7 @@ static int win_fillBox_30( pvm_object_t me, pvm_object_t *ret, struct data_area_
     int y  = AS_INT(args[1]);
     int x  = AS_INT(args[0]);
 
-    w_fill_box( &(da->w), x, y, xs, ys, da->fg );
+    w_fill_box( w, x, y, xs, ys, da->fg );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -310,6 +335,8 @@ static int win_fillEllipse_31( pvm_object_t me, pvm_object_t *ret, struct data_a
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(4);
 
@@ -318,7 +345,7 @@ static int win_fillEllipse_31( pvm_object_t me, pvm_object_t *ret, struct data_a
     int y  = AS_INT(args[1]);
     int x  = AS_INT(args[0]);
 
-    w_fill_ellipse( &(da->w), x, y, xs, ys, da->fg );
+    w_fill_ellipse( w, x, y, xs, ys, da->fg );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -349,6 +376,8 @@ static int win_setTitle_33( pvm_object_t me, pvm_object_t *ret, struct data_area
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(1);
 
@@ -364,7 +393,7 @@ static int win_setTitle_33( pvm_object_t me, pvm_object_t *ret, struct data_area
 
     SYS_FREE_O(_text);
 
-    w_set_title( &(da->w), da->w.title );
+    w_set_title( w, da->title );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -374,10 +403,12 @@ static int win_update_34( pvm_object_t me, pvm_object_t *ret, struct data_area_4
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
     
     CHECK_PARAM_COUNT(0);
 
-    w_update( &(da->w) );
+    w_update( w );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -388,6 +419,8 @@ static int win_scrollHor_35( pvm_object_t me, pvm_object_t *ret, struct data_are
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(5);
 
@@ -397,7 +430,7 @@ static int win_scrollHor_35( pvm_object_t me, pvm_object_t *ret, struct data_are
     int y  = AS_INT(args[1]);
     int x  = AS_INT(args[0]);
 
-    errno_t err = w_scroll_hor( &(da->w), x, y, xs, ys, s );
+    errno_t err = w_scroll_hor( w, x, y, xs, ys, s );
 
     SYSCALL_RETURN(pvm_create_int_object( err ));
 }
@@ -426,13 +459,16 @@ static int win_drawImagePart_36( pvm_object_t me, pvm_object_t *ret, struct data
     //struct data_area_4_tty *tty = pvm_object_da( _tty, tty );
     struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
 
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w_and_pixels = (void *)&bda->data;
+
     bitmap2bitmap(
-                da->pixel, da->w.xsize, da->w.ysize, x+xstart, y+ystart,
+                w_and_pixels->pixels, w_and_pixels->xsize, w_and_pixels->ysize, x+xstart, y+ystart,
                 (rgba_t *)pixels, _bmp->xsize, _bmp->ysize, xstart, ystart,
                 xsize, ysize
     );
 
-    w_update( &(da->w) );
+    w_update( w_and_pixels );
 
     SYS_FREE_O(_img);
 

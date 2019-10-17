@@ -899,6 +899,13 @@ void pvm_internal_init_window(pvm_object_t os)
 {
     struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
 
+    pvm_object_t bin = pvm_create_binary_object( PVM_MAX_TTY_PIXELS * 4 + sizeof(drv_video_window_t), 0 );
+    da->o_pixels = bin;
+
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)bin->da;
+
+    void *w_and_pixels = &bda->data;
+
     strlcpy( da->title, "Window", sizeof(da->title) );
 
     //da->w.title = da->title;
@@ -907,7 +914,8 @@ void pvm_internal_init_window(pvm_object_t os)
     da->x = 0;
     da->y = 0;
 
-    drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
+    //drv_video_window_init( &(da->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
+    drv_video_window_init( w_and_pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
 
     {
     pvm_object_t o;
@@ -932,6 +940,7 @@ void pvm_gc_iter_window(gc_iterator_call_t func, pvm_object_t  os, void *arg)
     struct data_area_4_window *da = (struct data_area_4_window *)os->da;
 
     gc_fcall( func, arg, da->connector );
+    gc_fcall( func, arg, da->o_pixels );
 }
 
 
@@ -950,7 +959,12 @@ void pvm_gc_finalizer_window( pvm_object_t  os )
 {
     // is it called?
     struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
-    drv_video_window_destroy(&(da->w));
+
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    void *w_and_pixels = &bda->data;
+
+    //drv_video_window_destroy(&(da->w));
+    drv_video_window_destroy(w_and_pixels);
 }
 
 #include <event.h>
@@ -961,11 +975,15 @@ void pvm_restart_window( pvm_object_t o )
 
     struct data_area_4_window *da = pvm_object_da( o, window );
 
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    window_handle_t w_and_pixels = &bda->data;
+
     printf("restart WIN\n");
 
-    w_restart_init( &da->w );
+    w_restart_init( w_and_pixels );
 
-    da->w.title = da->title; // must be correct in snap? don't reset?
+    //w_and_pixels->title = da->title; // must be correct in snap? don't reset?
+    w_set_title( w_and_pixels, da->title );
 
     /*
     queue_init(&(da->w.events));
@@ -976,7 +994,7 @@ void pvm_restart_window( pvm_object_t o )
     //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, &da->w );
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );
     */
-    w_restart_attach( &da->w );
+    w_restart_attach( w_and_pixels );
 }
 
 

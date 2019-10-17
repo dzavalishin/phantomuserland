@@ -56,6 +56,8 @@ typedef pool_handle_t taskbar_handle_t;
 #define WFLAG_WIN_FULLPAINT             (1<<7)
 // Don't bring focus to this window by key event (ctrl-tab)
 #define WFLAG_WIN_NOKEYFOCUS            (1<<8)
+// Put this window to task bar - it is a main application window - UNIMPL yet
+#define WFLAG_WIN_TASK_BAR              (1<<9)
 
 
 #define WIN_HAS_FLAG(__w,__f) ((__w)->flags & (__f))

@@ -401,9 +401,9 @@ struct data_area_4_window
 #else
     drv_video_window_t                  w;
     // this field extends w and works as it's last field. 
-    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
+    //rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
 #endif
-
+    pvm_object_t                        o_pixels;       //< .i.binary object containing bitmap for window
     pvm_object_t                        connector;      // Used for callbacks - events
 
     int                                 x, y; // in pixels
@@ -416,7 +416,7 @@ struct data_area_4_window
 
 
 
-#define DIR_MUTEX_O 1
+#define DIR_MUTEX_O 1 // TODO kill me
 
 // Very dumb implementation, redo with hash map or bin search or tree
 // Container entry has pvm_object_t at the beginning and the rest is 0-term name string
@@ -428,12 +428,8 @@ struct data_area_4_directory
     pvm_object_t                        keys;           // Where we actually hold keys
     pvm_object_t                        values;         // Where we actually hold values
     u_int8_t                           *flags;          // Is this keys/values slot pointing to 2nd level array
-#if DIR_MUTEX_O
-    //pvm_object_t                   mutex;             // Mutex object
-        pvm_spinlock_t                                          pvm_lock;
-#else
-    hal_spinlock_t                      lock;
-#endif
+
+    pvm_spinlock_t                      pvm_lock;
 
 };
 
