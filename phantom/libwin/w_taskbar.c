@@ -172,8 +172,11 @@ static void task_bar_callback(window_handle_t w, struct control *cc) {
         return;
     }
 
+    // TODO bring on top if not
+
     int on = cc->state == cs_pressed;
-    w_set_visible( e->w, on );    
+    w_set_visible( e->w, on );
+    // if( on ) w_to_top( e-> w ); // TODO can't - recurs mutex - send message 
 
     pool_release_el( task_bar, h );
     }

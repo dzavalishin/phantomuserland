@@ -398,9 +398,9 @@ void phantom_init_console_window()
 
 #if NEW_TASK_BAR
 
-    w_add_to_task_bar( phantom_console_window );
-    w_add_to_task_bar( phantom_debug_window );
-    w_add_to_task_bar( phantom_settings_window );
+    w_add_to_task_bar_icon( phantom_console_window, &icon_screen_bmp );
+    w_add_to_task_bar_icon( phantom_debug_window, &icon_text_bmp );
+    w_add_to_task_bar_icon( phantom_settings_window, &icon_settings_bmp );
 
 #else
     // -----------------------------
