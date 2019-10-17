@@ -15,6 +15,8 @@
 // Dynamic wtty_t size
 //#define CONF_WTTY_SIZE 1
 
+#define NEW_TASK_BAR 1
+
 
 #define UHCI_INTERRUPT 0
 #define OHCI_INTERRUPT 1

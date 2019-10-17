@@ -37,5 +37,5 @@ source -v ./.gdb-local
 #break w_add_control
 #break find_visible_text_len
 
-break ctl_text_field_paint
+#break ctl_text_field_paint
 break ctl_text_field_events

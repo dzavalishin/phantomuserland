@@ -34,6 +34,8 @@ typedef pool_handle_t window_handle_t;
 typedef struct drv_video_window * window_handle_t;
 #endif
 
+typedef pool_handle_t taskbar_handle_t;
+
 // Win flags supposed to stay the same
 
 #define WFLAG_WIN_DECORATED             (1<<0)
@@ -217,6 +219,8 @@ typedef struct drv_video_window
 
     pool_t              *controls; //< Attached UI controls
 
+    taskbar_handle_t    task_bar_h; //< Me it task bar
+
     rgba_t       	*r_pixel; // read ptr - for blit to screen
     rgba_t       	*w_pixel; // write ptr - for painting
 #if VIDEO_DOUBLE_BUF
@@ -225,7 +229,6 @@ typedef struct drv_video_window
 //#define w_pixel pixels
 #endif
     rgba_t       	*buf[2]; // 1st/2nd halves ptrs for dbl buf switch
-
 
     // bitmap itself
     rgba_t       	pixels[];
@@ -239,7 +242,7 @@ int    point_in_win( int x, int y, drv_video_window_t *w );
 
 
 // ------------------------------------------------------------------------
-// Window interface - old, to be killed
+// Window interface
 // ------------------------------------------------------------------------
 
 //! malloc value to create drv_video_window_t
@@ -301,6 +304,26 @@ void	w_set_bg_color( window_handle_t w, rgba_t color );
 extern queue_head_t         allwindows;
 extern window_handle_t      focused_window;
 
+// -----------------------------------------------------------------------
+// Task bar
+// -----------------------------------------------------------------------
+
+taskbar_handle_t w_add_to_task_bar( window_handle_t w );
+
+taskbar_handle_t w_add_to_task_bar_icon( window_handle_t w, drv_video_bitmap_t *icon );
+
+taskbar_handle_t w_add_to_task_bar_ext( window_handle_t w, drv_video_bitmap_t *icon,
+        drv_video_bitmap_t *n_bmp,
+        drv_video_bitmap_t *p_bmp,
+        drv_video_bitmap_t *h_bmp );
+
+void w_set_task_bar_icon( window_handle_t w, drv_video_bitmap_t *bmp );
+errno_t w_remove_from_task_bar( window_handle_t w );
+
+
+// -----------------------------------------------------------------------
+// Internals
+// -----------------------------------------------------------------------
 
 
 window_handle_t drv_video_next_window(window_handle_t curr);

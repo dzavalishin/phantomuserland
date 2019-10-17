@@ -244,6 +244,7 @@ void w_control_set_callback( window_handle_t w, control_handle_t c, control_call
 void w_control_set_children( window_handle_t w, control_handle_t c, window_handle_t w_child, control_handle_t c_child );
 void w_control_set_visible( window_handle_t w, control_handle_t ch, int visible ); // unimpl yet
 void w_control_set_flags( window_handle_t w, control_handle_t ch, int toSet, int toReset );
+void w_control_set_position( window_handle_t w, control_handle_t ch, int x, int y );
 
 void w_control_set_state( window_handle_t w, control_handle_t ch, int pressed ); //< Is checkbox checked or switch turned on?
 void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ); //< Is checkbox checked or switch turned on?

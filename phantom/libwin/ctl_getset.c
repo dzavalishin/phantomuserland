@@ -264,3 +264,25 @@ void w_control_set_callback( window_handle_t w, pool_handle_t ch, control_callba
 
     RELEASE_CONTROL
 }
+
+
+
+void w_control_set_position( window_handle_t w, control_handle_t ch, int x, int y )
+{
+    GET_CONTROL
+    // TODO paint win bg at old place
+
+    //w_control_set_visible( w, ch, 0 );
+    cc->flags |= CONTROL_FLAG_DISABLED;
+    
+    //w_update(w); // clear at old place
+
+    cc->r.x = x;
+    cc->r.y = x;
+
+    //w_control_set_visible( w, ch, 1 );
+    cc->flags &= ~CONTROL_FLAG_DISABLED;    
+
+    w_paint_control( w, cc );
+    RELEASE_CONTROL
+}

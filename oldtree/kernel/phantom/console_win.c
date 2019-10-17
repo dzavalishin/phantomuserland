@@ -66,12 +66,14 @@ window_handle_t phantom_debug_window = 0;
 #else
 drv_video_window_t *phantom_console_window = 0;
 drv_video_window_t *phantom_debug_window = 0;
-drv_video_window_t *phantom_launcher_menu_window = 0;
 drv_video_window_t *phantom_settings_window = 0;
 #endif
 
+#if !NEW_TASK_BAR
 static window_handle_t phantom_launcher_window = 0;
 static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e);
+drv_video_window_t *phantom_launcher_menu_window = 0;
+#endif
 
 int volatile debug_mode_selector = 's';
 
@@ -252,10 +254,10 @@ static struct console_ops win_ops =
 #define DEBWIN_XS 416
 #define DEBWIN_YS 600
 
-//#define MAX_LAUNCH_BUTTONS 64
+#if !NEW_TASK_BAR
 #define MAX_LAUNCH_BUTTONS 3
-
 static pool_handle_t taskbuttons[MAX_LAUNCH_BUTTONS];
+#endif
 
 static void phantom_debug_window_loop();
 //static void phantom_launcher_window_loop();
@@ -319,6 +321,7 @@ void phantom_init_console_window()
     hal_start_kernel_thread(phantom_debug_window_loop);
 
 
+#if !NEW_TASK_BAR
     // -------------------------------------------------------------------
     // Launcher window
     // -------------------------------------------------------------------
@@ -390,8 +393,16 @@ void phantom_init_console_window()
 
     //bh = w_add_text_field( lmw, 1, 1+31*6, 170, 31, "Hell", COLOR_BLACK );
 
+#endif
     create_settings_window();
 
+#if NEW_TASK_BAR
+
+    w_add_to_task_bar( phantom_console_window );
+    w_add_to_task_bar( phantom_debug_window );
+    w_add_to_task_bar( phantom_settings_window );
+
+#else
     // -----------------------------
     // Buttons
     // -----------------------------
@@ -459,6 +470,7 @@ void phantom_init_console_window()
     w_draw_line( phantom_launcher_window, 0, LW_HEIGHT-2, scr_get_xsize(), LW_HEIGHT-2, la_b2 );
 
     w_update( phantom_launcher_window );
+#endif    
 }
 
 
@@ -495,6 +507,8 @@ static void put_progress()
 static void paint_memory_map(window_handle_t w);
 static void paint_vaspace_map(window_handle_t w);
 static void paint_persistent_map(window_handle_t w);
+static void paint_object_map(window_handle_t w);
+
 
 static void phantom_debug_window_loop()
 {
@@ -536,6 +550,7 @@ static void phantom_debug_window_loop()
                        "s\t- show stats\n"            "p\t- show profiler\n"
                        "d\t- dump threads to JSON\n"  "m\t- show physical memory map\n"
                        "v\t- show virtual address space map\n" "o\t- show objects (persistent) memory map\n"
+                       "a\t- show object arenas memory map\n" 
                       );
                 break;
             case 'p':            case 't':
@@ -572,7 +587,7 @@ static void phantom_debug_window_loop()
                 case 'm': w_set_title( phantom_debug_window,  "Physical memory" ); break;
                 case 'v': w_set_title( phantom_debug_window,  "Virtual address space" ); break;
                 case 'o': w_set_title( phantom_debug_window,  "Objects memory" );  break;                
-                case 'a': w_set_title( phantom_debug_window,  "Objects allocator (off)" );  break;                
+                case 'a': w_set_title( phantom_debug_window,  "Objects allocator" );  break;                
                 }
             }
         }
@@ -615,7 +630,7 @@ static void phantom_debug_window_loop()
         case 'p':           phantom_dump_profiler_buf(bp,len);           break;
         case 'm':           paint_memory_map(phantom_debug_window);      break;
         case 'v':           paint_vaspace_map(phantom_debug_window);     break;
-        case 'a':           
+        case 'a':           paint_object_map(phantom_debug_window);      break;
         case 'o':           paint_persistent_map(phantom_debug_window);  break;
         }
 
@@ -705,6 +720,17 @@ static void paint_persistent_map(window_handle_t w)
 }
 
 
+static void paint_object_map(window_handle_t w)
+{
+    memory_map_rect.ysize = w->ysize - HEAD_ROOM;
+    memory_map_rect.xsize = w->xsize - (memory_map_rect.x * 2);
+
+    vm_lock_persistent_memory();
+    paint_object_memory_map( w, &memory_map_rect );
+    vm_unlock_persistent_memory();
+}
+
+
 
 # if 0
 static void consoleOnOff(window_handle_t w, struct control *c) { 
@@ -755,8 +781,9 @@ void create_settings_window( void )
     bh = w_add_text_field( w, 20, 200, 200, 31, "Hell", COLOR_BLACK );
 
 
-    bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
+    //bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    //w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
+    bh = w_add_checkbox( w, 350, 300 );
     w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_console_window );
     w_control_set_state( w, bh, 1 );
 
@@ -764,8 +791,9 @@ void create_settings_window( void )
 
 
 
-    bh = w_add_button( w, '4', 350, 250, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
+    //bh = w_add_button( w, '4', 350, 250, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    //w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
+    bh = w_add_checkbox( w, 350, 250 );
     w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_debug_window );
     w_control_set_state( w, bh, 1 );
 

@@ -20,10 +20,8 @@
 
 void init_new_windows(void);
 
-#if CONF_TRUETYPE
 void init_truetype(void);
-
-#endif
+void init_task_bar(void);
 
 // -----------------------------------------------------------------------
 // windows lock - must be taken when manipulate all win q or on update
