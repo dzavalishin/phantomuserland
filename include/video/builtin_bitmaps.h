@@ -102,3 +102,4 @@ extern drv_video_bitmap_t		start_button_normal_bmp;
 extern drv_video_bitmap_t		start_button_selected_w_key_bmp;
 extern drv_video_bitmap_t		start_button_selected_bmp;
 extern drv_video_bitmap_t		start_button_hover_bmp;
+extern drv_video_bitmap_t		notification_green_button_bmp;
