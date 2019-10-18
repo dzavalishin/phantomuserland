@@ -154,6 +154,8 @@ class weather
         //stat_conn = new .internal.connection();
         //stat_conn.connect("stt:");
 
+		win.setAutoUpdate( 0 );
+
         while(1)
         {
 			console.putws("Weather win: sleep\n");

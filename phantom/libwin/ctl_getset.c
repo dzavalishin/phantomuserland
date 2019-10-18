@@ -286,3 +286,14 @@ void w_control_set_position( window_handle_t w, control_handle_t ch, int x, int 
     w_paint_control( w, cc );
     RELEASE_CONTROL
 }
+
+
+void w_control_set_notify( window_handle_t w, control_handle_t ch, int count )
+{
+    GET_CONTROL
+
+    cc->notify = count;
+    w_paint_control( w, cc );
+
+    RELEASE_CONTROL
+}

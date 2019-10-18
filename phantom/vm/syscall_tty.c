@@ -258,6 +258,20 @@ static int tty_setWinTitle_25( pvm_object_t me, pvm_object_t *ret, struct data_a
 }
 
 
+static int setbgcolor_26( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    struct data_area_4_tty      *da = pvm_data_area( me, tty );
+
+    DEBUG_INFO;
+
+    CHECK_PARAM_COUNT(1);
+
+    int color = AS_INT(args[0]);
+    INT32_TO_RGBA(da->bg, color);
+
+    SYSCALL_RETURN_NOTHING;
+}
+
 
 syscall_func_t  syscall_table_4_tty[32] =
 {
@@ -277,7 +291,7 @@ syscall_func_t  syscall_table_4_tty[32] =
     &fill_22,                           &putblock_23,
     // 24
     &tty_setWinPos_24,                  &tty_setWinTitle_25,
-    &invalid_syscall,                   &invalid_syscall,
+    &setbgcolor_26,                     &invalid_syscall,
     &invalid_syscall,                   &invalid_syscall,
     &invalid_syscall,                   &invalid_syscall,
 

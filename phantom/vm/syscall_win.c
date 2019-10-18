@@ -97,7 +97,7 @@ static int win_clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_
     da->x = da->y = 0;
 
     w_fill( w, da->bg );
-    w_update( w );
+    if( da->autoupdate) w_update( w );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -189,7 +189,7 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
 
     // TODO make a version of drv_video_font_tty_string that accepts non-zero terminated strings with len
     w_font_tty_string( w, tty_font, buf, fg, bg, &x, &y );
-    w_update( w );
+    if( da->autoupdate) w_update( w );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -221,8 +221,8 @@ static int win_putImage_25( pvm_object_t me, pvm_object_t *ret, struct data_area
                 (rgba_t *)pixels, _bmp->xsize, _bmp->ysize, 0, 0,
                 _bmp->xsize, _bmp->ysize
     );
-    // Sure? Make flag for window - autoUpdate! and method setAutoUpdate( false )
-    w_update( w_and_pixels );
+
+    if( da->autoupdate) w_update( w_and_pixels );
 
     SYS_FREE_O(_img);
 
@@ -408,7 +408,7 @@ static int win_update_34( pvm_object_t me, pvm_object_t *ret, struct data_area_4
     
     CHECK_PARAM_COUNT(0);
 
-    w_update( w );
+    if( da->autoupdate) w_update( w );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -468,12 +468,26 @@ static int win_drawImagePart_36( pvm_object_t me, pvm_object_t *ret, struct data
                 xsize, ysize
     );
 
-    w_update( w_and_pixels );
+    if( da->autoupdate) w_update( w_and_pixels );
 
     SYS_FREE_O(_img);
 
     SYSCALL_RETURN_NOTHING;
 }
+
+
+
+
+static int win_setAutoUpdate_37( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    DEBUG_INFO;
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+    
+    CHECK_PARAM_COUNT(1);
+    da->autoupdate = AS_INT(args[0]);
+    SYSCALL_RETURN_NOTHING;
+}
+
 
 
 
@@ -501,7 +515,7 @@ syscall_func_t  syscall_table_4_window[32+8] =
     // 32
     &win_setHandler_32,             &win_setTitle_33,
     &win_update_34,                 &win_scrollHor_35,
-    &win_drawImagePart_36,          &invalid_syscall,
+    &win_drawImagePart_36,          &win_setAutoUpdate_37,
     &invalid_syscall,               &invalid_syscall,
 
 };

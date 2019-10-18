@@ -96,6 +96,9 @@ static int phantom_console_window_puts(const char *s)
     	s, console_fg, console_bg, &ttx, &tty );
 
     w_update( phantom_console_window );
+
+    w_add_notification( phantom_console_window, 1 );
+
     return 0;
 }
 

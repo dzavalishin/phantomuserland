@@ -395,22 +395,17 @@ struct data_area_4_weakref
 
 struct data_area_4_window
 {
-#if NEW_WINDOWS
-    window_handle_t                     w;
-    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
-#else
-    drv_video_window_t                  w;
-    // this field extends w and works as it's last field. 
-    //rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
-#endif
     pvm_object_t                        o_pixels;       //< .i.binary object containing bitmap for window
     pvm_object_t                        connector;      // Used for callbacks - events
 
-    int                                 x, y; // in pixels
+    uint32_t                            x, y; // in pixels
     rgba_t                              fg, bg; // colors
 
-    //pvm_object_t                   event_handler; // connection!
-    char                                title[PVM_MAX_TTY_TITLE+1];
+    //pvm_object_t                      event_handler; // connection!
+    char                                title[PVM_MAX_TTY_TITLE+1]; // TODO wchar_t
+
+    uint32_t                            autoupdate;
+
 };
 
 

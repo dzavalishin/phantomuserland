@@ -108,6 +108,7 @@
       "errno.h": "c",
       "control.h": "c",
       "keyboard_mode2_tab.h": "c",
-      "font.h": "c"
+      "font.h": "c",
+      "ui.h": "c"
     }
   }
