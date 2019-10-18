@@ -112,5 +112,8 @@ drv_video_window_t *private_drv_video_window_create(int xsize, int ysize);
 /// Is one of topmost - i.e. covered only by WFLAG_WIN_ONTOP ones
 int iw_is_top(drv_video_window_t *w);
 
+void w_fill_bitmap( rgba_t *dest, rgba_t color, int npixels );
 
+void iw_setup_buffers(drv_video_window_t *w); //< setup r_ and w_pointers
+void iw_switch_buffers(drv_video_window_t *w); //< for double buffered mode
 

@@ -139,15 +139,15 @@ typedef struct drv_video_window
 
     rgba_t       	            *r_pixel;        //< read ptr - for blit to screen
     rgba_t       	            *w_pixel;        //< write ptr - for painting
+    rgba_t       	            *buf[2];         //< 1st/2nd halves ptrs for dbl buf switch
 #if VIDEO_DOUBLE_BUF
 #else
 //#define r_pixel pixels
 //#define w_pixel pixels
 #endif
-    rgba_t       	            *buf[2];         //< 1st/2nd halves ptrs for dbl buf switch
 
     // bitmap itself
-    rgba_t       	             pixels[];
+    rgba_t       	            *bitmap;
 } drv_video_window_t;
 
 
@@ -174,7 +174,7 @@ drv_video_window_t *drv_video_window_create(int xsize, int ysize, int x, int y, 
 void 	drv_video_window_free(drv_video_window_t *w);
 
 // init for statically allocated ones
-void 	drv_video_window_init( drv_video_window_t *w, int xsize, int ysize, int x, int y, rgba_t bg, int flags, const char *title );
+void 	drv_video_window_init( drv_video_window_t *w, void *pixels, int xsize, int ysize, int x, int y, rgba_t bg, int flags, const char *title );
 // destroy for statically allocated ones
 void 	drv_video_window_destroy(drv_video_window_t *w);
 
@@ -302,7 +302,7 @@ void win2blt_flags( u_int32_t *flags, const window_handle_t w );
 //! After calling this func you must reset all the required
 //! fields and call w_restart_attach( w )
 //! to add window to in-kernel lists and repaint it.
-void            w_restart_init(window_handle_t w);
+void            w_restart_init(window_handle_t w, void *pixels);
 
 // Called from vm restart code to reattach window to win system
 void            w_restart_attach( window_handle_t w );
@@ -317,8 +317,6 @@ window_handle_t w_get_bg_window(void);
 
 
 #if !NEW_WINDOWS
-
-void w_switch_buffers(drv_video_window_t *w);
 
 void w_update( drv_video_window_t *w );
 
