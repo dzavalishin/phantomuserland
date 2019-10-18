@@ -56,6 +56,8 @@ void w_to_bottom(drv_video_window_t *w)
 
 void w_to_top(drv_video_window_t *w)
 {
+    w_reset_notification( w ); // If some notifications are in task bar, reset 'em
+
     w_lock();
 
     w->state &= ~WSTATE_WIN_UNCOVERED; // mark as possibly covered
@@ -117,3 +119,31 @@ inserted:
 }
 
 
+/// UNLOCKED: call from lock only
+/// Is one of topmost - i.e. covered only by WFLAG_WIN_ONTOP ones
+int iw_is_top(drv_video_window_t *w)
+{
+    w_assert_lock();
+
+    drv_video_window_t *iw;
+    queue_iterate_back(&allwindows, iw, drv_video_window_t *, chain)
+    {
+        if( iw == w ) 
+            return 1;
+
+        if( ! (iw->flags & WFLAG_WIN_ONTOP) )
+            break;
+    }
+
+    return 0;
+}
+
+
+/// Is one of topmost - i.e. covered only by WFLAG_WIN_ONTOP ones
+int w_is_top(drv_video_window_t *w)
+{
+    w_lock();
+    int ret = iw_is_top(w);
+    w_unlock();
+    return ret;
+}

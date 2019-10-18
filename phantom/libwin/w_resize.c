@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Windowing system - resize. Unimpl.
  *
@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "win"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -30,8 +30,8 @@ do_window_resize( drv_video_window_t *w, int xsize, int ysize )
 
 
 
-void
-w_resize( drv_video_window_t *w, int xsize, int ysize )
+void    
+w_resize( window_handle_t w, int xsize, int ysize, void *new_buffer, int clear )
 {
     rect_t oldsize;
     rect_t newsize;
@@ -42,6 +42,8 @@ w_resize( drv_video_window_t *w, int xsize, int ysize )
     w_get_bounds( w, &oldsize );
     do_window_resize(w, xsize, ysize);
     w_get_bounds( w, &newsize );
+
+    win_make_decorations( w ); // TODO clear dec?!
 
     rect_add( &maxsize, &oldsize, &newsize );
 

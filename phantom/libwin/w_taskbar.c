@@ -172,11 +172,21 @@ static void task_bar_callback(window_handle_t w, struct control *cc) {
         return;
     }
 
-    // TODO bring on top if not
-
-    int on = cc->state == cs_pressed;
-    w_set_visible( e->w, on );
-    // if( on ) w_to_top( e-> w ); // TODO can't - recurs mutex - send message 
+    // bring on top if not
+    if( !iw_is_top(e->w) ) 
+    {
+        w_set_visible( e->w, 1 );
+        //w_to_top( e->w ); // TODO can't - recurse mutex - send message 
+        ev_q_put_win( 0, 0, UI_EVENT_WIN_TO_TOP, e->w );
+        
+        if(cc->state != cs_pressed) // TODO quite a hack? call method? Need internal ictl_set_state( cc, state )?
+        {
+            cc->state = cs_pressed;
+            w_paint_control( cc->w, cc );
+        }
+    }
+    else
+        w_set_visible( e->w, cc->state == cs_pressed );
 
     pool_release_el( task_bar, h );
     }
@@ -308,6 +318,8 @@ void w_set_task_bar_icon( window_handle_t w, drv_video_bitmap_t *bmp )
     assert( w );
     taskbar_handle_t t = w->task_bar_h;
 
+    if( t == 0 ) return;
+
     task_bar_el_t *e = pool_get_el( task_bar, t );
     if( 0 == e )
     {
@@ -316,6 +328,52 @@ void w_set_task_bar_icon( window_handle_t w, drv_video_bitmap_t *bmp )
     }
 
     w_control_set_icon( task_bar_window, e->c, bmp );
+
+    pool_release_el( task_bar, t );
+}
+
+
+void w_add_notification( window_handle_t w, int count_to_add )
+{
+    assert( w );
+    taskbar_handle_t t = w->task_bar_h;
+
+    if( t == 0 ) return;
+
+    task_bar_el_t *e = pool_get_el( task_bar, t );
+    if( 0 == e )
+    {
+        LOG_ERROR( 1, "invalid handle %x", t );
+        return;
+    }
+
+    e->notif_count += count_to_add;
+
+    // w_is_in_focus is a very cheap check and usually true for topmost ones
+    if( w_is_in_focus(w) && w_is_top(w) ) e->notif_count = 0; 
+
+    w_control_set_notify( task_bar_window, e->c, e->notif_count );
+
+    pool_release_el( task_bar, t );
+}
+
+void w_reset_notification( window_handle_t w )
+{
+    assert( w );
+    taskbar_handle_t t = w->task_bar_h;
+
+    if( t == 0 ) return;
+
+    task_bar_el_t *e = pool_get_el( task_bar, t );
+    if( 0 == e )
+    {
+        LOG_ERROR( 1, "invalid handle %x", t );
+        return;
+    }
+
+    e->notif_count = 0;
+
+    w_control_set_notify( task_bar_window, e->c, e->notif_count );
 
     pool_release_el( task_bar, t );
 }

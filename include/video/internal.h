@@ -99,11 +99,18 @@ extern int      bit_mover_byte_step;
 
 
 // -----------------------------------------------------------------------
-// etc?
+// Creation
 // -----------------------------------------------------------------------
 
 drv_video_window_t *private_drv_video_window_create(int xsize, int ysize);
 
+// -----------------------------------------------------------------------
+// Internals
+// -----------------------------------------------------------------------
+
+/// UNLOCKED: call from lock only
+/// Is one of topmost - i.e. covered only by WFLAG_WIN_ONTOP ones
+int iw_is_top(drv_video_window_t *w);
 
 
 
