@@ -3,7 +3,7 @@
  * Phantom OS
  *
  * Copyright (C) 2005-2011 Phantom OS team
- * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Window.
  *
@@ -26,15 +26,11 @@
 #include <kernel/pool.h>
 
 #define VIDEO_T_IN_D 0
-//#define T_IN_D VIDEO_T_IN_D
 
-#if NEW_WINDOWS
-typedef pool_handle_t window_handle_t;
-#else
+
 typedef struct drv_video_window * window_handle_t;
-#endif
-
 typedef pool_handle_t taskbar_handle_t;
+
 
 // Win flags supposed to stay the same
 
@@ -81,160 +77,80 @@ typedef pool_handle_t taskbar_handle_t;
 #define WBUTTON_SYS_ROLLUP 				WBUTTON_SYS(0)
 #define WBUTTON_SYS_CLOSE 				WBUTTON_SYS(1)
 
+
+
 // -----------------------------------------------------------------------
-// New windows (in work)
-// -----------------------------------------------------------------------
-
-typedef struct _phantom_window
-{
-    int                 xsize; // physical
-    int                 ysize;
-
-    int                 x, y, z; // On screen
-    int                 dx, dy;  // Drag base (see titleMouseEventProcessor)
-
-    //int                 unused_generation; // used to redraw self and borders on global events
-    int                 flags; // Not supposed to change during window's life
-    int                 state; // Can change anytime
-
-    //queue_chain_t       chain; // All windows are on this chain
-
-    int                 li, ti, ri, bi; // insets
-
-    rgba_t              bg; // background color
-
-    const char*         title;
-
-    //queue_head_t        events; // Incoming events
-    //volatile int        events_count; // To prevent overfill of dead window q
-
-    int                 stall; // True if event queue is overloaded and events are being lost
-
-    /*!
-     * Called from main event dispatch thread after event is placed to
-     * window event queue. Supposed to process event or trigger waiting
-     * thread to do that.
-     */
-    int                 (*inKernelEventProcess)( window_handle_t, struct ui_event *e );
-
-    tid_t               owner;
-
-    //pool_handle_t       w_title; // child window - title
-    //pool_handle_t       w_decor; // child window - decorations
-    //pool_handle_t       w_owner; // my parent window
-
-    // bitmap itself
-    rgba_t       	*pixel;
-} window_t;
-
-
-
-
-
-
-pool_handle_t 	w_create( int xsize, int ysize );
-//void 		w_resize( pool_handle_t h, int xsize, int ysize );
-//void 		w_moveto( pool_handle_t h, int x, int y );
-void            w_blt( pool_handle_t h );
-//void		w_set_visible( pool_handle_t h, int v );
-
-//void 		w_to_top(pool_handle_t h);
-//void 		w_to_bottom(pool_handle_t h);
-
-//void    	w_clear( pool_handle_t h );
-//void    	w_fill( pool_handle_t h, rgba_t color );
-//void 		w_fill_rect( pool_handle_t h, rgba_t color, rect_t r );
-//void		w_pixel( pool_handle_t h, int x, int y, rgba_t color );
-//void    	w_draw_bitmap( pool_handle_t h, int x, int y, drv_video_bitmap_t *bmp );
-
-void            w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len );
-void            w_draw_v_line( window_handle_t h, rgba_t color, int x, int y, int len );
-//void          w_draw_line( pool_handle_t h, rgba_t color, int x, int y, int x2, int y2 );
-
-errno_t         w_scroll_hor( window_handle_t w, int x, int y, int xs, int ys, int s );
-void            w_scroll_up( window_handle_t win, int npix, rgba_t color);
-
-//! Called from object restart code to reinit window struct
-//! contained in VM object. This func just clears pointers.
-//! After calling this func you must reset all the required
-//! fields and call w_restart_attach( w )
-//! to add window to in-kernel lists and repaint it.
-void            w_restart_init(window_handle_t w);
-
-// Called from vm restart code to reattach window to win system
-void            w_restart_attach( window_handle_t w );
-
-// Get most bottom (background) window. Used to set scrren background pic.
-window_handle_t w_get_bg_window(void);
-
-
-
-#if !NEW_WINDOWS
-// -----------------------------------------------------------------------
-// Old windows
+// Window struct
 // -----------------------------------------------------------------------
 
-
-// SNAPSHOT WARNING: this structure is used in snapshotted objects. If you change it, old snapshots are invalid. Be careful.
+/**
+ * 
+ * Main structure representing window.
+ * 
+ * SNAPSHOT WARNING: this structure is used in snapshotted objects. 
+ * If you change it, old snapshots are invalid. Be careful.
+ * 
+ * 
+ * 
+**/
 typedef struct drv_video_window
 {
-    int                 xsize; // physical
-    int                 ysize;
+    int                          xsize;          //< Pixels
+    int                          ysize;
 
-    int                 x, y, z; // On screen
-    int                 dx, dy;  // Drag base (see titleMouseEventProcessor)
+    int                          x, y, z;        //< On screen
+    int                          dx, dy;         //< Drag base (see titleMouseEventProcessor)
 
-    //int                 unused_generation; // used to redraw self and borders on global events
-    int                 flags; // Not supposed to change during window's life
-    int                 state; // Can change anytime
+    int                          flags;          //< Not supposed to change during window's life
+    int                          state;          //< Can change anytime
 
-    queue_chain_t       chain; // All windows are on this chain
+    queue_chain_t                chain;          //< All windows are on this chain
 
-    int                 li, ti, ri, bi; // insets
+    int                          li, ti, ri, bi; //< insets - unused?
 
-    rgba_t              bg; // background color
+    rgba_t                       bg;             //< background color
 
-    const char*         title;
+    const char*                  title;
 
-    queue_head_t        events; // Incoming events
-    volatile int        events_count; // To prevent overfill of dead window q
+    queue_head_t                 events;         //< Incoming events
+    volatile int                 events_count;   //< To prevent overfill of dead window q
 
-    int                 stall; // True if event queue is overloaded and events are being lost
+    int                          stall;          //< True if event queue is overloaded and events are being lost
 
     /*!
      * Called from main event dispatch thread after event is placed to
      * window event queue. Supposed to process event or trigger waiting
      * thread to do that.
      */
-    int                 (*inKernelEventProcess)( struct drv_video_window *w, struct ui_event *e );
+    int                         (*inKernelEventProcess)( struct drv_video_window *w, struct ui_event *e );  
+    hal_sem_t                   *eventDeliverSema; //< If not null - signalled on new event in win q
 
-    // If not null - signalled on new event in win q
-    hal_sem_t           *eventDeliverSema;
-
-    tid_t               owner;
+    tid_t                        owner;
 
 #if !VIDEO_T_IN_D
-    struct drv_video_window     *w_title; // child window - title
+    struct drv_video_window     *w_title;        //< Child window - title
 #endif
-    struct drv_video_window     *w_decor; // child window - decorations
-    struct drv_video_window     *w_owner; // my parent window
+    struct drv_video_window     *w_decor;        //< Child window - decorations
+    struct drv_video_window     *w_owner;        //< My parent window - i am decor/title
 
-    pool_t              *controls; //< Attached UI controls
+    pool_t                      *controls;       //< Attached UI controls
 
-    taskbar_handle_t    task_bar_h; //< Me it task bar
+    taskbar_handle_t             task_bar_h;     //< Me it task bar
 
-    rgba_t       	*r_pixel; // read ptr - for blit to screen
-    rgba_t       	*w_pixel; // write ptr - for painting
+    rgba_t       	            *r_pixel;        //< read ptr - for blit to screen
+    rgba_t       	            *w_pixel;        //< write ptr - for painting
 #if VIDEO_DOUBLE_BUF
 #else
 //#define r_pixel pixels
 //#define w_pixel pixels
 #endif
-    rgba_t       	*buf[2]; // 1st/2nd halves ptrs for dbl buf switch
+    rgba_t       	            *buf[2];         //< 1st/2nd halves ptrs for dbl buf switch
 
     // bitmap itself
-    rgba_t       	pixels[];
+    rgba_t       	             pixels[];
 } drv_video_window_t;
+
+
 
 // returns nonzero if rect is out of window
 int    rect_win_bounds( rect_t *r, drv_video_window_t *w );
@@ -274,34 +190,63 @@ void    w_fill( window_handle_t win, rgba_t color );
 void 	w_draw_rect( window_handle_t win, rgba_t color, rect_t r );
 void 	w_fill_rect( window_handle_t win, rgba_t color, rect_t r );
 
-void	w_pixel( window_handle_t w, int x, int y, rgba_t color );
+//#define w_draw_pixel w_pixel
 
-#define w_draw_pixel w_pixel
-
-void    drv_video_window_draw_bitmap( window_handle_t w, int x, int y, drv_video_bitmap_t *bmp );
-
-#define w_draw_bitmap drv_video_window_draw_bitmap
-
-
+void	w_draw_pixel( window_handle_t w, int x, int y, rgba_t color );
 void    w_draw_line( window_handle_t w, int x1, int y1, int x2, int y2, rgba_t c);
 void    w_fill_ellipse( window_handle_t w, int x,int y,int lx,int ly, rgba_t c);
 void    w_fill_box( window_handle_t w, int x,int y,int lx,int ly, rgba_t c);
 void    w_draw_box( window_handle_t w, int x,int y,int lx,int ly, rgba_t c);
+void    w_draw_bitmap( window_handle_t w, int x, int y, drv_video_bitmap_t *bmp );
+void    w_draw_blend_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp ); //< Draw with alpha blending
 
 
 void    w_move( window_handle_t w, int x, int y );
 
-//! Warning - caller must check buffer size!
-void    w_resize( window_handle_t w, int xsize, int ysize );
+errno_t w_scroll_hor( window_handle_t w, int x, int y, int xs, int ys, int s );
+void    w_scroll_up( window_handle_t win, int npix, rgba_t color);
 
 void    w_set_title( window_handle_t w,  const char *title );
 void    w_get_bounds( window_handle_t w, rect_t *out );
 void    w_set_visible( window_handle_t h, int v );
 void	w_set_bg_color( window_handle_t w, rgba_t color );
 
+/**
+ * 
+ * Resize window - tricky!
+ * 
+ * Warning - caller must check buffer size!
+ * 
+ * It is up to caller to be sure that window has enough 
+ * place in its allocated memory for new size. If it is
+ * not so, caller must allocate and pass new buffer.
+ * 
+ * Use drv_video_window_bytes() to find correct size of
+ * video memory for window, add sizeof(window_handle_t)
+ * 
+ * \param[in] w           Window to resize
+ * \param[in] xsize       New width
+ * \param[in] ysize       New height
+ * \param[in] new_buffer  Zero if old memory is big enough for a new size, or new buffer.
+ * \param[in] clear       Do not attempt to save contents, clear with bg color.
+ * 
+**/
+void    w_resize_ext( window_handle_t w, int xsize, int ysize, void *new_buffer, int clear );
+
+// -----------------------------------------------------------------------
+// Getters for state
+// -----------------------------------------------------------------------
 
 
-#endif // !new win
+#define w_is_in_focus(w) ({ ((w)->state) & WSTATE_WIN_FOCUSED; })
+
+/// Is one of topmost - i.e. covered only by WFLAG_WIN_ONTOP ones
+int w_is_top(drv_video_window_t *w);
+
+
+// -----------------------------------------------------------------------
+// Globals - TODO move away
+// -----------------------------------------------------------------------
 
 extern queue_head_t         allwindows;
 extern window_handle_t      focused_window;
@@ -310,6 +255,13 @@ extern window_handle_t      focused_window;
 // Task bar
 // -----------------------------------------------------------------------
 
+/**
+ * 
+ * Add window to task bar. Task bar will control window visibility.
+ * Also, application can control image in task bar by changing
+ * task bar icon with w_set_task_bar_icon.
+ * 
+**/
 taskbar_handle_t w_add_to_task_bar( window_handle_t w );
 
 taskbar_handle_t w_add_to_task_bar_icon( window_handle_t w, drv_video_bitmap_t *icon );
@@ -320,7 +272,16 @@ taskbar_handle_t w_add_to_task_bar_ext( window_handle_t w, drv_video_bitmap_t *i
         drv_video_bitmap_t *h_bmp );
 
 void w_set_task_bar_icon( window_handle_t w, drv_video_bitmap_t *bmp );
+//! Not impl yet - displays a marker with a number aside to icon top
+void w_set_task_bar_note( window_handle_t w, int n_of_outstanding_events );
+//void w_set_task_bar_menu( window_handle_t w, window_handle_t m );
 errno_t w_remove_from_task_bar( window_handle_t w );
+
+
+/// Add marker in taskbar telling that window needs attention
+void w_add_notification( window_handle_t w, int count_to_add );
+/// Remove marker. Also automativally called on bringing window to top
+void w_reset_notification( window_handle_t w );
 
 
 // -----------------------------------------------------------------------
@@ -331,6 +292,23 @@ errno_t w_remove_from_task_bar( window_handle_t w );
 window_handle_t drv_video_next_window(window_handle_t curr);
 
 void win2blt_flags( u_int32_t *flags, const window_handle_t w );
+
+// -----------------------------------------------------------------------
+// Persistent mem support
+// -----------------------------------------------------------------------
+
+//! Called from object restart code to reinit window struct
+//! contained in VM object. This func just clears pointers.
+//! After calling this func you must reset all the required
+//! fields and call w_restart_attach( w )
+//! to add window to in-kernel lists and repaint it.
+void            w_restart_init(window_handle_t w);
+
+// Called from vm restart code to reattach window to win system
+void            w_restart_attach( window_handle_t w );
+
+// Get most bottom (background) window. Used to set scrren background pic.
+window_handle_t w_get_bg_window(void);
 
 
 // -----------------------------------------------------------------------
@@ -379,6 +357,74 @@ void window_basic_border( window_handle_t dest, const rgba_t *src, int srcSize, 
 #endif
 
 void w_repaint_screen_part( drv_video_window_t *w, rect_t *todo );
+
+
+
+#if 0
+#if NEW_WINDOWS
+
+typedef pool_handle_t window_handle_t;
+
+
+// -----------------------------------------------------------------------
+// New windows attempt - outdated
+// -----------------------------------------------------------------------
+
+typedef struct _phantom_window
+{
+    int                 xsize; // physical
+    int                 ysize;
+
+    int                 x, y, z; // On screen
+    int                 dx, dy;  // Drag base (see titleMouseEventProcessor)
+
+    //int                 unused_generation; // used to redraw self and borders on global events
+    int                 flags; // Not supposed to change during window's life
+    int                 state; // Can change anytime
+
+    //queue_chain_t       chain; // All windows are on this chain
+
+    int                 li, ti, ri, bi; // insets
+
+    rgba_t              bg; // background color
+
+    const char*         title;
+
+    //queue_head_t        events; // Incoming events
+    //volatile int        events_count; // To prevent overfill of dead window q
+
+    int                 stall; // True if event queue is overloaded and events are being lost
+
+    /*!
+     * Called from main event dispatch thread after event is placed to
+     * window event queue. Supposed to process event or trigger waiting
+     * thread to do that.
+     */
+    int                 (*inKernelEventProcess)( window_handle_t, struct ui_event *e );
+
+    tid_t               owner;
+
+    //pool_handle_t       w_title; // child window - title
+    //pool_handle_t       w_decor; // child window - decorations
+    //pool_handle_t       w_owner; // my parent window
+
+    // bitmap itself
+    rgba_t       	*pixel;
+} window_t;
+
+pool_handle_t 	w_create( int xsize, int ysize );
+void            w_blt( pool_handle_t h );
+
+void            w_draw_h_line( window_handle_t h, rgba_t color, int x, int y, int len );
+void            w_draw_v_line( window_handle_t h, rgba_t color, int x, int y, int len );
+
+//void 		w_moveto( pool_handle_t h, int x, int y );
+//void		w_pixel( pool_handle_t h, int x, int y, rgba_t color );
+
+
+#endif
+#endif
+
 
 
 #endif // WINDOW_H

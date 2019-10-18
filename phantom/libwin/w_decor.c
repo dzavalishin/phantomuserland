@@ -223,8 +223,8 @@ void win_make_decorations(drv_video_window_t *w)
                                 w->title, COLOR_BLACK, COLOR_TRANSPARENT,
                                 bordr_size+3, bmp_y-4 );
 
-    drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - close_bmp.xsize - 5, bmp_y+1, &close_bmp );
-    drv_video_window_draw_bitmap( w->w_decor, w->w_decor->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, bmp_y+1, &pin_bmp );
+    w_draw_bitmap( w->w_decor, w->w_decor->xsize - close_bmp.xsize - 5, bmp_y+1, &close_bmp );
+    w_draw_bitmap( w->w_decor, w->w_decor->xsize - pin_bmp.xsize - 2 - close_bmp.xsize - 5, bmp_y+1, &pin_bmp );
 
 
     // nSteps is x size, srcSize is y size

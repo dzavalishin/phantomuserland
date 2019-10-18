@@ -167,6 +167,7 @@ typedef struct control
     hover_state_t       hovered;        //< Hovered by mouse
     uint32_t            focused;        //< Selected in window
     uint32_t            changed;        //< Needs repaint
+    uint32_t            notify;         //< Notifications count - round bullet with number in the top right corner
 
     //control_group_t *   group;          //< Group we belong, if any
     //struct control *    next_in_group;  //< linked list of controls in group - radio or menu
@@ -245,6 +246,8 @@ void w_control_set_children( window_handle_t w, control_handle_t c, window_handl
 void w_control_set_visible( window_handle_t w, control_handle_t ch, int visible ); // unimpl yet
 void w_control_set_flags( window_handle_t w, control_handle_t ch, int toSet, int toReset );
 void w_control_set_position( window_handle_t w, control_handle_t ch, int x, int y );
+void w_control_set_notify( window_handle_t w, control_handle_t ch, int count ); //< show bullet with number in top right corner
+
 
 void w_control_set_state( window_handle_t w, control_handle_t ch, int pressed ); //< Is checkbox checked or switch turned on?
 void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ); //< Is checkbox checked or switch turned on?

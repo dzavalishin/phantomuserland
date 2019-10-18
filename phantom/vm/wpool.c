@@ -1,4 +1,7 @@
-#if 1
+void init_new_windows(void)
+{
+}
+#if 0
 /**
  *
  * Phantom OS

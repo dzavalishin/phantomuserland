@@ -196,7 +196,7 @@ void videotest_pbm()
             drv_video_window_t *w = drv_video_window_create( 900, 600, 10, 10, COLOR_BLACK, "BMP Test Window", WFLAG_WIN_DECORATED );
             drv_video_winblt( w );
 
-            drv_video_window_draw_bitmap( w, 0, 0, bmp );
+            w_draw_bitmap( w, 0, 0, bmp );
             drv_video_winblt( w );
 
             getchar();
