@@ -31,43 +31,43 @@ import .ru.dz.phantom.handler;
 
 class window
 {
-        int     getXSize() [16] {}
-        int     getYSize() [17] {}
+    int     getXSize() [16] {}
+    int     getYSize() [17] {}
 
-        int     getX() [18] {}
-        int     getY() [19] {}
+    int     getX() [18] {}
+    int     getY() [19] {}
 
-        void    update() [34] {}
+    void    update() [34] {}
+    //! Update window after each paint - flickers a bit. Turn off and update manually.
+    void    setAutoUpdate( var auto : int ) [37] {}
 
-        void    clear() [20] {}
-        void    fill(var fg : int) [21] {}
+    void    clear() [20] {}
+    void    fill(var fg : int) [21] {}
 
-        void    setBg( var bg : int ) [23] {}
-        void    setFg( var fg : int ) [22] {}
+    void    setBg( var bg : int ) [23] {}
+    void    setFg( var fg : int ) [22] {}
 
-        // todo will need font parameter
-        void    drawString( var x : int, var y : int, var s : string ) [24] {}
-        void    drawImage( var x : int, var y : int, var img : .internal.object ) [25] {} // error - param is bitmap
+    // todo will need font parameter
+    void    drawString( var x : int, var y : int, var s : string ) [24] {}
+    void    drawImage( var x : int, var y : int, var img : .internal.object ) [25] {} // error - param is bitmap
+    // One can put bitmap with basic drawImage and redraw part with this call
+    void    drawImagePart( var x : int, var y : int, var img : .internal.object, var xstart : int, var ystart : int, var xsize : int, var ysize : int ) [36] {} // error - param is bitmap
 
-        void    setWinSize( var xsize : int, var ysize : int ) [26] {}
-        void    setWinPosition( var x : int, var y : int ) [27] {}
+    void    setWinSize( var xsize : int, var ysize : int ) [26] {}
+    void    setWinPosition( var x : int, var y : int ) [27] {}
 
+    void    drawLine( var x : int, var y : int, var xsize : int, var ysize : int ) [28] {}
+    void    drawBox( var x : int, var y : int, var xsize : int, var ysize : int ) [29] {}
 
- 
-        void    drawLine( var x : int, var y : int, var xsize : int, var ysize : int ) [28] {}
-        void    drawBox( var x : int, var y : int, var xsize : int, var ysize : int ) [29] {}
+    void    fillBox( var x : int, var y : int, var xsize : int, var ysize : int ) [30] {}
+    void    fillEllipse( var x : int, var y : int, var xsize : int, var ysize : int ) [31] {}
 
-        void    fillBox( var x : int, var y : int, var xsize : int, var ysize : int ) [30] {}
-        void    fillEllipse( var x : int, var y : int, var xsize : int, var ysize : int ) [31] {}
-
-        void    setEventHandler( var handler : .ru.dz.phantom.handler ) [32] {}
-        void    setTitle( var title : string ) [33] {}
+    void    setEventHandler( var handler : .ru.dz.phantom.handler ) [32] {}
+    void    setTitle( var title : string ) [33] {}
 
     // errno
-        int     scrollHor( var x : int, var y : int, var xsize : int, var ysize : int, var steps : int ) [35] {}
+    int     scrollHor( var x : int, var y : int, var xsize : int, var ysize : int, var steps : int ) [35] {}
 
-    // One can put bitmap with basic drawImage and redraw part with this call
-        void    drawImagePart( var x : int, var y : int, var img : .internal.object, var xstart : int, var ystart : int, var xsize : int, var ysize : int ) [36] {} // error - param is bitmap
-
+    
 
 };
