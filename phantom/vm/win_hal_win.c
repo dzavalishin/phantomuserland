@@ -101,7 +101,8 @@ int win_hal_mutex_unlock(void *_m)
 int win_hal_mutex_is_locked(void *_m)
 {
     struct phantom_mutex_impl *impl = _m;
-    return impl->lock;
+    //return impl->lock;
+    return 1;
 }
 
 /*

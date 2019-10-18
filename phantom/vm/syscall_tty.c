@@ -343,7 +343,9 @@ void pvm_internal_init_tty( pvm_object_t  ttyos )
 
     strlcpy( tty->title, "VM TTY Window", sizeof(tty->title) );
 
-    drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, tty->bg, WFLAG_WIN_DECORATED, tty->title );
+    void *pixels = &(tty->w) + sizeof(drv_video_window_t);
+
+    drv_video_window_init( &(tty->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, tty->bg, WFLAG_WIN_DECORATED, tty->title );
     w_clear( &(tty->w) );
     //w_update( &(tty->w) );
 
@@ -382,7 +384,9 @@ void pvm_restart_tty( pvm_object_t o )
 
     printf( "restart TTY %p\n", tty );
 
-    w_restart_init( &tty->w );
+    void *pixels = ((void*)&(tty->w)) + sizeof(drv_video_window_t);
+
+    w_restart_init( &tty->w, pixels );
 
     tty->w.title = tty->title; // need? must be correct in snap
 
