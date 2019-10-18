@@ -406,6 +406,7 @@ struct data_area_4_window
 
     uint32_t                            autoupdate;
 
+    drv_video_window_t                  w;
 };
 
 
