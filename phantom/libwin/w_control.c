@@ -28,6 +28,7 @@
 #include <video/internal.h>
 
 #include <video/control.h>
+#include <video/builtin_bitmaps.h>
 
 #include <dev/key_event.h>
 
@@ -62,8 +63,32 @@ static void paint_or_replicate(window_handle_t win, control_t *cc, drv_video_bit
     if( img->xsize == 1 )
         w_replicate_hor( win, cc->r.x, cc->r.y, cc->r.xsize, img->pixel, img->ysize );
     else
-        drv_video_window_draw_bitmap( win, cc->r.x, cc->r.y, img );
+        w_draw_bitmap( win, cc->r.x, cc->r.y, img );
 }
+
+
+void ctl_paint_notification( window_handle_t win, control_t *cc )
+{
+    if(!cc->notify) return;
+
+    char counter[2] = "0";
+    color_t black90 = { 25, 25, 25, 0xFF };
+
+    if( cc->notify < 10 ) counter[0] = '0' + cc->notify;
+    else counter[0] = '#';
+
+    drv_video_bitmap_t *nb = &notification_green_button_bmp;
+
+    int y = cc->r.ysize - nb->ysize + 4;
+    int x = cc->r.xsize - nb->xsize + 4;
+        // add y to x and subtract from y to have equal dist
+    w_draw_blend_bitmap( win, cc->r.x + x, cc->r.y + y, nb );
+    w_font_draw_string( win, &drv_video_kolibri1_font, 
+        counter, black90, COLOR_TRANSPARENT,
+        cc->r.x + x + 10, cc->r.y + y + 7 );
+}
+
+
 
 void ctl_paint_bg( window_handle_t win, control_t *cc )
 {
@@ -155,6 +180,7 @@ static void ctl_button_paint(window_handle_t win, control_t *cc )
     ctl_paint_bg( win, cc );
     int shift = ctl_paint_icon( win, cc );
     ctl_paint_text( win, cc, shift );
+    ctl_paint_notification( win, cc );
     ctl_paint_border( win, cc );
 }
 
@@ -164,6 +190,7 @@ static void ctl_menu_item_paint(window_handle_t win, control_t *cc )
     ctl_paint_bg( win, cc );
     int shift = ctl_paint_icon( win, cc );
     ctl_paint_text( win, cc, shift );
+    ctl_paint_notification( win, cc );
     ctl_paint_border( win, cc );
     LOG_FLOW( 10, "paint menu item id %d", cc->id );
 }
@@ -173,6 +200,7 @@ static void ctl_label_paint(window_handle_t win, control_t *cc )
     ctl_paint_bg( win, cc );
     int shift = ctl_paint_icon( win, cc );
     ctl_paint_text( win, cc, shift );
+    ctl_paint_notification( win, cc );
     ctl_paint_border( win, cc );
     //LOG_FLOW( 10, "paint label id %d", cc->id );
 }
