@@ -261,7 +261,7 @@ static size_t      fatff_write(   struct uufile *f, const void *dest, size_t byt
 
     r = f_write(fp, dest, bytes, &res );
 
-    if( r || res <= 0 )
+    if( r || res == 0 )
         return 0;
 
     f->pos += res;
