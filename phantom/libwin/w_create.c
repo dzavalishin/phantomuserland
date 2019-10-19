@@ -44,7 +44,11 @@ void drv_video_window_free(drv_video_window_t *w)
     free(w);
 }
 
-
+/**
+ * 
+ * NB! xsize/ysize must be set up before call to us!
+ * 
+**/
 void iw_setup_buffers(drv_video_window_t *w)
 {
     w->buf[0] = w->bitmap;
@@ -103,8 +107,6 @@ common_window_init( drv_video_window_t *w,  void *pixels,
     }
 
     w->bitmap = pixels;
-    iw_setup_buffers(w);
-
 
     w->state |= WSTATE_WIN_VISIBLE; // default state is visible
 
@@ -133,6 +135,9 @@ common_window_init( drv_video_window_t *w,  void *pixels,
 #endif
     w->w_decor = 0;
     w->w_owner = 0;
+
+    // After setting most of the structure, namely x/y sizes
+    iw_setup_buffers(w);
 }
 
 //! Called from object restart code to reinit window struct
@@ -142,8 +147,12 @@ common_window_init( drv_video_window_t *w,  void *pixels,
 //! to add window to in-kernel lists and repaint it.
 void w_restart_init(drv_video_window_t *w, void *pixels)
 {
-    w->bitmap = pixels; // TODO buf[] init?
-    iw_setup_buffers(w);
+    w->bitmap = pixels; 
+    // TODO actually iw_setup_buffers will break current painting by
+    // switching buffers in the middle of user program's paint process
+    // we must either do not call it for pointers in snapped w are 
+    // correct (check?), or recreate in a smart way.
+    iw_setup_buffers(w); 
 
     w->title = 0; 
 
@@ -212,6 +221,9 @@ drv_video_window_create(
                         rgba_t bg, const char *title, int flags )
 {
     //drv_video_window_t *w = private_drv_video_window_create(xsize, ysize);
+
+    //LOG_FLOW()
+    lprintf( "drv_video_window_create %dx%d\n", xsize, ysize ); 
 
     drv_video_window_t *w = calloc(1,sizeof(drv_video_window_t));
     if(w == 0)

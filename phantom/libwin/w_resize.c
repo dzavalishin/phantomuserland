@@ -40,7 +40,9 @@ do_window_resize( drv_video_window_t *w, int xsize, int ysize, void *new_buffer,
         }
 
         w->bitmap = new_buffer;
-        iw_setup_buffers(w);
+        w->xsize = xsize;
+        w->ysize = ysize;
+        iw_setup_buffers(w); // Needs correct win x/y size
         w_fill( w, w->bg );
     }
     else
@@ -63,7 +65,9 @@ do_window_resize( drv_video_window_t *w, int xsize, int ysize, void *new_buffer,
 
         if(free_old) free(w->bitmap); // TODO assert not persistent ptr
         w->bitmap = new_buffer;
-        iw_setup_buffers(w);
+        w->xsize = xsize;
+        w->ysize = ysize;
+        iw_setup_buffers(w); // Needs correct win x/y size
     }
     
 }
