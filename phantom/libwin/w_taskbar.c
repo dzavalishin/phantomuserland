@@ -119,7 +119,7 @@ void init_task_bar(void)
             scr_get_xsize(), TB_HEIGHT,
             0, 0, tb_bg, "Task Bar", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
 
-    w_fill( task_bar_window, tb_bg );
+    w_fill( task_bar_window, tb_bg ); // Crashes with SEGV inusermode on mem fill (rep stos)
 
     int lb_x = scr_get_xsize();
     lb_x -= slide_switch_alpha_v31_off_bmp.xsize + 5;
