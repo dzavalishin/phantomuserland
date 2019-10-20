@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "ps2.k"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 1
 #define debug_level_error 1
 #define debug_level_info 0
 
@@ -56,17 +56,6 @@ static keyboard_ps2_t ps2k;
 static hal_sem_t keybd_sem;
 //static int keyb_init = 0;
 
-#if 0
-#define SCAN_CTRL	0x1D	/* Control */
-#define SCAN_LSHIFT	0x2A	/* Left shift */
-#define SCAN_RSHIFT	0x36	/* Right shift */
-#define SCAN_ALT	0x38	/* Right shift */
-#define SCAN_DEL	0x53	/* Del */
-#define SCAN_CAPS	0x3A	/* Caps lock */
-#define SCAN_NUM	0x45	/* Num lock */
-#define SCAN_LGUI	0x5B	/* Left Windows */
-#define SCAN_RGUI	0x5C	/* Right Windows */
-#endif
 
 #define STATE_BASE	0
 #define STATE_E0	1	/* got E0 */
@@ -324,7 +313,14 @@ receive_byte (keyboard_ps2_t *u, unsigned char byte)
     if (! make_event (u, u->in_last, byte))
         return 0;
     u->in_last->modifiers = u->modifiers;
-
+/*
+    // simulate crash
+    if( u->in_last->key == KEY_F12 ) 
+    {
+        hal_cpu_reset_real(); // not supposed to return, but...
+        return 0; // do it right anyway
+    }
+*/
     u->in_last = newlast;
     return 1;
 }
@@ -365,7 +361,7 @@ keyboard_ps2_interrupt (void *a)
         outb_reverse (strobe | KBDC_XT_CLEAR, KBDC_XT_CTL);
         outb_reverse (strobe, KBDC_XT_CTL);
 
-        /*debug_printf ("<%02x> ", c);*/
+        LOG_FLOW( 1, "<%02x> ", c);
         if (receive_byte (u, c))
         {
             hal_sem_release( &keybd_sem );
