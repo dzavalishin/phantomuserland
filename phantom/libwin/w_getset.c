@@ -41,6 +41,8 @@ void w_set_title( window_handle_t w, const char *title )
 
 void w_set_visible( window_handle_t w, int v )
 {
+    if( focused_window == w )
+        focused_window = 0;
     //if(v) w->state |= WSTATE_WIN_VISIBLE;
     //else  w->state &= ~WSTATE_WIN_VISIBLE;
     u_int32_t to1 = 0;

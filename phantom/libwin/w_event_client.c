@@ -2,9 +2,9 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * Windowing system helpers.
+ * Windowing system helpers: client window default event processor.
  *
  *
 **/
@@ -23,16 +23,11 @@
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
-//#include <spinlock.h>
 #include <wtty.h>
 
 #include <threads.h>
 
 
-//#include "win_local.h"
-
-
-#define KEY_EVENTS 1
 
 
 
@@ -40,7 +35,7 @@ static int defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e
 {
     //printf("defaultMouseEventProcessor buttons %x, %d-%d\r", e->m.buttons, e->abs_x, e->abs_y);
 
-    if( e->m.clicked & UI_MOUSE_BTN_RIGHT )
+    if( (e->m.clicked & UI_MOUSE_BTN_RIGHT) && (w->context_menu != 0) )
     {
         LOG_FLOW0(5, "have context right click");
         ev_q_put_win( 0, 0, UI_EVENT_WIN_TO_TOP, w->context_menu );
@@ -155,7 +150,8 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         }
         break;
 
-    case UI_EVENT_WIN_BUTTON_ON: printf("main w button %x\n", e->extra );
+    case UI_EVENT_WIN_BUTTON_ON: 
+        //printf("client win button %x\n", e->extra );
     break;
 
     case UI_EVENT_WIN_TO_TOP:    w_to_top( w ); break;

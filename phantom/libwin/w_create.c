@@ -23,18 +23,11 @@
 #include <video/internal.h>
 #include <video/screen.h>
 
-//static void defaultEventProcessor();
-
-//void iw_enter_allwq( drv_video_window_t *w);
 
 
-//static
 queue_head_t     	allwindows = { &allwindows, &allwindows };
-
-//static
 drv_video_window_t *	focused_window = 0;
 
-//char wild_ptr_catch[2048] = {};
 
 
 
