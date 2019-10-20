@@ -13,7 +13,6 @@
 // looses characters :(
 #define NET_TIMED_FLUSH 1
 
-void create_settings_window( void ); // tmp
 
 #define DEBUG_MSG_PREFIX "console"
 #include <debug_ext.h>
@@ -51,6 +50,10 @@ void create_settings_window( void ); // tmp
 #if NET_TIMED_FLUSH
 #include <kernel/net_timer.h>
 #endif
+
+
+void create_settings_window( void ); // tmp
+static window_handle_t make_debug_w_context_menu(void);
 
 
 #define CON_FONT drv_video_8x16san_font
@@ -404,6 +407,8 @@ void phantom_init_console_window()
     w_add_to_task_bar_icon( phantom_console_window, &icon_screen_bmp );
     w_add_to_task_bar_icon( phantom_debug_window, &icon_text_bmp );
     w_add_to_task_bar_icon( phantom_settings_window, &icon_settings_bmp );
+
+    w_set_task_bar_menu( phantom_debug_window, make_debug_w_context_menu() );
 
 #else
     // -----------------------------
@@ -865,6 +870,62 @@ void create_settings_window( void )
     bh = w_add_button( w, '0', 220, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
     w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
     w_control_set_text( w, bh, "Cancel", COLOR_BLACK );
-
-
 }
+
+#if 1
+static window_handle_t make_debug_w_context_menu(void)
+{
+    // -----------------------------
+    // Start Menu
+    // -----------------------------
+
+    pool_handle_t bh;
+
+    color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
+
+    window_handle_t ctx_menu = drv_video_window_create( 200, 186 /*+32*/,
+                                                       9, 47, COLOR_WHITE, 
+                                                       "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS|WFLAG_WIN_HIDE_ON_FOCUS_LOSS );
+    window_handle_t lmw = ctx_menu;
+    w_set_visible( lmw, 0 );
+
+    //w_set_bg_color( lmw, COLOR_WHITE );
+    w_fill_box(lmw, 0, 0, 200, 200, COLOR_WHITE );
+    w_draw_box( lmw, 0, 0, 200, 200, menu_border );
+    int menu_xsize = lmw->xsize-2;
+    
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*5, menu_xsize, "Threads", COLOR_BLACK );
+    //w_control_set_icon( lmw, bh, &icon_home_bmp );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'t' );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*4, menu_xsize, "Windows", COLOR_BLACK );
+    //w_control_set_icon( lmw, bh, &icon_settings_bmp );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'w' );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*3, menu_xsize, "Stats", COLOR_BLACK );
+    //w_control_set_icon( lmw, bh, &icon_key_bmp );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'s' );
+    
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*2, menu_xsize, "Phys mem", COLOR_BLACK );
+    //w_control_set_icon( lmw, bh, &icon_heart_bmp );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'m' );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*1, menu_xsize, "Virt addr", COLOR_BLACK );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'v' );
+
+    // before slide for it to paint over us
+    w_add_label( lmw, 1, 1, 200, 32, "Fast Snap", COLOR_BLACK );
+
+    bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( lmw, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+
+    return ctx_menu;
+}
+
+#endif
+
+
+
+
+
+

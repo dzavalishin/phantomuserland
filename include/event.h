@@ -79,6 +79,13 @@ typedef struct ui_event ui_event_t;
 #define UI_EVENT_TYPE_GLOBAL            (1<<3)
 
 
+// Mouse button bits 
+#define UI_MOUSE_BTN_LEFT               01
+#define UI_MOUSE_BTN_RIGHT              02
+#define UI_MOUSE_BTN_MIDDLE             04
+
+
+
 #define UI_MODIFIER_KEYUP               (1<<0) // Else down
 #define UI_MODIFIER_SHIFT               (1<<1)
 #define UI_MODIFIER_LSHIFT              (1<<2)
@@ -148,11 +155,12 @@ typedef struct ui_event ui_event_t;
 
 #define UI_EVENT_WIN_TO_TOP             8
 #define UI_EVENT_WIN_TO_BOTTOM          9
+#define UI_EVENT_WIN_MOVE              10
 
 
 #define UI_EVENT_GLOBAL_REPAINT_RECT    (0xFF00 | 1) //! Repaint all windows that intersect w. rect
-#define UI_EVENT_GLOBAL_COPY_RECT       (0xFF00 | 2) //! Copy part of screen to other place, rect is scr, rect2.x/y is dest pos - FOR 2D ACCELERATOR
-#define UI_EVENT_GLOBAL_FILL_RECT       (0xFF00 | 3) //! Fill part of screen with color, rect is scr pos, color is color        - FOR 2D ACCELERATOR
+#define UI_EVENT_GLOBAL_COPY_RECT       (0xFF00 | 2) //! TODO Copy part of screen to other place, rect is scr, rect2.x/y is dest pos - FOR 2D ACCELERATOR
+#define UI_EVENT_GLOBAL_FILL_RECT       (0xFF00 | 3) //! TODO Fill part of screen with color, rect is scr pos, color is color        - FOR 2D ACCELERATOR
 
 
 

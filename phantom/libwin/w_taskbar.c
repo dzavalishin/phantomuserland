@@ -49,6 +49,8 @@ typedef struct {
     control_handle_t        c;              //< This is what shown in task bar
 
     int                     notif_count;    //< Count of notifications - to display small number above the icon
+
+    window_handle_t         contex_menu;    //< Context menu for an item
 } task_bar_el_t;
 
 // -----------------------------------------------------------------------
@@ -212,7 +214,7 @@ taskbar_handle_t w_add_to_task_bar_ext( window_handle_t w, drv_video_bitmap_t *i
         return INVALID_POOL_HANDLE;
 
     w_control_set_background( task_bar_window, bh, n_bmp, p_bmp, h_bmp );
-    w_control_set_state( task_bar_window, bh, 1 );
+    w_control_set_state( task_bar_window, bh, w_is_visible( w ) );
     w_control_set_icon( task_bar_window, bh, icon );
 
     task_bar_next_x += 5 + TB_X_SHIFT;
@@ -312,6 +314,32 @@ static void task_bar_reorder_buttons( void )
 // -----------------------------------------------------------------------
 // Getters/setters
 // -----------------------------------------------------------------------
+/**
+ * 
+ * 
+ * \param[in] w Window that was added to task bar, main application window.
+ * \param[in] m Context menu window to add to task bar icon of w
+ * 
+**/
+void w_set_task_bar_menu( window_handle_t w, window_handle_t m )
+{
+    assert( w );
+    taskbar_handle_t t = w->task_bar_h;
+
+    if( t == 0 ) return;
+
+    task_bar_el_t *e = pool_get_el( task_bar, t );
+    if( 0 == e )
+    {
+        LOG_ERROR( 1, "invalid handle %x", t );
+        return;
+    }
+
+    e->contex_menu = m; // TODO do we need?
+    w_control_set_menu( task_bar_window, e->c, m );
+
+    pool_release_el( task_bar, t );
+}
 
 void w_set_task_bar_icon( window_handle_t w, drv_video_bitmap_t *bmp )
 {
@@ -396,7 +424,7 @@ static void create_start_menu( void )
     start_menu_window = drv_video_window_create( 
             200, 186,
             9, TB_HEIGHT, COLOR_WHITE, 
-            "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
+            "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS|WFLAG_WIN_HIDE_ON_FOCUS_LOSS );
 
     window_handle_t lmw = start_menu_window;
     w_set_visible( lmw, 0 );

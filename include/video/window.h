@@ -54,6 +54,8 @@ typedef pool_handle_t taskbar_handle_t;
 #define WFLAG_WIN_NOKEYFOCUS            (1<<8)
 // Put this window to task bar - it is a main application window - UNIMPL yet
 #define WFLAG_WIN_TASK_BAR              (1<<9)
+// For menu - hide if focus is gone
+#define WFLAG_WIN_HIDE_ON_FOCUS_LOSS    (1<<10)
 
 
 #define WIN_HAS_FLAG(__w,__f) ((__w)->flags & (__f))
@@ -239,6 +241,7 @@ void    w_resize_ext( window_handle_t w, int xsize, int ysize, void *new_buffer,
 
 
 #define w_is_in_focus(w) ({ ((w)->state) & WSTATE_WIN_FOCUSED; })
+#define w_is_visible(w) ({ ((w)->state) & WSTATE_WIN_VISIBLE; })
 
 /// Is one of topmost - i.e. covered only by WFLAG_WIN_ONTOP ones
 int w_is_top(drv_video_window_t *w);
@@ -283,6 +286,7 @@ void w_add_notification( window_handle_t w, int count_to_add );
 /// Remove marker. Also automativally called on bringing window to top
 void w_reset_notification( window_handle_t w );
 
+void w_set_task_bar_menu( window_handle_t w, window_handle_t m );
 
 // -----------------------------------------------------------------------
 // Internals

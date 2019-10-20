@@ -346,6 +346,20 @@ static errno_t do_event_to_control(pool_t *pool, void *el, pool_handle_t handle,
             cc->focused = 1;
             cc->changed = 1;
         }
+
+        if( (env->e.m.clicked == UI_MOUSE_BTN_RIGHT) )
+        {
+            LOG_FLOW(5, "have right click w %p", env->w);
+            if( cc->context_menu )
+            {
+                LOG_FLOW0(5, "have context right click");
+                //w_move( cc->context_menu, cc->r.x + cc->r.xsize, cc->r.y + cc->r.ysize );
+                ev_q_put_win( 0, 0, UI_EVENT_WIN_TO_TOP, cc->context_menu );
+                ev_q_put_win( cc->r.x + cc->r.xsize, cc->r.y + cc->r.ysize, UI_EVENT_WIN_MOVE, cc->context_menu );
+                w_set_visible( cc->context_menu, 1 );
+                return 1;
+            }
+        }
     }
 
     switch( cc->type )
@@ -528,7 +542,7 @@ static errno_t do_clear_focus(pool_t *pool, void *el, pool_handle_t handle, void
     control_t *cc = ref->c;                    assert(cc);
     struct foreach_control_param *env = arg;   assert(env);
 
-    LOG_FLOW0( 0, "enter");
+    LOG_FLOW0( 9, "enter");
 
     if( cc->focused )
         cc->changed = 1;

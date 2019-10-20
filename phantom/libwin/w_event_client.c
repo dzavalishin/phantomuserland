@@ -126,6 +126,8 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 
     case UI_EVENT_WIN_LOST_FOCUS:
         w->state &= ~WSTATE_WIN_FOCUSED;
+        if(WIN_HAS_FLAG(w,WFLAG_WIN_HIDE_ON_FOCUS_LOSS))
+            w_set_visible( w, 0 );
         goto redecorate;
 
     case UI_EVENT_WIN_DESTROYED:
@@ -152,6 +154,8 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
     case UI_EVENT_WIN_TO_TOP:    w_to_top( w ); break;
     case UI_EVENT_WIN_TO_BOTTOM: w_to_bottom( w ); break;
 
+    case UI_EVENT_WIN_MOVE:      w_move( w, e->abs_x, e->abs_y ); break;
+
     default:
         return 0;
 
@@ -167,9 +171,7 @@ int defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
     switch(e->type)
     {
     case UI_EVENT_TYPE_MOUSE: 	return defaultMouseEventProcessor(w, e); 
-#if KEY_EVENTS
     case UI_EVENT_TYPE_KEY:     return defaultKeyEventProcessor(w, e); 
-#endif
     case UI_EVENT_TYPE_WIN:     return defaultWinEventProcessor(w, e); 
     }
 

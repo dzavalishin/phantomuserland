@@ -297,3 +297,15 @@ void w_control_set_notify( window_handle_t w, control_handle_t ch, int count )
 
     RELEASE_CONTROL
 }
+
+
+
+void w_control_set_menu( window_handle_t w, control_handle_t ch, window_handle_t m ) //< set context (right click) menu
+{
+    GET_CONTROL
+
+    cc->context_menu = m;
+    //w_paint_control( w, cc );
+
+    RELEASE_CONTROL
+}

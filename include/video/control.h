@@ -130,6 +130,8 @@ typedef struct control
     control_handle_t    c_child;        //< Activate child on state == cs_pressed - usually submenu
     window_handle_t     w_child;        //< Activate on state == cs_pressed
 
+    window_handle_t     context_menu;   //< Show on right click
+
     union {
         uint8_t         _space[64];     //< To provide for growth
 
@@ -247,6 +249,7 @@ void w_control_set_visible( window_handle_t w, control_handle_t ch, int visible 
 void w_control_set_flags( window_handle_t w, control_handle_t ch, int toSet, int toReset );
 void w_control_set_position( window_handle_t w, control_handle_t ch, int x, int y );
 void w_control_set_notify( window_handle_t w, control_handle_t ch, int count ); //< show bullet with number in top right corner
+void w_control_set_menu( window_handle_t w, control_handle_t ch, window_handle_t m ); //< set context (right click) menu
 
 
 void w_control_set_state( window_handle_t w, control_handle_t ch, int pressed ); //< Is checkbox checked or switch turned on?
