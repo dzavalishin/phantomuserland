@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "ps2.k"
 #include <debug_ext.h>
-#define debug_level_flow 1
+#define debug_level_flow 0
 #define debug_level_error 1
 #define debug_level_info 0
 
@@ -361,7 +361,7 @@ keyboard_ps2_interrupt (void *a)
         outb_reverse (strobe | KBDC_XT_CLEAR, KBDC_XT_CTL);
         outb_reverse (strobe, KBDC_XT_CTL);
 
-        LOG_FLOW( 1, "<%02x> ", c);
+        LOG_FLOW( 9, "scan <%02x> ", c);
         if (receive_byte (u, c))
         {
             hal_sem_release( &keybd_sem );
