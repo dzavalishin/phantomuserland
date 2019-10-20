@@ -99,10 +99,11 @@ static void
 common_window_init( drv_video_window_t *w,  void *pixels,
                         int xsize, int ysize )
 {
+    LOG_FLOW( 1, "w %p, pix %p size %dx%d", w, pixels, xsize, ysize );
     if(pixels == 0)
     {
         // TODO drv_video_window_bytes gives too much memory, need special func for pixels only
-        pixels = malloc( drv_video_window_bytes(xsize, ysize) );
+        pixels = calloc( 1, drv_video_window_bytes(xsize, ysize) );
         assert(pixels != 0); // userland gives us buffer, so we alloc just for kernel
     }
 

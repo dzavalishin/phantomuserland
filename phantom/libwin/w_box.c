@@ -55,7 +55,10 @@ void w_fill_rect( window_handle_t w, rgba_t color, rect_t r )
 void
 w_fill_bitmap( rgba_t *dest, rgba_t color, int npixels )
 {
+    assert(npixels > 0);
     int i = npixels - 1;
+
+    //if( ((void *)dest) > 0x80000000 )        lprintf("w_fill_bitmap dest %p sz %d\n", dest, npixels );
 
 #if defined(ARCH_ia32) && 1
     //rgba_t *dest = win->w_pixel;

@@ -325,13 +325,6 @@ void pvm_internal_init_tty( pvm_object_t  ttyos )
 {
     struct data_area_4_tty      *tty = (struct data_area_4_tty *)ttyos->da;
 
-    /*
-    tty->w.xsize = PVM_DEF_TTY_XSIZE;
-    tty->w.ysize = PVM_DEF_TTY_YSIZE;
-    tty->w.x = 100;
-    tty->w.y = 100;
-    */
-
     tty->font_height = 16;
     tty->font_width = 8;
     tty->x = 0;
@@ -343,22 +336,24 @@ void pvm_internal_init_tty( pvm_object_t  ttyos )
 
     strlcpy( tty->title, "VM TTY Window", sizeof(tty->title) );
 
-    void *pixels = &(tty->w) + sizeof(drv_video_window_t);
+    pvm_object_t bin = pvm_create_binary_object( drv_video_window_bytes( PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE ) + sizeof(drv_video_window_t), 0 );
+    tty->o_pixels = bin;
+
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)bin->da;
+
+    void *pixels = &bda->data;
+
+    //void *pixels = &(tty->w) + sizeof(drv_video_window_t);
 
     drv_video_window_init( &(tty->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, tty->bg, WFLAG_WIN_DECORATED, tty->title );
+
+    //lprintf("pvm_internal_init_tty %p pix %p", &(tty->w), pixels );
+
+
     w_clear( &(tty->w) );
     //w_update( &(tty->w) );
 
-
-    {
-    //pvm_object_t o;
-    //o.data = ttyos;
-    //o.interface = pvm_get_default_interface(ttyos);
-
-    // This object needs OS attention at restart
-    // TODO do it by class flag in create fixed or earlier?
     pvm_add_object_to_restart_list( ttyos );
-    }
 }
 
 void pvm_gc_iter_tty(gc_iterator_call_t func, pvm_object_t  os, void *arg)
@@ -382,7 +377,7 @@ void pvm_restart_tty( pvm_object_t o )
 
     struct data_area_4_tty *tty = pvm_object_da( o, tty );
 
-    printf( "restart TTY %p\n", tty );
+    //lprintf( "restart TTY %p\n", tty );
 
     void *pixels = ((void*)&(tty->w)) + sizeof(drv_video_window_t);
 

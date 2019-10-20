@@ -915,6 +915,8 @@ void pvm_internal_init_window(pvm_object_t os)
     da->y = 0;
     da->autoupdate = 1;
 
+    //lprintf("pvm_internal_init_window w %p pix %p\n", &(da->w), pixels );
+
     drv_video_window_init( &(da->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
 
     {
@@ -950,6 +952,8 @@ pvm_object_t     pvm_create_window_object(pvm_object_t owned )
     pvm_object_t ret = pvm_create_object( pvm_get_window_class() );
     struct data_area_4_window *da = (struct data_area_4_window *)ret->da;
 
+    //lprintf("pvm_create_window_object %p n", ret );
+
     (void)da;
 
     return ret;
@@ -960,10 +964,9 @@ void pvm_gc_finalizer_window( pvm_object_t  os )
     // is it called?
     struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
 
-    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
-    void *pixels = &bda->data;
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //void *pixels = &bda->data;
 
-    //drv_video_window_destroy(&(da->w));
     drv_video_window_destroy(&(da->w));
 }
 

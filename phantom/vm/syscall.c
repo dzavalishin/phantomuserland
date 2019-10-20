@@ -1740,6 +1740,7 @@ static int si_bitmap_8_fromstring( pvm_object_t me, pvm_object_t *ret, struct da
 // TODO kill or move to tty/win?
 static int si_bitmap_9_paintto( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
+#if 0    
     DEBUG_INFO;
     struct data_area_4_bitmap *da = pvm_object_da( me, bitmap );
     
@@ -1760,7 +1761,7 @@ static int si_bitmap_9_paintto( pvm_object_t me, pvm_object_t *ret, struct data_
     );
     w_update( &(tty->w) );
     SYS_FREE_O(_tty);
-
+#endif
     SYSCALL_RETURN_NOTHING;
 }
 
