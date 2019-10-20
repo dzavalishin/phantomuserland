@@ -919,6 +919,8 @@ static window_handle_t make_debug_w_context_menu(void)
     bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
     w_control_set_background( lmw, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
+    phantom_debug_window->context_menu = ctx_menu;
+
     return ctx_menu;
 }
 

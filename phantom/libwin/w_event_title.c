@@ -141,9 +141,7 @@ int w_titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
     switch(e->type)
     {
     case UI_EVENT_TYPE_MOUSE: 	return titleMouseEventProcessor(w, e);
-#if KEY_EVENTS
     //case UI_EVENT_TYPE_KEY:     return defaultKeyEventProcessor(w, e);
-#endif
     case UI_EVENT_TYPE_WIN:     return titleWinEventProcessor(w, e);
 
     // Pass keys to main window

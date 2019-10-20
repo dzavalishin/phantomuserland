@@ -40,13 +40,20 @@ static int defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e
 {
     //printf("defaultMouseEventProcessor buttons %x, %d-%d\r", e->m.buttons, e->abs_x, e->abs_y);
 
+    if( e->m.clicked & UI_MOUSE_BTN_RIGHT )
+    {
+        LOG_FLOW0(5, "have context right click");
+        ev_q_put_win( 0, 0, UI_EVENT_WIN_TO_TOP, w->context_menu );
+        ev_q_put_win( e->abs_x, e->abs_y, UI_EVENT_WIN_MOVE, w->context_menu );
+        w_set_visible( w->context_menu, 1 );
+    }
+
     if( e->m.buttons )
         w_to_top(w->w_owner ? w->w_owner : w);
 
     return 0;
 }
 
-#if KEY_EVENTS
 static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
     wtty_t *wt;
@@ -63,7 +70,7 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
     // This char is shift?
     if( ch == 0 )
         return 1;
-
+#if 0 // have it in keybd driver
     if( e->modifiers & UI_MODIFIER_CTRL )
     {
         ch &= 0x1F; // Control char
@@ -100,7 +107,7 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
             break;
         }
     }
-
+#endif
     errno_t err = wtty_putc_nowait(wt, ch );
     if(err == ENOMEM)
     {
@@ -112,7 +119,7 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
     }
     return 1;
 }
-#endif
+
 
 static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {

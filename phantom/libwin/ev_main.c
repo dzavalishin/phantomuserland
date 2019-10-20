@@ -239,13 +239,9 @@ void init_main_event_q()
 #if EVENTS_ENABLED
     hal_start_kernel_thread( ev_push_thread );
 
-
     ev_engine_active = 1;
 
-#if KEY_EVENTS
     phantom_set_console_getchar( phantom_window_getc );
-    //hal_start_kernel_thread( ev_keyboard_read_thread );
-#endif
 #endif
 
 #if DELIVER2THREAD

@@ -97,27 +97,27 @@ typedef pool_handle_t taskbar_handle_t;
 **/
 typedef struct drv_video_window
 {
-    int                          xsize;          //< Pixels
-    int                          ysize;
+    int                         xsize;          //< Pixels
+    int                         ysize;
 
-    int                          x, y, z;        //< On screen
-    int                          dx, dy;         //< Drag base (see titleMouseEventProcessor)
+    int                         x, y, z;         //< On screen
+    int                         dx, dy;          //< Drag base (see titleMouseEventProcessor)
 
-    int                          flags;          //< Not supposed to change during window's life
-    int                          state;          //< Can change anytime
+    int                         flags;           //< Not supposed to change during window's life
+    int                         state;           //< Can change anytime
 
-    queue_chain_t                chain;          //< All windows are on this chain
+    queue_chain_t               chain;           //< All windows are on this chain
 
-    int                          li, ti, ri, bi; //< insets - unused?
+    int                         li, ti, ri, bi;  //< insets - unused?
 
-    rgba_t                       bg;             //< background color
+    rgba_t                      bg;              //< background color
 
-    const char*                  title;
+    const char*                 title;
 
-    queue_head_t                 events;         //< Incoming events
-    volatile int                 events_count;   //< To prevent overfill of dead window q
+    queue_head_t                events;          //< Incoming events
+    volatile int                events_count;    //< To prevent overfill of dead window q
 
-    int                          stall;          //< True if event queue is overloaded and events are being lost
+    int                         stall;           //< True if event queue is overloaded and events are being lost
 
     /*!
      * Called from main event dispatch thread after event is placed to
@@ -127,7 +127,7 @@ typedef struct drv_video_window
     int                         (*inKernelEventProcess)( struct drv_video_window *w, struct ui_event *e );  
     hal_sem_t                   *eventDeliverSema; //< If not null - signalled on new event in win q
 
-    tid_t                        owner;
+    tid_t                       owner;
 
 #if !VIDEO_T_IN_D
     struct drv_video_window     *w_title;        //< Child window - title
@@ -137,7 +137,8 @@ typedef struct drv_video_window
 
     pool_t                      *controls;       //< Attached UI controls
 
-    taskbar_handle_t             task_bar_h;     //< Me it task bar
+    taskbar_handle_t            task_bar_h;      //< Me it task bar
+    window_handle_t             context_menu;    //< Default window context menu
 
     rgba_t       	            *r_pixel;        //< read ptr - for blit to screen
     rgba_t       	            *w_pixel;        //< write ptr - for painting
