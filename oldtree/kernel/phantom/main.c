@@ -577,6 +577,7 @@ int kernel_keyboard_hook( unsigned key, unsigned shifts)
         return 1;
 
     case KEY_F12:
+    case KEY_KP_MINUS:
         hal_cpu_reset_real();
         return 1; // not really
 

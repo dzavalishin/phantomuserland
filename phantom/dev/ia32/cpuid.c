@@ -512,7 +512,7 @@ dump_regs(struct cpuid_regs regs)
 void
 munge_brandstr(const char *p, char *q)
 {
-    while(*p && *p == ' ')
+    while(*p == ' ')
         p++;
     while(*p){
         while(*p == ' ' && *(p+1) == ' ')

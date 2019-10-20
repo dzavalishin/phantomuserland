@@ -300,14 +300,11 @@ struct data_area_4_boot
 
 struct data_area_4_tty
 {
-#if NEW_WINDOWS
-    window_handle_t                     w;
-    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
-#else
     drv_video_window_t                  w;
     /** this field extends w and works as it's last field. */
-    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
-#endif
+    //rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
+    pvm_object_t                        o_pixels;
+
     int                                 font_height; // Font is hardcoded yet - BUG - but we cant have ptr to kernel from object
     int                                 font_width;
     int                                 xsize, ysize; // in chars
@@ -406,6 +403,7 @@ struct data_area_4_window
 
     uint32_t                            autoupdate;
 
+    drv_video_window_t                  w;
 };
 
 

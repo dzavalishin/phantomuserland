@@ -18,7 +18,7 @@ int fn2cn( char *out, const char *in, int outsz )
     p = rindex( in, ':' );
     if( p ) in = p+1;
 
-    strncpy( out, in, outsz );
+    strlcpy( out, in, outsz );
     out[outsz-1] = '\0';
 
     p = rindex( out, '.' );

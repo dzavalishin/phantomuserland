@@ -397,7 +397,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
         char pn[4] = "PC0";
         //pn[2] += pno++;
         pn[2] += pno;
-        strncpy(newp->name, pn, PARTITION_NAME_LEN-1);
+        strlcpy(newp->name, pn, PARTITION_NAME_LEN);
 
         register_partition( newp );
     }

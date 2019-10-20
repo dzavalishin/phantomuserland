@@ -17,11 +17,7 @@
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
-//#include <spinlock.h>
 
-//#include <hal.h>
-//#include <kernel/init.h>
-//#include "win_local.h"
 #include <video/window.h>
 #include <video/control.h>
 #include <video/internal.h>
@@ -48,17 +44,27 @@ void drv_video_window_free(drv_video_window_t *w)
     free(w);
 }
 
+/**
+ * 
+ * NB! xsize/ysize must be set up before call to us!
+ * 
+**/
+void iw_setup_buffers(drv_video_window_t *w)
+{
+    w->buf[0] = w->bitmap;
+    w->buf[1] = w->bitmap + (w->xsize * w->ysize);
+    iw_switch_buffers(w); // Will assign r_ and w_
+}
 
-
-void w_switch_buffers(drv_video_window_t *w)
+void iw_switch_buffers(drv_video_window_t *w)
 {
     assert(w);
 #if VIDEO_DOUBLE_BUF
     // Not doublebuffer mode? Just set both ptrs to buf 0
     if(!WIN_HAS_FLAG(w,WFLAG_WIN_DOUBLEBUF))
     {
-        w->r_pixel = w->pixels;
-        w->w_pixel = w->pixels;
+        w->r_pixel = w->bitmap;
+        w->w_pixel = w->bitmap;
         return;
     }
 
@@ -90,13 +96,18 @@ void w_switch_buffers(drv_video_window_t *w)
 }
 
 static void
-common_window_init( drv_video_window_t *w,
+common_window_init( drv_video_window_t *w,  void *pixels,
                         int xsize, int ysize )
 {
-    w->buf[0] = w->pixels;
-    w->buf[1] = w->pixels + xsize * ysize;
-    w_switch_buffers(w);
+    LOG_FLOW( 1, "w %p, pix %p size %dx%d", w, pixels, xsize, ysize );
+    if(pixels == 0)
+    {
+        // TODO drv_video_window_bytes gives too much memory, need special func for pixels only
+        pixels = calloc( 1, drv_video_window_bytes(xsize, ysize) );
+        assert(pixels != 0); // userland gives us buffer, so we alloc just for kernel
+    }
 
+    w->bitmap = pixels;
 
     w->state |= WSTATE_WIN_VISIBLE; // default state is visible
 
@@ -125,6 +136,9 @@ common_window_init( drv_video_window_t *w,
 #endif
     w->w_decor = 0;
     w->w_owner = 0;
+
+    // After setting most of the structure, namely x/y sizes
+    iw_setup_buffers(w);
 }
 
 //! Called from object restart code to reinit window struct
@@ -132,8 +146,15 @@ common_window_init( drv_video_window_t *w,
 //! After calling this func you must reset all the required
 //! fields and call w_restart_attach( w )
 //! to add window to in-kernel lists and repaint it.
-void w_restart_init(drv_video_window_t *w)
+void w_restart_init(drv_video_window_t *w, void *pixels)
 {
+    w->bitmap = pixels; 
+    // TODO actually iw_setup_buffers will break current painting by
+    // switching buffers in the middle of user program's paint process
+    // we must either do not call it for pointers in snapped w are 
+    // correct (check?), or recreate in a smart way.
+    iw_setup_buffers(w); 
+
     w->title = 0; 
 
     w->inKernelEventProcess = 0;
@@ -173,12 +194,22 @@ void w_restart_attach( drv_video_window_t *w )
 
 drv_video_window_t *private_drv_video_window_create(int xsize, int ysize)
 {
-    drv_video_window_t *w = calloc(1,drv_video_window_bytes(xsize,ysize));
+    drv_video_window_t *w = calloc(1,sizeof(drv_video_window_t));
     if(w == 0)
         return 0;
 
-    common_window_init( w, xsize, ysize );
+        // TODO drv_video_window_bytes gives too much memory, need special func for pixels only
+    void *pixels = calloc( 1, drv_video_window_bytes(xsize, ysize) );
+
+    if(pixels == 0)
+    {
+        free(w);
+        return 0;
+    }
+
+    common_window_init( w, pixels, xsize, ysize );
     w->flags |= WFLAG_WIN_DECORATED;
+   
     return w;
 }
 
@@ -190,8 +221,17 @@ drv_video_window_create(
                         int x, int y,
                         rgba_t bg, const char *title, int flags )
 {
-    drv_video_window_t *w = private_drv_video_window_create(xsize, ysize);
-    drv_video_window_init( w, xsize, ysize, x, y, bg, flags, title );
+    //drv_video_window_t *w = private_drv_video_window_create(xsize, ysize);
+
+    //LOG_FLOW()
+    lprintf( "drv_video_window_create %dx%d\n", xsize, ysize ); 
+
+    drv_video_window_t *w = calloc(1,sizeof(drv_video_window_t));
+    if(w == 0)
+        return 0;
+
+
+    drv_video_window_init( w, 0, xsize, ysize, x, y, bg, flags, title );
     //w->flags = flags;
 
     //w->title = title; // TODO pass title to _init
@@ -206,6 +246,7 @@ drv_video_window_create(
 // for statically allocated ones
 void
 drv_video_window_init( drv_video_window_t *w,
+                        void *pixels,
                        int xsize, int ysize,
                        int x, int y,
                        rgba_t bg, int flags,
@@ -213,7 +254,7 @@ drv_video_window_init( drv_video_window_t *w,
                      )
 {
     bzero(w, sizeof(*w));
-    common_window_init( w, xsize, ysize );
+    common_window_init( w, pixels, xsize, ysize );
 
     //w->flags |= WFLAG_WIN_DECORATED;
     w->flags = flags;
@@ -270,22 +311,7 @@ void drv_video_window_destroy(drv_video_window_t *w)
     if(w->controls)
         destroy_controls_pool(w->controls);
 
-#if 1
     request_repaint_all_for_win( w );
-#else
-    {
-    scr_zbuf_reset_win( w );
-    rect_t wsize;
-    w_get_bounds( w, &wsize );
-
-    ui_event_t e;
-    //struct ui_event e;
-    e.w.info = UI_EVENT_GLOBAL_REPAINT_RECT;
-    e.w.rect = wsize;
-
-    ev_q_put_global( &e );
-    }
-#endif
 
     // drain event queue
     if( w->events_count > 0 )

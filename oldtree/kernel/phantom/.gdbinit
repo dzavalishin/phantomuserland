@@ -38,4 +38,7 @@ source -v ./.gdb-local
 #break find_visible_text_len
 
 #break ctl_text_field_paint
-break ctl_text_field_events
+#break ctl_text_field_events
+
+break alloc.c:204
+
