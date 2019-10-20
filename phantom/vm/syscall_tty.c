@@ -379,7 +379,9 @@ void pvm_restart_tty( pvm_object_t o )
 
     //lprintf( "restart TTY %p\n", tty );
 
-    void *pixels = ((void*)&(tty->w)) + sizeof(drv_video_window_t);
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)tty->o_pixels->da;
+
+    void *pixels = &bda->data;
 
     w_restart_init( &tty->w, pixels );
 
