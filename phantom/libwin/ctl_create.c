@@ -420,7 +420,7 @@ control_handle_t w_add_scrollbar_ext( window_handle_t w, int x, int y, int xsize
     cb.minval = minval;
     cb.maxval = maxval;
     cb.value = maxval / 2;
-    cb.value_width = maxval / 4;
+    cb.value_width = (maxval-minval) / 4;
 
     return w_add_control( w, &cb );
 }

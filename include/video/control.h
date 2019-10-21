@@ -267,6 +267,12 @@ void w_control_set_menu( window_handle_t w, control_handle_t ch, window_handle_t
 void w_control_set_state( window_handle_t w, control_handle_t ch, int pressed ); //< Is checkbox checked or switch turned on?
 void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ); //< Is checkbox checked or switch turned on?
 
+/**
+ * 
+ * \param[in] value Current value. Determines start position of scroll bar.
+ * \param[in] width Width of scroll bar - how big part of possible values it takes. If == maxval - minval - takes 100% of scrollbar size
+ * 
+**/
 void w_control_set_value( window_handle_t w, control_handle_t ch, int value, int width );  //< For scrollbar - set value & bar handle width
 void w_control_get_value( window_handle_t w, control_handle_t ch, int *value, int *width ); //< For scrollbar - get value & bar handle width
 

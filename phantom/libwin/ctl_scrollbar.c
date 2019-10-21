@@ -103,17 +103,23 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
     int fg_width = cc->r.xsize - fg_xgap * 2;
     int fg_lside_w = fg_l->xsize;
     int fg_rside_w = fg_r->xsize;
-    int fg_mid_w = fg_width - fg_lside_w - fg_rside_w + 1; // dunno why +1, but it fits
+    int fg_mid_w_max = fg_width - fg_lside_w - fg_rside_w + 1; // dunno why +1, but it fits
 
-    if(fg_mid_w < 0) fg_mid_w = 0;
+    if(fg_mid_w_max < 0) fg_mid_w_max = 0;
 
-    // TODO recalc for current value
+    int valsize = cc->maxval - cc->minval;
+    // recalc for current value
+    // Pixels to shift right the bar for curr value
+    int pos_shift = (cc->value - cc->minval) * fg_mid_w_max / valsize;
+    // Pixels of bar width
+    int fg_mid_w_actual = fg_mid_w_max * cc->value_width / valsize;
+
 # if 1
-    w_draw_bitmap( w, cc->r.x + fg_xshift, cc->r.y + fg_yshift, fg_l );
-    w_draw_bitmap( w, cc->r.x + fg_xshift + fg_lside_w + fg_mid_w, cc->r.y + fg_yshift, fg_r );
+    w_draw_bitmap( w, cc->r.x + fg_xshift + pos_shift, cc->r.y + fg_yshift, fg_l );
+    w_draw_bitmap( w, cc->r.x + fg_xshift + fg_lside_w + fg_mid_w_actual + pos_shift, cc->r.y + fg_yshift, fg_r );
 
     // Replicate one column of fg
-    w_replicate_hor( w, cc->r.x + fg_xshift + fg_lside_w, cc->r.y + fg_yshift, fg_mid_w, fg_m->pixel, fg_m->ysize );
+    w_replicate_hor( w, cc->r.x + fg_xshift + fg_lside_w + pos_shift, cc->r.y + fg_yshift, fg_mid_w_actual, fg_m->pixel, fg_m->ysize );
 #endif
     }
 
