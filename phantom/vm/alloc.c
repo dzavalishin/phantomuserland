@@ -702,6 +702,8 @@ void paint_object_memory_map(window_handle_t w, rect_t *r )
     int i;
 
     if(!object_allocator_inited) return;
+    
+    //pvm_memcheck();
 
     if(vertical_pixels_per_arena[0] == 0)
     {
@@ -764,9 +766,9 @@ void paint_arena_memory_map(window_handle_t w, rect_t *r, int a )
             int cnt_used = 0;
             int cnt_free = 0;
 
-            pvm_object_t next = curr+curr->_ah.exact_size;
+            pvm_object_t next = ((void *)curr) + curr->_ah.exact_size;
 
-            LOG_FLOW( 0, "pixel %d/%d, start=%p, end=%p", x, y, this_pixel_start, this_pixel_end );
+            LOG_FLOW( 11, "pixel %d/%d, start=%p, end=%p", x, y, this_pixel_start, this_pixel_end );
 
             while( ((void *)next) < this_pixel_end )
             {
