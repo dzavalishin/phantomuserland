@@ -764,7 +764,7 @@ void create_settings_window( void )
 
     //color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
-    window_handle_t w = drv_video_window_create( 400, 350, 20, 500, COLOR_WHITE, "Controls", WFLAG_WIN_DECORATED );
+    window_handle_t w = drv_video_window_create( 400, 350, 20, 500, COLOR_WHITE, "Snapshots mode", WFLAG_WIN_DECORATED );
     phantom_settings_window = w;
     
     //w_set_visible( lmw, 0 );
@@ -776,7 +776,7 @@ void create_settings_window( void )
 
     
 
-    bh = w_add_menu_item( w, '1', 20, 300, 200, "Settings", COLOR_BLACK );
+    bh = w_add_menu_item( w, '1', 20, 300, 200, "Snap now", COLOR_BLACK );
     w_control_set_icon( w, bh, &icon_settings_bmp );
 
     // slide must paint over
@@ -786,7 +786,8 @@ void create_settings_window( void )
     bh = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
     w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
-    bh = w_add_text_field( w, 20, 200, 200, 31, "Help", COLOR_BLACK );
+    bh = w_add_text_field( w, 180, 200, 200, 31, "10", COLOR_BLACK );
+    w_add_label_transparent( w, 20, 200, 50, 32, "Snap delay, sec", COLOR_BLACK );
 
 
     //bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
