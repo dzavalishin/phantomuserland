@@ -62,7 +62,7 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
     //ctl_paint_bg( w, cc );    
 
     {
-    int alt_bg = cc->flags && CONTROL_FLAG_ALT_BG;
+    int alt_bg = cc->flags & CONTROL_FLAG_ALT_BG;
 
     drv_video_bitmap_t *bg_m = alt_bg ? &scrollbar_bed_middle_bmp : &scrollbar_bed_middle_narrow_bmp;
 
@@ -106,7 +106,7 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
 
     if( (cc->value >= 0  ) && (cc->value_width > 0) )
     {
-    int alt_fg = cc->flags && CONTROL_FLAG_ALT_FG;
+    int alt_fg = cc->flags & CONTROL_FLAG_ALT_FG;
 
     drv_video_bitmap_t *fg_l = alt_fg ? &scrollbar_orange_bar_left_bmp : &scrollbar_green_bar_left_bmp;
     drv_video_bitmap_t *fg_r = alt_fg ? &scrollbar_orange_bar_right_bmp : &scrollbar_green_bar_right_bmp;
@@ -126,13 +126,18 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
     // Pixels of bar width
     int fg_mid_w_actual = fg_mid_w_max * cc->value_width / valsize;
 
-
+    // TODO blend
     w_draw_bitmap( w, cc->r.x + fg_xshift + pos_shift, cc->r.y + fg_yshift, fg_l );
     w_draw_bitmap( w, cc->r.x + fg_xshift + fg_lside_w + fg_mid_w_actual + pos_shift, cc->r.y + fg_yshift, fg_r );
 
+    // TODO blend - make w_replicate_blend_hor
     // Replicate one column of fg
     w_replicate_hor( w, cc->r.x + fg_xshift + fg_lside_w + pos_shift, cc->r.y + fg_yshift, fg_mid_w_actual, fg_m->pixel, fg_m->ysize );
 
+    // TODO only if controllable - no CONTROL_FLAG_READONLY
+    // TODO on both sides of long bar?
+    if( (!alt_fg) && !(cc->flags & (CONTROL_FLAG_READONLY|CONTROL_FLAG_NOFOCUS)) )
+        w_draw_blend_bitmap( w, cc->r.x + fg_xshift + pos_shift + 3, cc->r.y + fg_yshift + 13, &scroll_bar_green_handle_bmp );
     }
 
     // Cursor
