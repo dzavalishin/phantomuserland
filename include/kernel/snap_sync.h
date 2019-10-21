@@ -17,6 +17,7 @@ void vm_unlock_persistent_memory( void );	// release access to persistent memory
 
 // request snap right now
 void request_snap(void);
+void set_snap_interval( int interval_sec );
 
 
 void phantom_thread_wait_4_snap( void );

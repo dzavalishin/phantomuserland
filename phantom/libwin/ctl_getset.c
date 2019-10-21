@@ -63,6 +63,8 @@ void w_control_set_visible( window_handle_t w, control_handle_t ch, int visible 
     cc->flags |= CONTROL_FLAG_DISABLED;
     if( visible ) cc->flags &= ~CONTROL_FLAG_DISABLED;    
 
+    w_paint_control( w, cc );
+
     RELEASE_CONTROL
 }
 

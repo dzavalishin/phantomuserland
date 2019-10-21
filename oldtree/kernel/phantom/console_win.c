@@ -764,6 +764,7 @@ static void debugOnOff(window_handle_t w, struct control *c) {
 #endif
 
 extern void request_snap(void);
+static int setup_snap_interval = 100;
 
 void snap_time_text_update( window_handle_t w, struct control *cc )
 {
@@ -784,8 +785,24 @@ again:
         }
     }
 
-    int val = atoi( cc->buffer );
-    LOG_FLOW( 1, "snap timeout %d", val );
+    setup_snap_interval = atoi( cc->buffer );
+    set_snap_interval( setup_snap_interval );
+    LOG_FLOW( 1, "snap timeout %d", setup_snap_interval );
+}
+
+
+static control_handle_t settings_ed;
+static control_handle_t settings_lbl;
+
+void settings_sw_callback( window_handle_t w, struct control *cc )
+{
+    w_control_set_visible( w, settings_ed, cc->state != cs_pressed );
+    w_control_set_visible( w, settings_lbl, cc->state != cs_pressed );
+
+    if( cc->state == cs_pressed )
+        set_snap_interval( 0 );
+    else
+        set_snap_interval( setup_snap_interval );
 }
 
 void create_settings_window( void )
@@ -815,14 +832,16 @@ void create_settings_window( void )
     //w_add_label( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
     w_add_label_transparent( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
 
-    bh = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+    control_handle_t sw = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, sw, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
-    bh = w_add_text_field( w, 180, 200, 200, 31, "10", COLOR_BLACK );
-    w_control_set_flags( w, bh, CONTROL_FLAG_CALLBACK_KEY, 0 );
-    w_control_set_callback( w, bh, snap_time_text_update, 0 );
-    w_add_label_transparent( w, 20, 200, 50, 32, "Snap delay, sec", COLOR_BLACK );
+    settings_ed = w_add_text_field( w, 180, 200, 200, 31, "100", COLOR_BLACK );
+    w_control_set_flags( w, settings_ed, CONTROL_FLAG_CALLBACK_KEY, 0 );
+    w_control_set_callback( w, settings_ed, snap_time_text_update, 0 );
 
+    settings_lbl = w_add_label_transparent( w, 20, 200, 50, 32, "Snap delay, sec", COLOR_BLACK );
+
+    w_control_set_callback( w, sw, settings_sw_callback, 0 );
 
     //bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
     //w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
@@ -897,7 +916,8 @@ void create_settings_window( void )
     // -------------------------------------------------------------------
 
 #if 1
-    snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 360, 31, 0, 100, CONTROL_FLAG_ALT_FG|CONTROL_FLAG_ALT_BG );
+    //snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 360, 31, 0, 100, CONTROL_FLAG_ALT_FG|CONTROL_FLAG_ALT_BG );
+    snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 360, 31, 0, 100, 0 );
     w_control_set_value( w, snap_scroll_bar, -1, -1 ); // Remove bar
 #else
 
