@@ -125,12 +125,13 @@ static void find_visible_text_len( control_t *cc )
 
 //        if( cc->vis_len > cc->str_len - cc->vis_shift )
 //            cc->vis_len = cc->str_len - cc->vis_shift;
+        LOG_FLOW(4, "try vis_len %d ", cc->vis_len );
 
         w_ttfont_string_size( decorations_title_font,
-                          cc->buffer + cc->vis_shift, cc->str_len - cc->vis_shift,
+                          cc->buffer + cc->vis_shift, cc->vis_len,
                            &r );
 
-        int vis_width_pixels = r.xsize;
+        int vis_width_pixels = r.xsize + 5; // TODO hack - +5 is to move away the right decoration
         LOG_FLOW(4, " vis_width_pixels %d, cc->r.xsize %d ", vis_width_pixels, cc->r.xsize );
         if (vis_width_pixels <= cc->r.xsize - 6 )
             break;
@@ -142,7 +143,14 @@ static void find_visible_text_len( control_t *cc )
             break;
     }     
 
-    cc->text_height = r.ysize;
+    //cc->text_height = r.ysize;
+    if( cc->text_height <= 0 )
+    {
+        w_ttfont_string_size( decorations_title_font,
+                          cc->buffer, cc->str_len,
+                           &r );
+        cc->text_height = r.ysize;
+    }
 }
 
 

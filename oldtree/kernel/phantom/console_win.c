@@ -872,7 +872,7 @@ void create_settings_window( void )
     w_control_set_text( w, bh, "Cancel", COLOR_BLACK );
 }
 
-#if 1
+
 static window_handle_t make_debug_w_context_menu(void)
 {
     // -----------------------------
@@ -924,7 +924,7 @@ static window_handle_t make_debug_w_context_menu(void)
     return ctx_menu;
 }
 
-#endif
+
 
 
 
