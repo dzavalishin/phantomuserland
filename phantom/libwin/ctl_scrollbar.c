@@ -54,8 +54,9 @@
 
 void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
 {
-    int fg_xgap = 4; // shift beween bed and bar itself
-    int fg_ygap = 1; // shift beween bed and bar itself
+    int fg_xgap = 4; // gap beween bed and bar itself
+    int fg_xshift = 3; // shift beween bed and bar itself
+    int fg_yshift = -3; // shift beween bed and bar itself
 
     //ctl_paint_bg( w, cc );    
 
@@ -102,17 +103,17 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
     int fg_width = cc->r.xsize - fg_xgap * 2;
     int fg_lside_w = fg_l->xsize;
     int fg_rside_w = fg_r->xsize;
-    int fg_mid_w = fg_width - fg_lside_w - fg_rside_w;
+    int fg_mid_w = fg_width - fg_lside_w - fg_rside_w + 1; // dunno why +1, but it fits
 
     if(fg_mid_w < 0) fg_mid_w = 0;
 
     // TODO recalc for current value
-# if 0
-    w_draw_bitmap( w, cc->r.x, cc->r.y + fg_ygap, fg_l );
-    w_draw_bitmap( w, cc->r.x + fg_lside_w + fg_mid_w, cc->r.y + fg_ygap, fg_r );
+# if 1
+    w_draw_bitmap( w, cc->r.x + fg_xshift, cc->r.y + fg_yshift, fg_l );
+    w_draw_bitmap( w, cc->r.x + fg_xshift + fg_lside_w + fg_mid_w, cc->r.y + fg_yshift, fg_r );
 
     // Replicate one column of fg
-    w_replicate_hor( w, cc->r.x + fg_lside_w, cc->r.y + fg_ygap, fg_mid_w, fg_m->pixel, fg_m->ysize );
+    w_replicate_hor( w, cc->r.x + fg_xshift + fg_lside_w, cc->r.y + fg_yshift, fg_mid_w, fg_m->pixel, fg_m->ysize );
 #endif
     }
 
