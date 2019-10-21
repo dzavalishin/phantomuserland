@@ -110,6 +110,7 @@
       "keyboard_mode2_tab.h": "c",
       "font.h": "c",
       "ui.h": "c",
-      "key_event.h": "c"
+      "key_event.h": "c",
+      "ctl_private.h": "c"
     }
   }

@@ -415,7 +415,7 @@ control_handle_t w_add_scrollbar_ext( window_handle_t w, int x, int y, int xsize
     cb.r.xsize = xsize;
     cb.r.ysize = ysize;
 
-    cb.flags = flags;
+    cb.flags = flags|CONTROL_FLAG_NOBORDER;
 
     cb.minval = minval;
     cb.maxval = maxval;

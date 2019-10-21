@@ -325,12 +325,19 @@ int w_event_to_controls( window_handle_t w, ui_event_t *e ); // Deliver events t
 
 void w_paint_control( window_handle_t w, control_t *cc );
 
+/**
+ * 
+ * Delete character from control's buffer at given position.
+ * 
+**/
+void w_ctl_delete_buffer_char( control_t *cc, int pos );
 
-    // -------------------------------------------------------------------
-    //
-    // Menu window
-    //
-    // -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+//
+// Menu window
+//
+// -------------------------------------------------------------------
 
 
 

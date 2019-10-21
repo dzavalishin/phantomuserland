@@ -45,8 +45,8 @@ static void ctl_text_modify_shift( control_t *cc )
     LOG_FLOW( 1, "Cursor pos = %d, str_len = %d, vis_shift  = %d, vis_len = %d, buf='%s'", 
     cc->cursor_pos, cc->str_len, cc->vis_shift, cc->vis_len, cc->buffer );
 
-    if( cc->cursor_pos > (cc->vis_shift + (cc->vis_len - 2) ) )
-        cc->vis_shift = cc->cursor_pos - (cc->vis_len - 2);
+    if( cc->cursor_pos > (cc->vis_shift + cc->vis_len ) )
+        cc->vis_shift = cc->cursor_pos - cc->vis_len;
 
     if( cc->cursor_pos < cc->vis_shift )
         cc->vis_shift = cc->cursor_pos;
@@ -154,6 +154,33 @@ static void find_visible_text_len( control_t *cc )
 }
 
 
+// -----------------------------------------------------------------------
+//
+// Buffer processing
+//
+// -----------------------------------------------------------------------
+
+void w_ctl_delete_buffer_char( control_t *cc, int pos )
+{
+    if( pos >= cc->str_len )
+        return;
+    
+    LOG_FLOW( 2, "Delete ch @%d buf='%s'", pos, cc->buffer );
+
+    const char *from = cc->buffer + pos + 1;
+    char *to = cc->buffer + pos;
+    size_t len = cc->str_len - (pos + 1);
+
+    strncpy( to, from, len );
+
+    assert(cc->str_len > 0);
+
+    cc->str_len--;
+    cc->buffer[cc->str_len] = 0;
+
+    LOG_FLOW( 2, "Delete ch done @%d buf='%s'", pos, cc->buffer );
+}
+
 
 // -----------------------------------------------------------------------
 //
@@ -203,7 +230,6 @@ void ctl_text_field_paint(window_handle_t win, control_t *cc )
 
 
 
-
 /// Process event for text edit field
 int ctl_text_field_events(control_t *cc, struct foreach_control_param *env)
 {
@@ -219,7 +245,7 @@ int ctl_text_field_events(control_t *cc, struct foreach_control_param *env)
         switch (e.k.ch)
         {
         case KEY_ENTER:
-            w_control_action(env->w, cc, &e);
+            //w_control_action(env->w, cc, &e); // see below
             break;
 
         case KEY_RIGHT:
@@ -249,6 +275,9 @@ check_cursor_right:
             cc->cursor_pos--;
             /* FALLTHROUGH */
         case KEY_DELETE:
+#if 1
+            w_ctl_delete_buffer_char( cc, cc->cursor_pos );
+#else
             if( cc->cursor_pos >= cc->str_len )
                 break;
             {
@@ -262,6 +291,7 @@ check_cursor_right:
                 cc->buffer[cc->str_len] = 0;
                 LOG_FLOW( 2, "Delete ch done @%d buf='%s'", cc->cursor_pos, cc->buffer );
             }
+#endif            
             break;
 
         default:
@@ -307,6 +337,10 @@ check_cursor_right:
         }
         
         LOG_FLOW( 9, "cursor pos = %d", cc->cursor_pos );
+
+        if( (e.k.ch == KEY_ENTER) || (cc->flags & CONTROL_FLAG_CALLBACK_KEY) )
+            w_control_action(env->w, cc, &e);
+
         return 1; // eat event
     }
 

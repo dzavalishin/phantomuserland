@@ -765,6 +765,29 @@ static void debugOnOff(window_handle_t w, struct control *c) {
 
 extern void request_snap(void);
 
+void snap_time_text_update( window_handle_t w, struct control *cc )
+{
+    (void) w;
+
+    int i;
+    for( i = 0; i < cc->str_len; i++ )
+    {
+        wchar_t ch;
+again:
+        ch = cc->buffer[i];
+        if( (ch < '0') || (ch > '9') )
+        {
+            w_ctl_delete_buffer_char( cc, i );
+            cc->cursor_pos--;
+            if( cc->cursor_pos < 0 ) cc->cursor_pos = 0;
+            goto again;
+        }
+    }
+
+    int val = atoi( cc->buffer );
+    LOG_FLOW( 1, "snap timeout %d", val );
+}
+
 void create_settings_window( void )
 {
     pool_handle_t bh;
@@ -796,6 +819,8 @@ void create_settings_window( void )
     w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
     bh = w_add_text_field( w, 180, 200, 200, 31, "10", COLOR_BLACK );
+    w_control_set_flags( w, bh, CONTROL_FLAG_CALLBACK_KEY, 0 );
+    w_control_set_callback( w, bh, snap_time_text_update, 0 );
     w_add_label_transparent( w, 20, 200, 50, 32, "Snap delay, sec", COLOR_BLACK );
 
 
@@ -872,7 +897,7 @@ void create_settings_window( void )
     // -------------------------------------------------------------------
 
 #if 1
-    snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 350, 31, 0, 100, CONTROL_FLAG_ALT_FG|CONTROL_FLAG_ALT_BG );
+    snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 360, 31, 0, 100, CONTROL_FLAG_ALT_FG|CONTROL_FLAG_ALT_BG );
     w_control_set_value( w, snap_scroll_bar, -1, -1 ); // Remove bar
 #else
 
