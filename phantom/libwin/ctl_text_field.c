@@ -10,9 +10,9 @@
 
 #define DEBUG_MSG_PREFIX "ui.ctl.txt"
 #include <debug_ext.h>
-#define debug_level_flow 3
+#define debug_level_flow 10
 #define debug_level_error 10
-#define debug_level_info 1
+#define debug_level_info 10
 
 
 #include <phantom_types.h>
@@ -274,7 +274,8 @@ check_cursor_right:
 
                 char *from = cc->buffer + cc->cursor_pos;
                 char *to = cc->buffer + cc->cursor_pos + 1;
-                ssize_t len = cc->str_len - (cc->cursor_pos + 1);
+                //ssize_t len = cc->str_len - (cc->cursor_pos + 1);
+                ssize_t len = cc->str_len - cc->cursor_pos;
                 // if(insert_mode)
                 if( (cc->str_len > 0) && (cc->cursor_pos < cc->str_len) ) // Can't extend empty string
                 {
@@ -283,7 +284,6 @@ check_cursor_right:
                 }
 
                 *from = e.k.ch;
-                //if(cc->cursor_pos == cc->str_len)                    *to = 0; // added at and of string, add zero
 
                 cc->str_len++;
                 if( cc->str_len >= sizeof(cc->buffer)-1 )

@@ -786,7 +786,7 @@ void create_settings_window( void )
     bh = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
     w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
-    bh = w_add_text_field( w, 20, 200, 200, 31, "Hell", COLOR_BLACK );
+    bh = w_add_text_field( w, 20, 200, 200, 31, "Help", COLOR_BLACK );
 
 
     //bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
