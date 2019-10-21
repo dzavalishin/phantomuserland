@@ -7,7 +7,7 @@
  * Window system event.
  *
  *
-**/
+ **/
 
 #ifndef EVENT_H
 #define EVENT_H
@@ -19,15 +19,16 @@
 #include <queue.h>
 #include <video/rect.h>
 
+#include <compat/uos/keyboard.h>
 
 struct ui_event
 {
     queue_chain_t               echain; // on q
 
-    int				type; // UI_EVENT_TYPE_
-    int				extra; // used for button event - button id
+    int                         type; // UI_EVENT_TYPE_
+    int                         extra; // used for button event - button id
 
-    time_t	 	       	time;
+    time_t                      time;
 
     int                         abs_x;
     int                         abs_y;
@@ -40,24 +41,24 @@ struct ui_event
     struct drv_video_window *   focus; // Target window
 
     // Shift, alt, etc - actual for key and mouse events
-    int 			modifiers; 
+    int                         modifiers;
 
     union {
 
         struct {
-            int         	vk;     // key code
-            int         	ch;     // unicode char
+            int                 vk;     // key code
+            int                 ch;     // unicode char
         } k;
 
         struct {
-            int         	buttons;	// Bits correspond to mouse buttons
-            int         	clicked;       	// Bits correspond to mouse buttons clicked this time
-            int         	released;      	// Bits correspond to mouse buttons released this time
+            int                 buttons;        // Bits correspond to mouse buttons
+            int                 clicked;        // Bits correspond to mouse buttons clicked this time
+            int                 released;       // Bits correspond to mouse buttons released this time
         } m;
 
         // WIN and GLOBAL events
         struct {
-            int         	info;           // UI_EVENT_WIN_
+            int                 info;           // UI_EVENT_WIN_
             rect_t              rect;           // If relevant...
             rect_t              rect2;          // If relevant...
             //rgba_t              color;          // For fill op
@@ -71,15 +72,22 @@ struct ui_event
 
 typedef struct ui_event ui_event_t;
 
-#define UI_EVENT_TYPE_MOUSE     	(1<<0)
-#define UI_EVENT_TYPE_KEY     		(1<<1)
-#define UI_EVENT_TYPE_WIN     		(1<<2)
+#define UI_EVENT_TYPE_MOUSE             (1<<0)
+#define UI_EVENT_TYPE_KEY               (1<<1)
+#define UI_EVENT_TYPE_WIN               (1<<2)
 // Global events are usually converted to multiple WIN events
-#define UI_EVENT_TYPE_GLOBAL   		(1<<3)
+#define UI_EVENT_TYPE_GLOBAL            (1<<3)
+
+
+// Mouse button bits 
+#define UI_MOUSE_BTN_LEFT               01
+#define UI_MOUSE_BTN_RIGHT              02
+#define UI_MOUSE_BTN_MIDDLE             04
+
 
 
 #define UI_MODIFIER_KEYUP               (1<<0) // Else down
-#define UI_MODIFIER_SHIFT               (1<<1) 
+#define UI_MODIFIER_SHIFT               (1<<1)
 #define UI_MODIFIER_LSHIFT              (1<<2)
 #define UI_MODIFIER_RSHIFT              (1<<3)
 #define UI_MODIFIER_CAPSLOCK            (1<<4)
@@ -101,6 +109,18 @@ typedef struct ui_event ui_event_t;
     if( m & (__n) ) yn = 0; \
     yn; \
     })
+
+
+// Key is down and no control/alt/shift is pressed
+#define UI_MOD_DOWN(__mod) \
+    ({ int m = (__mod); int yn; \
+    yn = !(m & UI_MODIFIER_KEYUP);  \
+    if( m & UI_MODIFIER_SHIFT ) yn = 0; \
+    if( m & UI_MODIFIER_ALT ) yn = 0; \
+    if( m & UI_MODIFIER_CTRL ) yn = 0; \
+    yn; \
+    })
+
 
 
 // Key is down and just control is pressed
@@ -129,13 +149,18 @@ typedef struct ui_event ui_event_t;
 #define UI_EVENT_WIN_DESTROYED          3
 #define UI_EVENT_WIN_REDECORATE         4 //! Repaint titlebar
 #define UI_EVENT_WIN_REPAINT            5 //! Repaint all
-#define UI_EVENT_WIN_BUTTON             6
 
+#define UI_EVENT_WIN_BUTTON_ON          6
+#define UI_EVENT_WIN_BUTTON_OFF         7
+
+#define UI_EVENT_WIN_TO_TOP             8
+#define UI_EVENT_WIN_TO_BOTTOM          9
+#define UI_EVENT_WIN_MOVE              10
 
 
 #define UI_EVENT_GLOBAL_REPAINT_RECT    (0xFF00 | 1) //! Repaint all windows that intersect w. rect
-#define UI_EVENT_GLOBAL_COPY_RECT       (0xFF00 | 2) //! Copy part of screen to other place, rect is scr, rect2.x/y is dest pos - FOR 2D ACCELERATOR
-#define UI_EVENT_GLOBAL_FILL_RECT       (0xFF00 | 3) //! Fill part of screen with color, rect is scr pos, color is color        - FOR 2D ACCELERATOR
+#define UI_EVENT_GLOBAL_COPY_RECT       (0xFF00 | 2) //! TODO Copy part of screen to other place, rect is scr, rect2.x/y is dest pos - FOR 2D ACCELERATOR
+#define UI_EVENT_GLOBAL_FILL_RECT       (0xFF00 | 3) //! TODO Fill part of screen with color, rect is scr pos, color is color        - FOR 2D ACCELERATOR
 
 
 
@@ -152,7 +177,7 @@ typedef struct ui_event ui_event_t;
 
 // TODO move to kern/event.h and rest to video/event.h
 
-//! Construct mouse event 
+//! Construct mouse event
 void ev_make_mouse_event( struct ui_event *e, int x, int y, int buttons );
 
 //! Put mouse event onto the main e q
@@ -186,7 +211,12 @@ int ev_w_get_event( struct drv_video_window *w, struct ui_event *e, int wait );
 int defaultWindowEventProcessor( struct drv_video_window *w, struct ui_event *e );
 
 //! Just for debug
-int ev_get_n_events_in_q(void); 
+int ev_get_n_events_in_q(void);
+
+//! Called early in driver for debugging and UI independent keyboard actions
+int kernel_keyboard_hook( unsigned key, unsigned shifts);
+
+
 
 #endif // KERNEL
 

@@ -121,7 +121,12 @@ static int getwc_16( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thre
     // wtty_getc( tty );
 
     vm_unlock_persistent_memory();
-    c[0] = phantom_dev_keyboard_getc(); // TODO need to read from local window? wtty?
+    
+    //c[0] = phantom_dev_keyboard_getc(); // TODO need to read from local window? wtty?
+    //#warning fix me - phantom_window_getc() ?
+
+    //c[0] = phantom_window_getc();
+    c[0] = 0;
     vm_lock_persistent_memory();
 
     SYSCALL_RETURN( pvm_create_string_object_binary( c, 1 ));
@@ -253,6 +258,20 @@ static int tty_setWinTitle_25( pvm_object_t me, pvm_object_t *ret, struct data_a
 }
 
 
+static int setbgcolor_26( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    struct data_area_4_tty      *da = pvm_data_area( me, tty );
+
+    DEBUG_INFO;
+
+    CHECK_PARAM_COUNT(1);
+
+    int color = AS_INT(args[0]);
+    INT32_TO_RGBA(da->bg, color);
+
+    SYSCALL_RETURN_NOTHING;
+}
+
 
 syscall_func_t  syscall_table_4_tty[32] =
 {
@@ -272,7 +291,7 @@ syscall_func_t  syscall_table_4_tty[32] =
     &fill_22,                           &putblock_23,
     // 24
     &tty_setWinPos_24,                  &tty_setWinTitle_25,
-    &invalid_syscall,                   &invalid_syscall,
+    &setbgcolor_26,                     &invalid_syscall,
     &invalid_syscall,                   &invalid_syscall,
     &invalid_syscall,                   &invalid_syscall,
 
@@ -306,13 +325,6 @@ void pvm_internal_init_tty( pvm_object_t  ttyos )
 {
     struct data_area_4_tty      *tty = (struct data_area_4_tty *)ttyos->da;
 
-    /*
-    tty->w.xsize = PVM_DEF_TTY_XSIZE;
-    tty->w.ysize = PVM_DEF_TTY_YSIZE;
-    tty->w.x = 100;
-    tty->w.y = 100;
-    */
-
     tty->font_height = 16;
     tty->font_width = 8;
     tty->x = 0;
@@ -324,20 +336,24 @@ void pvm_internal_init_tty( pvm_object_t  ttyos )
 
     strlcpy( tty->title, "VM TTY Window", sizeof(tty->title) );
 
-    drv_video_window_init( &(tty->w), PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, tty->bg, WFLAG_WIN_DECORATED, tty->title );
+    pvm_object_t bin = pvm_create_binary_object( drv_video_window_bytes( PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE ) + sizeof(drv_video_window_t), 0 );
+    tty->o_pixels = bin;
+
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)bin->da;
+
+    void *pixels = &bda->data;
+
+    //void *pixels = &(tty->w) + sizeof(drv_video_window_t);
+
+    drv_video_window_init( &(tty->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, tty->bg, WFLAG_WIN_DECORATED, tty->title );
+
+    //lprintf("pvm_internal_init_tty %p pix %p", &(tty->w), pixels );
+
+
     w_clear( &(tty->w) );
     //w_update( &(tty->w) );
 
-
-    {
-    //pvm_object_t o;
-    //o.data = ttyos;
-    //o.interface = pvm_get_default_interface(ttyos);
-
-    // This object needs OS attention at restart
-    // TODO do it by class flag in create fixed or earlier?
     pvm_add_object_to_restart_list( ttyos );
-    }
 }
 
 void pvm_gc_iter_tty(gc_iterator_call_t func, pvm_object_t  os, void *arg)
@@ -361,9 +377,13 @@ void pvm_restart_tty( pvm_object_t o )
 
     struct data_area_4_tty *tty = pvm_object_da( o, tty );
 
-    printf( "restart TTY %p\n", tty );
+    //lprintf( "restart TTY %p\n", tty );
 
-    w_restart_init( &tty->w );
+    struct data_area_4_binary *bda = (struct data_area_4_binary *)tty->o_pixels->da;
+
+    void *pixels = &bda->data;
+
+    w_restart_init( &tty->w, pixels );
 
     tty->w.title = tty->title; // need? must be correct in snap
 

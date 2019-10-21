@@ -1,7 +1,7 @@
 set confirm off
 
-target exec pvm_headless.exe 
-file pvm_headless.exe 
+#target exec pvm_headless.exe 
+#file pvm_headless.exe 
 #symbol-file pvm_headless.exe 
 
 break main
@@ -22,7 +22,7 @@ break e4c_exception_throw_verbatim_
 
 
 #break jsmn_parse
-break json_parse
-
+#break w_add_control
+break init_task_bar
 
 run

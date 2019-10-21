@@ -113,7 +113,7 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	cbuf.o khash.o udp.o if.o queue.o loopback.o net_misc.o \
 	time.o console.o timedcall.o driver_pci_rtl8139.o \
 	paging_device.o paging.o dpc.o spinlock.o hal.o fsck.o \
-	console_win.o vm_threads.o snap_sync.o ps2.o \
+	console_win.o vm_threads.o snap_sync.o \
 	video_drv_direct_vesa.o video_drv_bochs_vbe.o video_drv_cirrus.o \
 	video_drv_basic_vga.o video_drv_basic_vga_tables.o video_drv_null.o video.o \
 	ataiopio.o ataiotrc.o ataioreg.o ataiosub.o ataioint.o ataiotmr.o ataiopci.o \
@@ -126,12 +126,11 @@ phantom: $(START_O_FILE) $(ARCH)/boards/$(BOARD).o  $(ARCH_OBJS) \
 	unix/fs_proc.o unix/sys_file.o unix/fs_dev.o unix/sys_net.o \
 	unix/fs_udp.o unix/fs_tcp.o fs_ext2.o unix/fs_ext2.o unix/fs_fatff.o unix/fs_cd.o \
 	unix/signal.o unix/sys_sw.o unix/phantom.o \
-        vm_cn_udp.o vm_cn_timer.o vm_cn_stats.o  vm_cn_fio.o vm_cn_url.o \
-	fs_map.o resolve.o main.o keyboard.o syslog.o \
-        snmp.o snmp_agent.o snmp_mib.o snmp_auth.o snmp_session.o snmp_api.o snmp_config.o snmpd.o snmp_mib2os.o snmp_mib2if.o \
+    vm_cn_udp.o vm_cn_timer.o vm_cn_stats.o  vm_cn_fio.o vm_cn_url.o \
+	fs_map.o resolve.o main.o syslog.o \
 	arch_name.o arch_init.o \
 	driver_arm_raspberry_fb.o driver_arm_raspberry_interrupts.o \
-        driver_arm_raspberry_timer.o \
+    driver_arm_raspberry_timer.o \
 	vm_map.o vm_map_util.o pagelist.o pager.o vm_test.o \
 	svn_version.o profile.o trace.o $(L386) $(DEPENDLIBS) $(PHANTOM_LIBS) $(CLIB)
 

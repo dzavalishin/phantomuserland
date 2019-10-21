@@ -52,6 +52,9 @@ static int si_window_5_tostring( pvm_object_t o, pvm_object_t *ret, struct data_
 static int win_getXSize( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
+
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object( da->w.xsize ));
 }
@@ -59,6 +62,8 @@ static int win_getXSize( pvm_object_t o, pvm_object_t *ret, struct data_area_4_t
 static int win_getYSize( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( o, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
     DEBUG_INFO;
     SYSCALL_RETURN(pvm_create_int_object( da->w.ysize ));
 }
@@ -84,13 +89,15 @@ static int win_getY( pvm_object_t o, pvm_object_t *ret, struct data_area_4_threa
 static int win_clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     DEBUG_INFO;
 
     da->x = da->y = 0;
 
     w_fill( &(da->w), da->bg );
-    w_update( &(da->w) );
+    if( da->autoupdate) w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -98,6 +105,9 @@ static int win_clear_20( pvm_object_t me, pvm_object_t *ret, struct data_area_4_
 static int win_fill_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
+
     DEBUG_INFO;
 
     CHECK_PARAM_COUNT(1);
@@ -114,9 +124,7 @@ static int win_fill_21( pvm_object_t me, pvm_object_t *ret, struct data_area_4_t
 static int win_setFGcolor_22( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
-
     DEBUG_INFO;
-
     CHECK_PARAM_COUNT(1);
 
     int color = AS_INT(args[0]);
@@ -128,9 +136,7 @@ static int win_setFGcolor_22( pvm_object_t me, pvm_object_t *ret, struct data_ar
 static int win_setBGcolor_23( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     struct data_area_4_window      *da = pvm_data_area( me, window );
-
     DEBUG_INFO;
-
     CHECK_PARAM_COUNT(1);
 
     int color = AS_INT(args[0]);
@@ -148,7 +154,9 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
 {
     DEBUG_INFO;
 
-    struct data_area_4_tty      *da = pvm_data_area( me, tty );
+    struct data_area_4_window *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
     
     CHECK_PARAM_COUNT(3);
 
@@ -177,7 +185,7 @@ static int win_putString_24( pvm_object_t me, pvm_object_t *ret, struct data_are
 
     // TODO make a version of drv_video_font_tty_string that accepts non-zero terminated strings with len
     w_font_tty_string( &(da->w), tty_font, buf, fg, bg, &x, &y );
-    w_update( &(da->w) );
+    if( da->autoupdate) w_update( &(da->w) );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -201,13 +209,16 @@ static int win_putImage_25( pvm_object_t me, pvm_object_t *ret, struct data_area
     //struct data_area_4_tty *tty = pvm_object_da( _tty, tty );
     struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
 
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w_pixels = (void *)&bda->data;
+
     bitmap2bitmap(
-                da->pixel, da->w.xsize, da->w.ysize, x, y,
+                da->w.bitmap, da->w.xsize, da->w.ysize, x, y,
                 (rgba_t *)pixels, _bmp->xsize, _bmp->ysize, 0, 0,
                 _bmp->xsize, _bmp->ysize
     );
-    // Sure? Have flag for window - autoUpdate! and method setAutoUpdate( false )
-    w_update( &(da->w) );
+
+    if( da->autoupdate) w_update( &(da->w) );
 
     SYS_FREE_O(_img);
 
@@ -219,6 +230,8 @@ static int win_setSize_26( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(2);
 
@@ -228,8 +241,8 @@ static int win_setSize_26( pvm_object_t me, pvm_object_t *ret, struct data_area_
     if(x*y > PVM_MAX_WIN_PIXELS)
         SYSCALL_THROW_STRING( "new win size > PVM_MAX_WIN_PIXELS" );
 
-    w_resize( &(da->w), x, y );
-
+    //w_resize( &(da->w), x, y );
+#warning impl me
     SYSCALL_RETURN_NOTHING;
 }
 
@@ -237,6 +250,8 @@ static int win_setPos_27( pvm_object_t me, pvm_object_t *ret, struct data_area_4
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(2);
 
@@ -252,6 +267,8 @@ static int win_drawLine_28( pvm_object_t me, pvm_object_t *ret, struct data_area
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(4);
 
@@ -271,6 +288,8 @@ static int win_drawBox_29( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(4);
 
@@ -290,6 +309,8 @@ static int win_fillBox_30( pvm_object_t me, pvm_object_t *ret, struct data_area_
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(4);
 
@@ -310,6 +331,8 @@ static int win_fillEllipse_31( pvm_object_t me, pvm_object_t *ret, struct data_a
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(4);
 
@@ -349,6 +372,8 @@ static int win_setTitle_33( pvm_object_t me, pvm_object_t *ret, struct data_area
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(1);
 
@@ -364,7 +389,7 @@ static int win_setTitle_33( pvm_object_t me, pvm_object_t *ret, struct data_area
 
     SYS_FREE_O(_text);
 
-    w_set_title( &(da->w), da->w.title );
+    w_set_title( &(da->w), da->title );
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -374,6 +399,8 @@ static int win_update_34( pvm_object_t me, pvm_object_t *ret, struct data_area_4
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
     
     CHECK_PARAM_COUNT(0);
 
@@ -388,6 +415,8 @@ static int win_scrollHor_35( pvm_object_t me, pvm_object_t *ret, struct data_are
 {
     DEBUG_INFO;
     struct data_area_4_window      *da = pvm_data_area( me, window );
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w = (window_handle_t)&bda->data;
 
     CHECK_PARAM_COUNT(5);
 
@@ -426,18 +455,35 @@ static int win_drawImagePart_36( pvm_object_t me, pvm_object_t *ret, struct data
     //struct data_area_4_tty *tty = pvm_object_da( _tty, tty );
     struct data_area_4_binary *pixels = pvm_object_da( _bmp->image, binary );
 
+    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
+    //window_handle_t w_and_pixels = (void *)&bda->data;
+
     bitmap2bitmap(
-                da->pixel, da->w.xsize, da->w.ysize, x+xstart, y+ystart,
+                da->w.bitmap, da->w.xsize, da->w.ysize, x+xstart, y+ystart,
                 (rgba_t *)pixels, _bmp->xsize, _bmp->ysize, xstart, ystart,
                 xsize, ysize
     );
 
-    w_update( &(da->w) );
+    if( da->autoupdate) w_update( &(da->w) );
 
     SYS_FREE_O(_img);
 
     SYSCALL_RETURN_NOTHING;
 }
+
+
+
+
+static int win_setAutoUpdate_37( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    DEBUG_INFO;
+    struct data_area_4_window      *da = pvm_data_area( me, window );
+    
+    CHECK_PARAM_COUNT(1);
+    da->autoupdate = AS_INT(args[0]);
+    SYSCALL_RETURN_NOTHING;
+}
+
 
 
 
@@ -465,7 +511,7 @@ syscall_func_t  syscall_table_4_window[32+8] =
     // 32
     &win_setHandler_32,             &win_setTitle_33,
     &win_update_34,                 &win_scrollHor_35,
-    &win_drawImagePart_36,          &invalid_syscall,
+    &win_drawImagePart_36,          &win_setAutoUpdate_37,
     &invalid_syscall,               &invalid_syscall,
 
 };

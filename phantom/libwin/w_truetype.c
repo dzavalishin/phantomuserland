@@ -18,9 +18,9 @@
 
 #define DEBUG_MSG_PREFIX "w.ttf"
 #include <debug_ext.h>
-#define debug_level_flow 10
-#define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_flow 0
+#define debug_level_error 1
+#define debug_level_info 0
 
 
 #include <stdint.h>
@@ -30,6 +30,7 @@
 #include <video/screen.h>
 #include <video/internal.h>
 #include <video/font.h>
+#include <video/vops.h>
 
 #include <kernel/init.h>
 #include <kernel/debug.h>
@@ -39,10 +40,6 @@
 
 
 #define CACHE_FT_FACE 0
-
-// user mode debug - TODO debug_ext.h does not work in user mode
-#define lprintf printf
-
 
 static FT_Library ftLibrary = 0;
 static int running = 0;
@@ -137,7 +134,7 @@ struct ttf_symbol
 
 #define MIN(x, y) ((x) > (y) ? (y) : (x))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
-
+/*
 #define W_BLEND_PIXEL( old, new, newalpha ) \
     ((unsigned char) \
       ( \
@@ -146,6 +143,46 @@ struct ttf_symbol
         ( ((unsigned char)(old)) * (1.0f - (newalpha)) ) \
       )\
     )
+*/
+
+
+
+// -----------------------------------------------------------------------
+//
+// Helpers
+//
+// -----------------------------------------------------------------------
+
+
+FT_Glyph getGlyph(FT_Face face, uint32_t charcode)
+{
+    FT_Load_Char(face, charcode, FT_LOAD_RENDER);
+    FT_Glyph glyph = 0;
+    FT_Get_Glyph(face->glyph, &glyph);
+    return glyph;
+}
+
+
+FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
+{
+    FT_UInt leftIndex = FT_Get_Char_Index(face, leftCharcode);
+    FT_UInt rightIndex = FT_Get_Char_Index(face, rightCharcode);
+
+    FT_Vector delta;
+    FT_Get_Kerning(face, leftIndex, rightIndex, FT_KERNING_DEFAULT, &delta);
+    return delta.x;
+}
+
+
+
+
+
+// -----------------------------------------------------------------------
+//
+// UTF-8 versions
+//
+// -----------------------------------------------------------------------
+
 
 
 static void w_tt_paint_char(window_handle_t win, const struct ttf_symbol *symb, int win_x, int win_y, int top, const rgba_t color )
@@ -217,7 +254,7 @@ void w_ttfont_draw_char(
     struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
     if( 0 == pe )
     {
-        lprintf("\ncan't get font for handle %x\n", font);
+        LOG_ERROR( 1, "can't get font for handle %x", font);
         return;
     }
 
@@ -235,7 +272,7 @@ void w_ttfont_draw_char(
     int32_t posX = 0;
     int skip_total = 0;
 
-    int32_t charcode;
+    int32_t charcode = 0;
     //ssize_t skip =
     utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
 
@@ -271,46 +308,57 @@ void w_ttfont_draw_char(
 }
 
 
-
 void w_ttfont_draw_string(
                           window_handle_t win,
                           font_handle_t font,
-                          const char *str, const rgba_t color, //const rgba_t bg,
+                          const char *str, const rgba_t color,
                           int win_x, int win_y )
 {
+    size_t strLen = strnlen( str, MAX_SYMBOLS_COUNT*4 ); // TODO document it
+    w_ttfont_draw_string_ext( win, font,
+                          str, strLen,
+                          color,
+                          win_x, win_y,
+                          0, 0 );
+}
+
+/**
+ * 
+ * \param[out] find_x Return x coordinate for the start (left margin) of given character in a string we print
+ * \param[in] find_for_char Position in str of character we look x coordinate for
+ * 
+ * Coordinate returned in find_x is window relative, it includes win_x parameter value.
+ * 
+**/
+void w_ttfont_draw_string_ext(
+                          window_handle_t win,
+                          font_handle_t font,
+                          const char *str, size_t strLen,
+                          const rgba_t color,
+                          int win_x, int win_y,
+                          int *find_x, int find_for_char )
+{
+    int rc;
 
     if(!running) return;
-
-    int rc;
-    /*
-    FT_Face ftFace = 0;
-    rc = FT_New_Face(ftLibrary, "P:/phantomuserland/plib/resources/ttfonts/opensans/OpenSans-Regular.ttf", 0, &ftFace);
-    if( rc )
+ 
+    if(strLen == 0)
     {
-        lprintf("\ncan't load font\n");
+        if( find_x ) *find_x = 0;
         return;
     }
-
-    FT_Set_Pixel_Sizes(ftFace, 200, 0);
-    //FT_Set_Pixel_Sizes(ftFace, 100, 0);
-    //FT_Set_Pixel_Sizes(ftFace, 50, 0);
-    */
 
     struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
     if( 0 == pe )
     {
-        lprintf("\ncan't get font for handle %x\n", font);
-        //printf("\ncan't get font for handle %x\n", font);
+        LOG_ERROR( 0, "can't get font for handle %x", font);
         return;
     }
-    //printf( "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
+    LOG_FLOW( 1, "w_ttfont_draw_string f '%s' sz %d\n", pe->font_name, pe->font_size );
 
-    FT_Face ftFace = pe->face;;
+    FT_Face ftFace = pe->face;
 
     //dump_face( ftFace );
-
-    //const char *str = s;
-    const size_t strLen = strlen(str);
 
     struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
     size_t numSymbols = 0;
@@ -328,6 +376,7 @@ void w_ttfont_draw_string(
         //const uint32_t charcode = str[i];
         int32_t charcode;
         ssize_t skip = utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
+        if( skip < 0 ) break; // paint partial str
 
         skip_total += skip;
 
@@ -370,13 +419,22 @@ void w_ttfont_draw_string(
     //const int32_t imageW = lastSymbol->posX + lastSymbol->width;
     //const int32_t imageH = bottom - top;
 
-
+    //*find_x = -1;
+    int fx = -1;
     for (i = 0; i < numSymbols; ++i)
     {
         const struct ttf_symbol *symb = symbols + i;
         w_tt_paint_char( win, symb, win_x, win_y, top, color );
+        if( find_for_char == i )
+        {
+            fx = symb->posX + win_x;
+        }
     }
+    
+    // After lash char
+    if(fx == -1) fx = symbols[numSymbols-1].posX + symbols[numSymbols-1].width + win_x + 2;
 
+    if(find_x) *find_x = fx;
 
     for (i = 0; i < numSymbols; ++i)
     {
@@ -390,26 +448,395 @@ void w_ttfont_draw_string(
 }
 
 
-FT_Glyph getGlyph(FT_Face face, uint32_t charcode)
+
+
+
+// -----------------------------------------------------------------------
+//
+// Get metrics for string, as if we printed it
+//
+// -----------------------------------------------------------------------
+
+/**
+ * 
+ * \brief Calculate bounding rectangle for string.
+ * 
+ * 
+ * 
+ * 
+**/
+void w_ttfont_string_size(
+                          font_handle_t font,
+                          const char *str, size_t strLen,
+                          rect_t *r )
 {
-    FT_Load_Char(face, charcode, FT_LOAD_RENDER);
-    FT_Glyph glyph = 0;
-    FT_Get_Glyph(face->glyph, &glyph);
-    return glyph;
+    int i, rc;
+
+    if(!running) return;
+
+    if(strLen == 0)
+    {
+        if( r ) 
+        {
+            r->x = r->y = 0;
+            r->xsize = r->ysize = 0;
+        }
+        return;
+    }
+
+    struct ttf_pool_el *pe = pool_get_el( tt_font_pool, font );
+    if( 0 == pe )
+    {
+        LOG_ERROR( 0, "can't get font for handle %x", font);
+        return;
+    }
+    LOG_FLOW( 2, " f '%s' sz %d\n", pe->font_name, pe->font_size );
+
+    FT_Face ftFace = pe->face;
+
+    struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
+    size_t numSymbols = 0;
+
+    int32_t left = INT_MAX;
+    int32_t top = INT_MAX;
+    int32_t bottom = INT_MIN;
+    uint32_t prevCharcode = 0;
+
+    int32_t posX = 0;
+    int skip_total = 0;
+
+    while( (skip_total < strLen) && (numSymbols < MAX_SYMBOLS_COUNT))
+    {
+        int32_t charcode;
+        ssize_t skip = utf8proc_iterate( (const uint8_t *)(skip_total+str), strLen, &charcode);
+        if( skip < 0) break; // TODO LOG_ERR?
+
+        skip_total += skip;
+
+        FT_Glyph glyph = getGlyph(ftFace, charcode);
+
+        if (!glyph)
+            continue;
+
+        if (prevCharcode)
+            posX += getKerning(ftFace, prevCharcode, charcode);
+
+        prevCharcode = charcode;
+
+        struct ttf_symbol *symb = &(symbols[numSymbols++]);
+
+        FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) glyph;
+        symb->posX = (posX >> 6) + bitmapGlyph->left;
+        symb->posY = -bitmapGlyph->top;
+        symb->width = bitmapGlyph->bitmap.width;
+        symb->height = bitmapGlyph->bitmap.rows;
+        symb->glyph = glyph;
+
+        posX += glyph->advance.x >> 10;
+
+        left = MIN(left, symb->posX);
+        top = MIN(top, symb->posY);
+        bottom = MAX(bottom, symb->posY + symb->height);
+    }
+
+
+    const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
+    const int32_t imageW = lastSymbol->posX + lastSymbol->width;
+    //const int32_t imageH = bottom - top;
+
+    r->x = left;
+    r->y = bottom;
+    r->xsize = imageW - r->x;
+    r->ysize = bottom - top;
+
+    LOG_INFO_( 10, "left %d top %d bottom %d imageW %d", left, top, bottom, imageW );
+    LOG_INFO_( 2, "x %d y %d xsize %d ysize %d", r->x, r->y, r->xsize, r->ysize );
+
+    for (i = 0; i < numSymbols; ++i)
+    {
+        FT_Done_Glyph(symbols[i].glyph);
+    }
+
+    rc = pool_release_el( tt_font_pool, font );
+    if( rc )
+        LOG_ERROR( 1, "can't release font for handle %x", font);
+
+}
+
+// -----------------------------------------------------------------------
+//
+// UTF-32 version
+//
+// * w_ttfont_setup_string_w    - allocate data, open font, preprocess sizes
+// * w_ttfont_resetup_string_w  - do not allocate, just preprocess sizes for a new string
+// * w_ttfont_draw_string_w     - actually paint
+// * w_ttfont_dismiss_string_w  - free data
+//
+// -----------------------------------------------------------------------
+
+
+errno_t w_ttfont_resetup_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols,               //< sizeof symbols
+                        size_t strLen,                 //< Num of characters we process
+                        const wchar_t *str             //< String to preprocess
+                        )
+{
+    if(!running) return EFAULT;
+    assert( strLen <= nSymbols );
+ 
+    FT_Face ftFace = s->pe->face;
+
+    //dump_face( ftFace );
+    //struct ttf_symbol symbols[MAX_SYMBOLS_COUNT];
+
+    int32_t left = INT_MAX;
+    int32_t top = INT_MAX;
+    int32_t bottom = INT_MIN;
+    uint32_t prevCharcode = 0;
+
+    int32_t posX = 0;
+    int skip_total = 0;
+    
+    int i;
+    for( i = 0; i < nSymbols; i++ )
+        symbols[i].glyph = 0;
+
+    size_t numSymbols = 0;
+    while( (skip_total < strLen) && (numSymbols < nSymbols))
+    {
+        //const uint32_t charcode = str[i];
+        int32_t charcode = str[skip_total];
+
+        skip_total += 1;
+
+        FT_Glyph glyph = getGlyph(ftFace, charcode);
+
+        if (!glyph)
+            continue;
+
+        if (prevCharcode)
+            posX += getKerning(ftFace, prevCharcode, charcode);
+
+        prevCharcode = charcode;
+
+        struct ttf_symbol *symb = &(symbols[numSymbols++]);
+
+        FT_BitmapGlyph bitmapGlyph = (FT_BitmapGlyph) glyph;
+        symb->posX = (posX >> 6) + bitmapGlyph->left;
+        symb->posY = -bitmapGlyph->top;
+        symb->width = bitmapGlyph->bitmap.width;
+        symb->height = bitmapGlyph->bitmap.rows;
+
+        if(symb->glyph) FT_Done_Glyph( symb->glyph );
+        symb->glyph = glyph;
+
+        posX += glyph->advance.x >> 10;
+
+        left = MIN(left, symb->posX);
+        top = MIN(top, symb->posY);
+        bottom = MAX(bottom, symb->posY + symb->height);
+    }
+
+    for (i = 0; i < numSymbols; ++i)
+    {
+        symbols[i].posX -= left;
+    }
+
+    const struct ttf_symbol *lastSymbol = &(symbols[numSymbols - 1]);
+    const int32_t imageW = lastSymbol->posX + lastSymbol->width;
+
+    s->left = left;
+    s->top = top;
+    s->bottom = bottom;
+    s->right = imageW;
+
+    return 0;
 }
 
 
-FT_Pos getKerning(FT_Face face, uint32_t leftCharcode, uint32_t rightCharcode)
-{
-    FT_UInt leftIndex = FT_Get_Char_Index(face, leftCharcode);
-    FT_UInt rightIndex = FT_Get_Char_Index(face, rightCharcode);
 
-    FT_Vector delta;
-    FT_Get_Kerning(face, leftIndex, rightIndex, FT_KERNING_DEFAULT, &delta);
-    return delta.x;
+
+errno_t w_ttfont_setup_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols,               //< sizeof symbols
+                        size_t strLen,                 //< Num of characters we process
+                        const wchar_t *str,            //< String to preprocess
+                        font_handle_t font             //< Font
+                        )
+{
+    s->font = font;
+    s->pe = pool_get_el( tt_font_pool, font );
+    if( 0 == s->pe )
+    {
+        LOG_ERROR( 0, "can't get font for handle %x", font);
+        return EINVAL;
+    }
+    LOG_FLOW( 1, "w_ttfont_draw_string f '%s' sz %d\n", s->pe->font_name, s->pe->font_size );
+
+    //FT_Face ftFace = s->pe->face;
+    errno_t rc = w_ttfont_resetup_string_w( s, symbols, nSymbols, strLen, str );
+
+    if(rc)
+        pool_release_el( tt_font_pool, font );
+
+    return rc;
+}
+
+/**
+ * 
+ * 
+ * 
+**/
+void w_ttfont_draw_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t strLen,                 //< Num of characters we process
+
+                        window_handle_t win,
+                        const rgba_t color,
+                        int win_x, int win_y
+                        )
+{
+    int i;
+    for (i = 0; i < strLen; ++i)
+    {
+        const struct ttf_symbol *symb = symbols + i;
+        w_tt_paint_char( win, symb, win_x, win_y, s->top, color );
+    }   
 }
 
 
+
+void w_ttfont_dismiss_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols )              //< sizeof symbols
+{
+    int i;
+    for (i = 0; i < nSymbols; ++i)
+    {
+        if(symbols[i].glyph)
+            FT_Done_Glyph(symbols[i].glyph);
+    }
+
+    int rc = pool_release_el( tt_font_pool, s->font );
+    if( rc )
+        LOG_ERROR( 1, "Can't release font for handle %x", s->font);
+}
+
+
+
+/**
+ * 
+ * \brief Calculate bounding rectangle for string.
+ * 
+ * NB! Calcs for current state, strLen is checked just for zero.
+ * 
+ * 
+**/
+void w_ttfont_string_size_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        size_t strLen,                 //< wchars to count
+                        rect_t *r )
+{
+    if(!running) return;
+
+    if(strLen == 0)
+    {
+        if( r ) 
+        {
+            r->x = r->y = 0;
+            r->xsize = r->ysize = 0;
+        }
+        return;
+    }
+
+    r->x = s->left;
+    r->y = s->bottom;
+    r->xsize = s->right - r->x;
+    r->ysize = s->bottom - s->top;
+
+    LOG_INFO_( 10, "left %d top %d bottom %d imageW %d", s->left, s->top, s->bottom, s->right );
+    LOG_INFO_( 2, "x %d y %d xsize %d ysize %d", r->x, r->y, r->xsize, r->ysize );
+}
+
+/**
+ * 
+ * Find char by x pos (mouse click to char index)
+ * 
+ * \param[in] xpos - x coord position (from the beginning of string)
+ * 
+ * \returns Index of char or -1 for error.
+ * 
+**/
+int w_ttfont_char_by_x_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t strLen,                 //< wchars to check
+                        int xpos
+                        )
+{
+    int i;
+    for( i = 0; i < strLen; i++ )
+    {
+        if( xpos < symbols[i].posX ) continue;
+        //if( xpos > symbols[i].posX + symbols[i].width ) continue;
+        // get first that is to the left from mouse 
+        return i;
+    }
+
+    return -1;
+}
+
+
+// -----------------------------------------------------------------------
+//
+// UTF-8 to UTF-32 and back
+//
+// -----------------------------------------------------------------------
+
+// count = num of CHARS, excl zero
+errno_t utf8to32( wchar_t *dest, const char *src, size_t destSize, size_t srcSize, size_t *count )
+{
+    int skip_total = 0;
+    int numSymbols = 0;
+    while( (skip_total < srcSize) && (numSymbols < destSize-1))
+    {
+        //const uint32_t charcode = str[i];
+        int32_t charcode;
+        ssize_t skip = utf8proc_iterate( (const uint8_t *)(skip_total+src), srcSize-skip_total, &charcode); // TODO check err code!!
+        if( skip < 0) return EINVAL;
+
+        skip_total += skip;
+
+        dest[numSymbols++] = charcode;
+    }
+
+    dest[numSymbols] = 0;
+
+    if(count) *count = numSymbols;
+    return 0;
+}
+
+errno_t utf32to8( char *dest, const wchar_t *src, size_t destSize, size_t srcSize, size_t *count )
+{
+    int skip_total = 0;
+    int numSymbols = 0;
+    while( (skip_total < destSize-4) && (numSymbols < srcSize))
+    {   
+        ssize_t rc =  utf8proc_encode_char( *src++, (uint8_t *)(dest + skip_total));
+        if( rc <= 0) return EINVAL;
+        skip_total += rc;
+    }
+
+    dest[skip_total] = 0;
+    if(count) *count = skip_total;
+
+    return 0;
+}
 
 
 // -----------------------------------------------------------------------

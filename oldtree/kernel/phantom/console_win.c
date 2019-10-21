@@ -31,7 +31,8 @@
 #include <video/window.h>
 #include <video/font.h>
 #include <video/screen.h>
-#include <video/button.h>
+#include <video/control.h>
+#include <video/builtin_bitmaps.h>
 
 #include "console.h"
 #include "misc.h"
@@ -39,15 +40,21 @@
 #include <threads.h>
 #include <kernel/timedcall.h>
 #include <kernel/debug.h>
+#include <kernel/debug_graphical.h>
 #include <kernel/stats.h>
 #include <kernel/profile.h>
 #include <kernel/init.h>
+#include <kernel/snap_sync.h>
 
 #include <kernel/json.h>
 
 #if NET_TIMED_FLUSH
 #include <kernel/net_timer.h>
 #endif
+
+
+void create_settings_window( void ); // tmp
+static window_handle_t make_debug_w_context_menu(void);
 
 
 #define CON_FONT drv_video_8x16san_font
@@ -63,11 +70,17 @@ window_handle_t phantom_debug_window = 0;
 #else
 drv_video_window_t *phantom_console_window = 0;
 drv_video_window_t *phantom_debug_window = 0;
+drv_video_window_t *phantom_settings_window = 0;
 #endif
 
+#if !NEW_TASK_BAR
 static window_handle_t phantom_launcher_window = 0;
 static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e);
+drv_video_window_t *phantom_launcher_menu_window = 0;
+#endif
 
+int volatile debug_mode_selector = 's';
+control_handle_t snap_scroll_bar = 0;
 
 static rgba_t console_fg;
 static rgba_t console_bg;
@@ -87,6 +100,9 @@ static int phantom_console_window_puts(const char *s)
     	s, console_fg, console_bg, &ttx, &tty );
 
     w_update( phantom_console_window );
+
+    w_add_notification( phantom_console_window, 1 );
+
     return 0;
 }
 
@@ -245,17 +261,30 @@ static struct console_ops win_ops =
 #define DEBWIN_XS 416
 #define DEBWIN_YS 600
 
-//#define MAX_LAUNCH_BUTTONS 64
-#define MAX_LAUNCH_BUTTONS 5
-
+#if !NEW_TASK_BAR
+#define MAX_LAUNCH_BUTTONS 3
 static pool_handle_t taskbuttons[MAX_LAUNCH_BUTTONS];
+#endif
 
 static void phantom_debug_window_loop();
 //static void phantom_launcher_window_loop();
 
-extern drv_video_bitmap_t vanilla_task_button_bmp;
-extern drv_video_bitmap_t slide_switch_on_bmp;
-extern drv_video_bitmap_t slide_switch_off_bmp;
+//extern drv_video_bitmap_t vanilla_task_button_bmp;
+//extern drv_video_bitmap_t slide_switch_on_bmp;
+//extern drv_video_bitmap_t slide_switch_off_bmp;
+static void cc_arg_win_OnOff(window_handle_t w, struct control *cc) { 
+    (void)w;
+    LOG_FLOW( 0, "toggle %x", cc->callback_arg_p );
+    int on = cc->state == cs_pressed;
+    w_set_visible( cc->callback_arg_p, on );    
+    }
+
+
+static void debug_mode(window_handle_t w, struct control *cc) { 
+    (void)w;
+    debug_mode_selector = (char)((int)cc->callback_arg);
+    LOG_FLOW( 0, "set mode '%c'", debug_mode_selector );
+    }
 
 void phantom_init_console_window()
 {
@@ -299,29 +328,93 @@ void phantom_init_console_window()
     hal_start_kernel_thread(phantom_debug_window_loop);
 
 
+#if !NEW_TASK_BAR
     // -------------------------------------------------------------------
     // Launcher window
     // -------------------------------------------------------------------
 
-    //    color_t la_bg = { 0x19, 0x19, 0x19, 0xFF };
-    //color_t la_b1 = { 68, 66, 62, 0xFF  };
-    //color_t la_b2 = { 88, 84, 79, 0xFF  };
+    //color_t la_bg = { 214, 227, 231, 0xFF };
+    //color_t la_b1 = { 214, 227, 231, 0xFF };
+    //color_t la_b2 = { .r = 183, .g = 171, .b = 146, .a = 0xFF  };
 
-    color_t la_bg = { 214, 227, 231, 0xFF };
-
-    color_t la_b1 = { 214, 227, 231, 0xFF };
-    color_t la_b2 = { .r = 183, .g = 171, .b = 146, .a = 0xFF  };
+    color_t la_b2 = { 214, 227, 231, 0xFF };
+    color_t la_b1 = { .r = 183, .g = 171, .b = 146, .a = 0xFF  };
+    //color_t la_bg = la_b1;
+    //color_t la_bg = { .r = 210, .g = 204, .b = 189, .a = 0xFF };
+    color_t la_bg = { .r = 209, .g = 202, .b = 186, .a = 0xFF };
 
     //color_t la_txt = { 0x11, 0xd5, 0xff, 0xFF };
-    color_t la_txt = { 0x0, 0x0, 0x0, 0xFF };
-//#define BTEXT_COLOR COLOR_YELLOW
-#define BTEXT_COLOR la_txt
+    //color_t la_txt = { 0x0, 0x0, 0x0, 0xFF };
 
-    phantom_launcher_window = drv_video_window_create( scr_get_xsize(), 45,
+#define LW_HEIGHT 47 // was 45
+
+    phantom_launcher_window = drv_video_window_create( scr_get_xsize(), LW_HEIGHT,
                                                        0, 0, la_bg, "Launcher", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
+    window_handle_t plw = phantom_launcher_window;
 
     phantom_launcher_window->inKernelEventProcess = phantom_launcher_event_process;
     w_fill( phantom_launcher_window, la_bg );
+
+    // -----------------------------
+    // Start Menu
+    // -----------------------------
+
+    pool_handle_t bh;
+
+    color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
+
+    phantom_launcher_menu_window = drv_video_window_create( 200, 186 /*+32*/,
+                                                       9, LW_HEIGHT, COLOR_WHITE, 
+                                                       "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS );
+    window_handle_t lmw = phantom_launcher_menu_window;
+    w_set_visible( lmw, 0 );
+
+    //w_set_bg_color( lmw, COLOR_WHITE );
+    w_fill_box(lmw, 0, 0, 200, 200, COLOR_WHITE );
+    w_draw_box( lmw, 0, 0, 200, 200, menu_border );
+    int menu_xsize = lmw->xsize-2;
+    
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*5, menu_xsize, "Shell", COLOR_BLACK );
+    w_control_set_icon( lmw, bh, &icon_home_bmp );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*4, menu_xsize, "Settings", COLOR_BLACK );
+    w_control_set_icon( lmw, bh, &icon_settings_bmp );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*3, menu_xsize, "Kernel stats", COLOR_BLACK );
+    w_control_set_icon( lmw, bh, &icon_key_bmp );
+    
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*2, menu_xsize, "Weather", COLOR_BLACK );
+    w_control_set_icon( lmw, bh, &icon_heart_bmp );
+
+    w_add_menu_item( lmw, 0, 1, 1+31*1, menu_xsize, "Clock", COLOR_BLACK );
+
+    // before slide for it to paint over us
+    w_add_label( lmw, 1, 1, 200, 32, "Fast Snap", COLOR_BLACK );
+
+    bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+    //w_ttfont_draw_string( lmw, decorations_title_font, "Fast Snap", COLOR_BLACK, 10, 8 );    
+    //w_add_label( lmw, 10, 8, lmw->xsize, 32, "Fast Snap", COLOR_BLACK );
+    //w_ttfont_draw_string( lmw, w_get_system_font_ext(20), "Fast Snap", COLOR_BLACK, 10, 8 );
+    //w_control_set_text( lmw, bh, "Fast Snap", COLOR_BLACK );
+
+    //bh = w_add_text_field( lmw, 1, 1+31*6, 170, 31, "Hell", COLOR_BLACK );
+
+#endif
+    create_settings_window();
+
+#if NEW_TASK_BAR
+
+    w_add_to_task_bar_icon( phantom_console_window, &icon_screen_bmp );
+    w_add_to_task_bar_icon( phantom_debug_window, &icon_text_bmp );
+    w_add_to_task_bar_icon( phantom_settings_window, &icon_settings_bmp );
+
+    w_set_task_bar_menu( phantom_debug_window, make_debug_w_context_menu() );
+
+#else
+    // -----------------------------
+    // Buttons
+    // -----------------------------
 
     int lb_x = scr_get_xsize();
     int lb_y = 0;
@@ -330,32 +423,63 @@ void phantom_init_console_window()
     //lb_y += slide_switch_on_bmp.ysize + 5;
     lb_y += 8;
 
-    w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_on_bmp, &slide_switch_off_bmp, BUTTON_FLAG_NOBORDER );
+    w_add_button( phantom_launcher_window, -1, lb_x, lb_y, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_off_bmp, CONTROL_FLAG_NOBORDER );
+    w_control_set_background( w, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
 
-    pool_handle_t bh;
+    //bh = w_add_menu_item( phantom_launcher_window, -2, 5, 3, 39, 0, COLOR_BLACK );
+    bh = w_add_button( phantom_launcher_window, -2, 5, 5, &start_button_normal_bmp, &start_button_selected_bmp, CONTROL_FLAG_NOBORDER );
+    w_control_set_children( phantom_launcher_window, bh, phantom_launcher_menu_window, 0 );
+    w_control_set_flags( phantom_launcher_window, bh, CONTROL_FLAG_TOGGLE, 0 );
+    w_control_set_background( phantom_launcher_window, bh, 
+        &start_button_normal_bmp, &start_button_selected_bmp, &start_button_hover_bmp  );
 
-    lb_x = 5;
 
+
+
+    lb_x = 300;
+#if 0
     int nwin = 0;
     for( nwin = 0; nwin < MAX_LAUNCH_BUTTONS; nwin++ )
     {
         char wname[10] = "Window 1";
-
-        // crashes in some configurations??
         wname[7] = '0' + nwin;
 
-        bh = w_add_button( phantom_launcher_window, nwin, lb_x, 0, &vanilla_task_button_bmp, &vanilla_task_button_bmp, BUTTON_FLAG_NOBORDER );
-        w_button_set_text( phantom_launcher_window, bh, wname, BTEXT_COLOR );
+        bh = w_add_button( phantom_launcher_window, nwin, lb_x, 0, &vanilla_task_button_bmp, &vanilla_task_button_bmp, CONTROL_FLAG_NOBORDER );
+        w_control_set_text( phantom_launcher_window, bh, wname, BTEXT_COLOR );
         lb_x += 5+vanilla_task_button_bmp.xsize;
 
         taskbuttons[nwin] = bh;
     }
+#else
+        // Launcher task icons
+        lb_y = 3;
+
+        bh = w_add_button( plw, 'a', lb_x, lb_y, &toolbar_icon_shell_normal_bmp, &toolbar_icon_shell_pressed_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+        w_control_set_background( plw, bh, &toolbar_icon_shell_normal_bmp, &toolbar_icon_shell_pressed_bmp, &toolbar_icon_shell_hover_bmp );
+        lb_x += 5+toolbar_icon_shell_normal_bmp.xsize;
+        w_control_set_callback( plw, bh, cc_arg_win_OnOff, phantom_console_window );
+        w_control_set_state( plw, bh, 1 );
 
 
-    w_draw_line( phantom_launcher_window, 0, 44, scr_get_xsize(), 44, la_b1 );
-    w_draw_line( phantom_launcher_window, 0, 43, scr_get_xsize(), 43, la_b2 );
+        bh = w_add_button( plw, 'b', lb_x, lb_y, &toolbar_icon_debug_normal_bmp, &toolbar_icon_debug_pressed_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+        w_control_set_background( plw, bh, &toolbar_icon_debug_normal_bmp, &toolbar_icon_debug_pressed_bmp, &toolbar_icon_debug_hover_bmp );
+        lb_x += 5+toolbar_icon_debug_normal_bmp.xsize;
+        w_control_set_callback( plw, bh, cc_arg_win_OnOff, phantom_debug_window );
+        w_control_set_state( plw, bh, 1 );
+
+        bh = w_add_button( plw, 'b', lb_x, lb_y, &toolbar_icon_settings_normal_bmp, &toolbar_icon_settings_pressed_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+        w_control_set_background( plw, bh, &toolbar_icon_settings_normal_bmp, &toolbar_icon_settings_pressed_bmp, &toolbar_icon_settings_hover_bmp );
+        lb_x += 5+toolbar_icon_settings_normal_bmp.xsize;
+        w_control_set_callback( plw, bh, cc_arg_win_OnOff, phantom_settings_window );
+        w_control_set_state( plw, bh, 1 );
+
+#endif
+
+    w_draw_line( phantom_launcher_window, 0, LW_HEIGHT-1, scr_get_xsize(), LW_HEIGHT-1, la_b1 );
+    w_draw_line( phantom_launcher_window, 0, LW_HEIGHT-2, scr_get_xsize(), LW_HEIGHT-2, la_b2 );
 
     w_update( phantom_launcher_window );
+#endif    
 }
 
 
@@ -387,18 +511,26 @@ static void put_progress()
 
     progress_rect.xsize = (vm_map_do_for_percentage*DEBWIN_XS)/100;
     w_fill_rect( phantom_debug_window, COLOR_LIGHTGREEN, progress_rect );
+
+    //SHOW_FLOW( 0, "snap percentage %d", vm_map_do_for_percentage );
+    if( phantom_settings_window && snap_scroll_bar )
+    {
+        //SHOW_FLOW( 0, "snap scroll set %d", vm_map_do_for_percentage );
+        w_control_set_value( phantom_settings_window, snap_scroll_bar, vm_map_do_for_percentage, 1 );
+    }
 }
 
 static void paint_memory_map(window_handle_t w);
 static void paint_vaspace_map(window_handle_t w);
 static void paint_persistent_map(window_handle_t w);
+static void paint_object_map(window_handle_t w);
+
 
 static void phantom_debug_window_loop()
 {
     static char buf[DEBBS+1];
     int step = 0;
 
-    int show = 's';
 
     t_current_set_name("Debug Win");
     // Which thread will receive typein for this window
@@ -430,25 +562,18 @@ static void phantom_debug_window_loop()
                 printf(
                        "Commands:\n"
                        "---------\n"
-                       "w\t- show windows list\n"
-                       "t\t- show threads list\n"
-                       "s\t- show stats\n"
-                       "p\t- show profiler\n"
-                       "d\t- dump threads to JSON\n"
-                       "m\t- show physical memory map\n"
-                       "v\t- show virtual address space map\n"
-                       "o\t- show objects (persistent) memory map\n"
+                       "w\t- show windows list\n"     "t\t- show threads list\n"
+                       "s\t- show stats\n"            "p\t- show profiler\n"
+                       "d\t- dump threads to JSON\n"  "m\t- show physical memory map\n"
+                       "v\t- show virtual address space map\n" "o\t- show objects (persistent) memory map\n"
+                       "a\t- show object arenas memory map\n" 
                       );
                 break;
-            case 'p': // profiler
-            case 't':
-            case 'w':
-            case 's':
-            case 'm':
-            case 'v':
-            case 'o':
-            case 'a':
-                show = c;
+            case 'p':            case 't':
+            case 'w':            case 's':
+            case 'm':            case 'v':
+            case 'o':            case 'a':
+                debug_mode_selector = c;
                 break;
 
             case 'd':
@@ -458,7 +583,6 @@ static void phantom_debug_window_loop()
                     json_start( &jo );
                     json_dump_threads( &jo );
                     json_stop( &jo );
-
                 }
                 break;
             }
@@ -466,11 +590,11 @@ static void phantom_debug_window_loop()
 
 
         {
-            static char old_show = 0;
-            if( old_show != show )
+            static char old_debug_mode_selector = 0;
+            if( old_debug_mode_selector != debug_mode_selector )
             {
-                old_show = show;
-                switch(show)
+                old_debug_mode_selector = debug_mode_selector;
+                switch(debug_mode_selector)
                 {
                 case 't': w_set_title( phantom_debug_window,  "Threads" );         break;
                 case 'w': w_set_title( phantom_debug_window,  "Windows" );         break;
@@ -479,7 +603,7 @@ static void phantom_debug_window_loop()
                 case 'm': w_set_title( phantom_debug_window,  "Physical memory" ); break;
                 case 'v': w_set_title( phantom_debug_window,  "Virtual address space" ); break;
                 case 'o': w_set_title( phantom_debug_window,  "Objects memory" );  break;                
-                case 'a': w_set_title( phantom_debug_window,  "Objects allocator (off)" );  break;                
+                case 'a': w_set_title( phantom_debug_window,  "Objects allocator" );  break;                
                 }
             }
         }
@@ -513,7 +637,7 @@ static void phantom_debug_window_loop()
         bp += rc;
         len -= rc;
 
-        switch(show)
+        switch(debug_mode_selector)
         {
         case 't':
         default:            phantom_dump_threads_buf(bp,len);            break;
@@ -522,7 +646,7 @@ static void phantom_debug_window_loop()
         case 'p':           phantom_dump_profiler_buf(bp,len);           break;
         case 'm':           paint_memory_map(phantom_debug_window);      break;
         case 'v':           paint_vaspace_map(phantom_debug_window);     break;
-        case 'a':           
+        case 'a':           paint_object_map(phantom_debug_window);      break;
         case 'o':           paint_persistent_map(phantom_debug_window);  break;
         }
 
@@ -553,7 +677,7 @@ static void phantom_launcher_window_loop()
 }
 */
 
-
+/*
 static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e)
 {
 
@@ -562,7 +686,7 @@ static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e)
     default:
         return defaultWindowEventProcessor( w, e );
 
-    case UI_EVENT_WIN_BUTTON:
+    case UI_EVENT_WIN_BUTTON_ON:
         printf("launcher button %x\n", e->extra );
         {
             switch(e->extra)
@@ -579,7 +703,7 @@ static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e)
 
     return 1;
 }
-
+*/
 
 rect_t memory_map_rect = (rect_t){ 5, 10, 100, 100 };
 
@@ -610,5 +734,259 @@ static void paint_persistent_map(window_handle_t w)
 
     paint_persistent_memory_map( w, &memory_map_rect );
 }
+
+
+static void paint_object_map(window_handle_t w)
+{
+    memory_map_rect.ysize = w->ysize - HEAD_ROOM;
+    memory_map_rect.xsize = w->xsize - (memory_map_rect.x * 2);
+
+    vm_lock_persistent_memory();
+    paint_object_memory_map( w, &memory_map_rect );
+    vm_unlock_persistent_memory();
+}
+
+
+
+# if 0
+static void consoleOnOff(window_handle_t w, struct control *c) { 
+    (void)w;
+    int on = c->state == cs_pressed;
+    w_set_visible( phantom_console_window, on );    
+    }
+
+static void debugOnOff(window_handle_t w, struct control *c) { 
+    (void)w;
+    int on = c->state == cs_pressed;
+    w_set_visible( phantom_debug_window, on );    
+    }
+#else
+#endif
+
+extern void request_snap(void);
+static int setup_snap_interval = 100;
+
+void snap_time_text_update( window_handle_t w, struct control *cc )
+{
+    (void) w;
+
+    int i;
+    for( i = 0; i < cc->str_len; i++ )
+    {
+        wchar_t ch;
+again:
+        ch = cc->buffer[i];
+        if( (ch < '0') || (ch > '9') )
+        {
+            w_ctl_delete_buffer_char( cc, i );
+            cc->cursor_pos--;
+            if( cc->cursor_pos < 0 ) cc->cursor_pos = 0;
+            goto again;
+        }
+    }
+
+    setup_snap_interval = atoi( cc->buffer );
+    set_snap_interval( setup_snap_interval );
+    LOG_FLOW( 1, "snap timeout %d", setup_snap_interval );
+}
+
+
+static control_handle_t settings_ed;
+static control_handle_t settings_lbl;
+
+void settings_sw_callback( window_handle_t w, struct control *cc )
+{
+    w_control_set_visible( w, settings_ed, cc->state != cs_pressed );
+    w_control_set_visible( w, settings_lbl, cc->state != cs_pressed );
+
+    if( cc->state == cs_pressed )
+        set_snap_interval( 0 );
+    else
+        set_snap_interval( setup_snap_interval );
+}
+
+void create_settings_window( void )
+{
+    pool_handle_t bh;
+    int cc_y = 0;
+    int cc_x = 0;
+
+    //color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
+
+    window_handle_t w = drv_video_window_create( 400, 350, 20, 500, COLOR_WHITE, "Snapshots mode", WFLAG_WIN_DECORATED );
+    phantom_settings_window = w;
+    
+    //w_set_visible( lmw, 0 );
+
+    w_draw_bitmap( w, 0, 0, &vanilla_background_bmp );
+    
+    //w_fill_box( w, 0, 0, WXY, WXY, COLOR_WHITE );
+    //w_draw_box( w, 0, 0, WXY, WXY, menu_border );
+
+    bh = w_add_menu_item( w, '1', 20, 300, 200, "Snap now", COLOR_BLACK );
+    w_control_set_icon( w, bh, &icon_settings_bmp );
+    w_control_set_callback( w, bh, (void *)request_snap, 0 );
+
+
+    // slide must paint over
+    //w_add_label( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
+    w_add_label_transparent( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
+
+    control_handle_t sw = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, sw, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+
+    settings_ed = w_add_text_field( w, 180, 200, 200, 31, "100", COLOR_BLACK );
+    w_control_set_flags( w, settings_ed, CONTROL_FLAG_CALLBACK_KEY, 0 );
+    w_control_set_callback( w, settings_ed, snap_time_text_update, 0 );
+
+    settings_lbl = w_add_label_transparent( w, 20, 200, 50, 32, "Snap delay, sec", COLOR_BLACK );
+
+    w_control_set_callback( w, sw, settings_sw_callback, 0 );
+
+    //bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    //w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
+    bh = w_add_checkbox( w, 350, 300 );
+    w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_console_window );
+    w_control_set_state( w, bh, 1 );
+
+    w_add_label_transparent( w, 240, 300, 50, 32, "Console", COLOR_BLACK );
+
+
+
+    //bh = w_add_button( w, '4', 350, 250, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    //w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
+    bh = w_add_checkbox( w, 350, 250 );
+    w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_debug_window );
+    w_control_set_state( w, bh, 1 );
+
+    w_add_label_transparent( w, 240, 250, 50, 32, "Debug", COLOR_BLACK );        
+
+    // -------------------------------------------------------------------
+    // Radio
+    // -------------------------------------------------------------------
+
+#define RADIO_SHIFT 35    
+    cc_y = 150;
+    cc_x = 240;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'t' );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "Threads", COLOR_BLACK );        
+
+    cc_y -= RADIO_SHIFT;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'s' );
+    w_control_set_state( w, bh, 1 );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "Stats", COLOR_BLACK );        
+
+    cc_y -= RADIO_SHIFT;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'p' );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "Profiler", COLOR_BLACK );        
+
+
+
+
+    cc_y = 150;
+    cc_x = 20;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'m' );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "PhysMem", COLOR_BLACK );        
+
+    cc_y -= RADIO_SHIFT;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'v' );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "VAddr", COLOR_BLACK );        
+
+    cc_y -= RADIO_SHIFT;
+
+    bh = w_add_radio_button( w, 'x', 'g', cc_x+110, cc_y );
+    w_control_set_callback( w, bh, debug_mode, (void *)'o' );
+    w_add_label_transparent( w, cc_x, cc_y, 50, 32, "ObjMem", COLOR_BLACK );        
+
+
+
+
+    // -------------------------------------------------------------------
+    // Ok/Cancel
+    // -------------------------------------------------------------------
+
+#if 1
+    //snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 360, 31, 0, 100, CONTROL_FLAG_ALT_FG|CONTROL_FLAG_ALT_BG );
+    snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 360, 31, 0, 100, 0 );
+    w_control_set_value( w, snap_scroll_bar, -1, -1 ); // Remove bar
+#else
+
+    bh = w_add_button( w, 'o', 20, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
+    w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
+    w_control_set_text( w, bh, "Ok", COLOR_BLACK );
+
+    bh = w_add_button( w, '0', 220, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
+    w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
+    w_control_set_text( w, bh, "Cancel", COLOR_BLACK );
+    #endif
+}
+
+
+static window_handle_t make_debug_w_context_menu(void)
+{
+    // -----------------------------
+    // Start Menu
+    // -----------------------------
+
+    pool_handle_t bh;
+
+    color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
+
+    window_handle_t ctx_menu = drv_video_window_create( 200, 186 /*+32*/,
+                                                       9, 47, COLOR_WHITE, 
+                                                       "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS|WFLAG_WIN_HIDE_ON_FOCUS_LOSS );
+    window_handle_t lmw = ctx_menu;
+    w_set_visible( lmw, 0 );
+
+    //w_set_bg_color( lmw, COLOR_WHITE );
+    w_fill_box(lmw, 0, 0, 200, 200, COLOR_WHITE );
+    w_draw_box( lmw, 0, 0, 200, 200, menu_border );
+    int menu_xsize = lmw->xsize-2;
+    
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*5, menu_xsize, "Threads", COLOR_BLACK );
+    //w_control_set_icon( lmw, bh, &icon_home_bmp );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'t' );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*4, menu_xsize, "Windows", COLOR_BLACK );
+    //w_control_set_icon( lmw, bh, &icon_settings_bmp );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'w' );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*3, menu_xsize, "Stats", COLOR_BLACK );
+    //w_control_set_icon( lmw, bh, &icon_key_bmp );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'s' );
+    
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*2, menu_xsize, "Phys mem", COLOR_BLACK );
+    //w_control_set_icon( lmw, bh, &icon_heart_bmp );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'m' );
+
+    bh = w_add_menu_item( lmw, 0, 1, 1+31*1, menu_xsize, "Virt addr", COLOR_BLACK );
+    w_control_set_callback( lmw, bh, debug_mode, (void *)'v' );
+
+    // before slide for it to paint over us
+    w_add_label( lmw, 1, 1, 200, 32, "Fast Snap", COLOR_BLACK );
+
+    bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( lmw, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+
+    phantom_debug_window->context_menu = ctx_menu;
+
+    return ctx_menu;
+}
+
+
+
+
+
+
 
 

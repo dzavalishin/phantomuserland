@@ -175,7 +175,12 @@ int main(int argc, char* argv[])
 
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 
-    pvm_video_init();
+    if( pvm_video_init() )
+    {
+        printf("Video init failed\n");
+        exit(22);
+    }
+
     video_drv->mouse = mouse_callback;
 
     drv_video_init_windows();

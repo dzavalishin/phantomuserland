@@ -21,7 +21,7 @@
 
 #include <video/window.h>
 #include <video/internal.h>
-#include <video/button.h>
+#include <video/control.h>
 
 #include <threads.h>
 
@@ -48,7 +48,7 @@ static void w_do_deliver_event(window_handle_t w)
                 {
                     if((e.w.info == UI_EVENT_WIN_REPAINT) || (e.w.info == UI_EVENT_WIN_REDECORATE))
                     {
-                        SHOW_FLOW0( 1, "combined repaint" );
+                        LOG_FLOW0( 1, "combined repaint" );
                         // Choose more powerful spell
                         //e.w.info = UI_EVENT_WIN_REDECORATE;
                         // Eat one
@@ -60,7 +60,7 @@ static void w_do_deliver_event(window_handle_t w)
             else
                 got = 0;
 
-            SHOW_FLOW(8, "%p, w=%p, us=%p", &e, e.focus, w);
+            LOG_FLOW(8, "%p, w=%p, us=%p", &e, e.focus, w);
 
             w->inKernelEventProcess(w, &e);
             e = e2;
@@ -232,12 +232,30 @@ void w_receive_event(ui_event_t *e)
     if( e->type == UI_EVENT_TYPE_MOUSE )
     {
         ui_event_t ecopy = *e; // for any case
-        w_check_button( w, &ecopy );
+        if( w_event_to_controls( w, &ecopy ) )
+            goto ret;
     }
+
+    // Controls need it to 'unhover'
+    if( (e->type == UI_EVENT_TYPE_WIN) && (e->w.info == UI_EVENT_WIN_LOST_FOCUS) )
+    {
+        ui_event_t ecopy = *e; // for any case
+        if( w_event_to_controls( w, &ecopy ) )
+            goto ret;
+    }
+
+    // Edit field
+    if( e->type == UI_EVENT_TYPE_KEY )
+    {
+        ui_event_t ecopy = *e; // for any case
+        if( w_event_to_controls( w, &ecopy ) )
+            goto ret;
+    }
+
 
     if( w->events_count < MAX_WINDOW_EVENTS )
     {
-    	SHOW_FLOW(8, "e %p -> w %p", e, w);
+    	LOG_FLOW(8, "e %p -> w %p", e, w);
 
 #if DIRECT_DRIVE
         if(w != 0 && w->inKernelEventProcess)
@@ -280,14 +298,11 @@ void w_explode_event(ui_event_t *e)
 {
     window_handle_t w;
 
-#if 1
     if( e->w.info == UI_EVENT_GLOBAL_REPAINT_RECT )
     {
         w_request_async_repaint( &(e->w.rect) );
         return;
     }
-
-#endif
 
     w_lock();
     queue_iterate(&allwindows, w, drv_video_window_t *, chain)
@@ -354,11 +369,11 @@ locked:
 
     if( ret )
     {
-    	SHOW_FLOW(8, "tmp %p, w=%p", tmp, tmp->focus);
+    	LOG_FLOW(8, "tmp %p, w=%p", tmp, tmp->focus);
 
         *e = *tmp;
 
-        SHOW_FLOW(8, "e %p, w=%p", e, e->focus);
+        LOG_FLOW(8, "e %p, w=%p", e, e->focus);
 
         // Bring it back to main Q engine
         ev_return_unused(tmp);

@@ -235,7 +235,7 @@ void w_font_tty_string(
 {
     rgba_t color = _color;
     rgba_t back  = _back;
-    int nc = strlen(s);
+    //int nc = strlen(s);
     int bright = 0;
     //int startx = *x;
 
@@ -249,24 +249,20 @@ void w_font_tty_string(
     }
 #endif
 
-    while(nc--)
+    for( ; *s ; s++ )
     {
         if( *s == '\n' )
         {
             if( *y <= font->ysize )
-            {
                 w_font_scroll_line( win, font, back );
-            }
             else
                 *y -= font->ysize; // Step down a line
             *x = 0;
-            s++;
             continue;
         }
         else if( *s == '\r' )
         {
             *x = 0;
-            s++;
             continue;
         }
         else if( *s == '\t' )
@@ -274,48 +270,35 @@ void w_font_tty_string(
             (*x)++; // or else \t\t == \t
             while( *x % 8 )
                 (*x)++;
-            s++;
             continue;
         }
         else if( *s == 0x1B ) // esc
         {
-            s++; nc--;
-            if( *s != '[' )
-                continue;
-            s++; nc--;
 
-            if( *s == 0 )
-                continue;
+            s++; 
+            // checks for '*s == 0' too
+            if( *s != '[' )                continue;
 
+            s++; 
+            if( *s == 0 )                  continue;
             int v = 0;
             while( isdigit(*s) )
             {
                 v *= 10;
                 v += (*s - '0');
-                s++; nc--;
+                s++; 
             }
 
-            if( *s == 0 )
-                continue;
-
-            switch(*s++)
+            if( *s == 0 )                continue;
+            switch(*s)
             {
-            case 'm':
-#if 1
+            case 'm':  
                 set_ansi_color( v, &bright, &color, &back, _color, _back );
-#else
-                v -= 30;
-                if( (v < 0) || (v > 7) )
-                    color = COLOR_LIGHTGRAY;
-                else
-                    color = cmap[v];
-#endif
                 continue;
 
             default:
                 continue;
             }
-
 
         }
 #if TTF_TTY
@@ -327,8 +310,6 @@ void w_font_tty_string(
         }
 
         w_ttfont_draw_char( win, ttfont, s, color, *x, *y );
-
-        s++;
         *x += 8;
 
 #else
@@ -344,7 +325,6 @@ void w_font_tty_string(
             *x = 0;
             w_font_draw_char( win, font, *s, color, back, *x, *y );
         }
-        s++;
         *x += font->xsize;
 #endif
     }

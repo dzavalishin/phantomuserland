@@ -2,20 +2,20 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * Windowing system helpers.
+ * Windowing system helpers: client window default event processor.
  *
  *
 **/
 
 
 
-#define DEBUG_MSG_PREFIX "wevent"
+#define DEBUG_MSG_PREFIX "wevent.cli"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 0
 
 #include <video/window.h>
 #include <video/internal.h>
@@ -23,16 +23,11 @@
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
-//#include <spinlock.h>
 #include <wtty.h>
 
 #include <threads.h>
 
 
-//#include "win_local.h"
-
-
-#define KEY_EVENTS 1
 
 
 
@@ -40,13 +35,20 @@ static int defaultMouseEventProcessor( drv_video_window_t *w, struct ui_event *e
 {
     //printf("defaultMouseEventProcessor buttons %x, %d-%d\r", e->m.buttons, e->abs_x, e->abs_y);
 
+    if( (e->m.clicked & UI_MOUSE_BTN_RIGHT) && (w->context_menu != 0) )
+    {
+        LOG_FLOW0(5, "have context right click");
+        ev_q_put_win( 0, 0, UI_EVENT_WIN_TO_TOP, w->context_menu );
+        ev_q_put_win( e->abs_x, e->abs_y, UI_EVENT_WIN_MOVE, w->context_menu );
+        w_set_visible( w->context_menu, 1 );
+    }
+
     if( e->m.buttons )
         w_to_top(w->w_owner ? w->w_owner : w);
 
     return 0;
 }
 
-#if KEY_EVENTS
 static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
     wtty_t *wt;
@@ -63,7 +65,7 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
     // This char is shift?
     if( ch == 0 )
         return 1;
-
+#if 0 // have it in keybd driver
     if( e->modifiers & UI_MODIFIER_CTRL )
     {
         ch &= 0x1F; // Control char
@@ -100,21 +102,19 @@ static int defaultKeyEventProcessor( drv_video_window_t *w, struct ui_event *e )
             break;
         }
     }
-
+#endif
     errno_t err = wtty_putc_nowait(wt, ch );
     if(err == ENOMEM)
     {
-        SHOW_ERROR0( 1, "Window keyb buffer overflow" );
-        //printf( "Window keyb buffer overflow" );
+        LOG_ERROR0( 1, "Window keyb buffer overflow" );
     }
     else if(err)
     {
-        SHOW_ERROR( 1, "Window putc error %d", err );
-        //printf( "Window putc error %d", err );
+        LOG_ERROR( 1, "Window putc error %d", err );
     }
     return 1;
 }
-#endif
+
 
 static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 {
@@ -128,6 +128,8 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
 
     case UI_EVENT_WIN_LOST_FOCUS:
         w->state &= ~WSTATE_WIN_FOCUSED;
+        if(WIN_HAS_FLAG(w,WFLAG_WIN_HIDE_ON_FOCUS_LOSS))
+            w_set_visible( w, 0 );
         goto redecorate;
 
     case UI_EVENT_WIN_DESTROYED:
@@ -148,8 +150,14 @@ static int defaultWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         }
         break;
 
-    case UI_EVENT_WIN_BUTTON: printf("main w button %x\n", e->extra );
+    case UI_EVENT_WIN_BUTTON_ON: 
+        //printf("client win button %x\n", e->extra );
     break;
+
+    case UI_EVENT_WIN_TO_TOP:    w_to_top( w ); break;
+    case UI_EVENT_WIN_TO_BOTTOM: w_to_bottom( w ); break;
+
+    case UI_EVENT_WIN_MOVE:      w_move( w, e->abs_x, e->abs_y ); break;
 
     default:
         return 0;
@@ -166,9 +174,7 @@ int defaultWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
     switch(e->type)
     {
     case UI_EVENT_TYPE_MOUSE: 	return defaultMouseEventProcessor(w, e); 
-#if KEY_EVENTS
     case UI_EVENT_TYPE_KEY:     return defaultKeyEventProcessor(w, e); 
-#endif
     case UI_EVENT_TYPE_WIN:     return defaultWinEventProcessor(w, e); 
     }
 

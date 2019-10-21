@@ -39,8 +39,7 @@
  */
 
 
-#include "utf8proc.h"
-
+#include <utf8proc.h>
 #include <malloc.h>
 
 #ifndef NULL

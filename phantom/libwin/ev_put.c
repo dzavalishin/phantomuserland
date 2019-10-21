@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "events"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 4
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -21,6 +21,29 @@
 
 #include <dev/key_event.h>
 
+
+
+void w_set_focused( window_handle_t toFocus )
+{
+    window_handle_t later_lost = 0;
+    window_handle_t later_gain = toFocus;
+
+    // Next win
+    if(focused_window != 0)
+        later_lost = focused_window;
+
+    if( later_gain != focused_window )
+    {
+        focused_window = later_gain;
+
+        if(later_lost) ev_q_put_win( 0, 0, UI_EVENT_WIN_LOST_FOCUS, later_lost );
+        if(later_gain)
+        {
+            ev_q_put_win( 0, 0, UI_EVENT_WIN_GOT_FOCUS, later_gain );
+            w_to_top(later_gain);
+        }
+    }
+}
 
 
 
@@ -35,43 +58,31 @@ void ev_q_put_key( int vkey, int ch, int modifiers )
     switch( vkey )
     {
     case KEY_TAB:
-        SHOW_FLOW( 10, "Tab shifts = %x", modifiers );
+        LOG_FLOW( 4, "Tab shifts = %x", modifiers );
         if( UI_MOD_CTRL_DOWN(modifiers) || UI_MOD_ALT_DOWN(modifiers) )
         {
-            SHOW_FLOW( 9, "Next win shifts = %x", modifiers );
-            window_handle_t later_lost = 0;
-            window_handle_t later_gain = 0;
-
-            // Next win
-            if(focused_window != 0)
-                later_lost = focused_window;
-            later_gain = drv_video_next_window(focused_window);
-            if( later_gain != focused_window )
-            {
-                focused_window = later_gain;
-
-                if(later_lost) ev_q_put_win( 0, 0, UI_EVENT_WIN_LOST_FOCUS, later_lost );
-                if(later_gain)
-                {
-                    ev_q_put_win( 0, 0, UI_EVENT_WIN_GOT_FOCUS, later_gain );
-                    w_to_top(later_gain);
-                }
-            }
+            LOG_FLOW( 3, "Next win shifts = %x", modifiers );
+            w_set_focused( drv_video_next_window(focused_window) );
             return;
         }
         break;
-
+    /*
     case KEY_F4:
-        SHOW_FLOW( 0, "F4 shifts = %x", modifiers );
-        break;
+        LOG_FLOW( 0, "F4 shifts = %x", modifiers );
+        if( UI_MOD_CTRL_DOWN(modifiers) || UI_MOD_ALT_DOWN(modifiers) )
+        {
+            LOG_FLOW( 9, "Alt-F4 close win? = %x", modifiers );
 
-    case KEY_LWIN:
-    case KEY_RWIN:
-        SHOW_FLOW( 0, "WIN shifts = %x", modifiers );
+        }
         break;
+    */
+//    case KEY_LWIN:
+//    case KEY_RWIN:
+//        LOG_FLOW( 0, "WIN shifts = %x", modifiers );
+//        break;
 
     case KEY_MENU:
-        SHOW_FLOW( 0, "MENU shifts = %x", modifiers );
+        LOG_FLOW( 0, "MENU shifts = %x", modifiers );
         break;
 
     }

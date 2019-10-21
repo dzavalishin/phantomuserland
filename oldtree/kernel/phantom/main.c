@@ -61,6 +61,8 @@
 // phys addr
 #include <kernel/vm.h>
 
+// keyb hook
+#include <event.h>
 
 
 
@@ -549,3 +551,47 @@ void phantom_shutdown(int flags)
 }
 
 
+
+// -----------------------------------------------------------------------
+// Do strange things
+// -----------------------------------------------------------------------
+
+int kernel_keyboard_hook( unsigned key, unsigned shifts)
+{
+    if( shifts ) return 0;
+
+    switch(key)
+    {
+
+    case KEY_F9:
+        request_snap();
+        return 1;
+
+    case KEY_F10:
+    //case KEY_PRINT:
+        scr_zbuf_paint();
+        return 1;
+
+    case KEY_F11:
+        phantom_shutdown(0);
+        return 1;
+
+    case KEY_F12:
+    case KEY_KP_MINUS:
+        hal_cpu_reset_real();
+        return 1; // not really
+
+    /*case KEY_KP_MINUS:
+        panic("Keyboard panic request - KEYPAD MINUS key");
+        break;*/
+
+    /*case KEY_SCRLOCK:
+        if(event.modifiers & KEY_MODIFIER_DOWN)
+        {
+            ;
+            //dbg_set_serial_debug(dbg_get_serial_debug()?0:1);
+        }
+        break;*/
+    }
+    return 0;
+}

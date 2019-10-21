@@ -8,6 +8,13 @@
  *
 **/
 
+
+#define DEBUG_MSG_PREFIX "wevent.tit"
+#include <debug_ext.h>
+#define debug_level_flow 0
+#define debug_level_error 10
+#define debug_level_info 0
+
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
@@ -61,10 +68,18 @@ static int titleWinEventProcessor( drv_video_window_t *w, struct ui_event *e )
         }
         break;
 
-    case UI_EVENT_WIN_BUTTON: //printf("title button %x\n", e->extra );
+    case UI_EVENT_WIN_BUTTON_ON: //printf("title button %x\n", e->extra );
     {
         switch(e->extra)
         {
+        case WBUTTON_SYS_CLOSE:
+            LOG_FLOW( 4, "WBUTTON_SYS_CLOSE w %p", w);
+            // If I am an application window and I am added to task bar,
+            // it is possible to reopen me from there, so hide on close button
+            if( mainw->task_bar_h != 0 )
+                w_set_visible( mainw, 0 );
+        break;
+
         case WBUTTON_SYS_ROLLUP:
             if( mainw->state & WSTATE_WIN_ROLLEDUP )
             {
@@ -141,10 +156,11 @@ int w_titleWindowEventProcessor( drv_video_window_t *w, struct ui_event *e )
     switch(e->type)
     {
     case UI_EVENT_TYPE_MOUSE: 	return titleMouseEventProcessor(w, e);
-#if KEY_EVENTS
     //case UI_EVENT_TYPE_KEY:     return defaultKeyEventProcessor(w, e);
-#endif
     case UI_EVENT_TYPE_WIN:     return titleWinEventProcessor(w, e);
+
+    // Pass keys to main window
+    case UI_EVENT_TYPE_KEY:     return w->w_owner->inKernelEventProcess( w->w_owner, e );
 
     default:
         break;

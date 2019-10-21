@@ -97,6 +97,20 @@
       "phantom_libc.h": "c",
       "syscall_net.h": "c",
       "snap_sync.h": "c",
-      "root.h": "c"
+      "root.h": "c",
+      "bitmap.h": "c",
+      "button.h": "c",
+      "window.h": "c",
+      "ratio": "c",
+      "uos_keyboard.h": "c",
+      "keyboard.h": "c",
+      "event.h": "c",
+      "errno.h": "c",
+      "control.h": "c",
+      "keyboard_mode2_tab.h": "c",
+      "font.h": "c",
+      "ui.h": "c",
+      "key_event.h": "c",
+      "ctl_private.h": "c"
     }
   }

@@ -1,5 +1,6 @@
 #include <assert.h>
-#include <phantom_libc.h>  //printf
+//#include <phantom_libc.h>  //printf
+#include <kernel/debug.h> // lprintf
 
 
 #define MAX_DEPTH 16
@@ -12,14 +13,14 @@ static void stack_dump_one(void *ebp)
     if( addr == 0 )
         return;
 
-    printf("- %8p", addr);
+    lprintf("- %8p", addr);
 
     if(phantom_symtab_getname)
     {
-        printf(": %s\n", phantom_symtab_getname(addr) );
+        lprintf(": %s\n", phantom_symtab_getname(addr) );
     }
     else
-        printf("\n");
+        lprintf("\n");
 
 
 }
@@ -28,7 +29,7 @@ static void stack_dump_one(void *ebp)
 void stack_dump_from(void *ebp)
 {
     int i;
-    printf("Stack:\n");
+    lprintf("Stack:\n");
 
     for( i = 0; i < MAX_DEPTH; i++ )
     {

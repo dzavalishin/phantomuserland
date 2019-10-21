@@ -483,25 +483,25 @@ static void process_event( struct ui_event *e )
 
         switch(e->k.vk)
         {
-        case KEY_ARROW_DOWN:
+        case KEY_DOWN:
         case 0xB9:
             k_down++;
             //SHOW_FLOW( 2, "KEY__DOWN %d", k_down );
             break;
 
-        case KEY_ARROW_UP:
+        case KEY_UP:
         case 0xBF:
             k_up++;
             //SHOW_FLOW( 2, "KEY__UP %d", k_down );
             break;
 
-        case KEY_ARROW_LEFT:
+        case KEY_LEFT:
         case 0xBB:
             k_left++;
             //SHOW_FLOW( 2, "KEY__LEFT %d", k_down );
             break;
 
-        case KEY_ARROW_RIGHT:
+        case KEY_RIGHT:
         case 0xBD:
             k_right++;
             //SHOW_FLOW( 2, "KEY__RIGHT %d", k_down );

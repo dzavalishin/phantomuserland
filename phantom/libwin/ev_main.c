@@ -124,7 +124,7 @@ void ev_put_event(ui_event_t *e)
 {
     if(!ev_engine_active) return; // Just ignore
 
-    SHOW_FLOW(8, "%p", e);
+    LOG_FLOW(8, "%p", e);
     hal_mutex_lock( &ev_main_q_mutex );
     ev_events_in_q++;
     queue_enter(&ev_main_event_q, e, struct ui_event *, echain);
@@ -138,7 +138,7 @@ void ev_put_event(ui_event_t *e)
 
 static void ev_push_event( struct ui_event *e )
 {
-    //SHOW_FLOW( 9, "type %d abs x %d t %d", e->type, e->abs_x, e->abs_y );
+    //LOG_FLOW( 9, "type %d abs x %d t %d", e->type, e->abs_x, e->abs_y );
     //printf("%d,%d\n", e->abs_x, e->abs_y );
     ev_log( 9, e );
 
@@ -156,14 +156,8 @@ static void ev_push_thread()
     // +1 so that it is a bit higher than regular sys threads
     t_current_set_priority(PHANTOM_SYS_THREAD_PRIO+1);
 
-    //vm_lock_persistent_memory(); // We access persistent memory now and then
-
-#if EVENTS_ENABLED && 1
     while(1)
     {
-        //if(phantom_virtual_machine_snap_request) // Check if we need release access to persistent memory
-        //    phantom_thread_wait_4_snap();
-
         ev_remove_extra_unused();
 
         struct ui_event *e;
@@ -179,7 +173,7 @@ static void ev_push_thread()
         ev_events_in_q--;
         hal_mutex_unlock( &ev_main_q_mutex );
 
-        SHOW_FLOW(8, "%p", e);
+        LOG_FLOW(8, "%p", e);
 
         vm_lock_persistent_memory();
         // Deliver to 'em
@@ -189,13 +183,6 @@ static void ev_push_thread()
         // window code will return when done
         //return_unused_event(e);
     }
-#else
-    while(1)
-    {
-    	hal_sleep_msec(20000);
-    }
-#endif
-
 
 }
 
@@ -205,7 +192,7 @@ static void ev_push_thread()
 
 static int phantom_window_getc(void)
 {
-    //SHOW_FLOW0( 11, "window getc" );
+    //LOG_FLOW0( 11, "window getc" );
     //wtty_t *tty = &(GET_CURRENT_THREAD()->ctty);
 #if CONF_NEW_CTTY
     wtty_t *tty = GET_CURRENT_THREAD()->ctty_w;
@@ -214,7 +201,7 @@ static int phantom_window_getc(void)
 #endif
     if(tty == 0)
     {
-        SHOW_ERROR0( 0, "No wtty, phantom_window_getc loops forever" );
+        LOG_ERROR0( 0, "No wtty, phantom_window_getc loops forever" );
         while(1)
             hal_sleep_msec(10000);
     }
@@ -252,13 +239,9 @@ void init_main_event_q()
 #if EVENTS_ENABLED
     hal_start_kernel_thread( ev_push_thread );
 
-
     ev_engine_active = 1;
 
-#if KEY_EVENTS
     phantom_set_console_getchar( phantom_window_getc );
-    hal_start_kernel_thread( ev_keyboard_read_thread );
-#endif
 #endif
 
 #if DELIVER2THREAD

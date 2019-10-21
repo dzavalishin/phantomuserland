@@ -236,11 +236,12 @@ int vm_syscall_block( pvm_object_t this, struct data_area_4_thread *tc, pvm_obje
     return 0; // throw!
 }
 
+/*
 int phantom_dev_keyboard_getc(void)
 {
     return getchar();
 }
-
+*/
 
 
 

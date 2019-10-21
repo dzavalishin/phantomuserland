@@ -6,10 +6,12 @@ PNGFILES := $(filter %.png,$(FILES))
 CFILES += $(patsubst %.png,%.png.c,$(notdir $(PNGFILES)))
 
 all::     $(CFILES)
+	cp defs.h $(realpath $(PHANTOM_HOME))/include/video/builtin_bitmaps.h
 
 clean::
 	rm -f $(CFILES) defs.h
 
 %.png.c: %.png
 	$(CONV) $<
-	 gawk -f defs.awk $@ >>defs.h
+	gawk -f defs.awk $@ >>defs.h
+	cp $(patsubst %.png,%.png.c,$<) ../../../phantom/libwin/resources 

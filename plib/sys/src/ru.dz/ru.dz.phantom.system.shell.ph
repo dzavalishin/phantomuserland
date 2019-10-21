@@ -87,6 +87,8 @@ class shell extends runnable
 
         console.moveWindow(10,10);
         console.setTitle("VM Shell");
+		console.setbgcolor( 0xFFFFFFFF );
+		console.clear();
 
 		// test of fio connection
 		//fio = new .internal.connection();

@@ -24,7 +24,7 @@ Q_DISK_A="-boot a -no-fd-bootchk -drive file=img/grubfloppy-hd0.img,index=0,if=f
 
 # Q_NET="-net nic,model=pcnet -net nic,model=rtl8139 -net user,tftp=tftp "
 Q_PORTS=" -serial file:serial0.log -soundhw es1370"
-#Q_PORTS="-serial stdio -soundhw pcspk "
+Q_PORTS="-serial stdio -soundhw pcspk "
 
 # VIO="-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio"
 

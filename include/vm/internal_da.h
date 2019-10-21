@@ -300,14 +300,11 @@ struct data_area_4_boot
 
 struct data_area_4_tty
 {
-#if NEW_WINDOWS
-    window_handle_t                     w;
-    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
-#else
     drv_video_window_t                  w;
     /** this field extends w and works as it's last field. */
-    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
-#endif
+    //rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
+    pvm_object_t                        o_pixels;
+
     int                                 font_height; // Font is hardcoded yet - BUG - but we cant have ptr to kernel from object
     int                                 font_width;
     int                                 xsize, ysize; // in chars
@@ -395,28 +392,24 @@ struct data_area_4_weakref
 
 struct data_area_4_window
 {
-#if NEW_WINDOWS
-    window_handle_t                     w;
-    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
-#else
-    drv_video_window_t                  w;
-    // this field extends w and works as it's last field. 
-    rgba_t                              pixel[PVM_MAX_TTY_PIXELS];
-#endif
-
+    pvm_object_t                        o_pixels;       //< .i.binary object containing bitmap for window
     pvm_object_t                        connector;      // Used for callbacks - events
 
-    int                                 x, y; // in pixels
+    uint32_t                            x, y; // in pixels
     rgba_t                              fg, bg; // colors
 
-    //pvm_object_t                   event_handler; // connection!
-    char                                title[PVM_MAX_TTY_TITLE+1];
+    //pvm_object_t                      event_handler; // connection!
+    char                                title[PVM_MAX_TTY_TITLE+1]; // TODO wchar_t
+
+    uint32_t                            autoupdate;
+
+    drv_video_window_t                  w;
 };
 
 
 
 
-#define DIR_MUTEX_O 1
+#define DIR_MUTEX_O 1 // TODO kill me
 
 // Very dumb implementation, redo with hash map or bin search or tree
 // Container entry has pvm_object_t at the beginning and the rest is 0-term name string
@@ -428,12 +421,8 @@ struct data_area_4_directory
     pvm_object_t                        keys;           // Where we actually hold keys
     pvm_object_t                        values;         // Where we actually hold values
     u_int8_t                           *flags;          // Is this keys/values slot pointing to 2nd level array
-#if DIR_MUTEX_O
-    //pvm_object_t                   mutex;             // Mutex object
-        pvm_spinlock_t                                          pvm_lock;
-#else
-    hal_spinlock_t                      lock;
-#endif
+
+    pvm_spinlock_t                      pvm_lock;
 
 };
 

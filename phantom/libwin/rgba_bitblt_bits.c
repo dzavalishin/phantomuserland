@@ -447,16 +447,24 @@ void int565_to_rgba_move( struct rgba_t *dest, const short int *src, int nelem )
 
 
 void
-drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
+w_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
 {
     bitmap2bitmap(
                   w->w_pixel, w->xsize, w->ysize, x, y,
                   bmp->pixel, bmp->xsize, bmp->ysize, 0, 0,
                   bmp->xsize, bmp->ysize
                  );
-
 }
 
+/// blend bitmap to window
+void w_draw_blend_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
+{
+    bitmap2bitmap_blend(
+                  w->w_pixel, w->xsize, w->ysize, x, y,
+                  bmp->pixel, bmp->xsize, bmp->ysize, 0, 0,
+                  bmp->xsize, bmp->ysize
+                 );
+}
 
 
 

@@ -109,11 +109,11 @@ window_handle_t drv_video_next_window(window_handle_t curr)
 
     do {
 
-        SHOW_FLOW( 3, "next = %x", (int)next );
+        LOG_FLOW( 3, "next = %x", (int)next );
 
         if(reasonable_tries-- <= 0)
         {
-            SHOW_ERROR0( 0, "loop?");
+            LOG_ERROR0( 0, "loop?");
             w_unlock();
             return curr;
         }
@@ -125,27 +125,27 @@ window_handle_t drv_video_next_window(window_handle_t curr)
         // I'm decoration, don't choose me
         if( next->w_owner )
         {
-            SHOW_FLOW( 4, "next = %x has owner", (int)next );
+            LOG_FLOW( 4, "next = %x has owner", (int)next );
             continue;
         }
 
         // Don't choose unvisible ones
         if( !(next->state & WSTATE_WIN_VISIBLE) )
         {
-            SHOW_FLOW( 4, "next = %x not visible", (int)next );
+            LOG_FLOW( 4, "next = %x not visible", (int)next );
             continue;
         }
 
         // No focus means no focus
         if( next->flags & (WFLAG_WIN_NOFOCUS|WFLAG_WIN_NOKEYFOCUS) )
         {
-            SHOW_FLOW( 4, "next = %x nofocus", (int)next );
+            LOG_FLOW( 4, "next = %x nofocus", (int)next );
             continue;
         }
 
         if( next->flags & WFLAG_WIN_NOTINALL )
         {
-            SHOW_ERROR0( 0, "WFLAG_WIN_NOTINALL in allw");
+            LOG_ERROR0( 0, "WFLAG_WIN_NOTINALL in allw");
             continue;
         }
 

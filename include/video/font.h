@@ -86,21 +86,44 @@ void 	w_font_tty_string(
 // TrueType support
 // ------------------------------------------------------------------------
 
+typedef enum w_font_type { ft_none = 0, ft_bitmap = 1, ft_truetype = 2 } font_type_t;
+
+typedef pool_handle_t font_handle_t;
+
+struct ttf_pool_el;
+struct ttf_symbol;
+
+struct ttf_paint_state
+{
+    struct ttf_pool_el * pe;
+    font_handle_t        font;
+
+    int                  top;
+    int                  bottom;
+    int                  left;
+    int                  right;
+
+};
+
 
 //#include <ft2build.h>
 //#include FT_FREETYPE_H
 
-typedef enum w_font_type { ft_none = 0, ft_bitmap = 1, ft_truetype = 2 } font_type_t;
-//extern FT_Library ftLibrary;
 
-typedef pool_handle_t font_handle_t;
-
-/// truetype fonts - in progress
+/// truetype fonts
 void w_ttfont_draw_string(
                           window_handle_t win,
                           font_handle_t font,
-                          const char *s, const rgba_t color, //const rgba_t bg,
+                          const char *s, const rgba_t color,
                           int x, int y );
+
+void w_ttfont_draw_string_ext(
+                          window_handle_t win,
+                          font_handle_t font,
+                          const char *str, size_t strLen,
+                          const rgba_t color,
+                          int win_x, int win_y,
+                          int *find_x, int find_for_char );
 
 
 void w_ttfont_draw_char(
@@ -109,6 +132,10 @@ void w_ttfont_draw_char(
                           const char *str, const rgba_t color,
                           int win_x, int win_y );
 
+/// Calculate bounding rectangle for string.
+void w_ttfont_string_size( font_handle_t font,
+                          const char *str, size_t strLen,
+                          rect_t *r );
 
 font_handle_t w_get_system_font_ext( int font_size );
 font_handle_t w_get_system_font( void );
@@ -122,6 +149,79 @@ font_handle_t w_get_tt_font_mem( void *mem_font, size_t mem_font_size, const cha
 
 
 errno_t w_release_tt_font( font_handle_t font );
+
+
+extern font_handle_t decorations_title_font;
+
+
+// -----------------------------------------------------------------------
+//
+// UTF-32 version
+//
+// * w_ttfont_setup_string_w    - allocate data, open font, preprocess sizes
+// * w_ttfont_resetup_string_w  - do not allocate, just preprocess sizes for a new string
+// * w_ttfont_string_size_w     - get bounding rectangle
+// * w_ttfont_draw_string_w     - actually paint
+// * w_ttfont_dismiss_string_w  - free data
+//
+// -----------------------------------------------------------------------
+
+errno_t w_ttfont_setup_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols,               //< sizeof symbols
+                        size_t strLen,                 //< Num of characters we process
+                        const wchar_t *str,            //< String to preprocess
+                        font_handle_t font             //< Font
+                        );
+
+errno_t w_ttfont_resetup_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols,               //< sizeof symbols
+                        size_t strLen,                 //< Num of characters we process
+                        const wchar_t *str             //< String to preprocess
+                        );
+
+
+
+void w_ttfont_draw_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t strLen,                 //< Num of characters we process
+
+                        window_handle_t win,
+                        const rgba_t color,
+                        int win_x, int win_y
+                        );
+
+
+void w_ttfont_dismiss_string_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t nSymbols );              //< sizeof symbols
+
+void w_ttfont_string_size_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        size_t strLen,                 //< wchars to count
+                        rect_t *r );
+
+
+/**
+ * 
+ * Find char by x pos (mouse click to char index)
+ * 
+ * \param[in] xpos - x coord position (from the beginning of string)
+ * 
+ * \returns Index of char or -1 for error.
+ * 
+**/
+int w_ttfont_char_by_x_w(
+                        struct ttf_paint_state *s,     //< Workplace struct
+                        struct ttf_symbol *symbols,    //< Workplace for at least strLen characters
+                        size_t strLen,                 //< wchars to check
+                        int xpos
+                        );
 
 
 #endif // CONF_TRUETYPE

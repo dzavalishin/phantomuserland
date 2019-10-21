@@ -1669,6 +1669,7 @@ static void vm_map_lazy_pageout_thread(void)
     }
 }
 static int request_snap_flag = 0;
+static int seconds_between_snaps = 100;
 
 static void vm_map_snapshot_thread(void)
 {
@@ -1688,9 +1689,14 @@ static void vm_map_snapshot_thread(void)
             hal_exit_kernel_thread();
         }
 
-        //hal_sleep_msec( 100000 );
-        int i = 100; // secs between snaps
-        while( (!request_snap_flag) && (i-- > 0) )
+        if(!vm_regular_snaps_enabled)
+        {
+            hal_sleep_msec( 100 );
+            continue;
+        }
+
+        int i = 0;
+        while( (!request_snap_flag) && (i++ < seconds_between_snaps) )
         {
             hal_sleep_msec( 1000 );
         }
@@ -1708,6 +1714,10 @@ void request_snap(void)
     request_snap_flag++;
 }
 
+void set_snap_interval( int interval_sec )
+{
+    seconds_between_snaps = interval_sec;
+}
 
 static void vm_map_deferred_disk_alloc_thread(void)
 {

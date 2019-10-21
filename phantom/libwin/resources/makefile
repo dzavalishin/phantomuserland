@@ -8,5 +8,6 @@ TTF_DIR=$(realpath $(PHANTOM_HOME)/plib/resources/ttfonts)
 #	$(CONV) $<
 
 all::  #close.png.c pin.png.c close_pressed.png.c
-	cp $(RESDIR)/*.c .
+	$(MAKE) -C $(RESDIR)
+#	cp $(RESDIR)/*.c .
 	cp $(TTF_DIR)/*.c .

@@ -1913,8 +1913,7 @@ static void do_pvm_exec(pvm_object_t current_thread)
                 pvm_object_t cl = os_pop();
                 pvm_object_t no = pvm_create_object( cl );
                 os_push( no );
-                //printf("\nop_new\nclass @%p\n", cl );
-                //printf("new_this @%p %s\n", no, pvm_is_null(no) ? "null" : "not null"); 
+                //printf("\nop_new\tclass @%p\t", cl ); printf("new_this @%p %s\n", no, pvm_is_null(no) ? "null" : "not null"); 
             }
             break;
 #if 0

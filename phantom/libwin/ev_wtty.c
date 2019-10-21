@@ -73,7 +73,7 @@ int wtty_getc(wtty_t *w)
     int ret;
 
     assert(w);
-    SHOW_FLOW( 11, "wtty getc %p", w );
+    LOG_FLOW( 11, "wtty getc %p", w );
 
     hal_mutex_lock(&w->mutex);
 
@@ -97,7 +97,7 @@ int wtty_read(wtty_t *w, char *data, int cnt, bool nowait)
     assert(w);
     hal_mutex_lock(&w->mutex);
 
-    SHOW_FLOW( 11, "wtty rd %p", w );
+    LOG_FLOW( 11, "wtty rd %p", w );
 
     while( cnt > 0 )
     {
@@ -144,7 +144,7 @@ void wtty_putc(wtty_t *w, int c)
     hal_mutex_lock(&w->mutex);
     wtty_wrap(w);
 
-    SHOW_FLOW( 11, "wtty putc %p", w );
+    LOG_FLOW( 11, "wtty putc %p", w );
 
     while( _wtty_is_full(w) )
         hal_cond_wait( &w->wcond, &w->mutex );
@@ -163,11 +163,11 @@ errno_t wtty_putc_nowait(wtty_t *w, int c)
     hal_mutex_lock(&w->mutex);
     wtty_wrap(w);
 
-    SHOW_FLOW( 11, "wtty putc %p", w );
+    LOG_FLOW( 11, "wtty putc %p", w );
 
     if( _wtty_is_full(w) )
     {
-        SHOW_ERROR0( 10, "wtty putc fail" );
+        LOG_ERROR0( 10, "wtty putc fail" );
         ret = ENOMEM;
     }
     else
@@ -190,7 +190,7 @@ int wtty_write(wtty_t *w, const char *data, int cnt, bool nowait)
     hal_mutex_lock(&w->mutex);
     wtty_wrap(w);
 
-    SHOW_FLOW( 11, "wtty wr %p", w );
+    LOG_FLOW( 11, "wtty wr %p", w );
 
     while( cnt > 0 )
     {
