@@ -581,7 +581,7 @@ struct pvm_connection_ops
 
 
 
-
+// TODO kill me
 struct data_area_4_connection
 {
     struct data_area_4_thread *         owner;          // Just this one can use
@@ -617,6 +617,23 @@ errno_t phantom_disconnect_object( struct data_area_4_connection *da );
 // Internal connect - when connection is used by other object (host_object)
 //int pvm_connect_object_internal(struct data_area_4_connection *da, int connect_type, pvm_object_t host_object, void *arg);
 errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int connect_type, pvm_object_t host_object, void *arg);
+
+
+
+
+
+struct data_area_4_arena
+{
+    size_t                              size; // exact distance from my start to start of next arena object or end of memory
+    pvm_object_t                        owner; // If thread local arena - pointer to thread? No - will keep thread from being freed
+    uint32_t                            flags; // type of arena
+};
+
+
+
+
+
+
 
 
 

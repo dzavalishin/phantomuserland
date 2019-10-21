@@ -115,7 +115,36 @@ static inline unsigned int round_size(unsigned int size, int arena)
     return size;
 }
 
-pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
+
+int is_object_storage_initialized() 
+{ 
+    pvm_object_storage_t *root = pvm_object_space_start; 
+    return root->_ah.object_start_marker != PVM_OBJECT_START_MARKER;
+}
+
+//pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
+
+pvm_object_storage_t *find_root_object_storage()
+{
+    void *curr = pvm_object_space_start;
+    int wrap = 0;
+
+    do {
+        if(pvm_object_is_allocated_light(curr))
+        {            
+            pvm_object_t o = curr;
+
+            if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_ROOT )
+                return o;
+        }
+
+        curr = alloc_wrap_to_next_object( curr, pvm_object_space_start, pvm_object_space_end, &wrap, 0 );
+    } while( !wrap );
+
+    panic("No root object");
+    return 0;
+}
+
 
 // TODO must be rewritten - arena properties must be kept in persistent memory
 static void init_arenas( void * _pvm_object_space_start, unsigned int size )

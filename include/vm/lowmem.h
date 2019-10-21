@@ -1,3 +1,4 @@
+#if 0 // unused
 /**
  *
  * Phantom OS
@@ -56,3 +57,5 @@ errno_t		vm_concatenate_dead_arenas();
 
 
 #endif // LOWMEM_H
+
+#endif

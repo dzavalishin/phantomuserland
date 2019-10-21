@@ -81,9 +81,11 @@ POSF(IS_CODE,0x01)
 // TODO rename PHANTOM_OBJECT_STORAGE_FLAG_IS_ --> PHANTOM_OBJECT_FLAG_IS_
 
 // flags: o->_flags
-
 // These are set on creation by class
+// NB - 0x100000 is used below
 
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_ARENA         0x8000 // Allocation arena marker object
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_ROOT          0x4000 // I am Root
 // object must not be modified at all - IMPLEMENTED PARTIALLY - can be set in run time
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE 0x2000
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER 0x1000
@@ -101,12 +103,26 @@ POSF(IS_CODE,0x01)
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE 0x01
 
 // NB! Runtime flags!
-
 // These can be set/reset in runtime
 
 // This object has week ref on it (must be on _satellites chain)
 #define PHANTOM_OBJECT_STORAGE_FLAG_HAS_WEAKREF 0x100000
 
+
+
+
+#define PHANTOM_ARENA_FOR_INT             (1<<1) // For allocation of ints
+#define PHANTOM_ARENA_FOR_STACK           (1<<2) // For allocation of stack frames
+#define PHANTOM_ARENA_FOR_STATIC          (1<<3) // For allocation of classes, interfaces, code, etc
+#define PHANTOM_ARENA_FOR_SMALL           (1<<4) // For allocation of < 1K
+
+#define PHANTOM_ARENA_FOR_THREAD_INT      (1<<7) // Thread personal ints
+#define PHANTOM_ARENA_FOR_THREAD_STACK    (1<<8) // Thread personal stack frames
+#define PHANTOM_ARENA_FOR_THREAD_SMALL    (1<<8) // Thread personal small objects
+
+#define PHANTOM_ARENA_FOR_1K              (1<<10) // For [1,2[K
+#define PHANTOM_ARENA_FOR_2K              (1<<11) // For [2,4[K
+// And so on, must be allocated on request
 
 #endif // PO_OBJECT_FLAGS_H
 

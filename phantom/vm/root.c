@@ -36,7 +36,6 @@
 #include <kernel/stats.h>
 #include <kernel/snap_sync.h>
 
-//#include "vm/systable_id.h"
 
 static void pvm_create_root_objects();
 
@@ -72,11 +71,10 @@ void pvm_root_init(void)
 {
     vm_lock_persistent_memory();
 
-    pvm_object_t root = get_root_object_storage();
-
     dbg_add_command( runclass, "runclass", "runclass class [method ordinal] - create object of given class and run method (ord 8 by default)");
 
-    if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
+    //if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
+    if( !is_object_storage_initialized() )
     {
         // Not an object in the beginning of the address space?
         // We have a fresh OS instance then. Set it up from scratch.
@@ -94,6 +92,7 @@ void pvm_root_init(void)
         return;
     }
 
+    pvm_object_t root = find_root_object_storage();
     assert(pvm_object_is_allocated( root ));
 
     // internal classes
@@ -239,15 +238,15 @@ static void pvm_save_root_objects()
 static void pvm_create_root_objects()
 {
     int root_da_size = PVM_ROOT_OBJECTS_COUNT * sizeof(pvm_object_t );
-    unsigned int flags = 0; // usual plain vanilla array
+    unsigned int flags = PHANTOM_OBJECT_STORAGE_FLAG_IS_ROOT; // usual plain vanilla array, but with root flag
     // make sure refcount is disabled for all objects created here: 3-rd argument of pvm_object_alloc is true (obsolete: ref_saturate_p)
 
     // Allocate the very first object
-    pvm_object_t root = get_root_object_storage();
+    //pvm_object_t root = get_root_object_storage();
     pvm_object_t roota = pvm_object_alloc( root_da_size, flags, 1 );
 
     // and make sure it is really the first
-    assert(root == roota);
+    //assert(root == roota);
 
     // TODO set class later
 
