@@ -43,6 +43,11 @@
 #define CONTROL_FLAG_NOFOCUS           (1<<8)  //< This control is passive - no events, no focus
 // NB - unused - convert to NOBGFILL to turn off just painting rectangle with bg color?
 #define CONTROL_FLAG_NOBACKGROUND      (1<<9)  //< Do not paint control background - TODO check me
+#define CONTROL_FLAG_READONLY         (1<<10)  //< Control is just for display, don't accept user input - TODO implement
+#define CONTROL_FLAG_ALT_FG           (1<<11)  //< Control foreground (active part) is paint in a different way - TODO
+#define CONTROL_FLAG_ALT_BG           (1<<12)  //< Control background (passive part) is paint in a different way - TODO
+
+// TODO - do we need CONTROL_FLAG_READONLY? Can use CONTROL_FLAG_NOFOCUS instead?
 
 struct control;
 
@@ -66,6 +71,7 @@ typedef enum {
     ct_menu        = 3,
     ct_menuitem    = 4,
     ct_label       = 5,
+    ct_scrollbar   = 6,
 
     //ct_group       = 0xFF+0,            //< To store it in an .internal.ui.control we put group in a control union too.
 } control_type_t;
@@ -153,6 +159,13 @@ typedef struct control
             int32_t     str_len;        //< Num of bytes in buffer
             int32_t     cursor_pos;     //< Cursor position in bytes - TODO UTF-32!
             int32_t     text_height;    //< Rendered text height in pixels, max possible
+        };
+
+        struct { // scroll bar
+            int32_t     minval;         //< Max value
+            int32_t     maxval;         //< Max value
+            int32_t     value;          //< Cur value
+            int32_t     value_width;    //< Size of handle = value_width / (maxval - minval)
         };
 
     };
@@ -251,9 +264,11 @@ void w_control_set_position( window_handle_t w, control_handle_t ch, int x, int 
 void w_control_set_notify( window_handle_t w, control_handle_t ch, int count ); //< show bullet with number in top right corner
 void w_control_set_menu( window_handle_t w, control_handle_t ch, window_handle_t m ); //< set context (right click) menu
 
-
 void w_control_set_state( window_handle_t w, control_handle_t ch, int pressed ); //< Is checkbox checked or switch turned on?
 void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ); //< Is checkbox checked or switch turned on?
+
+void w_control_set_value( window_handle_t w, control_handle_t ch, int value, int width );  //< For scrollbar - set value & bar handle width
+void w_control_get_value( window_handle_t w, control_handle_t ch, int *value, int *width ); //< For scrollbar - get value & bar handle width
 
 // -----------------------------------------------------------------------
 //
@@ -276,6 +291,10 @@ control_handle_t w_add_label_ext( window_handle_t w, int x, int y, int xsize, in
                                   drv_video_bitmap_t *bg, uint32_t flags );
 
 control_handle_t w_add_text_field( window_handle_t w, int x, int y, int xsize, int ysize, const char *text, color_t text_color );
+
+control_handle_t w_add_scrollbar_ext( window_handle_t w, int x, int y, int xsize, int ysize, int minval, int maxval, uint32_t flags );
+control_handle_t w_add_scrollbar( window_handle_t w, int x, int y, int xsize, int ysize, int maxval );
+
 
 // -----------------------------------------------------------------------
 //

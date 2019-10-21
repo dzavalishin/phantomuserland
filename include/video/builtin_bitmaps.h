@@ -114,3 +114,5 @@ extern drv_video_bitmap_t		scrollbar_orange_bar_middle_bmp;
 extern drv_video_bitmap_t		scrollbar_bed_middle_narrow_bmp;
 extern drv_video_bitmap_t		scrollbar_green_bar_middle_bmp;
 extern drv_video_bitmap_t		scrollbar_green_bar_right_bmp;
+extern drv_video_bitmap_t		scrollbar_bed_middle_narrow_bmp;
+extern drv_video_bitmap_t		scrollbar_bed_middle_narrow_bmp;

@@ -225,6 +225,7 @@ void w_paint_control(window_handle_t w, control_t *cc )
         case ct_button:     ctl_button_paint( w, cc ); break;
         case ct_menuitem:   ctl_menu_item_paint( w, cc ); break;
         case ct_text:       ctl_text_field_paint( w, cc ); break;
+        case ct_scrollbar:  ctl_scroll_bar_paint( w, cc ); break;
 
         case ct_menu:       /* FALLTHROUGH */
         default:
@@ -335,7 +336,7 @@ static errno_t do_event_to_control(pool_t *pool, void *el, pool_handle_t handle,
     control_t *cc = ref->c;                    assert(cc);
     struct foreach_control_param *env = arg;   assert(env);
 
-    if(cc->flags & (CONTROL_FLAG_DISABLED|CONTROL_FLAG_NOFOCUS) ) 
+    if(cc->flags & (CONTROL_FLAG_DISABLED|CONTROL_FLAG_NOFOCUS|CONTROL_FLAG_READONLY) ) 
         return 0; // Event is not seen by me
 
     if( (env->e.type == UI_EVENT_TYPE_MOUSE) && point_in_rect( env->e.rel_x, env->e.rel_y, &cc->r ) )
@@ -364,17 +365,11 @@ static errno_t do_event_to_control(pool_t *pool, void *el, pool_handle_t handle,
 
     switch( cc->type )
     {
-        case ct_menuitem: /* FALLTHROUGH */
-        case ct_button: 
-            return ctl_button_events(cc, env);
-            break;
-/*
-        case ct_label: // No reaction
-            // TODO use CONTROL_FLAG_NOFOCUS and kill this case
-            break;
-*/
-        case ct_text: ctl_text_field_events(cc,env);
-            break;
+        case ct_menuitem:  /* FALLTHROUGH */
+        case ct_button:    return ctl_button_events(cc, env); break;
+        //case ct_label: // No reaction
+        case ct_text:      return ctl_text_field_events(cc,env); break;
+        case ct_scrollbar: return ctl_scroll_bar_events(cc,env); break;
 
         default:
             LOG_ERROR( 1, "unknown ctl type %d", cc->type );

@@ -29,7 +29,7 @@
 
 #include <video/control.h>
 
-#include <dev/key_event.h>
+//#include <dev/key_event.h>
 
 #include "ctl_private.h"
 

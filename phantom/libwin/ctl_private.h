@@ -56,6 +56,17 @@ void ctl_text_field_paint(window_handle_t win, control_t *cc );
 /// Process event for button or menu item
 int ctl_button_events(control_t *cc, struct foreach_control_param *env);
 
+
+// -------------------------------------------------------------------
+//
+// Scroll bar control specific processing
+//
+// -------------------------------------------------------------------
+
+int ctl_scroll_bar_events(control_t *cc, struct foreach_control_param *env);
+void ctl_scroll_bar_paint(window_handle_t w, control_t *cc );
+
+
 // -------------------------------------------------------------------
 //
 // Bits to combine in control paint function

@@ -401,6 +401,38 @@ control_handle_t w_add_checkbox( window_handle_t w, int x, int y )
     return bh;
 }
 
+
+
+control_handle_t w_add_scrollbar_ext( window_handle_t w, int x, int y, int xsize, int ysize, int minval, int maxval, uint32_t flags )
+{
+    control_t cb;
+    w_clear_control( &cb );
+
+    cb.type = ct_scrollbar;
+
+    cb.r.x = x;
+    cb.r.y = y;
+    cb.r.xsize = xsize;
+    cb.r.ysize = ysize;
+
+    cb.flags = flags;
+
+    cb.minval = minval;
+    cb.maxval = maxval;
+    cb.value = maxval / 2;
+    cb.value_width = maxval / 4;
+
+    return w_add_control( w, &cb );
+}
+
+
+control_handle_t w_add_scrollbar( window_handle_t w, int x, int y, int xsize, int ysize, int maxval )
+{
+    return w_add_scrollbar_ext( w, x, y, xsize, ysize, 0, maxval, 0 );
+}
+
+
+
 // -----------------------------------------------------------------------
 //
 // Deletion

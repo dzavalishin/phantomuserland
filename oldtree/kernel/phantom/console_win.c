@@ -862,7 +862,10 @@ void create_settings_window( void )
     // Ok/Cancel
     // -------------------------------------------------------------------
 
+#if 1
+    bh = w_add_scrollbar_ext( w, 20, 20, 350, 31, 0, 100, 0 );
 
+#else
 
     bh = w_add_button( w, 'o', 20, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
     w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
@@ -871,6 +874,7 @@ void create_settings_window( void )
     bh = w_add_button( w, '0', 220, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
     w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
     w_control_set_text( w, bh, "Cancel", COLOR_BLACK );
+    #endif
 }
 
 
