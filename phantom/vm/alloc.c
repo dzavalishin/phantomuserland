@@ -495,10 +495,21 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 
     if( data == 0 )
     {
+        int i;
+        // Try any pool now
+        for( i = ARENAS-1; i>= 0; i-- )
+        {
+            data = pool_alloc(size, i);
+            if( data != 0 )
+                goto found;
+        }
+
+        pvm_memcheck();
         // TODO VM throw
-        panic("out of persistent mem looking for %d bytes", size);
+        panic("out of persistent mem looking for %d bytes, arena %d", size, arena );
     }
 
+found:
     data->_da_size = data_area_size;
     data->_flags = flags;
     if (saturated)

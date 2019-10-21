@@ -436,7 +436,7 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize, const char *head
     }
     SHOW_FLOW0( 2, "TCP - connected");
 
-    char buf[1024];
+    char buf[2048];
 
     memset( buf, 0, sizeof(buf) );
     strlcpy( buf, "GET /", sizeof(buf) );
