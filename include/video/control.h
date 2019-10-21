@@ -269,8 +269,12 @@ void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ); //
 
 /**
  * 
+ * Control scrollbar position ad size.
+ * 
  * \param[in] value Current value. Determines start position of scroll bar.
  * \param[in] width Width of scroll bar - how big part of possible values it takes. If == maxval - minval - takes 100% of scrollbar size
+ * 
+ * Set value or width to be negative to disable display of bar at all.
  * 
 **/
 void w_control_set_value( window_handle_t w, control_handle_t ch, int value, int width );  //< For scrollbar - set value & bar handle width

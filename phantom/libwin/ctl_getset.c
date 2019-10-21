@@ -309,3 +309,33 @@ void w_control_set_menu( window_handle_t w, control_handle_t ch, window_handle_t
 
     RELEASE_CONTROL
 }
+
+
+// -----------------------------------------------------------------------
+//
+// Value - for scrollbar
+//
+// -----------------------------------------------------------------------
+
+
+void w_control_set_value( window_handle_t w, control_handle_t ch, int value, int width )  //< For scrollbar - set value & bar handle width
+{
+    GET_CONTROL
+
+    cc->value = value;
+    cc->value_width = width;
+
+    w_paint_control( w, cc );
+
+    RELEASE_CONTROL
+}
+
+void w_control_get_value( window_handle_t w, control_handle_t ch, int *value, int *width ) //< For scrollbar - get value & bar handle width
+{
+    GET_CONTROL
+
+    if(value) *value = cc->value;
+    if(width) *width = cc->value_width;
+    
+    RELEASE_CONTROL
+}

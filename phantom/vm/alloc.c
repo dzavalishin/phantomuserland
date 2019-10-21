@@ -20,6 +20,7 @@
 #include <kernel/stats.h>
 #include <kernel/page.h>
 #include <kernel/vm.h>
+#include <kernel/debug_graphical.h>
 
 
 static int object_allocator_inited = 0;

@@ -1688,7 +1688,12 @@ static void vm_map_snapshot_thread(void)
             hal_exit_kernel_thread();
         }
 
-        //hal_sleep_msec( 100000 );
+        if(!vm_regular_snaps_enabled)
+        {
+            hal_sleep_msec( 100 );
+            continue;
+        }
+
         int i = 100; // secs between snaps
         while( (!request_snap_flag) && (i-- > 0) )
         {

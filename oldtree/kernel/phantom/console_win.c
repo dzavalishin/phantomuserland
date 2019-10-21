@@ -44,6 +44,7 @@
 #include <kernel/stats.h>
 #include <kernel/profile.h>
 #include <kernel/init.h>
+#include <kernel/snap_sync.h>
 
 #include <kernel/json.h>
 
@@ -79,7 +80,7 @@ drv_video_window_t *phantom_launcher_menu_window = 0;
 #endif
 
 int volatile debug_mode_selector = 's';
-
+control_handle_t snap_scroll_bar = 0;
 
 static rgba_t console_fg;
 static rgba_t console_bg;
@@ -510,6 +511,13 @@ static void put_progress()
 
     progress_rect.xsize = (vm_map_do_for_percentage*DEBWIN_XS)/100;
     w_fill_rect( phantom_debug_window, COLOR_LIGHTGREEN, progress_rect );
+
+    //SHOW_FLOW( 0, "snap percentage %d", vm_map_do_for_percentage );
+    if( phantom_settings_window && snap_scroll_bar )
+    {
+        //SHOW_FLOW( 0, "snap scroll set %d", vm_map_do_for_percentage );
+        w_control_set_value( phantom_settings_window, snap_scroll_bar, vm_map_do_for_percentage, 5 );
+    }
 }
 
 static void paint_memory_map(window_handle_t w);
@@ -669,7 +677,7 @@ static void phantom_launcher_window_loop()
 }
 */
 
-
+/*
 static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e)
 {
 
@@ -695,7 +703,7 @@ static int phantom_launcher_event_process( window_handle_t w, ui_event_t *e)
 
     return 1;
 }
-
+*/
 
 rect_t memory_map_rect = (rect_t){ 5, 10, 100, 100 };
 
@@ -755,6 +763,7 @@ static void debugOnOff(window_handle_t w, struct control *c) {
 #else
 #endif
 
+extern void request_snap(void);
 
 void create_settings_window( void )
 {
@@ -774,10 +783,10 @@ void create_settings_window( void )
     //w_fill_box( w, 0, 0, WXY, WXY, COLOR_WHITE );
     //w_draw_box( w, 0, 0, WXY, WXY, menu_border );
 
-    
-
     bh = w_add_menu_item( w, '1', 20, 300, 200, "Snap now", COLOR_BLACK );
     w_control_set_icon( w, bh, &icon_settings_bmp );
+    w_control_set_callback( w, bh, (void *)request_snap, 0 );
+
 
     // slide must paint over
     //w_add_label( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
@@ -863,8 +872,8 @@ void create_settings_window( void )
     // -------------------------------------------------------------------
 
 #if 1
-    bh = w_add_scrollbar_ext( w, 20, 20, 350, 31, 0, 100, 0 );
-
+    snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 350, 31, 0, 100, CONTROL_FLAG_ALT_FG );
+    w_control_set_value( w, snap_scroll_bar, -1, -1 ); // Remove bar
 #else
 
     bh = w_add_button( w, 'o', 20, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );

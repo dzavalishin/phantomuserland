@@ -93,6 +93,7 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
 
     }
 
+    if( (cc->value >= 0  ) && (cc->value_width > 0) )
     {
     int alt_fg = cc->flags && CONTROL_FLAG_ALT_FG;
 
@@ -114,13 +115,13 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
     // Pixels of bar width
     int fg_mid_w_actual = fg_mid_w_max * cc->value_width / valsize;
 
-# if 1
+
     w_draw_bitmap( w, cc->r.x + fg_xshift + pos_shift, cc->r.y + fg_yshift, fg_l );
     w_draw_bitmap( w, cc->r.x + fg_xshift + fg_lside_w + fg_mid_w_actual + pos_shift, cc->r.y + fg_yshift, fg_r );
 
     // Replicate one column of fg
     w_replicate_hor( w, cc->r.x + fg_xshift + fg_lside_w + pos_shift, cc->r.y + fg_yshift, fg_mid_w_actual, fg_m->pixel, fg_m->ysize );
-#endif
+
     }
 
     // Cursor
@@ -147,12 +148,3 @@ int ctl_scroll_bar_events(control_t *cc, struct foreach_control_param *env)
     return 0; // do not eat event
 }
 
-// -----------------------------------------------------------------------
-//
-// Get/set
-//
-// -----------------------------------------------------------------------
-
-
-void w_control_set_value( window_handle_t w, control_handle_t ch, int value, int width );  //< For scrollbar - set value & bar handle width
-void w_control_get_value( window_handle_t w, control_handle_t ch, int *value, int *width ); //< For scrollbar - get value & bar handle width

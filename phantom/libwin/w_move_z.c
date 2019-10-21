@@ -118,23 +118,29 @@ inserted:
     scr_repaint_win( w );
 }
 
-
+/// TODO: find way to not to use vm_lock_persistent_memory()
 /// UNLOCKED: call from lock only
 /// Is one of topmost - i.e. covered only by WFLAG_WIN_ONTOP ones
 int iw_is_top(drv_video_window_t *w)
 {
     w_assert_lock();
 
+    vm_lock_persistent_memory();
+
     drv_video_window_t *iw;
     queue_iterate_back(&allwindows, iw, drv_video_window_t *, chain)
     {
         if( iw == w ) 
+        {
+            vm_unlock_persistent_memory();
             return 1;
+        }
 
         if( ! (iw->flags & WFLAG_WIN_ONTOP) )
             break;
     }
 
+    vm_unlock_persistent_memory();
     return 0;
 }
 
