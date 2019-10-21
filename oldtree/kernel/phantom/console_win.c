@@ -811,17 +811,11 @@ void create_settings_window( void )
     int cc_y = 0;
     int cc_x = 0;
 
-    //color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
-
     window_handle_t w = drv_video_window_create( 400, 350, 20, 500, COLOR_WHITE, "Snapshots mode", WFLAG_WIN_DECORATED );
-    phantom_settings_window = w;
-    
-    //w_set_visible( lmw, 0 );
+    phantom_settings_window = w;  
 
     w_draw_bitmap( w, 0, 0, &vanilla_background_bmp );
     
-    //w_fill_box( w, 0, 0, WXY, WXY, COLOR_WHITE );
-    //w_draw_box( w, 0, 0, WXY, WXY, menu_border );
 
     bh = w_add_menu_item( w, '1', 20, 300, 200, "Snap now", COLOR_BLACK );
     w_control_set_icon( w, bh, &icon_settings_bmp );
@@ -829,7 +823,6 @@ void create_settings_window( void )
 
 
     // slide must paint over
-    //w_add_label( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
     w_add_label_transparent( w, 20, 250, 200, 32, "Fast Snap", COLOR_BLACK );
 
     control_handle_t sw = w_add_button( w, '2', 138, 250, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
@@ -843,8 +836,6 @@ void create_settings_window( void )
 
     w_control_set_callback( w, sw, settings_sw_callback, 0 );
 
-    //bh = w_add_button( w, '3', 350, 300, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    //w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
     bh = w_add_checkbox( w, 350, 300 );
     w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_console_window );
     w_control_set_state( w, bh, 1 );
@@ -852,9 +843,6 @@ void create_settings_window( void )
     w_add_label_transparent( w, 240, 300, 50, 32, "Console", COLOR_BLACK );
 
 
-
-    //bh = w_add_button( w, '4', 350, 250, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    //w_control_set_background( w, bh, &checkbox_square_off_a_x30_bmp, &checkbox_square_on_a_x30_bmp, 0 );
     bh = w_add_checkbox( w, 350, 250 );
     w_control_set_callback( w, bh, cc_arg_win_OnOff, phantom_debug_window );
     w_control_set_state( w, bh, 1 );
@@ -911,15 +899,15 @@ void create_settings_window( void )
 
 
 
-    // -------------------------------------------------------------------
-    // Ok/Cancel
-    // -------------------------------------------------------------------
-
 #if 1
     //snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 360, 31, 0, 100, CONTROL_FLAG_ALT_FG|CONTROL_FLAG_ALT_BG );
     snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 360, 31, 0, 100, 0 );
     w_control_set_value( w, snap_scroll_bar, -1, -1 ); // Remove bar
 #else
+
+    // -------------------------------------------------------------------
+    // Ok/Cancel
+    // -------------------------------------------------------------------
 
     bh = w_add_button( w, 'o', 20, 20, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, 0 );
     w_control_set_background( w, bh, &button_normal_alpha_x98_bmp, &button_pressed_alpha_x98_bmp, &button_hover_alpha_x98_bmp );
@@ -942,9 +930,10 @@ static window_handle_t make_debug_w_context_menu(void)
 
     color_t menu_border = (color_t){.r = 0xA0, .g = 0xA0, .b = 0xA0, .a = 255};
 
-    window_handle_t ctx_menu = drv_video_window_create( 200, 186 /*+32*/,
+    /*window_handle_t ctx_menu = drv_video_window_create( 200, 186 /*+32* /,
                                                        9, 47, COLOR_WHITE, 
-                                                       "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS|WFLAG_WIN_HIDE_ON_FOCUS_LOSS );
+                                                       "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS|WFLAG_WIN_HIDE_ON_FOCUS_LOSS );*/
+    window_handle_t ctx_menu = w_create_menu_window( 200, 186, 9, 47 );
     window_handle_t lmw = ctx_menu;
     w_set_visible( lmw, 0 );
 
@@ -975,8 +964,9 @@ static window_handle_t make_debug_w_context_menu(void)
     // before slide for it to paint over us
     w_add_label( lmw, 1, 1, 200, 32, "Fast Snap", COLOR_BLACK );
 
-    bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
-    w_control_set_background( lmw, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+    //bh = w_add_button( lmw, 0, 128, 2+31*0, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    //w_control_set_background( lmw, bh, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+    bh =  w_add_switch( lmw, 128, 2+31*0 );
 
     phantom_debug_window->context_menu = ctx_menu;
 

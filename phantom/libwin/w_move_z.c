@@ -20,6 +20,7 @@
 #include <video/internal.h>
 #include <video/zbuf.h>
 
+#include <kernel/snap_sync.h>
 
 
 

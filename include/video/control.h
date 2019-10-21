@@ -339,6 +339,7 @@ void w_ctl_delete_buffer_char( control_t *cc, int pos );
 //
 // -------------------------------------------------------------------
 
+window_handle_t w_create_menu_window( int x, int y, int xsize, int ysize);
 
 
 

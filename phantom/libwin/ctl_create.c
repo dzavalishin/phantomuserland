@@ -433,6 +433,15 @@ control_handle_t w_add_scrollbar( window_handle_t w, int x, int y, int xsize, in
 
 
 
+control_handle_t w_add_switch( window_handle_t w, int x, int y )
+{
+    control_handle_t ch = w_add_button( w, 0, x, y, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, CONTROL_FLAG_NOBORDER|CONTROL_FLAG_TOGGLE );
+    w_control_set_background( w, ch, &slide_switch_alpha_v31_off_bmp, &slide_switch_alpha_v31_on_bmp, 0 );
+
+    return ch;
+}
+
+
 // -----------------------------------------------------------------------
 //
 // Deletion
@@ -484,3 +493,22 @@ static errno_t kill_any_button(pool_t *pool, void *el, pool_handle_t handle, voi
     return 0;
 }
 */
+
+
+// -----------------------------------------------------------------------
+//
+// Menu window
+//
+// -----------------------------------------------------------------------
+
+
+window_handle_t w_create_menu_window( int x, int y, int xsize, int ysize)
+{
+    window_handle_t menu = drv_video_window_create( 
+        x, y, xsize, ysize,
+        COLOR_WHITE, 
+        "Menu", WFLAG_WIN_ONTOP|WFLAG_WIN_NOKEYFOCUS|WFLAG_WIN_HIDE_ON_FOCUS_LOSS );
+
+    return menu;
+}
+
