@@ -28,7 +28,7 @@ second :), amd64 port is incomplete and does not compile at all.
 
 See [ChangeLog](https://github.com/dzavalishin/phantomuserland/wiki/ChangeLog), look at [ScreenShots](https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots), and here is the last one:
 
-![](https://github.com/dzavalishin/phantomuserland/blob/master/doc/images/phantom_screen_08_10_2019_new_UI.png?raw=true)
+![](https://github.com/dzavalishin/phantomuserland/blob/master/doc/images/Phantom_screen_Controls_21_10_2019.png?raw=true)
 
 ## Build ##
 
