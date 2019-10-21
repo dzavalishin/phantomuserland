@@ -516,7 +516,7 @@ static void put_progress()
     if( phantom_settings_window && snap_scroll_bar )
     {
         //SHOW_FLOW( 0, "snap scroll set %d", vm_map_do_for_percentage );
-        w_control_set_value( phantom_settings_window, snap_scroll_bar, vm_map_do_for_percentage, 5 );
+        w_control_set_value( phantom_settings_window, snap_scroll_bar, vm_map_do_for_percentage, 1 );
     }
 }
 
@@ -872,7 +872,7 @@ void create_settings_window( void )
     // -------------------------------------------------------------------
 
 #if 1
-    snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 350, 31, 0, 100, CONTROL_FLAG_ALT_FG );
+    snap_scroll_bar = w_add_scrollbar_ext( w, 20, 20, 350, 31, 0, 100, CONTROL_FLAG_ALT_FG|CONTROL_FLAG_ALT_BG );
     w_control_set_value( w, snap_scroll_bar, -1, -1 ); // Remove bar
 #else
 

@@ -27,6 +27,7 @@
 #include <video/font.h>
 #include <video/internal.h>
 #include <video/control.h>
+#include <video/vops.h>
 
 #include <video/builtin_bitmaps.h>
 
@@ -61,7 +62,7 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
     //ctl_paint_bg( w, cc );    
 
     {
-    int alt_bg = cc->flags && CONTROL_FLAG_ALT_FG;
+    int alt_bg = cc->flags && CONTROL_FLAG_ALT_BG;
 
     drv_video_bitmap_t *bg_m = alt_bg ? &scrollbar_bed_middle_bmp : &scrollbar_bed_middle_narrow_bmp;
 
@@ -85,7 +86,17 @@ void ctl_scroll_bar_paint(window_handle_t w, control_t *cc )
         if( step_w > bg_m->xsize )
             step_w = bg_m->xsize;
 
-        w_draw_bitmap( w, mid_cur_x, cc->r.y, bg_m ); // wrong, clip x size
+        if(step_w == bg_m->xsize)
+            w_draw_bitmap( w, mid_cur_x, cc->r.y, bg_m ); // wrong, clip x size
+        else
+        {
+            bitmap2bitmap(
+                        w->w_pixel, w->xsize, w->ysize, mid_cur_x, cc->r.y,
+                        bg_m->pixel, bg_m->xsize, bg_m->ysize, 0, 0,
+                        step_w, bg_m->ysize
+                        );            
+        }
+        
 
         bg_mid_w -= step_w;
         mid_cur_x += step_w;
