@@ -2156,12 +2156,12 @@ static rgba_t calc_persistent_pixel_color( int elem, int units_per_pixel );
 
 /**
  * 
- * \brief Generic painter for any allocator using us.
+ * @brief Generic painter for any allocator using us.
  * 
  * Used in debug window.
  * 
- * \param[in] w Window to draw to
- * \param[in] r Rectangle to paint inside
+ * @param[in] w Window to draw to
+ * @param[in] r Rectangle to paint inside
  * 
 **/
 void paint_persistent_memory_map(window_handle_t w, rect_t *r )

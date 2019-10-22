@@ -1,13 +1,13 @@
 #if 0
 
 
-/*!     \file fs/ext2/ext2.c
- *      \brief ext2 file system.
- *      \author
+/*!     @file fs/ext2/ext2.c
+ *      @brief ext2 file system.
+ *      @author
  *              Filippo Brogi
- *      \note Copyright (&copy;) 2003
+ *      @note Copyright (&copy;) 2003
  *              Filippo Brogi
- *      \date Last update:
+ *      @date Last update:
  *              2003-09-30 by Andrea Righi
  *                      init_ext2() now returns a boolean value.\n
  */

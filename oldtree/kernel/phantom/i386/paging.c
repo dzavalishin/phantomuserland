@@ -158,11 +158,11 @@ void phantom_paging_start(void)
 
 #if CONF_DUAL_PAGEMAP
 /**
- * \brief Enable or disable paged mem access. Must be called just 
+ * @brief Enable or disable paged mem access. Must be called just 
  * from t_set_paged_mem() in threads lib, as it saves cr3 state for 
  * thread switch.
  * 
- * \return cr3 value for threads lib to save.
+ * @return cr3 value for threads lib to save.
  * 
 **/
 int32_t arch_switch_pdir( bool paged_mem_enable )

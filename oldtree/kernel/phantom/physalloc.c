@@ -329,13 +329,13 @@ static rgba_t calc_pixel_color( physalloc_t *m, int elem, int units_per_pixel );
 
 /**
  * 
- * \brief Generic painter for any allocator using us.
+ * @brief Generic painter for any allocator using us.
  * 
  * Used in debug window.
  * 
- * \param[in] w Window to draw to
- * \param[in] r Rectangle to paint inside
- * \param[in] m Memory map (allocator state) to paint state of
+ * @param[in] w Window to draw to
+ * @param[in] r Rectangle to paint inside
+ * @param[in] m Memory map (allocator state) to paint state of
  * 
 **/
 void paint_allocator_memory_map(window_handle_t w, rect_t *r, physalloc_t *m )

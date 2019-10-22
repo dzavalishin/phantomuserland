@@ -21,8 +21,8 @@
 
 
 /**
- * \file
- * \brief ACPI video hacks
+ * @file
+ * @brief ACPI video hacks
  */
 
 /*

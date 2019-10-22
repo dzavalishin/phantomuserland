@@ -48,14 +48,14 @@
 static hal_cond_t maq;
 
 /*!
- * \brief Select specified PHY register for reading or writing.
+ * @brief Select specified PHY register for reading or writing.
  *
- * \note NIC interrupts must have been disabled before calling this routine.
+ * @note NIC interrupts must have been disabled before calling this routine.
  *
- * \param reg PHY register number.
- * \param we  Indicates type of access, 1 for write and 0 for read.
+ * @param reg PHY register number.
+ * @param we  Indicates type of access, 1 for write and 0 for read.
  *
- * \return Contents of the PHY interface rgister.
+ * @return Contents of the PHY interface rgister.
  */
 static uint8_t NicPhyRegSelect(phantom_device_t * dev, uint8_t reg, uint8_t we)
 {
@@ -113,13 +113,13 @@ static uint8_t NicPhyRegSelect(phantom_device_t * dev, uint8_t reg, uint8_t we)
 }
 
 /*!
- * \brief Read contents of PHY register.
+ * @brief Read contents of PHY register.
  *
- * \note NIC interrupts must have been disabled before calling this routine.
+ * @note NIC interrupts must have been disabled before calling this routine.
  *
- * \param reg PHY register number.
+ * @param reg PHY register number.
  *
- * \return Contents of the specified register.
+ * @return Contents of the specified register.
  */
 static u_int16_t NicPhyRead(phantom_device_t * dev, uint8_t reg)
 {
@@ -150,12 +150,12 @@ static u_int16_t NicPhyRead(phantom_device_t * dev, uint8_t reg)
 }
 
 /*!
- * \brief Write value to PHY register.
+ * @brief Write value to PHY register.
  *
- * \note NIC interrupts must have been disabled before calling this routine.
+ * @note NIC interrupts must have been disabled before calling this routine.
  *
- * \param reg PHY register number.
- * \param val Value to write.
+ * @param reg PHY register number.
+ * @param val Value to write.
  */
 static void NicPhyWrite(phantom_device_t * dev, uint8_t reg, u_int16_t val)
 {
@@ -187,7 +187,7 @@ static void NicPhyWrite(phantom_device_t * dev, uint8_t reg, u_int16_t val)
 }
 
 /*!
- * \brief Configure the internal PHY.
+ * @brief Configure the internal PHY.
  *
  * Reset the PHY and initiate auto-negotiation.
  */
@@ -274,14 +274,14 @@ static int NicPhyConfig(phantom_device_t * dev)
 }
 
 /*!
- * \brief Wait until MMU is ready.
+ * @brief Wait until MMU is ready.
  *
  * Poll the MMU command register until \ref MMUCR_BUSY
  * is cleared.
  *
- * \param tmo Timeout in milliseconds.
+ * @param tmo Timeout in milliseconds.
  *
- * \return 0 on success or -1 on timeout.
+ * @return 0 on success or -1 on timeout.
  */
 static INLINE int NicMmuWait(phantom_device_t * dev, u_int16_t tmo)
 {
@@ -294,9 +294,9 @@ static INLINE int NicMmuWait(phantom_device_t * dev, u_int16_t tmo)
 }
 
 /*!
- * \brief Reset the Ethernet controller.
+ * @brief Reset the Ethernet controller.
  *
- * \return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 static int NicReset(phantom_device_t * dev)
 {
@@ -345,7 +345,7 @@ static int NicReset(phantom_device_t * dev)
  * should have been disabled when calling this
  * function.
  *
- * \param mac Six byte unique MAC address.
+ * @param mac Six byte unique MAC address.
  */
 static int NicStart(phantom_device_t * dev, CONST uint8_t * mac)
 {
@@ -492,7 +492,7 @@ static void NicRead(phantom_device_t * dev, uint8_t * buf, u_int16_t len)
 }
 
 /*!
- * \brief Fetch the next packet out of the receive ring buffer.
+ * @brief Fetch the next packet out of the receive ring buffer.
  *
  * Nic interrupts must be disabled when calling this funtion.
  *
@@ -563,16 +563,16 @@ static int NicGetPacket( struct phantom_device *dev, void *buf, int len )
 
 #if 0
 /*!
- * \brief Load a packet into the nic's transmit ring buffer.
+ * @brief Load a packet into the nic's transmit ring buffer.
  *
  * Interupts must have been disabled when calling this function.
  *
- * \param nb Network buffer structure containing the packet to be sent.
+ * @param nb Network buffer structure containing the packet to be sent.
  *           The structure must have been allocated by a previous
  *           call NutNetBufAlloc(). This routine will automatically
  *           release the buffer in case of an error.
  *
- * \return 0 on success, -1 in case of any errors. Errors
+ * @return 0 on success, -1 in case of any errors. Errors
  *         will automatically release the network buffer 
  *         structure.
  */
@@ -785,7 +785,7 @@ int LancOutput(NUTDEVICE * dev, NETBUF * nb)
 
 
 /*!
- * \brief Initialize Ethernet hardware.
+ * @brief Initialize Ethernet hardware.
  *
  * Resets the LAN91C111 Ethernet controller, initializes all required 
  * hardware registers and starts a background thread for incoming 
@@ -799,7 +799,7 @@ int LancOutput(NUTDEVICE * dev, NETBUF * nb)
  * before registering the specified device, this function will
  * call NutNetLoadConfig() to get the MAC address.
  *
- * \param dev Identifies the device to initialize.
+ * @param dev Identifies the device to initialize.
  */
 static int LancInit(lanc111_nic_t *nic)
 {
@@ -874,9 +874,9 @@ phantom_device_t * driver_lanc111_probe( int port, int irq, int stage )
     dev->seq_number = seq_number++;
     dev->drv_private = nic;
 
-    //NutEtherInput,              /*!< \brief Routine to pass received data to, if_recv(). */
-    //LancOutput,                 /*!< \brief Driver output routine, if_send(). */
-    //NutEtherOutput              /*!< \brief Media output routine, if_output(). */
+    //NutEtherInput,              /*!< @brief Routine to pass received data to, if_recv(). */
+    //LancOutput,                 /*!< @brief Driver output routine, if_send(). */
+    //NutEtherOutput              /*!< @brief Media output routine, if_output(). */
 
     //dev->dops.read = pcnet32_read;
     //dev->dops.write = pcnet32_write;

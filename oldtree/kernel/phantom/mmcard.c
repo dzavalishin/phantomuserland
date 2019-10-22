@@ -32,12 +32,12 @@
  */
 
 /*!
- * \brief Basic block device driver for multimedia cards.
+ * @brief Basic block device driver for multimedia cards.
  *
  * The driver uses SPI mode, but doesn't include any low level hardware
  * access. This must be provided by some additional routines.
  *
- * \verbatim
+ * @verbatim
  *
  * $Log$
  * Revision 1.15  2009/02/13 14:52:05  haraldkipp
@@ -129,13 +129,13 @@
 #include <hal.h>
 
 /*!
- * \addtogroup xgMmCard
+ * @addtogroup xgMmCard
  */
 /*@{*/
 
 #ifndef MMC_BLOCK_SIZE
 /*!
- * \brief Block size.
+ * @brief Block size.
  *
  * Block size in bytes. Do not change unless you are sure that both, 
  * the file system and the hardware support it.
