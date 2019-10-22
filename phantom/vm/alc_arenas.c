@@ -365,6 +365,17 @@ static persistent_arena_t *alloc_find_arena_by_data_size( size_t size )
 
     }
 
+    // No right size arena, return just biggest one
+    for( i = N_PER_SIZE_ARENAS - 1; i >= 0 ; i-- )
+    {
+        if( 0 == per_size_arena[i].base )
+            continue; // Use next, bigger one
+
+        LOG_FLOW( 1, "Alloc %d bytes: use backup arena %d, flags %x", size, i, per_size_arena[i].flags );
+        return per_size_arena+i;
+    }
+
+
     LOG_ERROR( 0, "Attempt to alloc %d bytes: NO ARENA", size );
     return 0;
 }

@@ -491,6 +491,22 @@ static long used_o[ARENAS][max_stat_size+1];
 static long used_large_o[ARENAS];
 */
 
+struct alloc_anyw {
+    void *found;
+    size_t size;
+};
+
+
+static void try_alloc_anywhere( persistent_arena_t *ap, void *aap )
+{
+    struct alloc_anyw *aa = aap;
+
+    if(aa->found) return;
+
+    aa->found = pool_alloc( aa->size, ap );
+    LOG_FLOW( 1, "size %zd found %p", aa->size, aa->found );
+}
+
 pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned int flags, bool saturated )
 {
     unsigned int size = sizeof(pvm_object_storage_t) + data_area_size;
@@ -507,6 +523,15 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 
     if( data == 0 )
     {
+        struct alloc_anyw aa;
+        aa.size = size;
+        aa.found = 0;
+        
+        alloc_for_all_arenas( try_alloc_anywhere, &aa );
+
+        data = aa.found;
+        if( data != 0 )
+            goto found;
         /*
         int i;
         // Try any pool now
