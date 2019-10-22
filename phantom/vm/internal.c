@@ -336,7 +336,7 @@ struct internal_class pvm_internal_classes[] =
         PVM_ROOT_OBJECT_UDP_CLASS,
         IINIT(tcp),
         pvm_gc_finalizer_udp,
-        0, // no restart func
+        pvm_restart_udp,
         sizeof(struct data_area_4_udp),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
