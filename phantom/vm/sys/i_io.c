@@ -29,6 +29,10 @@
 
 #include <kernel/vm.h>
 #include <kernel/snap_sync.h>
+#include <kunix.h>
+
+#include <sys/fcntl.h>
+
 
 static int debug_print = 0;
 
@@ -121,9 +125,9 @@ static int io_15_hashcode( pvm_object_t me, pvm_object_t *ret, struct data_area_
 
 
 
-static int io_do_open()
+static int io_do_open(struct data_area_4_io *da)
 {
-    char fn[MAX_FILENAME_LEN];
+    char fn[MAX_FILENAME_LEN]; 
 
     strlcpy( fn, pvm_get_str_data(da->name), min( sizeof(fn), pvm_get_str_len(da->name)) );
 
@@ -144,14 +148,14 @@ static int io_8_open( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thr
     struct data_area_4_io *da = pvm_object_da( me, io );
 
     CHECK_PARAM_COUNT(1);
-    pvm_object_t fname = arg[0];
+    pvm_object_t fname = args[0];
 
     ASSERT_STRING( fname );
 
     if(! pvm_is_null(da->name)) SYS_FREE_O(da->name);
     da->name = fname;
 
-    int rc = io_do_open();
+    int rc = io_do_open(da);
 
     SYSCALL_RETURN_INT(rc);
 }
@@ -163,7 +167,7 @@ static int io_8_open( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thr
 static int io_9_close( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    struct data_area_4_io *meda = pvm_object_da( me, io );
+    struct data_area_4_io *da = pvm_object_da( me, io );
 
     k_close( da->fd ); // TODO err check
 
@@ -188,7 +192,7 @@ static int io_10_read( pvm_object_t me, pvm_object_t *ret, struct data_area_4_th
 
     CHECK_PARAM_COUNT(0);
 
-    int len = AS_INT(arg[0]);
+    int len = AS_INT(args[0]);
     int nread = 0;
 
     char buf[len];
@@ -196,7 +200,7 @@ static int io_10_read( pvm_object_t me, pvm_object_t *ret, struct data_area_4_th
     SHOW_FLOW( 1, "read %d", len );
 
     vm_unlock_persistent_memory();
-    e =  k_read( &nread, da->fd, buf, len );
+    int e =  k_read( &nread, da->fd, buf, len );
     vm_lock_persistent_memory();
 
     if( e )
@@ -259,7 +263,7 @@ static int io_11_write( pvm_object_t me, pvm_object_t *ret, struct data_area_4_t
 
     CHECK_PARAM_COUNT(1);
     pvm_object_t arg = args[0];
-    ASSERT_SRING(arg);
+    ASSERT_STRING(arg);
 
     int iret;
 
@@ -270,7 +274,7 @@ static int io_11_write( pvm_object_t me, pvm_object_t *ret, struct data_area_4_t
     // TODO add unlock pers mem and make k_write to be pers mem friendly
     // and lock/unlock on access
 
-    int e =  k_write( &nwritten, vp->fd, data, len );
+    int e =  k_write( &nwritten, da->fd, data, len );
 
     if( !e && (nwritten >= 0) )
         iret = nwritten;
@@ -399,8 +403,7 @@ static int io_14_reset( pvm_object_t me, pvm_object_t *ret, struct data_area_4_t
 static int io_16_seek( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    struct data_area_4_io *meda = pvm_object_da( me, io );
-    (void) meda;
+    struct data_area_4_io *da = pvm_object_da( me, io );
 
     CHECK_PARAM_COUNT(1);
 
@@ -410,7 +413,7 @@ static int io_16_seek( pvm_object_t me, pvm_object_t *ret, struct data_area_4_th
     int opos;
 
     SHOW_FLOW( 1, "seek %d", seek_pos );
-    e = k_seek( &opos, vp->fd, seek_pos, seek_from );
+    int e = k_seek( &opos, da->fd, seek_pos, seek_from );
 
     if( e )
     {
@@ -493,7 +496,7 @@ void pvm_restart_io( pvm_object_t o )
     if(!pvm_is_null(da->name))
     {
         LOG_FLOW0( 1, "restarting IO" );
-        io_do_open();
+        io_do_open(da);
     }
 
 }

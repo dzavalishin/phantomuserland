@@ -26,6 +26,9 @@
 #include <kernel/net.h>
 #include <kernel/json.h>
 
+#include <kernel/profile.h>
+#include <kernel/stats.h>
+
 #include <errno.h>
 
 

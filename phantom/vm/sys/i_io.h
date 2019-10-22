@@ -2,6 +2,7 @@
 #define _I_IO
 
 
+#define MAX_FILENAME_LEN 128
 
 struct data_area_4_io
 {

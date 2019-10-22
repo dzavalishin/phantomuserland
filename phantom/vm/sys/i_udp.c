@@ -75,7 +75,7 @@ static int si_udp_sendto_25( pvm_object_t me, pvm_object_t *ret, struct data_are
     i4sockaddr toaddr;
 
     toaddr.port = AS_INT(args[2]);
-    NETADDR_TO_IPV4(toaddr->addr) = AS_INT(args[1]);
+    NETADDR_TO_IPV4(toaddr.addr) = AS_INT(args[1]);
     pvm_object_t buf = args[0];
 
     void *data;
@@ -129,18 +129,20 @@ static int si_udp_recv_21( pvm_object_t me, pvm_object_t *ret, struct data_area_
 
 static int si_udp_recvfrom_23( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
-    (void) me;
-    //struct data_area_4_udp      *da = pvm_data_area( me, udp );
+    struct data_area_4_udp      *da = pvm_data_area( me, udp );
 
     DEBUG_INFO;
     CHECK_PARAM_COUNT(2);
 
-    i4sockaddr toaddr;
+    i4sockaddr fromaddr;
 
     fromaddr.port = AS_INT(args[1]);
-    NETADDR_TO_IPV4(fromaddr->addr) = AS_INT(args[0]);
+    NETADDR_TO_IPV4(fromaddr.addr) = AS_INT(args[0]);
 
     char tbuf[20148];
+
+    int flags = 0; 
+    bigtime_t timeout = 0;
 
     vm_unlock_persistent_memory();
     // TODO rewrite TCP stack copyout to access user memory and take lock
@@ -149,7 +151,7 @@ static int si_udp_recvfrom_23( pvm_object_t me, pvm_object_t *ret, struct data_a
                      da->udp_endpoint,
                      &tbuf, sizeof(tbuf),
                      &fromaddr,
-                     int flags, bigtime_t timeout)
+                     flags, timeout);
 
     vm_lock_persistent_memory();
 
@@ -282,7 +284,6 @@ void pvm_gc_finalizer_udp( pvm_object_t  os )
 void pvm_restart_udp( pvm_object_t o )
 {
     struct data_area_4_udp *da = pvm_object_da( o, udp );
-    int rc = 0;
 
     int rc = udp_open( &da->udp_endpoint );
     if( rc )
