@@ -115,7 +115,8 @@ void run_gc()
     // First pass - tree walk, mark visited.
     //
     // Root is always used. All other objects, including pvm_root and pvm_root.threads_list, should be reached from root...
-    mark_tree( get_root_object_storage() );
+    mark_tree( find_root_object_storage() );
+    mark_tree( get_pvm_object_space_start() ); // arena objects
 
 
     // Second pass - linear walk to free unused objects.

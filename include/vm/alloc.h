@@ -165,6 +165,7 @@ extern persistent_arena_t * find_arena(unsigned int size, unsigned int flags, bo
 pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned int size);
 void init_free_object_header( pvm_object_storage_t *op, unsigned int size );
 
+void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size );
 
 
 

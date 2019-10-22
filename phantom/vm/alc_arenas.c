@@ -105,15 +105,22 @@ void alloc_for_all_arenas( arena_iterator_t iter, void *arg )
 // Init
 // ------------------------------------------------------------
 
+#define CHECK_TOTAL( total ) if( total < 0 ) panic("total < 0");
+#define ASSIGN_MEMORY( _arena, _curr, _size, _total ) do {  \
+        (_arena)->base = _curr; (_arena)->size = _size; \
+        (_curr) += (_size); (_total) -= (_size); \
+        CHECK_TOTAL(_total); \
+        LOG_FLOW( 1, "Alloc @%p - " __STRING(_arena) , as_curr ); \
+        } while(0)
 
-void alloc_init_arenas( void * _pvm_object_space_start, size_t size )
+void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
 {
     init_per_size_arena_flags();
 
     if( is_object_storage_initialized() )
     {
         // We have snapshot, just find out what's in memory
-        alloc_find_arenas( _pvm_object_space_start, size );
+        alloc_find_arenas( _pvm_object_space_start, o_space_size );
         alloc_print_arenas();
         return;
     }
@@ -121,8 +128,43 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t size )
     // Memory is empty, start fron scratch.
 
     // Decide on arena sizes 
-    // TODO 
-#error write me    
+
+    // - fixed static space
+    // - 1/4 of rest to int/stack/small
+    // - rest is to size based arenas:
+    //   - 1/2 to biggest one
+    //   - 1/2 of rest to next one
+    //   - so on
+
+    void *as_curr = _pvm_object_space_start;
+    ssize_t as_total = o_space_size;
+
+    ASSIGN_MEMORY( &curr_static_arena, as_curr, 4096*1024, as_total ); // TODO make it bigger
+    
+    ASSIGN_MEMORY( &curr_int_arena, as_curr, as_total/10, as_total ); 
+    ASSIGN_MEMORY( &curr_small_arena, as_curr, as_total/10, as_total );
+    ASSIGN_MEMORY( &curr_stack_arena, as_curr, as_total/10, as_total );
+
+    int i;
+    for( i = N_PER_SIZE_ARENAS - 1; i >= 0; i-- )
+    {
+        size_t arena_min_object_size = 0x400 << i; // 1 k byte 
+        size_t arena_n_objects = 1024; // num of objects that can be allocated 
+        size_t arena_bytes = arena_min_object_size * arena_n_objects;
+
+        LOG_FLOW( 1, "Sized arena %d, el size from %zd, want bytes %zd, have %zd",
+                i, arena_min_object_size, arena_bytes, as_total 
+            );
+
+        if( as_total / 2 < arena_bytes )
+        {
+            LOG_FLOW0( 1, "No alloc" );
+            continue;
+        }
+        LOG_FLOW( 1, "Alloc @%p", as_curr );
+        ASSIGN_MEMORY( per_size_arena + i, as_curr, as_total/2, as_total );
+    }
+
     // Create arena header objects in memory
     pvm_alloc_clear_mem();
 }
@@ -311,11 +353,26 @@ persistent_arena_t *find_arena(unsigned int size, unsigned int flags, bool satur
 
 }
 
-/*
+static inline int is_in_arena( persistent_arena_t *a, void *mem )
+{
+    return (mem >= a->base) && (mem < (a->base + a->size));
+}
+
+#define RET_IF_IS( a, mem ) if( is_in_arena( a, mem ) ) return a;
+
 persistent_arena_t * find_arena_by_address(void *memaddr)
 {
+    RET_IF_IS( &curr_int_arena, memaddr );
+    RET_IF_IS( &curr_stack_arena, memaddr );
+    RET_IF_IS( &curr_small_arena, memaddr );
+    RET_IF_IS( &curr_static_arena, memaddr );
 
-}*/
+    int i;
+    for( i = 0; i < N_PER_SIZE_ARENAS; i++ )
+        RET_IF_IS( per_size_arena+i, memaddr );
+    
+    return 0;
+}
 
 static int alloc_is_better_arena( persistent_arena_t *our, persistent_arena_t *src )
 {
@@ -335,7 +392,7 @@ static void alloc_print_arena(persistent_arena_t *a)
 }
 
 static void alloc_print_arenas( void )
-{
+{ // TODO use for_arena
     alloc_print_arena(  &curr_int_arena );
     alloc_print_arena( &curr_stack_arena );
     alloc_print_arena( &curr_small_arena );

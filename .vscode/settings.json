@@ -111,6 +111,12 @@
       "font.h": "c",
       "ui.h": "c",
       "key_event.h": "c",
-      "ctl_private.h": "c"
+      "ctl_private.h": "c",
+      "array": "c",
+      "string_view": "c",
+      "initializer_list": "c",
+      "utility": "c",
+      "*.q1": "c",
+      "*.q2": "c"
     }
   }

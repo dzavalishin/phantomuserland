@@ -203,7 +203,7 @@ static void process_specific_restarts(void)
 
 static void pvm_save_root_objects()
 {
-    pvm_object_storage_t *root = get_root_object_storage();
+    pvm_object_storage_t *root = find_root_object_storage();
 
     assert(root->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
 
@@ -245,7 +245,8 @@ static void pvm_create_root_objects()
 
     // Allocate the very first object
     //pvm_object_t root = get_root_object_storage();
-    pvm_object_t roota = pvm_object_alloc( root_da_size, flags, 1 );
+    //pvm_object_t root = 
+    pvm_object_alloc( root_da_size, flags, 1 );
 
     // and make sure it is really the first
     //assert(root == roota);

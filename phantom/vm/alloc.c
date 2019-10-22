@@ -177,7 +177,7 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
     assert(_pvm_object_space_start != 0);
     assert(size > 0);
 
-    init_arenas(_pvm_object_space_start, size);
+    alloc_init_arenas(_pvm_object_space_start, size);
 
 
     //init_gc();  // here, if needed

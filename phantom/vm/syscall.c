@@ -733,7 +733,7 @@ static int si_thread_14_getOsInterface( pvm_object_t me, pvm_object_t *ret, stru
 {
     (void)me;
     DEBUG_INFO;
-    pvm_object_t root = get_root_object_storage();
+    pvm_object_t root = find_root_object_storage();
     pvm_object_t o = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
     SYSCALL_RETURN( ref_inc_o( o ) );
 }
@@ -1252,7 +1252,7 @@ static int si_bootstrap_17_register_class_loader( pvm_object_t me, pvm_object_t 
     pvm_object_t loader = args[0];
 
     pvm_root.class_loader = loader;
-    pvm_object_storage_t *root = get_root_object_storage();
+    pvm_object_storage_t *root = find_root_object_storage();
     pvm_set_field( root, PVM_ROOT_OBJECT_CLASS_LOADER, pvm_root.class_loader );
     // Don't need do SYS_FREE_O(loader) since we store it
 
@@ -1386,8 +1386,9 @@ static int si_bootstrap_22_set_os_interface( pvm_object_t me, pvm_object_t *ret,
     pvm_root.os_entry = args[0];
 
     ref_saturate_o(pvm_root.os_entry); // make sure refcount is disabled for this object
-    pvm_object_t root = get_root_object_storage();
+    pvm_object_t root = find_root_object_storage();
     pvm_set_field( root, PVM_ROOT_OBJECT_OS_ENTRY, pvm_root.os_entry );
+    
     // No ref dec - we store it.
 
     SYSCALL_RETURN_NOTHING;
