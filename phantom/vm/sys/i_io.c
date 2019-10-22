@@ -121,8 +121,21 @@ static int io_15_hashcode( pvm_object_t me, pvm_object_t *ret, struct data_area_
 
 
 
+static int io_do_open()
+{
+    char fn[MAX_FILENAME_LEN];
 
+    strlcpy( fn, pvm_get_str_data(da->name), min( sizeof(fn), pvm_get_str_len(da->name)) );
 
+    vm_unlock_persistent_memory();
+    errno_t rc = k_open( &da->fd, fn, O_RDWR|O_CREAT, 0666 ); // TODO flags/mode?
+    vm_lock_persistent_memory();
+
+    if( rc )
+        SHOW_ERROR( 1, "open io '%s' rc=%d", fn, rc );
+
+    return rc;
+}
 
 
 static int io_8_open( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
@@ -136,18 +149,9 @@ static int io_8_open( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thr
     ASSERT_STRING( fname );
 
     if(! pvm_is_null(da->name)) SYS_FREE_O(da->name);
-    name = fname;
+    da->name = fname;
 
-    char fn[MAX_FILENAME_LEN];
-
-    strlcpy( fn, pvm_get_str_data(fname), min( sizeof(fn), pvm_get_str_len(fname)) );
-
-    vm_unlock_persistent_memory();
-    errno_t rc = k_open( &da->fd, fn, O_RDWR|O_CREAT, 0666 ); // TODO flags/mode?
-    vm_lock_persistent_memory();
-
-    if( rc )
-        SHOW_ERROR( 1, "connect fio '%s' rc=%d", suffix, rc );
+    int rc = io_do_open();
 
     SYSCALL_RETURN_INT(rc);
 }
@@ -338,7 +342,7 @@ static int io_12_setvar( pvm_object_t me, pvm_object_t *ret, struct data_area_4_
     SYS_FREE_O(var);
     SYS_FREE_O(val);
 
-    LOCKME(meda);
+    LOCKME(meda); // TODO pvm_spinlock!
     // TODO impl
     UNLOCKME(meda);
 
@@ -485,12 +489,11 @@ void pvm_gc_finalizer_io( pvm_object_t  os )
 void pvm_restart_io( pvm_object_t o )
 {
     struct data_area_4_io *da = pvm_object_da( o, io );
-    (void) da;
 
-    //da->connected = 0;
-    //if( da->connected )
+    if(!pvm_is_null(da->name))
     {
-        printf("restarting IO - unimpl!");
+        LOG_FLOW0( 1, "restarting IO" );
+        io_do_open();
     }
 
 }
