@@ -128,19 +128,28 @@ static int io_15_hashcode( pvm_object_t me, pvm_object_t *ret, struct data_area_
 static int io_8_open( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    struct data_area_4_io *meda = pvm_object_da( me, io );
+    struct data_area_4_io *da = pvm_object_da( me, io );
 
     CHECK_PARAM_COUNT(1);
-    (void) meda;
+    pvm_object_t fname = arg[0];
 
-    //int is_reset = AS_INT(args[0]);
+    ASSERT_STRING( fname );
 
-    //LOCKME(meda);
-    //meda->reset = is_reset;
-    //SYSCALL_WAKE_THREAD_UP();
-    //UNLOCKME(meda);
+    if(! pvm_is_null(da->name)) SYS_FREE_O(da->name);
+    name = fname;
 
-    SYSCALL_RETURN_NOTHING;
+    char fn[MAX_FILENAME_LEN];
+
+    strlcpy( fn, pvm_get_str_data(fname), min( sizeof(fn), pvm_get_str_len(fname)) );
+
+    vm_unlock_persistent_memory();
+    errno_t rc = k_open( &da->fd, fn, O_RDWR|O_CREAT, 0666 ); // TODO flags/mode?
+    vm_lock_persistent_memory();
+
+    if( rc )
+        SHOW_ERROR( 1, "connect fio '%s' rc=%d", suffix, rc );
+
+    SYSCALL_RETURN_INT(rc);
 }
 
 
@@ -151,16 +160,8 @@ static int io_9_close( pvm_object_t me, pvm_object_t *ret, struct data_area_4_th
 {
     DEBUG_INFO;
     struct data_area_4_io *meda = pvm_object_da( me, io );
-    (void) meda;
 
-    CHECK_PARAM_COUNT(1);
-
-    //int is_reset = AS_INT(args[0]);
-
-    //LOCKME(meda);
-    //meda->reset = is_reset;
-    //SYSCALL_WAKE_THREAD_UP();
-    //UNLOCKME(meda);
+    k_close( da->fd ); // TODO err check
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -179,30 +180,29 @@ static int io_9_close( pvm_object_t me, pvm_object_t *ret, struct data_area_4_th
 static int io_10_read( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    struct data_area_4_io *meda = pvm_object_da( me, io );
-    (void) meda;
+    struct data_area_4_io *da = pvm_object_da( me, io );
 
     CHECK_PARAM_COUNT(0);
-    /*
-    LOCKME(meda);
 
-    if( meda->in_count <= 0 )
+    int len = AS_INT(arg[0]);
+    int nread = 0;
+
+    char buf[len];
+
+    SHOW_FLOW( 1, "read %d", len );
+
+    vm_unlock_persistent_memory();
+    e =  k_read( &nread, da->fd, buf, len );
+    vm_lock_persistent_memory();
+
+    if( e )
     {
-        UNLOCKME(meda);
-        SYSCALL_RETURN_NOTHING;
+        SHOW_FLOW( 1, "read failed , errno=%d", e );
+        SYSCALL_RETURN_INT(-e);
     }
 
-    pvm_object_t ret = meda->ibuf[0];
-
-    meda->ibuf[0] = meda->ibuf[1];
-    meda->ibuf[1] = meda->ibuf[2];
-    meda->ibuf[2] = meda->ibuf[3];
-    meda->in_count--;
-
-    UNLOCKME(meda);
-    */
-    //SYSCALL_RETURN( ret );
-    SYSCALL_RETURN_NOTHING;
+    SHOW_FLOW( 1, "read %d '%*s'", nread, nread, buf );
+    SYSCALL_RETURN( pvm_create_string_object_binary( buf, nread ) );
 }
 
 
@@ -251,28 +251,33 @@ errno_t io_object_put(pvm_object_t ioo, pvm_object_t data )
 static int io_11_write( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    struct data_area_4_io *meda = pvm_object_da( me, io );
-    (void) meda;
+    struct data_area_4_io *da = pvm_object_da( me, io );
 
     CHECK_PARAM_COUNT(1);
-    /*
-    pvm_object_t him = args[0];
+    pvm_object_t arg = args[0];
+    ASSERT_SRING(arg);
 
-    //SYS_FREE_O(him);
+    int iret;
 
-    LOCKME(meda);
+    int len = pvm_get_str_len(arg);
+    const char *data = (const char *)pvm_get_str_data(arg);
+    int nwritten = 0;
 
-    if( meda->out_count >= IO_DA_BUFSIZE )
-    {
-        UNLOCKME(meda);
-        SYSCALL_RETURN( pvm_create_int_object( 1 ) );
-    }
+    // TODO add unlock pers mem and make k_write to be pers mem friendly
+    // and lock/unlock on access
 
-    meda->obuf[meda->out_count++] = him;
-    UNLOCKME(meda);
-    */
+    int e =  k_write( &nwritten, vp->fd, data, len );
 
-    SYSCALL_RETURN( pvm_create_int_object( 0 ) );
+    if( !e && (nwritten >= 0) )
+        iret = nwritten;
+    else
+        iret = -e;
+    
+    SHOW_FLOW( 1, "write %d '%*s'", nwritten, len, data );
+
+    SYS_FREE_O(arg);
+
+    SYSCALL_RETURN( pvm_create_int_object( iret ) );
 }
 
 
@@ -387,20 +392,46 @@ static int io_14_reset( pvm_object_t me, pvm_object_t *ret, struct data_area_4_t
 
 
 
+static int io_16_seek( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    DEBUG_INFO;
+    struct data_area_4_io *meda = pvm_object_da( me, io );
+    (void) meda;
+
+    CHECK_PARAM_COUNT(1);
+
+    int seek_from = AS_INT(args[1]);
+    int seek_pos  = AS_INT(args[0]);
+
+    int opos;
+
+    SHOW_FLOW( 1, "seek %d", seek_pos );
+    e = k_seek( &opos, vp->fd, seek_pos, seek_from );
+
+    if( e )
+    {
+        SHOW_FLOW( 1, "seek failed , errno=%d", e );
+        SYSCALL_RETURN_INT(-e);
+    }
+
+    SHOW_FLOW( 1, "seek opos %d", opos );
+    SYSCALL_RETURN_INT(opos);
+}
 
 
-
-syscall_func_t  syscall_table_4_io[16] =
+syscall_func_t  syscall_table_4_io[17] =
 {
     &io_0_construct,                &io_1_destruct,
-    &si_void_2_class,                    &io_3_clone,
+    &si_void_2_class,               &io_3_clone,
     &io_4_equals,                   &io_5_tostring,
     &io_6_toXML,                    &io_7_fromXML,
     // 8
     &io_8_open,                     &io_9_close,
     &io_10_read,                    &io_11_write,
     &io_12_setvar,                  &io_13_getvar,
-    &io_14_reset,                   &io_15_hashcode
+    &io_14_reset,                   &io_15_hashcode,
+    // 16
+    &io_16_seek,
 
 };
 DECLARE_SIZE(io);
