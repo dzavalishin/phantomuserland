@@ -114,6 +114,7 @@ void alloc_for_all_arenas( arena_iterator_t iter, void *arg )
         LOG_FLOW( 1, "Alloc @%p - " __STRING(_arena) , as_curr ); \
         } while(0)
 
+
 void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
 {
     init_per_size_arena_flags();
@@ -262,9 +263,18 @@ static void alloc_clear_arena( persistent_arena_t *ap, void *arg)
 
     ref_saturate_o( arena_object );
 
+    arena_object->_flags |= PHANTOM_OBJECT_STORAGE_FLAG_IS_ARENA;
+    arena_object->_da_size = sizeof(struct data_area_4_arena);
+
     persistent_arena_t *ada = (persistent_arena_t *)&(arena_object->da);
 
     *ada = *ap; // Init
+    
+    ada->arena_start_marker = PVM_ARENA_START_MARKER;
+    // TODO use
+    
+    //ada->largest
+    //ada->free
 
     // TODO check fields - some personal init? mutex!
 }

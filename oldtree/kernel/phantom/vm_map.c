@@ -1393,6 +1393,8 @@ static void wait_commit_snap(vm_page *p)
 // TODO if we page out page, which is unchanged since THE SNAP and page fault comes (somebody wants to write to that
 // page) we need to do COW too!
 
+extern int pvm_spinlock_lock_count;
+
 void do_snapshot(void)
 {
     int			  enabled; // interrupts
@@ -1436,7 +1438,9 @@ void do_snapshot(void)
 
     // START!
     is_in_snapshot_process = 1;
-
+    if( pvm_spinlock_lock_count )
+        panic("pvm_spinlock_lock_count not zero in snapshot!\n")
+        //lprintf("pvm_spinlock_lock_count not zero in snapshot!\n")
     // Terrible and mighty step - ALL the pages will be marked
     // as not snapped and access to them will be locked here, so
     // that page faults will bring them to us on write attempts and we'll

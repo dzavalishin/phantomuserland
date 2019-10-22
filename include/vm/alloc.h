@@ -129,6 +129,15 @@ void pvm_collapse_free(pvm_object_storage_t *op);
 // TODO add name
 // TODO add next arena ptr? for GC to not to collect? Or check by flag? Modify GC!
 
+/**
+ * 
+ * @brief Arena descriptor - object DA
+ * 
+ * Data Area of the very first object in arena.
+ * 
+ * @note Object header must have PHANTOM_OBJECT_STORAGE_FLAG_IS_ARENA flag
+ * 
+**/
 struct data_area_4_arena
 {
     int32_t                             arena_start_marker;
@@ -141,12 +150,17 @@ struct data_area_4_arena
     size_t                              free;     //< total free mem here - UNUSED
     size_t                              largest;  //< largest free space here - UNUSED
 
-    pvm_object_t                        owner;    //< If thread local arena - pointer to thread? No - will keep thread from being freed - UNUSED
 
     u_int32_t                           flags;    //< type of arena - int, permanent, small, large, etc
 
     // Must be recreated on OS restart
     hal_mutex_t                         mutex;
+
+    /// If thread local arena - pointer to thread? No - will keep thread from being freed - UNUSED
+    pvm_object_t                        owner;    
+
+    /// Previos arena of same type - used on additional arena allocation. Example is list of thread local arenas.
+    pvm_object_t                        prev_arena; 
 };
 
 typedef struct data_area_4_arena persistent_arena_t;

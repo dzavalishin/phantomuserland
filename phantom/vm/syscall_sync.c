@@ -50,6 +50,8 @@ static int debug_print = 0;
 //
 // --------- spinlock -------------------------------------------------------
 
+int pvm_spinlock_lock_count = 0;
+
 void pvm_spin_init( pvm_spinlock_t *ps )
 {
     assert( ps != 0 );
@@ -70,6 +72,7 @@ void pvm_spin_lock( pvm_spinlock_t *ps )
         hal_wired_spin_lock(sl);
         was_locked = *additional_lock;
         *additional_lock = 1;
+        ATOMIC_ADD_AND_FETCH( &pvm_spinlock_lock_count, 1 );
         hal_wired_spin_unlock(sl);
 
         if(!was_locked) break;
@@ -91,6 +94,7 @@ void pvm_spin_unlock( pvm_spinlock_t *ps )
     hal_wired_spin_lock(sl);
     assert(*additional_lock);
     *additional_lock = 0;
+    ATOMIC_ADD_AND_FETCH( &pvm_spinlock_lock_count, -1 );
     hal_wired_spin_unlock(sl);
 }
 
