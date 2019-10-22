@@ -75,6 +75,46 @@ trunk/tools/plc              - phantom language compiler / java bytecode transla
 
 ## Go on and take part ##
 
+### Kernel and compiler
+
+Creating an unusual operating system is a very interesting thing to do. There are challenges on each and every step.
+Just to start with:
+
+* Persistent memory garbage collector. Suppose we're in a 64 bit world and persistent memory size is some 20 Tb. Current GC is incomplete.
+* If we touch memory too much snapshot engine will spend a lot of IO to store difference. Fast and good allocator can reduce IO load. There is one, but it could be better.
+* There's need for a fast alpha-blending image transfer (bitblt) code.
+* Unix subsystem is very limited. No signal delivery, for example. It waits for one who will implement missing parts.
+* It is theoretically possible to implement a persistent Unix environment. Quite challenging.
+* Drivers - current set is minimal, AHCI driver is not complete, USB needs optimization, some more must be ported or written.
+* It would be interesting to add Python frontend to Phantom compiler. Are you a Python fan? Can help?
+* Phantom bytecode supports classes, inheritance, but does not support interfaces. It is not really trivial to implement interfaces in an efficient way.
+* Even simple JIT engine will help a lot.
+* TCP stack is not ideal and needs someone to lend a hand.
+
+### Porting Phantom
+
+Ports to ARM and MIPS were started, but long time no progress. I look for one who can help with that.
+
+Bringing it to 64 bit Intel/AMD is actual task too. 
+
+Current kernel is basically SMP ready, but SMP support is not finished completely.
+
+### Userland
+
+There's need to implement demo applications for Phantom - even simple ones will help.
+
+More serious task is to bring in some simple HTML renderer and get basic browser working.
+
+### Build and CI
+
+* There is a need for a good CI setup which can run system in a specific configurations and following special scenarios.
+* Bytecode engine needs to be tested with random garbage execution.
+* It is a good idea to keep set of tools that for sure build correct OS kernel. cc/binutils/qemu, etc.
+* Need setup to build ISO image of system to run on different machines and emulators.
+* There is real need to do CI on a real hadrware. Need corresponding scripts.
+
+If you feel interested to take part in a project, please leave me a note. An issue on a GitHub is ideal communications channel.
+
 [Issues to start with](https://github.com/dzavalishin/phantomuserland/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
 ## Badges ##
