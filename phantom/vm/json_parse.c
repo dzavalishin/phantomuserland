@@ -32,16 +32,16 @@
 
 /**
  *
- * \brief Print JSON-style object tree. 
+ * @brief Print JSON-style object tree. 
  *
  * Can process array and directory as containers, others will be just printed as
  * leafs.
  * 
- * \param[in]  key        Name to print as header
- * \param[in]  o          Root of tree to print
- * \param[in]  tab        Initial shift
+ * @param[in]  key        Name to print as header
+ * @param[in]  o          Root of tree to print
+ * @param[in]  tab        Initial shift
  *
- * \return 0 if success.
+ * @return 0 if success.
  *
  * See also:
  * 
@@ -107,14 +107,14 @@ errno_t pvm_print_json_ext( pvm_object_t key, pvm_object_t o, int tab )
 
 /**
  *
- * \brief Print JSON-style object tree. 
+ * @brief Print JSON-style object tree. 
  *
  * Can process array and directory as containers, others will be just printed as
  * leafs.
  * 
- * \param[in]  root        Root of tree to print
+ * @param[in]  root        Root of tree to print
  *
- * \return 0 if success.
+ * @return 0 if success.
  *
  * 
 **/
@@ -134,13 +134,13 @@ errno_t pvm_print_json( pvm_object_t root )
 
 /**
  *
- * \brief Build JSON-style object tree from output of C JSON parser.
+ * @brief Build JSON-style object tree from output of C JSON parser.
  *
- * \param[in]  name       Name to print as header
- * \param[in]  jv         Root of input JSON tree
- * \param[in]  tab        Initial shift
+ * @param[in]  name       Name to print as header
+ * @param[in]  jv         Root of input JSON tree
+ * @param[in]  tab        Initial shift
  *
- * \return Corresponding JSON as tree of objects.
+ * @return Corresponding JSON as tree of objects.
  * 
 **/
 pvm_object_t pvm_convert_json_to_objects_ext( const char *name, json_value *jv, int tab )
@@ -218,12 +218,12 @@ pvm_object_t pvm_convert_json_to_objects_ext( const char *name, json_value *jv, 
 
 /**
  *
- * \brief Parse JSON string and build JSON-style object tree from output of C JSON parser.
+ * @brief Parse JSON string and build JSON-style object tree from output of C JSON parser.
  *
- * \param[in]  json       JSON string
- * \param[in]  json_len   String length
+ * @param[in]  json       JSON string
+ * @param[in]  json_len   String length
  *
- * \return Corresponding JSON as tree of objects.
+ * @return Corresponding JSON as tree of objects.
  * 
 **/
 pvm_object_t pvm_json_parse_ext( const char *json, size_t json_len )
@@ -236,11 +236,11 @@ pvm_object_t pvm_json_parse_ext( const char *json, size_t json_len )
 
 /**
  *
- * \brief Parse JSON string and build JSON-style object tree from output of C JSON parser.
+ * @brief Parse JSON string and build JSON-style object tree from output of C JSON parser.
  *
- * \param[in]  json       JSON string
+ * @param[in]  json       JSON string
  *
- * \return Corresponding JSON as tree of objects.
+ * @return Corresponding JSON as tree of objects.
  * 
 **/
 pvm_object_t pvm_json_parse( const char *json )
@@ -251,14 +251,14 @@ pvm_object_t pvm_json_parse( const char *json )
 
 /**
  *
- * \brief Build JSON-style object tree from output of C JSON parser.
+ * @brief Build JSON-style object tree from output of C JSON parser.
  *
  * Can process array and directory as containers, others will be just printed as
  * leafs.
  * 
- * \param[in]  jv         Root of input JSON tree
+ * @param[in]  jv         Root of input JSON tree
  *
- * \return Corresponding JSON as tree of objects.
+ * @return Corresponding JSON as tree of objects.
  * 
 **/
 pvm_object_t pvm_convert_json_to_objects( json_value *jv )

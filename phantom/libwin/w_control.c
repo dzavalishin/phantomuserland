@@ -120,7 +120,7 @@ void ctl_paint_bg( window_handle_t win, control_t *cc )
     }
 }
 
-/// \return X shift for text
+/// @return X shift for text
 int ctl_paint_icon( window_handle_t win, control_t *cc )
 {
     if(!cc->icon_image) return 0;
@@ -420,7 +420,7 @@ void w_repaint_controls(window_handle_t w)
  * 
  * Seems to be unused. 
  * 
- * \todo check me
+ * @todo check me
  * 
  * 
 **/
@@ -478,9 +478,9 @@ static errno_t do_pass_focus(pool_t *pool, void *el, pool_handle_t handle, void 
  * 
  * Deliver event to controls. Mouse and focus loss events accepted.
  * 
- * \param[in] e Event to deliver.
+ * @param[in] e Event to deliver.
  * 
- * \return True (non-zero) if event is consumed, and should not be delivered to containing window and other controls.
+ * @return True (non-zero) if event is consumed, and should not be delivered to containing window and other controls.
  * 
 **/
 int w_event_to_controls( window_handle_t w, ui_event_t *e )

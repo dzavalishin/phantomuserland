@@ -76,15 +76,15 @@ static int hdir_cmp_keys( const char *ikey, size_t ikey_len, pvm_object_t okey )
 
 /**
  *
- * \brief Lookup object in hash table.
+ * @brief Lookup object in hash table.
  *
- * \param[in]  dir          Directory (hash table) to lookup in
- * \param[in]  ikey         Key to lookup for (string)
- * \param[in]  i_key_len    Key length
- * \param[out] out          Object found (returned even if delete requested)
- * \param[in]  delete_found Delete key/value from hash
+ * @param[in]  dir          Directory (hash table) to lookup in
+ * @param[in]  ikey         Key to lookup for (string)
+ * @param[in]  i_key_len    Key length
+ * @param[out] out          Object found (returned even if delete requested)
+ * @param[in]  delete_found Delete key/value from hash
  * 
- * \return 0 if found, ENOENT if not found
+ * @return 0 if found, ENOENT if not found
  *
  * Actually implements '.internal.directory' internal class
  *

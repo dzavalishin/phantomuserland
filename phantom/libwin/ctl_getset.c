@@ -92,8 +92,8 @@ void w_control_set_children( window_handle_t w, control_handle_t ch, window_hand
  * 
  * Change flags for control.
  * 
- * \param[in] toSet Flags to set
- * \param[in] toReset Flags to clear
+ * @param[in] toSet Flags to set
+ * @param[in] toReset Flags to clear
  * 
 **/
 void w_control_set_flags( window_handle_t w, control_handle_t ch, int toSet, int toReset )
@@ -244,7 +244,7 @@ void w_control_get_state( window_handle_t w, control_handle_t ch, int *ret ) //<
 
 /**
  * 
- * \brief Set callback.
+ * @brief Set callback.
  * 
  * Will be called on control state change or, if control has flags:
  * 

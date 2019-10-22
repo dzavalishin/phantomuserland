@@ -192,8 +192,8 @@ void phantom_interrupt_ack(unsigned int n)
 }
 
 
-//! \brief Disable an IRQ line.
-//! \param irq_no The IRQ line to disable.
+//! @brief Disable an IRQ line.
+//! @param irq_no The IRQ line to disable.
 void phantom_pic_disable_irq(unsigned int irq_no)
 {
     u_int8_t mask;
@@ -220,8 +220,8 @@ void phantom_pic_disable_irq(unsigned int irq_no)
 
 
 
-//! \brief Enable an IRQ line.
-//! \param irq_no The IRQ line to enable.
+//! @brief Enable an IRQ line.
+//! @param irq_no The IRQ line to enable.
 void phantom_pic_enable_irq(unsigned int irq_no)
 {
     u_int8_t mask;
@@ -257,8 +257,8 @@ void phantom_pic_enable_irq(unsigned int irq_no)
 
 
 
-//! \brief Check if an IRQ is pending.
-//! \param irq_no The IRQ to check.
+//! @brief Check if an IRQ is pending.
+//! @param irq_no The IRQ to check.
 int phantom_pic_is_irq_pending(unsigned int irq_no)
 {
     assert( irq_no < NINTR );

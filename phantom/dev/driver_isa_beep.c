@@ -12,7 +12,7 @@
 
 #ifdef ARCH_ia32
 /*!
- *      \brief System speaker driver.
+ *      @brief System speaker driver.
  *      \author Mostly based on driver from Andrea Righi <drizzt@inwind.it>
  */
 
@@ -49,8 +49,8 @@ static timedcall_t e;
 
 
 
-//! \brief Start a sound using the speaker.
-//! \param frequency The frequency of the sound.
+//! @brief Start a sound using the speaker.
+//! @param frequency The frequency of the sound.
 void sound(u_int32_t frequency)
 {
     int ie;
@@ -71,7 +71,7 @@ void sound(u_int32_t frequency)
     if(ie) hal_sti();
 }
 
-//! \brief Turn off the speaker.
+//! @brief Turn off the speaker.
 void nosound()
 {
     int ie = hal_save_cli();
@@ -83,7 +83,7 @@ void nosound()
 
 static int freq = DRV_BEEP_FREQ;
 
-//! \brief Play a system beep.
+//! @brief Play a system beep.
 void beep()
 {
     sound(freq);

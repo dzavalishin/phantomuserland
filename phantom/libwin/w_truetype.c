@@ -324,8 +324,8 @@ void w_ttfont_draw_string(
 
 /**
  * 
- * \param[out] find_x Return x coordinate for the start (left margin) of given character in a string we print
- * \param[in] find_for_char Position in str of character we look x coordinate for
+ * @param[out] find_x Return x coordinate for the start (left margin) of given character in a string we print
+ * @param[in] find_for_char Position in str of character we look x coordinate for
  * 
  * Coordinate returned in find_x is window relative, it includes win_x parameter value.
  * 
@@ -459,7 +459,7 @@ void w_ttfont_draw_string_ext(
 
 /**
  * 
- * \brief Calculate bounding rectangle for string.
+ * @brief Calculate bounding rectangle for string.
  * 
  * 
  * 
@@ -731,7 +731,7 @@ void w_ttfont_dismiss_string_w(
 
 /**
  * 
- * \brief Calculate bounding rectangle for string.
+ * @brief Calculate bounding rectangle for string.
  * 
  * NB! Calcs for current state, strLen is checked just for zero.
  * 
@@ -767,9 +767,9 @@ void w_ttfont_string_size_w(
  * 
  * Find char by x pos (mouse click to char index)
  * 
- * \param[in] xpos - x coord position (from the beginning of string)
+ * @param[in] xpos - x coord position (from the beginning of string)
  * 
- * \returns Index of char or -1 for error.
+ * @returns Index of char or -1 for error.
  * 
 **/
 int w_ttfont_char_by_x_w(

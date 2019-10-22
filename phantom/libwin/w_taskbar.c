@@ -317,8 +317,8 @@ static void task_bar_reorder_buttons( void )
 /**
  * 
  * 
- * \param[in] w Window that was added to task bar, main application window.
- * \param[in] m Context menu window to add to task bar icon of w
+ * @param[in] w Window that was added to task bar, main application window.
+ * @param[in] m Context menu window to add to task bar icon of w
  * 
 **/
 void w_set_task_bar_menu( window_handle_t w, window_handle_t m )

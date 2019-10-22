@@ -264,10 +264,10 @@ static void pvm_exec_do_return(struct data_area_4_thread *da)
 
 /**
  *
- * \brief Virtual machine throw.
+ * @brief Virtual machine throw.
  *
- * \param[in]  da         Current thread data area
- * \param[in]  thrown_obj Object to throw
+ * @param[in]  da         Current thread data area
+ * @param[in]  thrown_obj Object to throw
  *
  * Must be called in main interpreter loop right before 'break' of main switch,
  * i.e. right before next instruction execution.
@@ -312,11 +312,11 @@ static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t
 
 /**
  *
- * \brief Check obect type
+ * @brief Check obect type
  *
- * \param[in]  da         Current thread data area
- * \param[in]  obj        Object to check
- * \param[in]  type       Class object to check type against
+ * @param[in]  da         Current thread data area
+ * @param[in]  obj        Object to check
+ * @param[in]  type       Class object to check type against
  *
  * Must be called in main interpreter loop right before 'break' of main switch,
  * i.e. right before next instruction execution.
@@ -325,7 +325,7 @@ static void pvm_exec_do_throw_object(struct data_area_4_thread *da, pvm_object_t
  * (temporarily throws string) and return non-zero. Caller must abort instruction
  * execution and break.
  *
- * \return 0 if type is ok, throw and return non-zero otherwise.
+ * @return 0 if type is ok, throw and return non-zero otherwise.
  *
  * **Example**
  * 
@@ -354,10 +354,10 @@ static void pvm_exec_do_throw_pop(struct data_area_4_thread *da)
 
 /**
  *
- * \brief Exec system call instruction.
+ * @brief Exec system call instruction.
  *
- * \param[in]  da            Current thread data area
- * \param[in]  syscall_index Number of syscall to execute,
+ * @param[in]  da            Current thread data area
+ * @param[in]  syscall_index Number of syscall to execute,
  *
  * Similar to usual methid call, but executes native code.
  *
@@ -440,14 +440,14 @@ pvm_exec_sys( struct data_area_4_thread *da, unsigned int syscall_index )
 
 /**
  *
- * \brief Init call frame data area.
+ * @brief Init call frame data area.
  *
- * \param[in]  da            Current thread data area
- * \param[in]  cfda          New call frame to fill
- * \param[in]  method_index  Ordinal of method we call
- * \param[in]  n_param       Number of parameters to copy on new stack
- * \param[in]  new_this      This for called method
- * \param[in]  class_ref     If not null - we do static call. If null - will do VMT call.
+ * @param[in]  da            Current thread data area
+ * @param[in]  cfda          New call frame to fill
+ * @param[in]  method_index  Ordinal of method we call
+ * @param[in]  n_param       Number of parameters to copy on new stack
+ * @param[in]  new_this      This for called method
+ * @param[in]  class_ref     If not null - we do static call. If null - will do VMT call.
  *
  * Fill new call stack data area with correct values.
  *
@@ -538,13 +538,13 @@ static void init_cfda(
 
 /**
  *
- * \brief Execute (dynamic, VMT based) call instruction.
+ * @brief Execute (dynamic, VMT based) call instruction.
  *
- * \param[in]  da              Current thread data area
- * \param[in]  method_index    Ordinal of method we call
- * \param[in]  n_param         Number of parameters to copy on new stack
- * \param[in]  do_optimize_ret Optimize stack if next instuction is opcode_ret
- * \param[in]  new_this        This for called method
+ * @param[in]  da              Current thread data area
+ * @param[in]  method_index    Ordinal of method we call
+ * @param[in]  n_param         Number of parameters to copy on new stack
+ * @param[in]  do_optimize_ret Optimize stack if next instuction is opcode_ret
+ * @param[in]  new_this        This for called method
  *
  * Create new call frame, init it.
  *
@@ -552,7 +552,7 @@ static void init_cfda(
  *
  * Set new call frame as current.
  *
- * \todo Possibly do not even create/free call frame, just reuse? Criteria?
+ * @todo Possibly do not even create/free call frame, just reuse? Criteria?
  *
 **/
 
@@ -625,19 +625,19 @@ static void pvm_exec_call( struct data_area_4_thread *da, unsigned int method_in
 
 /**
  *
- * \brief Execute static call instruction.
+ * @brief Execute static call instruction.
  *
- * \param[in]  da              Current thread data area
- * \param[in]  method_ordinal  Ordinal of method we call
- * \param[in]  n_param         Number of parameters to copy on new stack
- * \param[in]  class_ref       Class to look up method in (we do static call, not use 'this')
- * \param[in]  new_this        This for called method
+ * @param[in]  da              Current thread data area
+ * @param[in]  method_ordinal  Ordinal of method we call
+ * @param[in]  n_param         Number of parameters to copy on new stack
+ * @param[in]  class_ref       Class to look up method in (we do static call, not use 'this')
+ * @param[in]  new_this        This for called method
  *
  * Create new call frame, init it.
  *
  * Set new call frame as current.
  *
- * \todo Combine this and prev funcs where possible
+ * @todo Combine this and prev funcs where possible
  *
 **/
 
@@ -674,13 +674,13 @@ pvm_exec_static_call(
 
 /** UNTESTED, UNUSED
  *
- * \brief Simulate call - used to call methods on behalf of current thread.
+ * @brief Simulate call - used to call methods on behalf of current thread.
  *
- * \param[in]  da              Current thread data area
- * \param[in]  new_this        This for called method
- * \param[in]  method_ordinal  Ordinal of method we call
- * \param[in]  n_args          Number of parameters 
- * \param[in]  args            Parameters
+ * @param[in]  da              Current thread data area
+ * @param[in]  new_this        This for called method
+ * @param[in]  method_ordinal  Ordinal of method we call
+ * @param[in]  n_args          Number of parameters 
+ * @param[in]  args            Parameters
  *
  * Create new call frame, init it.
  *
@@ -2476,13 +2476,13 @@ static int catch_comparator( void *backptr, struct pvm_exception_handler *test )
 
 /**
  *
- * \brief Find catch for given thrown object.
+ * @brief Find catch for given thrown object.
  *
- * \param[in]  stack        Exceptions stack to look for catcher on
- * \param[out] jump_to      IP address to jump to
- * \param[in]  thrown_obj   Object that is being thrown, class of this object is checked against catcher class
+ * @param[in]  stack        Exceptions stack to look for catcher on
+ * @param[out] jump_to      IP address to jump to
+ * @param[in]  thrown_obj   Object that is being thrown, class of this object is checked against catcher class
  *
- * \return Nonzero if catcher found.
+ * @return Nonzero if catcher found.
  *
 **/
 
@@ -2525,18 +2525,18 @@ void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, pvm_object_t  code )
 
 /**
  *
- * \brief Find class object by class name.
+ * @brief Find class object by class name.
  *
- * \param[in]  name        Name of class to find,
+ * @param[in]  name        Name of class to find,
  *
- * \return Class obect if class is found and null object otherwise.
+ * @return Class obect if class is found and null object otherwise.
  *
- * \todo Must have some persistent cache to lookup. Currently can load class twice on
+ * @todo Must have some persistent cache to lookup. Currently can load class twice on
  *       system start. Cache is implemented in userland and can be absent in early boot time.
  *       See syscall.c pvm_class_cache_* funcs implementing such cache.
  *       See also pvm_root.class_dir
  *
- * \todo We can speed up class load if we use cache here directly.
+ * @todo We can speed up class load if we use cache here directly.
  *
 **/
 

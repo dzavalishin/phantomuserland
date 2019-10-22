@@ -150,10 +150,10 @@ pvm_object_t pvm_ostack_abs_get( struct data_area_4_object_stack* rootda, int ab
 
 /**
  * 
- * \brief Dig element from stack.
+ * @brief Dig element from stack.
  * 
- * \param[in]  rootda    Root stack page
- * \param[in]  depth     Distance to object we need from stack top, 0 = last element on stack.
+ * @param[in]  rootda    Root stack page
+ * @param[in]  depth     Distance to object we need from stack top, 0 = last element on stack.
  * 
 **/
 pvm_object_t  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int depth )

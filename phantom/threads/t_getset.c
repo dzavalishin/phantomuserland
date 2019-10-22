@@ -305,7 +305,7 @@ errno_t t_set_snapper_flag()
 /**
  * Set paged (object land) memory access enabled or disabled for current thread.
  * 
- * \param[in]  enable         True to enable access.
+ * @param[in]  enable         True to enable access.
  * 
  * Supposed to be called ONLY from snap_sync.c vm_{lock,unlock}_persistent_memory()
  * 

@@ -1070,13 +1070,13 @@ DECLARE_SIZE(page);
 
 /**
  *
- * \brief Lookup class by name in persistent class cache.
+ * @brief Lookup class by name in persistent class cache.
  *
- * \param[in]  name       Name of class to lookup
- * \param[in]  name_len   Length of name
- * \param[out] new_class  Class found
+ * @param[in]  name       Name of class to lookup
+ * @param[in]  name_len   Length of name
+ * @param[out] new_class  Class found
  * 
- * \return 0 if found, ENOENT if not found
+ * @return 0 if found, ENOENT if not found
  *
  * Stores directory in pvm_root.class_dir
  *
@@ -1105,13 +1105,13 @@ errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new
 
 /**
  *
- * \brief Add class to persistent class cache.
+ * @brief Add class to persistent class cache.
  *
- * \param[in]  name       Name of class
- * \param[in]  name_len   Length of name
- * \param[out] new_class  Class object
+ * @param[in]  name       Name of class
+ * @param[in]  name_len   Length of name
+ * @param[out] new_class  Class object
  * 
- * \return 0 if ok, nonzero (errno) on error.
+ * @return 0 if ok, nonzero (errno) on error.
  *
  * Stores directory in pvm_root.class_dir
  *

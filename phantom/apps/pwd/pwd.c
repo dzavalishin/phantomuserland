@@ -8,8 +8,8 @@
 #define PATH_MAX	2048
 
 /**
- * \brief Simple print working directory program
- * \todo Replace 4096 with a define!
+ * @brief Simple print working directory program
+ * @todo Replace 4096 with a define!
  */
 int main( int argc, char **argv ) 
 {

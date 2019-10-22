@@ -48,12 +48,12 @@ static int cncmp( const char *a, const char *b );
 
 /**
  *
- * \brief Find class object by class name.
+ * @brief Find class object by class name.
  *
- * \param[in]  class_name        Name of class to find.
- * \param[out] out               Class object found.
+ * @param[in]  class_name        Name of class to find.
+ * @param[out] out               Class object found.
  *
- * \return 0 on success, nonzero if not found..
+ * @return 0 on success, nonzero if not found..
  *
  * Called from root.c to load boot class on object land creation
  * and from syscall (internal boot class) to be used by userland loader

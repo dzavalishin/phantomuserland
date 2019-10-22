@@ -13,14 +13,14 @@
 
 
 
-//! \brief
+//! @brief
 //!     Read a configuration byte/word/dword from the PCI
 //!     controller.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param reg The PCI register.
-//! \param uint8_ts
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param reg The PCI register.
+//! @param uint8_ts
 //!     The size of the read operation:
 //!     \li 1 = 8-bit;
 //!     \li 2 = 16-bit;
@@ -57,15 +57,15 @@ u_int32_t pciRead(int bus, int dev, int func, int reg, int uint8_ts)
     }
 }
 
-//! \brief
+//! @brief
 //!     Write a configuration byte/word/dword to the PCI
 //!     controller.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param reg The PCI register.
-//! \param v The value to write.
-//! \param uint8_ts
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param reg The PCI register.
+//! @param v The value to write.
+//! @param uint8_ts
 //!     The size of the write operation:
 //!     \li 1 = 8-bit;
 //!     \li 2 = 16-bit;
@@ -102,36 +102,36 @@ void pciWrite(int bus, int dev, int func, int reg, u_int32_t v, int uint8_ts)
 
 // --- PCI read functions --------------------------------------------- //
 
-//! \brief
+//! @brief
 //!     Read a configuration byte from the PCI controller.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param reg The PCI register.
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param reg The PCI register.
 //! eturn The byte read from the controller.
 uint8_t pci_read_config_byte(int bus, int dev, int func, int reg)
 {
     return ( pciRead(bus, dev, func, reg, sizeof(uint8_t)) );
 }
 
-//! \brief
+//! @brief
 //!     Read a configuration word from the PCI controller.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param reg The PCI register.
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param reg The PCI register.
 //! eturn The word read from the controller.
 uint16_t pci_read_config_word(int bus, int dev, int func, int reg)
 {
     return ( pciRead(bus, dev, func, reg, sizeof(uint16_t)) );
 }
 
-//! \brief
+//! @brief
 //!     Read a configuration double word from the PCI controller.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param reg The PCI register.
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param reg The PCI register.
 //! eturn The dword read from the controller.
 uint32_t pci_read_config_dword(int bus, int dev, int func, int reg)
 {
@@ -140,37 +140,37 @@ uint32_t pci_read_config_dword(int bus, int dev, int func, int reg)
 
 // --- PCI write functions -------------------------------------------- //
 
-//! \brief
+//! @brief
 //!     Write a configuration byte to the PCI controller.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param reg The PCI register.
-//! \param val The byte to write.
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param reg The PCI register.
+//! @param val The byte to write.
 void pci_write_config_byte(int bus, int dev, int func, int reg, uint8_t val)
 {
     pciWrite(bus, dev, func, reg, val, sizeof(uint8_t));
 }
 
-//! \brief
+//! @brief
 //!     Write a configuration word to the PCI controller.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param reg The PCI register.
-//! \param val The word to write.
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param reg The PCI register.
+//! @param val The word to write.
 void pci_write_config_word(int bus, int dev, int func, int reg, uint16_t val)
 {
     pciWrite(bus, dev, func, reg, val, sizeof(uint16_t));
 }
 
-//! \brief
+//! @brief
 //!     Write a configuration double word to the PCI controller.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param reg The PCI register.
-//! \param val The dword to write.
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param reg The PCI register.
+//! @param val The dword to write.
 void pci_write_config_dword(int bus, int dev, int func, int reg, uint32_t val)
 {
     pciWrite(bus, dev, func, reg, val, sizeof(uint32_t));
@@ -178,8 +178,8 @@ void pci_write_config_dword(int bus, int dev, int func, int reg, uint32_t val)
 
 // --- PCI utility functions ------------------------------------------ //
 
-//! \brief Read the IRQ line of the device if it is present.
-//! \param cfg The PCI device structure.
+//! @brief Read the IRQ line of the device if it is present.
+//! @param cfg The PCI device structure.
 //! \note This routine sets up the pci_cfg_t::irq field.
 void pci_read_irq(pci_cfg_t *cfg)
 {
@@ -192,9 +192,9 @@ void pci_read_irq(pci_cfg_t *cfg)
     cfg->irq = irq;
 }
 
-//! \brief Calculate the size of an I/O space.
-//! \param base The size read from the controller.
-//! \param mask The address mask of the I/O space.
+//! @brief Calculate the size of an I/O space.
+//! @param base The size read from the controller.
+//! @param mask The address mask of the I/O space.
 //! eturn
 //!     The size of the given I/O space aligned by the mask.
 //! \note
@@ -211,14 +211,14 @@ uint32_t pci_size(uint32_t base, unsigned long mask)
     return(size-1);
 }
 
-//! \brief Read the base addresses of the selected deivice.
-//! \param cfg The PCI device structure.
-//! \param tot_bases
+//! @brief Read the base addresses of the selected deivice.
+//! @param cfg The PCI device structure.
+//! @param tot_bases
 //!     The amount of bases to read.
 //!     Every PCI device has up to 6 base addresses (6 for
 //!     normal devices, 2 for PCI to PCI bridges and only 1 for
 //!     cardbuses).
-//! \param rom
+//! @param rom
 //!     The ROM address register (from this register we can read the
 //!     ROM base address and the ROM space size).
 //! \note
@@ -287,11 +287,11 @@ void pci_read_bases(pci_cfg_t *cfg, int tot_bases, int rom)
     }
 }
 
-//! \brief Probe for a PCI device.
-//! \param bus The bus number.
-//! \param dev The device number.
-//! \param func The function number.
-//! \param cfg The PCI device structure.
+//! @brief Probe for a PCI device.
+//! @param bus The bus number.
+//! @param dev The device number.
+//! @param func The function number.
+//! @param cfg The PCI device structure.
 //! \note This routine sets up the pci_cfg_t structure.
 //! eturn
 //!     \li #TRUE if a device is present at the configuration
@@ -357,8 +357,8 @@ bool pci_probe(int bus, int dev, int func, pci_cfg_t *cfg)
 //! lockups; otherwise default value is 255.
 unsigned int pcibios_max_latency=255;
 
-//! \brief Enable bus-mastering (aka 32-bit DMA) for a PCI device.
-//! \param cfg The PCI device structure.
+//! @brief Enable bus-mastering (aka 32-bit DMA) for a PCI device.
+//! @param cfg The PCI device structure.
 void pci_set_master(pci_cfg_t *cfg)
 {
     uint16_t cmd;
@@ -384,9 +384,9 @@ void pci_set_master(pci_cfg_t *cfg)
     pci_write_config_byte(cfg->bus, cfg->dev, cfg->func, PCI_LATENCY_TIMER, lat);
 }
 
-//! \brief Tell if a device supports a given PCI capability.
-//! \param cfg The PCI device structure.
-//! \param cap
+//! @brief Tell if a device supports a given PCI capability.
+//! @param cfg The PCI device structure.
+//! @param cap
 //!     The given capability (see pci.h PCI_CAP_* for a
 //!     complete list of supported capabilities).
 //! eturn
@@ -432,12 +432,12 @@ int pci_find_capability(pci_cfg_t *cfg, int cap)
     return(0);
 }
 
-//! \brief
+//! @brief
 //!     Set a new power state for the device using the Power
 //!     Management Capabilities.
-//! \param cfg
+//! @param cfg
 //!     The PCI device structure.
-//! \param state The power state (from D0 to D3).
+//! @param state The power state (from D0 to D3).
 //! eturn
 //!     \li 0 if we can successfully change the power state;
 //!     \li -#EIO if the device doesn't support PCI Power Management;
@@ -514,10 +514,10 @@ int pci_set_power_state(pci_cfg_t *cfg, int state)
 }
 
 
-//! \brief
+//! @brief
 //!     Low level function to initialize a PCI device before it's
 //!     used by a driver.
-//! \param cfg The PCI device structure.
+//! @param cfg The PCI device structure.
 //! \note
 //!     This is a low-level routine, so it is strongly recommended
 //!     to do not use it externally.
@@ -567,8 +567,8 @@ int pcibios_enable_device_io(pci_cfg_t *cfg)
     return(0);
 }
 
-//! \brief Initialize a PCI device before it's used by a driver.
-//! \param cfg The PCI device structure.
+//! @brief Initialize a PCI device before it's used by a driver.
+//! @param cfg The PCI device structure.
 int pci_enable_device(pci_cfg_t *cfg)
 {
     int err, pm;
@@ -595,10 +595,10 @@ int pci_enable_device(pci_cfg_t *cfg)
     return(0);
 }
 
-//! \brief
+//! @brief
 //!     Look for a device in the PCI bus and eventually enable it.
-//! \param cfg The PCI device configuration structure.
-//! \param enable
+//! @param cfg The PCI device configuration structure.
+//! @param enable
 //!     \li #TRUE enable the device if present;
 //!     \li #FALSE simply look for a device without enabling it.
 //! eturn
@@ -639,7 +639,7 @@ bool pci_find_cfg(pci_cfg_t *cfg, bool enable)
 }
 
 #if 0
-//! \brief
+//! @brief
 //!     Scan all the PCI buses, looking for devices.
 //!     If a device is found it will be enabled.
 void pci_scan()

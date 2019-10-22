@@ -748,7 +748,7 @@ THREAD(NicRxLanc, arg)
  *              The structure must have been allocated by a previous
  *              call NutNetBufAlloc().
  *
- * \return 0 on success, -1 in case of any errors.
+ * @return 0 on success, -1 in case of any errors.
  */
 int LancOutput(NUTDEVICE * dev, NETBUF * nb)
 {

@@ -93,7 +93,7 @@
  * First check-in.
  *
  *
- * \endverbatim
+ * @endverbatim
  */
 
 
@@ -145,7 +145,7 @@
 
 #ifndef MMC_MAX_INIT_POLLS
 /*!
- * \brief Card init timeout.
+ * @brief Card init timeout.
  *
  * Max. number of loops waiting for card's idle mode after initialization. 
  * An additional delay of 1 ms is added to each loop after one quarter of 
@@ -156,7 +156,7 @@
 
 #ifndef MMC_MAX_RESET_POLLS
 /*!
- * \brief Card reset timeout.
+ * @brief Card reset timeout.
  *
  * Max. number of loops waiting for card's idle mode after resetting it.
  */
@@ -165,7 +165,7 @@
 
 #ifndef MMC_MAX_WRITE_POLLS
 /*!
- * \brief Card write timeout.
+ * @brief Card write timeout.
  *
  * Max. number of loops waiting for card's idle mode after resetting it. 
  * An additional delay of 1 ms is added to each loop after 31/32 of this 
@@ -176,7 +176,7 @@
 
 #ifndef MMC_MAX_WRITE_RETRIES
 /*!
- * \brief Card write retries.
+ * @brief Card write retries.
  *
  * Max. number of retries while writing.
  */
@@ -185,7 +185,7 @@
 
 #ifndef MMC_MAX_READ_RETRIES
 /*!
- * \brief Card read retries.
+ * @brief Card read retries.
  *
  * Max. number of retries while reading.
  */
@@ -194,7 +194,7 @@
 
 #ifndef MMC_MAX_REG_POLLS
 /*!
- * \brief Register read timeout.
+ * @brief Register read timeout.
  *
  * Max. number of loops while reading a card's register.
  */
@@ -203,7 +203,7 @@
 
 #ifndef MMC_MAX_CMDACK_POLLS
 /*!
- * \brief Command acknowledge timeout.
+ * @brief Command acknowledge timeout.
  *
  * Max. number of loops waiting for card's acknowledge of a command. 
  * An additional delay of 1 ms is added to each loop after three quarter 
@@ -214,7 +214,7 @@
 
 #ifndef MMC_MAX_R1_POLLS
 /*!
- * \brief R1 response timeout.
+ * @brief R1 response timeout.
  *
  * Max. number of loops waiting for card's R1 response.
  */
@@ -222,18 +222,18 @@
 #endif
 
 /*!
- * \brief Local multimedia card mount information.
+ * @brief Local multimedia card mount information.
  */
 typedef struct _MMCFCB {
-    /*! \brief Attached file system device. 
+    /*! @brief Attached file system device. 
      */
     NUTDEVICE *fcb_fsdev;
 
-    /*! \brief Partition table entry of the currently mounted partition.
+    /*! @brief Partition table entry of the currently mounted partition.
      */
     //DOSPART fcb_part;
 
-    /*! \brief Next block number to read.
+    /*! @brief Next block number to read.
      *
      * The file system driver will send a NUTBLKDEV_SEEK control command
      * to set this value before calling the read or the write routine.
@@ -242,7 +242,7 @@ typedef struct _MMCFCB {
      */
     uint32_t fcb_blknum;
 
-    /*! \brief Internal block buffer.
+    /*! @brief Internal block buffer.
      *
      * A file system driver may use this one or optionally provide it's 
      * own buffers.
@@ -262,11 +262,11 @@ typedef struct _MMCFCB {
 static hal_mutex_t mutex;
 
 /*!
- * \brief Send command to multimedia card.
+ * @brief Send command to multimedia card.
  *
- * \param ifc   Specifies the hardware interface.
- * \param cmd   Command code. See MMCMD_ macros.
- * \param param Optional command parameter.
+ * @param ifc   Specifies the hardware interface.
+ * @param cmd   Command code. See MMCMD_ macros.
+ * @param param Optional command parameter.
  */
 static void MmCardTxCmd(MMCIFC * ifc, uint8_t cmd, uint32_t param)
 {
@@ -306,14 +306,14 @@ static void MmCardTxCmd(MMCIFC * ifc, uint8_t cmd, uint32_t param)
 }
 
 /*!
- * \brief Receive an R1 response token from the card.
+ * @brief Receive an R1 response token from the card.
  *
  * In SPI mode, the card sends an R1 response after every command except
  * after the SEND_STATUS and the READ_OCR commands.
  *
- * \param ifc Specifies the hardware interface.
+ * @param ifc Specifies the hardware interface.
  *
- * \return R1 response token or 0xFF on timeout.
+ * @return R1 response token or 0xFF on timeout.
  */
 static uint8_t MmCardRxR1(MMCIFC * ifc)
 {
@@ -329,14 +329,14 @@ static uint8_t MmCardRxR1(MMCIFC * ifc)
 }
 
 /*!
- * \brief Receive an R2 response token from the card.
+ * @brief Receive an R2 response token from the card.
  *
  * In SPI mode the card sends this token in response to the SEND_STATUS
  * command.
  *
- * \param ifc Specifies the hardware interface.
+ * @param ifc Specifies the hardware interface.
  *
- * \return R2 response token or 0xFFFF on timeout.
+ * @return R2 response token or 0xFFFF on timeout.
  */
 static uint16_t MmCardRxR2(MMCIFC * ifc)
 {
@@ -350,15 +350,15 @@ static uint16_t MmCardRxR2(MMCIFC * ifc)
 }
 
 /*!
- * \brief Receive an R3 response token from the card.
+ * @brief Receive an R3 response token from the card.
  *
  * In SPI mode the card sends this token in response to the READ_OCR
  * command.
  *
- * \param ifc Specifies the hardware interface.
- * \param ocr Points to a buffer which receives the OCR register contents.
+ * @param ifc Specifies the hardware interface.
+ * @param ocr Points to a buffer which receives the OCR register contents.
  *
- * \return R1 response token or 0xFF on timeout.
+ * @return R1 response token or 0xFF on timeout.
  */
 static uint8_t MmCardRxR3(MMCIFC * ifc, uint32_t * ocr)
 {
@@ -376,11 +376,11 @@ static uint8_t MmCardRxR3(MMCIFC * ifc, uint32_t * ocr)
 }
 
 /*!
- * \brief Configure card for SPI mode.
+ * @brief Configure card for SPI mode.
  *
- * \param ifc Specifies the hardware interface.
+ * @param ifc Specifies the hardware interface.
  *
- * \return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 static int MmCardReset(MMCIFC * ifc)
 {
@@ -419,14 +419,14 @@ static int MmCardReset(MMCIFC * ifc)
 }
 
 /*!
- * \brief Initialize the multimedia card.
+ * @brief Initialize the multimedia card.
  *
  * This routine will put a newly powered up card into SPI mode.
  * It is called by MmCardMount().
  *
- * \param ifc Specifies the hardware interface.
+ * @param ifc Specifies the hardware interface.
  *
- * \return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 static int MmCardInit(MMCIFC * ifc)
 {
@@ -480,14 +480,14 @@ static int MmCardInit(MMCIFC * ifc)
 }
 
 /*!
- * \brief Read or verify a single block.
+ * @brief Read or verify a single block.
  *
- * \param ifc Specifies the hardware interface.
- * \param blk Block number to read or verify.
- * \param buf Data buffer. Receives the data or is verified against the
+ * @param ifc Specifies the hardware interface.
+ * @param blk Block number to read or verify.
+ * @param buf Data buffer. Receives the data or is verified against the
  *            data being read from the card.
  *
- * \return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 static int MmCardReadOrVerify(MMCIFC * ifc, uint32_t blk, uint8_t * buf, int vflg)
 {
@@ -533,13 +533,13 @@ static int MmCardReadOrVerify(MMCIFC * ifc, uint32_t blk, uint8_t * buf, int vfl
 }
 
 /*!
- * \brief Write a single block.
+ * @brief Write a single block.
  *
- * \param ifc Specifies the hardware interface.
- * \param blk Block number to read or verify.
- * \param buf Pointer to a buffer which holds the data to write.
+ * @param ifc Specifies the hardware interface.
+ * @param blk Block number to read or verify.
+ * @param buf Pointer to a buffer which holds the data to write.
  *
- * \return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 static int MmCardWrite(MMCIFC * ifc, uint32_t blk, CONST uint8_t * buf)
 {
@@ -593,18 +593,18 @@ static int MmCardWrite(MMCIFC * ifc, uint32_t blk, CONST uint8_t * buf)
 
 #if MMC_FIO
 /*!
- * \brief Read data blocks from a mounted partition.
+ * @brief Read data blocks from a mounted partition.
  *
  * Applications should not call this function directly, but use the
  * stdio interface.
  *
- * \param nfp    Pointer to a ::NUTFILE structure, obtained by a previous 
+ * @param nfp    Pointer to a ::NUTFILE structure, obtained by a previous 
  *               call to MmCardMount().
- * \param buffer Pointer to the data buffer to fill.
- * \param num    Maximum number of blocks to read. However, reading 
+ * @param buffer Pointer to the data buffer to fill.
+ * @param num    Maximum number of blocks to read. However, reading 
  *               multiple blocks is not yet supported by this driver.
  *
- * \return The number of blocks actually read. A return value of -1 
+ * @return The number of blocks actually read. A return value of -1 
  *         indicates an error.
  */
 int MmCardBlockRead(NUTFILE * nfp, void *buffer, int num)
@@ -646,18 +646,18 @@ int MmCardBlockRead(NUTFILE * nfp, void *buffer, int num)
 }
 
 /*!
- * \brief Write data blocks to a mounted partition.
+ * @brief Write data blocks to a mounted partition.
  *
  * Applications should not call this function directly, but use the
  * stdio interface.
  *
- * \param nfp    Pointer to a \ref NUTFILE structure, obtained by a previous 
+ * @param nfp    Pointer to a @ref NUTFILE structure, obtained by a previous 
  *               call to MmCardMount().
- * \param buffer Pointer to the data to be written.
- * \param num    Maximum number of blocks to write. However, writing
+ * @param buffer Pointer to the data to be written.
+ * @param num    Maximum number of blocks to write. However, writing
  *               multiple blocks is not yet supported by this driver.
  *
- * \return The number of blocks written. A return value of -1 indicates an 
+ * @return The number of blocks written. A return value of -1 indicates an 
  *         error.
  */
 int MmCardBlockWrite(NUTFILE * nfp, CONST void *buffer, int num)
@@ -700,7 +700,7 @@ int MmCardBlockWrite(NUTFILE * nfp, CONST void *buffer, int num)
 
 
 /*!
- * \brief Mount a partition.
+ * @brief Mount a partition.
  *
  * Nut/OS doesn't provide specific routines for mounting. Instead routines
  * for opening files are used.
@@ -708,20 +708,20 @@ int MmCardBlockWrite(NUTFILE * nfp, CONST void *buffer, int num)
  * Applications should not directly call this function, but use the high
  * level stdio routines for opening a file.
  *
- * \param dev  Pointer to the MMC device.
- * \param name Partition number followed by a slash followed by a name
+ * @param dev  Pointer to the MMC device.
+ * @param name Partition number followed by a slash followed by a name
  *             of the file system device. Both items are optional. If no 
  *             file system driver name is given, the first file system
  *             driver found in the list of registered devices will be 
  *             used. If no partition number is specified or if partition
  *             zero is given, the first active primary partition will be 
  *             used.
- * \param mode Opening mode. Currently ignored, but 
- *             \code _O_RDWR | _O_BINARY \endcode should be used for
+ * @param mode Opening mode. Currently ignored, but 
+ *             @code _O_RDWR | _O_BINARY @endcode should be used for
  *             compatibility with future enhancements.
- * \param acc  File attributes, ignored.
+ * @param acc  File attributes, ignored.
  *
- * \return Pointer to a newly created file pointer to the mounted
+ * @return Pointer to a newly created file pointer to the mounted
  *         partition or NUTFILE_EOF in case of any error.
  */
 NUTFILE *MmCardMount(NUTDEVICE * dev, CONST char *name, int mode, int acc)
@@ -853,12 +853,12 @@ NUTFILE *MmCardMount(NUTDEVICE * dev, CONST char *name, int mode, int acc)
 }
 
 /*!
- * \brief Unmount a previously mounted partition.
+ * @brief Unmount a previously mounted partition.
  *
  * Applications should not directly call this function, but use the high
  * level stdio routines for closing a previously opened file.
  *
- * \return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 int MmCardUnmount(NUTFILE * nfp)
 {
@@ -884,15 +884,15 @@ int MmCardUnmount(NUTFILE * nfp)
 
 
 /*!
- * \brief Retrieve contents of a card register.
+ * @brief Retrieve contents of a card register.
  *
- * \param ifc Specifies the hardware interface.
- * \param cmd This command is sent to the card to retrieve the contents
+ * @param ifc Specifies the hardware interface.
+ * @param cmd This command is sent to the card to retrieve the contents
  *            of a specific register.
- * \param rbp Pointer to the buffer that receives the register contents.
- * \param siz Size of the specified register.
+ * @param rbp Pointer to the buffer that receives the register contents.
+ * @param siz Size of the specified register.
  *
- * \return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 static int MmCardGetReg(MMCIFC * ifc, uint8_t cmd, uint8_t * rbp, int siz)
 {
@@ -934,27 +934,27 @@ static int MmCardGetReg(MMCIFC * ifc, uint8_t cmd, uint8_t * rbp, int siz)
 }
 
 /*!
- * \brief Perform MMC control functions.
+ * @brief Perform MMC control functions.
  *
  * This function is called by the ioctl() function of the C runtime
  * library. Applications should not directly call this function.
  *
- * \todo Card change detection should verify the serial card number.
+ * @todo Card change detection should verify the serial card number.
  *
- * \param dev  Identifies the device that receives the device-control
+ * @param dev  Identifies the device that receives the device-control
  *             function.
- * \param req  Requested control function. May be set to one of the
+ * @param req  Requested control function. May be set to one of the
  *             following constants:
- *             - \ref NUTBLKDEV_MEDIACHANGE
- *             - \ref NUTBLKDEV_INFO
- *             - \ref NUTBLKDEV_SEEK
- *             - \ref MMCARD_GETCID
- *             - \ref MMCARD_GETCSD
+ *             - @ref NUTBLKDEV_MEDIACHANGE
+ *             - @ref NUTBLKDEV_INFO
+ *             - @ref NUTBLKDEV_SEEK
+ *             - @ref MMCARD_GETCID
+ *             - @ref MMCARD_GETCSD
  *
- * \param conf Points to a buffer that contains any data required for
+ * @param conf Points to a buffer that contains any data required for
  *             the given control function or receives data from that
  *             function.
- * \return 0 on success, -1 otherwise.
+ * @return 0 on success, -1 otherwise.
  */
 int MmCardIOCtl(NUTDEVICE * dev, int req, void *conf)
 {
@@ -1043,15 +1043,15 @@ int MmCardIOCtl(NUTDEVICE * dev, int req, void *conf)
 }
 
 /*!
- * \brief Initialize high level MMC driver.
+ * @brief Initialize high level MMC driver.
  *
  * Applications should not directly call this function. It is 
  * automatically executed during during device registration by 
  * NutRegisterDevice().
  *
- * \param dev  Identifies the device to initialize.
+ * @param dev  Identifies the device to initialize.
  *
- * \return Always zero.
+ * @return Always zero.
  * /
 int MmCardDevInit(NUTDEVICE * dev)
 {
