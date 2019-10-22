@@ -340,8 +340,8 @@ static int io_12_setvar( pvm_object_t me, pvm_object_t *ret, struct data_area_4_
 
     CHECK_PARAM_COUNT(2);
 
-    pvm_object_t var = args[1];
-    pvm_object_t val = args[0];
+    pvm_object_t var = args[0];
+    pvm_object_t val = args[1];
 
     SYS_FREE_O(var);
     SYS_FREE_O(val);
