@@ -27,6 +27,7 @@
 #include <kernel/json.h>
 
 #include <errno.h>
+#include <time.h>
 
 
 static int debug_print = 0;
@@ -48,21 +49,13 @@ static int si_time_tostring_5( pvm_object_t me, pvm_object_t *ret, struct data_a
 
 
 
-
+// simple Unix 32 bit time
 static int si_time_time_16( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     (void) me;
     //struct data_area_4_udp      *da = pvm_data_area( me, udp );
-
     DEBUG_INFO;
-
-    CHECK_PARAM_COUNT(0);
-    //int addr = AS_INT(args[0]);
-    //(void) addr;
-
-    //SYSCALL_PUT_THIS_THREAD_ASLEEP()
-
-    SYSCALL_THROW_STRING( "not implemented" );
+    SYSCALL_RETURN_INT(time(0));
 }
 
 
