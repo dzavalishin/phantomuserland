@@ -80,6 +80,9 @@ static void alloc_unload_arena( persistent_arena_t *our );
 static void alloc_print_arena(persistent_arena_t *a);
 static void alloc_print_arenas( void );
 
+void pvm_alloc_clear_mem( void );
+
+
 // ------------------------------------------------------------
 // Loop for arenas
 // ------------------------------------------------------------
@@ -117,7 +120,11 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t size )
 
     // Memory is empty, start fron scratch.
 
-    // Decide on arena sizes and create arena header objects in memory
+    // Decide on arena sizes 
+    // TODO 
+#error write me    
+    // Create arena header objects in memory
+    pvm_alloc_clear_mem();
 }
 
 
@@ -180,6 +187,33 @@ static void alloc_find_arenas( void * start, size_t size )
 }
 
 
+static void alloc_clear_arena( persistent_arena_t *ap, void *arg)
+{
+    (void) arg;
+
+    // Create free space object at the beginning of the arena
+    init_free_object_header((pvm_object_storage_t *) ap->base, ap->size );
+
+    size_t arena_obj_size = sizeof(struct pvm_object_storage) + sizeof(struct data_area_4_arena);
+
+    // Create arena descriptor object at the beginning of the arena
+    pvm_object_storage_t *arena_object = alloc_eat_some((pvm_object_storage_t *) ap->base, arena_obj_size );
+
+    assert( arena_object );
+
+    persistent_arena_t *ada = (persistent_arena_t *)&(arena_object->da);
+
+    *ada = *ap; // Init
+
+    // TODO check fields - some personal init? mutex!
+}
+// Initialize the heap
+void pvm_alloc_clear_mem( void )
+{
+    assert( pvm_object_space_start != 0 );
+
+    alloc_for_all_arenas( alloc_clear_arena, 0 );
+}
 
 
 

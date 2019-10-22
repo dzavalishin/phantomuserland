@@ -622,13 +622,6 @@ errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int c
 
 
 
-struct data_area_4_arena
-{
-    size_t                              size; // exact distance from my start to start of next arena object or end of memory
-    pvm_object_t                        owner; // If thread local arena - pointer to thread? No - will keep thread from being freed
-    uint32_t                            flags; // type of arena
-};
-
 
 
 

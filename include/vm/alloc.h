@@ -32,7 +32,7 @@ void pvm_alloc_clear_mem(void);
 
 pvm_object_storage_t *get_root_object_storage(void);
 
-int pvm_memcheck(void);
+void pvm_memcheck(void);
 bool pvm_object_is_allocated_light(pvm_object_storage_t *p);
 bool pvm_object_is_allocated(pvm_object_storage_t *p);
 void pvm_object_is_allocated_assert(pvm_object_storage_t *p);
@@ -107,53 +107,63 @@ void pvm_collapse_free(pvm_object_storage_t *op);
 
 #include <kernel/mutex.h>
 
+
+
 #define PVM_ARENA_START_MARKER 0xAAAA77FE
 
-// Contains nothing at all, unallocated arena space
-#define PVM_ARENA_FLAG_EMPTY            (1<<0)
-// Contains objects, not arenas
-#define PVM_ARENA_FLAG_LEAF             (1<<1)
-// This is a per-thread arena - how do we find thread after restoring snap?
-#define PVM_ARENA_FLAG_THREAD           (1<<2)
+#define PHANTOM_ARENA_FOR_INT             (1<<1) // For allocation of ints
+#define PHANTOM_ARENA_FOR_STACK           (1<<2) // For allocation of stack frames
+#define PHANTOM_ARENA_FOR_STATIC          (1<<3) // For allocation of classes, interfaces, code, etc
+#define PHANTOM_ARENA_FOR_SMALL           (1<<4) // For allocation of < 1K
 
-#define PVM_ARENA_FLAG_INT              (1<<8)
-#define PVM_ARENA_FLAG_FAST             (1<<9)
-#define PVM_ARENA_FLAG_SATURATED        (1<<10)
+#define PHANTOM_ARENA_FOR_THREAD_INT      (1<<7) // Thread personal ints
+#define PHANTOM_ARENA_FOR_THREAD_STACK    (1<<8) // Thread personal stack frames
+#define PHANTOM_ARENA_FOR_THREAD_SMALL    (1<<8) // Thread personal small objects
 
-// Object size < 1K
-#define PVM_ARENA_FLAG_1K               (1<<16)
-// Object size < 16K
-#define PVM_ARENA_FLAG_16K              (1<<17)
-#define PVM_ARENA_FLAG_64K              (1<<18)
-#define PVM_ARENA_FLAG_512K             (1<<19)
+#define PHANTOM_ARENA_FOR_1K              (1<<10) // For [1,2[K
+#define PHANTOM_ARENA_FOR_2K              (1<<11) // For [2,4[K
+// And so on, must be allocated on request
 
 
-struct persistent_arena
+
+
+
+struct data_area_4_arena
 {
-    int32_t             arena_start_marker;
+    int32_t                             arena_start_marker;
 
-    // from beginning of this struct to arena end
-    int64_t             arena_full_size; 
+    void *                              base;     //< Base address of this arena
 
-    int32_t             arena_flags;
+    void *                              curr;     //< Last allocator position
 
-    // pointer to owning thread (data part) - used on startup only, not counted.
-    // must be cleaned by GC if thread is collected.
-    int64_t             arena_thread_ptr;
+    size_t                              size;     //< exact distance from my start to start of next arena object or end of memory
+    size_t                              free;     //< total free mem here - UNUSED
+    size_t                              largest;  //< largest free space here - UNUSED
+
+    pvm_object_t                        owner;    //< If thread local arena - pointer to thread? No - will keep thread from being freed - UNUSED
+
+    u_int32_t                           flags;    //< type of arena - int, permanent, small, large, etc
 
     // Must be recreated on OS restart
-    hal_mutex_t         arena_mutex;
+    hal_mutex_t                         mutex;
 };
 
-typedef struct persistent_arena persistent_arena_t;
+typedef struct data_area_4_arena persistent_arena_t;
 
 
+typedef void (*arena_iterator_t)( persistent_arena_t *, void *arg );
+void alloc_for_all_arenas( arena_iterator_t iter, void *arg );
 
 
+extern int is_object_storage_initialized( void );
+extern pvm_object_storage_t *find_root_object_storage( void );
 
+extern persistent_arena_t * find_arena(unsigned int size, unsigned int flags, bool saturated);
+// Attempt not to use - it is possible that not all arena descriptors are loaded now
+//extern persistent_arena_t * find_arena_by_address(void *memaddr);
 
-
-
+pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned int size);
+void init_free_object_header( pvm_object_storage_t *op, unsigned int size );
 
 
 

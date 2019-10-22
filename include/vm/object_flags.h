@@ -111,18 +111,6 @@ POSF(IS_CODE,0x01)
 
 
 
-#define PHANTOM_ARENA_FOR_INT             (1<<1) // For allocation of ints
-#define PHANTOM_ARENA_FOR_STACK           (1<<2) // For allocation of stack frames
-#define PHANTOM_ARENA_FOR_STATIC          (1<<3) // For allocation of classes, interfaces, code, etc
-#define PHANTOM_ARENA_FOR_SMALL           (1<<4) // For allocation of < 1K
-
-#define PHANTOM_ARENA_FOR_THREAD_INT      (1<<7) // Thread personal ints
-#define PHANTOM_ARENA_FOR_THREAD_STACK    (1<<8) // Thread personal stack frames
-#define PHANTOM_ARENA_FOR_THREAD_SMALL    (1<<8) // Thread personal small objects
-
-#define PHANTOM_ARENA_FOR_1K              (1<<10) // For [1,2[K
-#define PHANTOM_ARENA_FOR_2K              (1<<11) // For [2,4[K
-// And so on, must be allocated on request
 
 #endif // PO_OBJECT_FLAGS_H
 

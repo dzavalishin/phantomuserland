@@ -73,8 +73,11 @@ void pvm_root_init(void)
 
     dbg_add_command( runclass, "runclass", "runclass class [method ordinal] - create object of given class and run method (ord 8 by default)");
 
+    pvm_object_t root = find_root_object_storage();
+
     //if(root->_ah.object_start_marker != PVM_OBJECT_START_MARKER)
-    if( !is_object_storage_initialized() )
+    //if( !is_object_storage_initialized() )
+    if( !root )
     {
         // Not an object in the beginning of the address space?
         // We have a fresh OS instance then. Set it up from scratch.
@@ -92,7 +95,6 @@ void pvm_root_init(void)
         return;
     }
 
-    pvm_object_t root = find_root_object_storage();
     assert(pvm_object_is_allocated( root ));
 
     // internal classes
