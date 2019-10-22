@@ -64,10 +64,12 @@
 // keyb hook
 #include <event.h>
 
+#include <video/zbuf.h>
 
 
-//#define N_OBJMEM_PAGES ((1024L*1024*128)/4096)
-#define N_OBJMEM_PAGES ((1024L*1024*32)/4096)
+#define N_OBJMEM_MBYTES 128 
+#define N_OBJMEM_PAGES ((1024L * 1024 * N_OBJMEM_MBYTES )/4096)
+//#define N_OBJMEM_PAGES ((1024L*1024*32)/4096)
 #define CHECKPAGES 1000
 
 
@@ -134,6 +136,9 @@ void start_phantom()
     // allocator insists on trying to access the byte
     // just after the memory arena. Fix that and remove this +1 after.
     vm_map_init( N_OBJMEM_PAGES+1 );
+
+    pvm_alloc_init( hal.object_vspace, hal.object_vsize ); // needs access to object space
+
 }
 
 

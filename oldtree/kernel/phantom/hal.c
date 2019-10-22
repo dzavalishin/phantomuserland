@@ -42,7 +42,7 @@ void hal_init( vmem_ptr_t va, long vs )
     hal.object_vsize = vs;
 
     printf("HAL init: %s %s, VM @ 0x%x\n", arch_name, board_name, hal.object_vspace );
-    pvm_alloc_init( va, vs );
+    //pvm_alloc_init( va, vs ); // too early - needs access to object space
 
     hal_init_vm_map();
 

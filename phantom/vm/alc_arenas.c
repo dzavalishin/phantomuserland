@@ -108,6 +108,7 @@ void alloc_for_all_arenas( arena_iterator_t iter, void *arg )
 #define CHECK_TOTAL( total ) if( total < 0 ) panic("total < 0");
 #define ASSIGN_MEMORY( _arena, _curr, _size, _total ) do {  \
         (_arena)->base = _curr; (_arena)->size = _size; \
+        (_arena)->curr = _curr; \
         (_curr) += (_size); (_total) -= (_size); \
         CHECK_TOTAL(_total); \
         LOG_FLOW( 1, "Alloc @%p - " __STRING(_arena) , as_curr ); \
@@ -167,6 +168,8 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
 
     // Create arena header objects in memory
     pvm_alloc_clear_mem();
+    alloc_print_arenas();
+    pvm_memcheck();
 }
 
 
@@ -233,6 +236,14 @@ static void alloc_clear_arena( persistent_arena_t *ap, void *arg)
 {
     (void) arg;
 
+    if( (ap->base == 0) || (ap->size == 0) )
+    {
+        LOG_FLOW( 1, "skip a %p", ap );
+        return;
+    }
+
+    LOG_FLOW( 1, "do %p @%p size %zd K", ap, ap->base, ap->size/1024 );
+
     // Create free space object at the beginning of the arena
     init_free_object_header((pvm_object_storage_t *) ap->base, ap->size );
 
@@ -242,6 +253,8 @@ static void alloc_clear_arena( persistent_arena_t *ap, void *arg)
     pvm_object_storage_t *arena_object = alloc_eat_some((pvm_object_storage_t *) ap->base, arena_obj_size );
 
     assert( arena_object );
+
+    ref_saturate_o( arena_object );
 
     persistent_arena_t *ada = (persistent_arena_t *)&(arena_object->da);
 
@@ -255,6 +268,28 @@ void pvm_alloc_clear_mem( void )
     assert( pvm_object_space_start != 0 );
 
     alloc_for_all_arenas( alloc_clear_arena, 0 );
+}
+
+
+pvm_object_storage_t *find_root_object_storage( void )
+{
+    void *curr = curr_static_arena.base; // pvm_object_space_start;
+    int wrap = 0;
+
+    do {
+        if(pvm_object_is_allocated_light(curr))
+        {            
+            pvm_object_t o = curr;
+
+            if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_ROOT )
+                return o;
+        }
+
+        curr = alloc_wrap_to_next_object( curr, curr_static_arena.base, curr_static_arena.base+curr_static_arena.size, &wrap, 0 );
+    } while( !wrap );
+
+    //panic("No root object");
+    return 0;
 }
 
 
@@ -313,7 +348,7 @@ static persistent_arena_t *alloc_find_arena_by_data_size( size_t size )
     int i;
     for( i = 0; i < N_PER_SIZE_ARENAS; i++ )
     {
-        if( size & ~0x1 ) // bits above lower are non-zero - out of size for this range
+        if( ss & ~0x1 ) // bits above lower are non-zero - out of size for this range
         {
             ss >>= 1;
             continue;
@@ -321,7 +356,7 @@ static persistent_arena_t *alloc_find_arena_by_data_size( size_t size )
 
         if( 0 == per_size_arena[i].base )
         {
-            LOG_ERROR( 0, "Attempt to alloc %d bytes from unloaded arena %d", size, i );
+            LOG_ERROR( 1, "Attempt to alloc %d bytes from unloaded arena %d", size, i );
             continue; // Use next, bigger one
         }
 
@@ -346,7 +381,13 @@ persistent_arena_t *find_arena(unsigned int size, unsigned int flags, bool satur
     if (saturated)
         return &curr_static_arena;
 
-    if (flags & (PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS|PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
+    if (flags & (
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_ROOT
+        ))
+
         return &curr_static_arena; //code|class|interface - never dies?
 
     return alloc_find_arena_by_data_size( size );
@@ -386,8 +427,8 @@ static int alloc_is_better_arena( persistent_arena_t *our, persistent_arena_t *s
 
 static void alloc_print_arena(persistent_arena_t *a)
 {
-    LOG_INFO_( 1, "Arena flags %x, base %p, size %zd, free %zd, largest %zd", 
-        a->flags, a->base, a->size, a->free, a->largest
+    LOG_INFO_( 1, "Arena flags %x, base %p, size %zd K, free %zd, largest %zd", 
+        a->flags, a->base, a->size / 1024 , a->free, a->largest
          );
 }
 

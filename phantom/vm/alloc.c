@@ -21,6 +21,7 @@
 #include <kernel/page.h>
 #include <kernel/vm.h>
 #include <kernel/debug_graphical.h>
+#include <kernel/snap_sync.h>
 
 
 int object_allocator_inited = 0;
@@ -35,7 +36,6 @@ int object_allocator_inited = 0;
 
 
 
-static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op, void * start, void * end, int *wrap, persistent_arena_t *ap);
 
 // TODO Object alloc - gigant lock for now. This is to be redone with separate locks for buckets/arenas.
 static hal_mutex_t  _vm_alloc_mutex;
@@ -121,31 +121,13 @@ static inline unsigned int round_size(unsigned int size, persistent_arena_t *ap)
 int is_object_storage_initialized() 
 { 
     pvm_object_storage_t *root = pvm_object_space_start; 
-    return root->_ah.object_start_marker != PVM_OBJECT_START_MARKER;
+    return root->_ah.object_start_marker == PVM_OBJECT_START_MARKER;
 }
 
 //pvm_object_storage_t *get_root_object_storage() { return pvm_object_space_start; }
 
-pvm_object_storage_t *find_root_object_storage( void )
-{
-    void *curr = pvm_object_space_start;
-    int wrap = 0;
 
-    do {
-        if(pvm_object_is_allocated_light(curr))
-        {            
-            pvm_object_t o = curr;
 
-            if( o->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_ROOT )
-                return o;
-        }
-
-        curr = alloc_wrap_to_next_object( curr, pvm_object_space_start, pvm_object_space_end, &wrap, 0 );
-    } while( !wrap );
-
-    //panic("No root object");
-    return 0;
-}
 
 /*
 // TODO must be rewritten - arena properties must be kept in persistent memory
@@ -177,8 +159,12 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
     assert(_pvm_object_space_start != 0);
     assert(size > 0);
 
-    alloc_init_arenas(_pvm_object_space_start, size);
+    pvm_object_space_start = _pvm_object_space_start;
+    pvm_object_space_end = pvm_object_space_start + size;
 
+    vm_lock_persistent_memory();
+    alloc_init_arenas(_pvm_object_space_start, size);
+    vm_unlock_persistent_memory();
 
     //init_gc();  // here, if needed
 
@@ -318,7 +304,7 @@ void pvm_collapse_free(pvm_object_storage_t *op)
 
 
 // walk through
-static pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op, void * start, void * end, int *wrap, persistent_arena_t *ap)
+pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op, void * start, void * end, int *wrap, persistent_arena_t *ap)
 {
     assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
 
@@ -362,7 +348,8 @@ bool pvm_object_is_allocated(pvm_object_storage_t *o)
             //o->_ah.gc_flags == 0;
             && o->_ah.refCount > 0
             && o->_ah.exact_size >= ( o->_da_size + sizeof(pvm_object_storage_t) )
-            && o->_ah.exact_size <  ( o->_da_size + sizeof(pvm_object_storage_t) + PVM_MIN_FRAGMENT_SIZE )
+            // Why? Fails on arena start object. Check it separately? Do we need such waste at all?
+            // && o->_ah.exact_size <  ( o->_da_size + sizeof(pvm_object_storage_t) + PVM_MIN_FRAGMENT_SIZE ) 
             && o->_ah.exact_size <= ( pvm_object_space_end - (void*)o ) ;
 }
 
@@ -511,6 +498,9 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
     pvm_object_storage_t * data;
 
     persistent_arena_t *ap = find_arena(size, flags, saturated);
+
+    if( ap == 0 ) panic("No arena to allocate %zd bytes", size );
+
     size = round_size(size, ap);
 
     data = pool_alloc(size, ap);

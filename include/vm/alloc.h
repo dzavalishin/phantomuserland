@@ -126,7 +126,8 @@ void pvm_collapse_free(pvm_object_storage_t *op);
 
 
 
-
+// TODO add name
+// TODO add next arena ptr? for GC to not to collect? Or check by flag? Modify GC!
 
 struct data_area_4_arena
 {
@@ -164,6 +165,7 @@ extern persistent_arena_t * find_arena(unsigned int size, unsigned int flags, bo
 
 pvm_object_storage_t *alloc_eat_some(pvm_object_storage_t *op, unsigned int size);
 void init_free_object_header( pvm_object_storage_t *op, unsigned int size );
+pvm_object_storage_t *alloc_wrap_to_next_object(pvm_object_storage_t *op, void * start, void * end, int *wrap, persistent_arena_t *ap);
 
 void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size );
 
