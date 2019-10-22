@@ -163,7 +163,13 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
             continue;
         }
         LOG_FLOW( 1, "Alloc @%p", as_curr );
-        ASSIGN_MEMORY( per_size_arena + i, as_curr, as_total/2, as_total );
+
+        // Give it all to smallest one just to fill to the end of address space
+        // Or else vm code snap verificator whines
+        if( 0 == i )
+            ASSIGN_MEMORY( per_size_arena + i, as_curr, as_total, as_total );
+        else
+            ASSIGN_MEMORY( per_size_arena + i, as_curr, as_total/2, as_total );
     }
 
     // Create arena header objects in memory

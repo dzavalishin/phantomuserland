@@ -1862,12 +1862,16 @@ static void vm_verify_vm(void)
     int np;
 
     if(SNAP_STEPS_DEBUG) hal_printf("Verifying VM before snapshot...\n");
+    // vm_lock_persistent_memory(); // We can't - we're in snapshot and it hangs forever waiting for snap.
+    t_set_paged_mem( 1 ); //< Enable access to paged memory
     for (np = 0; np < vm_map_map_end - vm_map_map; np++)
     {
         size_t page_offset = np * PAGE_SIZE;
         current = vm_verify_page(vm_map_start_of_virtual_address_space + page_offset,
                 page_offset, current, hal.object_vsize);
     }
+    t_set_paged_mem( 0 ); //< Disable access to paged memory
+    //vm_unlock_persistent_memory();
     if(SNAP_STEPS_DEBUG) hal_printf("VM verification icomplete\n");
 }
 
