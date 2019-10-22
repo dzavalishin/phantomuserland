@@ -1,3 +1,5 @@
+#if 0 // killing connections
+
 #define DEBUG_MSG_PREFIX "vmcn.stats"
 #include <debug_ext.h>
 #define debug_level_flow 10
@@ -162,3 +164,4 @@ errno_t cn_stats_disconnect( struct data_area_4_connection *c )
 
 
 
+#endif
