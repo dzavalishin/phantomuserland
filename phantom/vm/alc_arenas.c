@@ -67,7 +67,7 @@ static persistent_arena_t curr_small_arena;   //< Less than 1K, but not one of t
 // ------------------------------------------------------------
 
 
-static void init_per_size_arena_flags( void );
+static void init_arena_flags( void );
 static void alloc_find_arenas( void * _pvm_object_space_start, size_t size );
 static void alloc_assert_is_arena( pvm_object_t a, void *start, void *end );
 static persistent_arena_t *alloc_find_arena_by_flags( u_int32_t flags );
@@ -117,8 +117,6 @@ void alloc_for_all_arenas( arena_iterator_t iter, void *arg )
 
 void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
 {
-    init_per_size_arena_flags();
-
     if( is_object_storage_initialized() )
     {
         // We have snapshot, just find out what's in memory
@@ -128,6 +126,7 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
     }
 
     // Memory is empty, start fron scratch.
+    init_arena_flags();
 
     // Decide on arena sizes 
 
@@ -180,7 +179,7 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
 }
 
 
-void init_per_size_arena_flags( void )
+void init_arena_flags( void )
 {
     int flags = 0x400; // 1K bytes
 
@@ -191,6 +190,10 @@ void init_per_size_arena_flags( void )
         flags <<= 1;
     }
 
+    curr_int_arena.flags     = PHANTOM_ARENA_FOR_INT;
+    curr_small_arena.flags   = PHANTOM_ARENA_FOR_SMALL;
+    curr_stack_arena.flags   = PHANTOM_ARENA_FOR_STACK;
+    curr_static_arena.flags  = PHANTOM_ARENA_FOR_STATIC;
 }
 
 
@@ -205,6 +208,8 @@ static void alloc_find_arenas( void * start, size_t size )
     memset( &curr_stack_arena, 0, sizeof(curr_stack_arena) );
     memset( &curr_static_arena, 0, sizeof(curr_static_arena) );
     memset( &curr_small_arena, 0, sizeof(curr_small_arena) );
+
+    init_arena_flags();
 
     while( curr < end )
     {
@@ -505,12 +510,12 @@ static void paint_arena_memory_map(window_handle_t w, rect_t *r, persistent_aren
 
 /**
  * 
- * \brief Generic painter for any allocator using us.
+ * @brief Generic painter for any allocator using us.
  * 
  * Used in debug window.
  * 
- * \param[in] w Window to draw to
- * \param[in] r Rectangle to paint inside
+ * @param[in] w Window to draw to
+ * @param[in] r Rectangle to paint inside
  * 
 **/
 
