@@ -7,7 +7,9 @@ public class ObjectFlags {
 	protected static final int REF_BYTES = 8; // TODO - hardcoded size
 
 	public static final int  PHANTOM_OBJECT_STORAGE_FLAG_HAS_WEAKREF 		= 0x100000;
-
+	
+	public static final int  PHANTOM_OBJECT_STORAGE_FLAG_IS_ARENA           = 0x8000;
+	public static final int  PHANTOM_OBJECT_STORAGE_FLAG_IS_ROOT            = 0x4000;
 	public static final int  PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE       = 0x2000;
 
 	public static final int  PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER       = 0x1000;
@@ -67,6 +69,12 @@ public class ObjectFlags {
 	public static final int  PVM_OBJECT_AH_ALLOCATOR_FLAG_WENT_DOWN		= 0x04;
 	// and this is for objects already in cycle candidates buffer -
 	public static final int  PVM_OBJECT_AH_ALLOCATOR_FLAG_IN_BUFFER		= 0x08;
+
+	
+	
+	
+	public static final int ARENA_MAGIC = 0xAAAA77FE;
+	//public static final int ARENA_MAGIC_REV = 0xfe77aaaa; // we read it this way. byte order conbersion?
 	
 	
 }

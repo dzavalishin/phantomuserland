@@ -23,6 +23,7 @@ import java.util.Queue;
 import java.util.stream.Collectors;
 
 import phantom.data.DataLoadException;
+import phantom.data.ObjectFlags;
 import phantom.data.ObjectHeader;
 
 
@@ -37,7 +38,8 @@ public class Main {
 	private static final long OBJECT_VMEM_SHIFT = 0x80000000L;
 	
 	// Later we will have arenas info right in the virtual memory and will take sizes from there
-	private static final long OBJECT_VMEM_SIZE = 0x2000000L; // TODO ERROR size hardcode
+	//private static final long OBJECT_VMEM_SIZE = 0x2000000L; // TODO ERROR size hardcode
+	private static final long OBJECT_VMEM_SIZE = 128*1024L*1024L; // TODO ERROR size hardcode
 
 	// Provide exit code to be used in shell scripts
 	//private static final int EXIT_CODE_OK = 0;		// Checked memory and found it to be correct
@@ -55,6 +57,7 @@ public class Main {
 		if( args.length > 1)
 		{
 			System.out.println("gc <phantom_memory_dump_file>");
+			System.out.println("(use pfsextract to extract memory dump file from Phantom disk image)");
 			System.exit(EXIT_CODE_ERROR);
 		}
 
@@ -107,17 +110,58 @@ public class Main {
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		System.out.println(String.format("Size of buffer while reading = %d", buffer.capacity()));
 
-		/*
-		for(int i = 0; i <10; i++)
-		{
-			//byte b = buffer.get();
-			//System.out.print(" "+Integer.toHexString( ((int)b) & 0xFF ) );
 
-			int v = buffer.getInt();
-			System.out.print(" "+Integer.toHexString( v ) );
+		// Scan through arena markers
+		buffer.rewind();
+		while( (buffer.position() < inChannel.size()) && (buffer.position() < OBJECT_VMEM_SIZE) )
+		{
+			int pos = buffer.position();
+			ObjectHeader h = new ObjectHeader();
+			try {
+				h.loadHeader(buffer);
+			} catch (DataLoadException e) {
+				System.out.println("Exception @ file pos 0x"+Integer.toHexString( buffer.position() )+", read start pos 0x"+Integer.toHexString(pos) );
+				e.printStackTrace();
+				//System.exit(EXIT_CODE_ERROR);
+				break;
+			}
+			
+			int fl = h.getObjectFlags();
+			if( (fl & ObjectFlags.PHANTOM_OBJECT_STORAGE_FLAG_IS_ARENA) == 0 )
+			{
+				System.err.println("No arena object @ file pos 0x"+Integer.toHexString( pos ));
+				break;
+			}
+			
+			// Now read arena DA
+			ByteBuffer da = h.getDataArea();
+			da.order(ByteOrder.LITTLE_ENDIAN);
+			
+			int arena_magic = da.getInt();
+			int arena_base = da.getInt();
+			int arena_curr = da.getInt();
+			int arena_size = da.getInt();
+			int arena_free = da.getInt();
+			int arena_largest = da.getInt();
+			int arena_flags= da.getInt();
+			
+			System.out.println(String.format("pos 0x%X: Arena @%X sz %dK, free %dK, flags 0x%X, curr 0x%X, largest %d", 
+					pos + OBJECT_VMEM_SHIFT,
+					arena_base+OBJECT_VMEM_SHIFT, arena_size/1024, arena_free/1024, arena_flags, arena_curr, arena_largest ));
+			
+			if( arena_magic != ObjectFlags.ARENA_MAGIC )
+			{
+				System.err.println("No arena magic, got 0x"+Integer.toHexString( arena_magic ));
+				break;
+			}
+					
+			int next_arena = pos + arena_size;
+			//int next_arena = buffer.position() + arena_size;
+			
+			buffer.position(next_arena);
 		}
-		System.out.println();
-		*/
+		
+		
 		buffer.rewind();
 		//buffer.load();
 
@@ -154,6 +198,9 @@ public class Main {
 			objects.put(objectAddress, h);
 		}
 
+
+		
+		
 		int size = 0;
 		for( ObjectHeader header : objects.values()){
 			size += header.getExactSize();

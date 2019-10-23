@@ -32,6 +32,18 @@ public class PhantomSuperBlock {
 		map.putInt(Const.checksum, calcSBchecksum(map));
 		
 	}
+
+	// Set new start of free space
+	public void updateFreeStart(int pos)
+	{
+		map.putInt(Const.free_start, pos);
+	}
+
+	public void updateLastSnap(int pos) 
+	{
+		map.putInt(Const.last_snap, pos);
+	}
+	
 	
 	int calcSBchecksum(ByteBuffer sb)
 	{
@@ -49,5 +61,6 @@ public class PhantomSuperBlock {
 	{
 		return map;
 	}
+
 
 }

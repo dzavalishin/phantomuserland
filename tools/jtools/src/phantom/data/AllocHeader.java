@@ -33,7 +33,7 @@ public class AllocHeader extends ObjectFlags {
 		if(objectMarker != PVM_OBJECT_START_MARKER) // PVM_OBJECT_START_MARKER = 0x7FAA7F55
 		{
 			//System.out.println("ObjectHeader.loadMe() marker is wrong @"+Long.toHexString(phantomObjectAddress));
-			throw new DataLoadException("object header marker is wrong, = "+Integer.toHexString(objectMarker));
+			throw new DataLoadException("object header marker is wrong, = 0x"+Integer.toHexString(objectMarker));
 		}
 
 		refCount = bb.getInt();
