@@ -4,21 +4,24 @@
 package phantom.gc;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
-import java.util.*;
-import java.util.stream.Collectors;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.stream.Collectors;
 
-
-import phantom.data.AllocHeader;
 import phantom.data.DataLoadException;
 import phantom.data.ObjectHeader;
 
@@ -37,7 +40,7 @@ public class Main {
 	private static final long OBJECT_VMEM_SIZE = 0x2000000L; // TODO ERROR size hardcode
 
 	// Provide exit code to be used in shell scripts
-	private static final int EXIT_CODE_OK = 0;		// Checked memory and found it to be correct
+	//private static final int EXIT_CODE_OK = 0;		// Checked memory and found it to be correct
 	private static final int EXIT_CODE_FAILED = 1;	// Memory contents are broken
 	private static final int EXIT_CODE_ERROR = 2;	// Unable to load all the memory map
 
@@ -193,6 +196,13 @@ public class Main {
 
 
 			currentObject = objects.get(currentObjectAddress);
+			
+			if(currentObject == null)
+			{
+				System.err.println("object mising @"+currentObjectAddress);
+				continue;
+			}
+			
 			visitedObjects.put(currentObjectAddress, currentObject);
 
 			// inspect object
@@ -346,10 +356,10 @@ public class Main {
 		}
 
 		System.out.println("Distribution:");
-		System.out.println(String.format("  0: %d", refCounterDistribution.get(0)));
-		System.out.println(String.format("  1: %d", refCounterDistribution.get(1)));
-		System.out.println(String.format("  2-5: %d", refCounterDistribution.get(2)));
-		System.out.println(String.format("  >5: %d", refCounterDistribution.get(3)));
+		System.out.println(String.format("    0: %d objects", refCounterDistribution.get(0)));
+		System.out.println(String.format("    1: %d objects", refCounterDistribution.get(1)));
+		System.out.println(String.format("  2-5: %d objects", refCounterDistribution.get(2)));
+		System.out.println(String.format("   >5: %d objects", refCounterDistribution.get(3)));
 	}
 
 	/**
