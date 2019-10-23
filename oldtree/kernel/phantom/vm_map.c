@@ -1439,7 +1439,7 @@ void do_snapshot(void)
     // START!
     is_in_snapshot_process = 1;
     if( pvm_spinlock_lock_count )
-        panic("pvm_spinlock_lock_count not zero in snapshot!\n")
+        panic("pvm_spinlock_lock_count not zero in snapshot!\n");
         //lprintf("pvm_spinlock_lock_count not zero in snapshot!\n")
     // Terrible and mighty step - ALL the pages will be marked
     // as not snapped and access to them will be locked here, so
