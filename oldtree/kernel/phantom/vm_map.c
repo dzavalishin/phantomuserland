@@ -424,7 +424,17 @@ vm_map_init(unsigned long page_count)
 
     disk_page_no_t snap_start = 0;
 
-    if(pager_superblock_ptr()->last_snap != 0 )
+    int skip_last_snap = keyboard_shift_pressed();
+    if(skip_last_snap)
+        hal_printf("\n----- SKIP LAST SNAP, LOAD OLDER ONE ---- \n\n");
+    else
+    {
+        hal_printf("Reboot and press SHIFT to use prev snap\n");
+    }
+    
+
+
+    if( (!skip_last_snap) && (pager_superblock_ptr()->last_snap != 0) )
     {
         hal_printf("-- Use last snap\n");
         snap_start = pager_superblock_ptr()->last_snap;

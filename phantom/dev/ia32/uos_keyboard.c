@@ -55,7 +55,7 @@ static void keyboard_ps2_wait_event (keyboard_ps2_t *u, keyboard_event_t *data);
 static keyboard_ps2_t ps2k;
 static hal_sem_t keybd_sem;
 //static int keyb_init = 0;
-
+static int uos_keyb_shift_pressed = 0;
 
 #define STATE_BASE	0
 #define STATE_E0	1	/* got E0 */
@@ -197,13 +197,13 @@ make_event (keyboard_ps2_t *u, keyboard_event_t *m, unsigned char byte)
         break;
         
     case KEY_LSHIFT:
-        if(u->state_F0)  u->modifiers &= ~KEYMOD_LSHIFT;
-        else             u->modifiers |= KEYMOD_LSHIFT;
+        if(u->state_F0)  { u->modifiers &= ~KEYMOD_LSHIFT; uos_keyb_shift_pressed = 0; }
+        else             { u->modifiers |= KEYMOD_LSHIFT;  uos_keyb_shift_pressed = 1; }
         break;
 
     case KEY_RSHIFT:
-        if(u->state_F0)  u->modifiers &= ~KEYMOD_RSHIFT;
-        else             u->modifiers |= KEYMOD_RSHIFT;
+        if(u->state_F0)  { u->modifiers &= ~KEYMOD_RSHIFT; uos_keyb_shift_pressed = 0; }
+        else             { u->modifiers |= KEYMOD_RSHIFT;  uos_keyb_shift_pressed = 1; }
         break;
         
     case KEY_LALT:
@@ -680,3 +680,12 @@ int board_boot_console_getc(void)
     return 0;
 }
 
+//---------------------------------------------------------------------------
+// Boot process modificator
+//---------------------------------------------------------------------------
+
+
+int keyboard_shift_pressed(void)
+{
+    return uos_keyb_shift_pressed;
+}

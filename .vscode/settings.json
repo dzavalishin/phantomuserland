@@ -117,6 +117,8 @@
       "initializer_list": "c",
       "utility": "c",
       "*.q1": "c",
-      "*.q2": "c"
+      "*.q2": "c",
+      "svn_version.h": "c",
+      "init.h": "c"
     }
   }

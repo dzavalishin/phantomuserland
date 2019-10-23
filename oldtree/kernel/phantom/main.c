@@ -2,9 +2,9 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel main
+ * Kernel main: system startup
  *
  *
 **/
@@ -31,16 +31,13 @@
 #include <kernel/debug.h>
 #include <kernel/trap.h>
 
-
 #include <newos/port.h>
-
 
 #include <hal.h>
 #include "paging_device.h"
 #include "vm_map.h"
 
 #include <vm/root.h>
-//#include "video.h"
 #include "misc.h"
 #include <kernel/net.h>
 
@@ -52,19 +49,11 @@
 
 #include <threads.h>
 
-// pvm_memcheck
-#include <vm/alloc.h>
-
-// multiboot info
-#include <multiboot.h>
-
-// phys addr
-#include <kernel/vm.h>
-
-// keyb hook
-#include <event.h>
-
-#include <video/zbuf.h>
+#include <vm/alloc.h>   // pvm_memcheck
+#include <multiboot.h>  // multiboot info
+#include <kernel/vm.h>  // phys addr
+#include <event.h>      // keyb hook
+#include <video/zbuf.h> // paint zbuf
 
 
 #define N_OBJMEM_MBYTES 128 
@@ -74,6 +63,7 @@
 
 
 
+//static void pressEnter(char *text);
 
 
 
@@ -88,23 +78,7 @@
 
 
 
-void pressEnter(char *text)
-{
-    printf("%s\n", text);
 
-    if(debug_boot_pause)
-    {
-        printf("press Enter...\n...");
-#if 0
-        while( getchar() >= ' ' )
-            ;
-#else
-        hal_sleep_msec(10000);
-#endif
-    }
-}
-
-//static void pause() { pressEnter("pause"); printf("\n"); }
 
 
 #if !PAGING_PARTITION
@@ -371,8 +345,6 @@ int main(int argc, char **argv, char **envp)
     // Now starting object world infrastructure
     // -----------------------------------------------------------------------
 
-
-    //pressEnter("will start phantom");
     start_phantom();
 
 #ifdef ARCH_ia32
@@ -391,9 +363,8 @@ int main(int argc, char **argv, char **envp)
 #endif
 
 
-
-
     SHOW_FLOW0( 2, "Will init phantom root... ");
+
     // Start virtual machine in special startup (single thread) mode
     pvm_root_init();
 
@@ -402,6 +373,7 @@ int main(int argc, char **argv, char **envp)
 
     //pressEnter("will run vm threads");
     SHOW_FLOW0( 2, "Will run phantom threads... ");
+
     // Virtual machine will be run now in normal mode
     activate_all_threads();
 
@@ -415,9 +387,7 @@ int main(int argc, char **argv, char **envp)
     run_init_functions( INIT_LEVEL_LATE );
 
 
-    //init_wins(u_int32_t ip_addr);
-
-    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
+    printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (GIT %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
 
 #if 1
     {
@@ -440,13 +410,6 @@ int main(int argc, char **argv, char **envp)
     return 0;
 }
 
-
-void phantom_save_vmem(void)
-{
-#ifdef ARCH_ia32
-    phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
-#endif
-}
 
 
 
@@ -485,13 +448,6 @@ static void net_stack_init()
 }
 
 
-
-void _exit(int code)
-{
-    (void) code;
-
-    hal_cpu_reset_real();
-}
 
 
 // -----------------------------------------------------------------------
@@ -600,3 +556,41 @@ int kernel_keyboard_hook( unsigned key, unsigned shifts)
     }
     return 0;
 }
+
+
+
+// -----------------------------------------------------------------------
+// Misc
+// -----------------------------------------------------------------------
+
+void pressEnter(char *text)
+{
+    printf("%s\n", text);
+
+    if(debug_boot_pause)
+    {
+        printf("press Enter...\n...");
+#if 0
+        while( getchar() >= ' ' )
+            ;
+#else
+        hal_sleep_msec(10000);
+#endif
+    }
+}
+
+void _exit(int code)
+{
+    (void) code;
+
+    hal_cpu_reset_real();
+}
+
+
+void phantom_save_vmem(void)
+{
+#ifdef ARCH_ia32
+    phantom_check_disk_save_virtmem( (void *)hal_object_space_address(), CHECKPAGES );
+#endif
+}
+

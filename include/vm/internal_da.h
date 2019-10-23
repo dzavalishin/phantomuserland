@@ -411,8 +411,8 @@ struct data_area_4_window
 
 #define DIR_MUTEX_O 1 // TODO kill me
 
-// Very dumb implementation, redo with hash map or bin search or tree
-// Container entry has pvm_object_t at the beginning and the rest is 0-term name string
+
+/// Classic hash map
 struct data_area_4_directory
 {
     u_int32_t                           capacity;       // size of 1nd level arrays

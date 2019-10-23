@@ -15,8 +15,8 @@
 #include <errno.h>
 
 /**
- * \ingroup Init
- * \defgroup Init Init - kernel startup
+ * @ingroup Init
+ * @defgroup Init Init - kernel startup
  * @{
 **/
 
@@ -197,6 +197,11 @@ errno_t InitializeFullAcpi(void);
 
 void start_tcp_echo_server(void);
 
+// -----------------------------------------------------------------------
+// Keyboard driver must supply - switches to prev snapshot on boot
+// -----------------------------------------------------------------------
+
+int keyboard_shift_pressed(void);
 
 // -----------------------------------------------------------------------
 // Finita
