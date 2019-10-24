@@ -132,3 +132,5 @@ test/unit/suites/Makefile
 *.py~
 run/qemu/0.15.1/stdout.txt
 phantom/doxygen/
+tools/pfsextract/last_snap.data
+tools/pfsextract/prev_snap.data
