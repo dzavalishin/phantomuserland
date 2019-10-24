@@ -431,14 +431,10 @@ static pvm_object_t create_interface_worker( int n_methods )
 
 pvm_object_t     pvm_create_interface_object( int n_methods, pvm_object_t parent_class )
 {
-    pvm_object_t 	ret = create_interface_worker( n_methods );
-    pvm_object_t * data_area = (pvm_object_t *)ret->da;
-
     if(pvm_is_null( parent_class ))
         pvm_exec_panic0( "create interface: parent is null" );
 
     pvm_object_t base_i =  ((struct data_area_4_class*)parent_class->da)->object_default_interface;
-
     int base_icount = da_po_limit(base_i);
 
     if(base_icount > n_methods)
@@ -446,8 +442,13 @@ pvm_object_t     pvm_create_interface_object( int n_methods, pvm_object_t parent
         // root classes have N_SYS_METHODS slots in interface, don't cry about that
         if( n_methods > N_SYS_METHODS )
             printf( " create interface: child has less methods (%d) than parent (%d)\n", n_methods, base_icount );
-        base_icount = n_methods;
+        //base_icount = n_methods; // why??
+        n_methods = base_icount;
     }
+
+    pvm_object_t 	ret = create_interface_worker( n_methods );
+    pvm_object_t * data_area = (pvm_object_t *)ret->da;
+
 
     int i = 0;
     // copy methods from parent
@@ -468,7 +469,7 @@ pvm_object_t     pvm_create_interface_object( int n_methods, pvm_object_t parent
 
 void pvm_internal_init_interface(pvm_object_t  os)
 {
-	memset( os->da, 0, os->_da_size );
+	//memset( os->da, 0, os->_da_size ); // clears all we done above?
 }
 
 void pvm_gc_iter_interface(gc_iterator_call_t func, pvm_object_t  os, void *arg)

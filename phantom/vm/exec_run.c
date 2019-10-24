@@ -135,6 +135,8 @@ errno_t pvm_run_new_thread( pvm_object_t object, pvm_object_t arg ) //, int n_ar
     pvm_object_t thread = pvm_create_thread_object( new_cf );
 
     phantom_activate_thread(thread);
+    
+    return 0;
 }
 
 #if 0

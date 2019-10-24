@@ -60,7 +60,7 @@ public class PdbClassInfoLoader extends AbstractClassInfoLoader {
 		long start = is.getFilePointer();
 		
 		my_name = Fileops.get_string(is);
-		System.out.println("Method is: " + my_name );
+		System.out.print("Method is: " + my_name );
 
 		my_ordinal = Fileops.get_int32(is);
 		System.out.println(", ordinal: " + my_ordinal + "\n" );
@@ -86,7 +86,7 @@ public class PdbClassInfoLoader extends AbstractClassInfoLoader {
 	
 	public static void main(String[] args) throws IOException, PlcException 
 	{
-		String pcFileName = System.getenv("PHANTOM_HOME") + "/plib/bin/ru.dz.phantom.system.boot.pc";
+		String pcFileName = System.getenv("PHANTOM_HOME") + "/plib/bin/test.test_mutex.test_mutex.pc";
 		RandomAccessFile is;
 		
 		try {

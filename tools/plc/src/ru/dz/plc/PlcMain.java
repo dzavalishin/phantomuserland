@@ -13,9 +13,12 @@ import java.io.*;
 
 /**
  * <p>Title: Phantom Language Compiler main</p>
- * <p>Description: </p>
- * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
+ * 
+ * <p>Copyright: Copyright (c) 2004-2019 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 

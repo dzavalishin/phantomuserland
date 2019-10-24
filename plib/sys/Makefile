@@ -67,7 +67,8 @@ $(BINDIR)/phantom.application.pc: $(BINDIR)/internal.world.pc
 
 $(BINDIR)/internal.world.pc: $(BINDIR)/phantom.runnable.pc
 
-$(BINDIR)/test.test_mutex.pc: $(BINDIR)/test.test_mutex.sub.pc
+ 
+$(BINDIR)/test.test_mutex.test_mutex.pc: $(BINDIR)/test.test_mutex.sub.pc
 
 # manual deps
 $(BINDIR)/internal.bitmap.pc: internal.io.tty.pc
@@ -88,7 +89,7 @@ $(BINDIR)/ru.dz.phantom.backgrounds.pc: ../resources/backgrounds/phantom_dz_new_
 
 $(BINDIR)/ru.dz.phantom.system.boot.pc: ru.dz.phantom.system.regression_tests.pc ru.dz.phantom.system.class_loader.pc ru.dz.windows.root.pc ru.dz.phantom.system.thread_test.pc ru.dz.phantom.system.shell.pc internal.binary.pc test.suite.pc
 $(BINDIR)/ru.dz.phantom.system.iterator.pc: $(BINDIR)/ru.dz.phantom.system.iterable.pc
-$(BINDIR)/ru.dz.phantom.system.shell.pc: $(BINDIR)/phantom.runnable.pc $(BINDIR)/ru.dz.phantom.system.shell_callback.pc $(BINDIR)/test.toPhantom.PhantomPrinter.pc $(BINDIR)/internal.mutex.pc $(BINDIR)/ru.dz.demo.start.pc $(BINDIR)/internal.stat.pc 
+$(BINDIR)/ru.dz.phantom.system.shell.pc: $(BINDIR)/phantom.runnable.pc $(BINDIR)/ru.dz.phantom.system.shell_callback.pc $(BINDIR)/test.toPhantom.PhantomPrinter.pc $(BINDIR)/internal.mutex.pc $(BINDIR)/ru.dz.demo.start.pc $(BINDIR)/internal.stat.pc $(BINDIR)/test.test_mutex.test_mutex.pc
 $(BINDIR)/ru.dz.phantom.system.shell_callback.pc: $(BINDIR)/internal.window.pc $(BINDIR)/internal.io.pc $(BINDIR)/phantom.runnable.pc
 
 $(BINDIR)/ru.dz.phantom.tetris.figure.pc: $(BINDIR)/ru.dz.phantom.tetris.playingfield.pc

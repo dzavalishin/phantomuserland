@@ -26,7 +26,7 @@
 #include "vm/alloc.h"
 
 
-int debug_print = 0;
+int debug_print = 1;
 
 
 static int vm_code_linenum_cmp(const void *, const void *) __attribute__((used));
@@ -44,7 +44,7 @@ struct method_loader_handler
 
     pvm_object_t           my_name;
     pvm_object_t           my_code;
-    int                         my_ordinal;
+    int                    my_ordinal;
 };
 
 
@@ -124,11 +124,12 @@ pvm_load_method( struct method_loader_handler *mh, const unsigned char *data, in
 
 int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 {
+    errno_t error = 0;
+
     const unsigned char *rec_start = (const unsigned char *)data;
     int record_size = 0;
 
     pvm_object_t class_name;
-    //pvm_object_t base_class = pvm_get_null_class();
 
     int n_object_slots = 0; // for a new class
     int n_method_slots = 0;
@@ -215,6 +216,11 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                         printf("Class ");
                         pvm_object_print( class_name );
                         printf(" attempted to extend internal class. Child of void now.\n");
+                    }
+                    if(pvm_is_null(base_class))
+                    {
+                        printf("Can't get base class, load failed.\n");
+                        error = ENOENT;
                     }
                 }
 #endif
@@ -409,8 +415,25 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 
     if( !got_class_header )
         return 1;
+#if 0 // is done in interace creation code
+    struct data_area_4_class *base_cda= pvm_object_da( base_class, class );
+    pvm_object_t base_iface = base_cda->object_default_interface;
 
+    int n_base_methods = pvm_get_array_size(base_iface);
+    int i;
 
+    // Copy absent methods from base class
+    for( i = 0; i < n_base_methods; i++ )
+    {
+        pvm_object_t my_method = pvm_get_array_ofield( iface, i );
+        if(!pvm_is_null(my_method))
+            continue; // I have it, skip
+        pvm_object_t base_method = pvm_get_array_ofield( base_iface, i );
+
+        pvm_set_array_ofield( iface, i, base_method );
+        if(debug_print) printf("Copy method %d from base class\n", i);
+    }
+#endif
     pvm_object_t new_class = pvm_create_class_object(class_name, iface, sizeof(pvm_object_t) * n_object_slots);
 
     struct data_area_4_class *cda= pvm_object_da( new_class, class );
@@ -428,7 +451,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
     }
 
     *out = new_class;
-    return 0;
+    return error;
 }
 
 

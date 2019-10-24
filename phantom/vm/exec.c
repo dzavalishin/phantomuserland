@@ -43,7 +43,7 @@
 
 
 static errno_t find_dynamic_method( dynamic_method_info_t *mi );
-static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal );
+static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal, struct data_area_4_thread *tda );
 static syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int syscall_index );
 static int pvm_exec_find_catch( struct data_area_4_exception_stack* stack, unsigned int *jump_to, pvm_object_t thrown_obj );
 
@@ -525,7 +525,7 @@ static void init_cfda(
                 printf("class_ref @%p: ", class_ref); pvm_object_dump( class_ref );
                 pvm_exec_panic( "static_invoke: non-related class is given", da );
             }
-        code = pvm_exec_find_static_method( class_ref, method_index );
+        code = pvm_exec_find_static_method( class_ref, method_index, da );
     }
     else
         code = pvm_exec_find_method( new_this, method_index, da );
@@ -2405,21 +2405,22 @@ static syscall_func_t pvm_exec_find_syscall( pvm_object_t _class, unsigned int s
 
 
 static pvm_object_t  
-    pvm_exec_get_iface_method(
+pvm_exec_get_iface_method(
         pvm_object_t iface,
-        unsigned int method_index
+        unsigned int method_index,
+        struct data_area_4_thread *tda
         )
 {
     if( iface == 0 )
-        pvm_exec_panic0( "pvm_exec_get_iface_method: no interface found" );
+        pvm_exec_panic( "pvm_exec_get_iface_method: no interface found", tda );
 
     if(!(iface->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE))
-        pvm_exec_panic0( "pvm_exec_get_iface_method: not an interface object" );
+        pvm_exec_panic( "pvm_exec_get_iface_method: not an interface object", tda );
 
     if(method_index > da_po_limit(iface))
     {
         lprintf("pvm_exec_get_iface_method: method index %d is out of bounds\n", method_index);
-        pvm_exec_panic0( "pvm_exec_get_iface_method: method index is out of bounds" );
+        pvm_exec_panic( "pvm_exec_get_iface_method: method index is out of bounds", tda );
     }
 
     return da_po_ptr(iface->da)[method_index];    
@@ -2432,14 +2433,14 @@ static pvm_object_t
  *
 **/
 
-static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal )
+static pvm_object_t  pvm_exec_find_static_method( pvm_object_t class_ref, int method_ordinal, struct data_area_4_thread *tda )
 {
     if( class_ref == 0 )
         pvm_exec_panic0( "pvm_exec_find_static_method: null class!" );
 
     pvm_object_t iface = pvm_object_da( class_ref, class )->object_default_interface;
 
-    return pvm_exec_get_iface_method(iface, method_ordinal );        
+    return pvm_exec_get_iface_method(iface, method_ordinal, tda );        
 }
 
 /*
@@ -2455,7 +2456,7 @@ pvm_object_t  pvm_exec_find_method( pvm_object_t o, unsigned int method_index, s
 
     pvm_object_t iface = pvm_object_da( o->_class, class )->object_default_interface;
 
-    return pvm_exec_get_iface_method(iface, method_index );        
+    return pvm_exec_get_iface_method(iface, method_index, tda );        
 }
 
 
