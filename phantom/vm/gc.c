@@ -529,3 +529,92 @@ static void gc_clear_weakrefs(pvm_object_storage_t *p)
 }
 
 
+
+
+// -----------------------------------------------------------------------
+// Scan object tree to find refcount errors
+// -----------------------------------------------------------------------
+
+struct pvm_scan_subtree_internal_args
+{
+    int depth;
+    memory_scan_report_t *report;
+};
+
+void pvm_scan_subtree_internal( pvm_object_t o, void *arg );
+
+/**
+ * 
+ * @brief Scan object subtree starting from given point and gather info.
+ * 
+ * Mostly used for refcount errors debug.
+ * 
+ * @param[in]   start       Start object
+ * @param[out]  report      Where to place answers
+ * @param[in]   maxdepth    Maximum scan depth
+ * 
+**/
+void pvm_scan_subtree( pvm_object_t start, memory_scan_report_t *report, int max_depth )
+{
+    if( report->min_depth < max_depth ) report->min_depth = max_depth;
+    if( (max_depth == 0) || (start == 0) ) return;
+
+    report->n_objects++;
+
+    if( report->max_ref_count < start->_ah.refCount )
+        report->max_ref_count = start->_ah.refCount;
+
+    // plain non internal objects -
+    if( !(start->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL) )
+    {
+        unsigned i;
+
+        for( i = 0; i < da_po_limit(start); i++ )
+        {
+            pvm_scan_subtree( da_po_ptr(start->da)[i], report, max_depth-1 );
+        }
+        return; // TODO satellites/classes?
+    }
+
+    // We're here if object is internal.
+
+    // skip classes and interfaces too
+    if(
+       (start->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS) ||
+       (start->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE) ||
+       (start->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE)
+      )
+        return;
+
+
+    // Now find and call class-specific function: pvm_gc_iter_*
+
+    gc_iterator_func_t  func = pvm_internal_classes[pvm_object_da( start->_class, class )->sys_table_id].iter;
+    
+    if( func == 0 ) return;
+
+    struct pvm_scan_subtree_internal_args ia;    
+    ia.depth = max_depth-1;
+    ia.report = report;
+
+    func( pvm_scan_subtree_internal, start, &ia );
+}
+
+
+void pvm_scan_subtree_internal( pvm_object_t o, void *arg )
+{
+    if( o == 0 ) return;
+    struct pvm_scan_subtree_internal_args *ia = arg;       
+    pvm_scan_subtree( o, ia->report, ia->depth );
+}
+
+
+void pvm_scan_print_subtree( pvm_object_t start, int max_depth )
+{
+    memory_scan_report_t report;
+    memset( &report, 0, sizeof(report));
+    pvm_scan_subtree( start, &report, max_depth );
+    printf("SCAN subtree: %d objects, max refs %d, max depth %d",
+            report.n_objects,  report.max_ref_count, max_depth - report.min_depth
+        );
+}
