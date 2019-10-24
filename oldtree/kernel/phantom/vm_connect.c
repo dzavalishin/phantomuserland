@@ -371,10 +371,10 @@ struct conntab
 
 static struct conntab connection_types_table[] =
 {
-    { "tmr:", sizeof(net_timer_event), sizeof(net_timer_event), CON_F_NAMES(timer) },
-    { "stt:", 0, 0, CON_F_NAMES(stats) },
-    { "udp:", sizeof(struct cn_udp_persistent), sizeof(struct cn_udp_volatile), CON_F_NAMES(udp) },
-    { "fio:", sizeof(struct cn_fio_persistent), sizeof(struct cn_fio_volatile), CON_F_NAMES(fio) },
+//    { "tmr:", sizeof(net_timer_event), sizeof(net_timer_event), CON_F_NAMES(timer) },
+//    { "stt:", 0, 0, CON_F_NAMES(stats) },
+//    { "udp:", sizeof(struct cn_udp_persistent), sizeof(struct cn_udp_volatile), CON_F_NAMES(udp) },
+//    { "fio:", sizeof(struct cn_fio_persistent), sizeof(struct cn_fio_volatile), CON_F_NAMES(fio) },
     { "url:", sizeof(struct cn_url_persistent), sizeof(struct cn_url_volatile), CON_F_NAMES(url) },
 };
 

@@ -61,6 +61,12 @@
         SYSCALL_THROW_STRING("not an integer arg: " __FILE__ ":" __XSTRING(__LINE__)  ); \
     } while(0)
 
+#define ASSERT_CLASS_IS(_obj,_class_name) \
+    do { \
+	if( !pvm_object_class_is_or_child( _obj, pvm_get_class_noload(_class_name) ) \
+        SYSCALL_THROW_STRING("arg class not " _class_name " : " __FILE__ ":" __XSTRING(__LINE__)  ); \
+    } while(0)
+
 #define DEBUG_INFO \
     if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __func__, __FILE__, __LINE__ )
 

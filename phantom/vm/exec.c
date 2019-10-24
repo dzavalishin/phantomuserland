@@ -2594,50 +2594,24 @@ pvm_object_t pvm_exec_lookup_class_by_name(pvm_object_t name)
 }
 
 
-/*
- *
- * TODO BUG! This executes code in a tight loop. It will prevent
- * snaps from being done. Redo with a separate thread start.
- *
- */
-
-pvm_object_t 
-pvm_exec_run_method(
-                    pvm_object_t this_object,
-                    int method,
-                    int n_args,
-                    pvm_object_t args[]
-                   )
+pvm_object_t pvm_get_class_noload(const char *class_name)
 {
-    pvm_object_t new_cf = pvm_create_call_frame_object();
-    struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
+    pvm_object_t name = pvm_create_string_object( class_name );
 
-    int i;
-    for( i = n_args; i > 0; i-- )
-    {
-        pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), ref_inc_o( args[i-1] ) );
-    }
+    pvm_object_t ret = pvm_lookup_internal_class(name);
+    if( !pvm_is_null(ret) )
+        return ret;
 
-    pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), n_args); // pass him real number of parameters
+    // Try persistent class cache
 
-    pvm_object_t code = pvm_exec_find_method( this_object, method, NULL );
-    pvm_exec_set_cs( cfda, code );
-    cfda->this_object = ref_inc_o( this_object );
+    //printf("lookup class in pers cache: "); pvm_object_dump(name);
+    errno_t rc = pvm_class_cache_lookup(pvm_get_str_data(name), pvm_get_str_len(name), &ret );
+    if( rc == 0 )
+        return ret;
 
-    pvm_object_t thread = pvm_create_thread_object( new_cf );
-
-    //vm_unlock_persistent_memory(); // pvm_exec will lock, do not need nested lock - will prevent snaps
-    // NO - we must prevent snap here!! it won't work right after restart, part of state is in C code
-    pvm_exec( thread );
-    //vm_lock_persistent_memory();
-
-
-    pvm_object_t ret = pvm_ostack_pop( pvm_object_da(cfda->ostack, object_stack) );
-
-    pvm_release_thread_object( thread );
-
-    return ret;
+    return pvm_null;
 }
+
 
 // Find a method for a dynamic invoke
 static errno_t find_dynamic_method( dynamic_method_info_t *mi )

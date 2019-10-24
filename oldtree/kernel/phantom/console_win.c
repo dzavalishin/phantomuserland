@@ -108,8 +108,8 @@ static int phantom_console_window_puts(const char *s)
 
 
 
-static char cbuf[BUFS+1];
-static int cbufpos = 0;
+static char con_buf[BUFS+1];
+static int con_bufpos = 0;
 static hal_mutex_t buf_mutex;
 
 
@@ -119,11 +119,11 @@ static void flush_stdout(void * arg)
     (void) arg;
 
     hal_mutex_lock( &buf_mutex );
-    if( cbufpos >= BUFS)
-        cbufpos = BUFS;
-    cbuf[cbufpos] = '\0';
-    memcpy(text, cbuf, cbufpos + 1);
-    cbufpos = 0;
+    if( con_bufpos >= BUFS)
+        con_bufpos = BUFS;
+    con_buf[con_bufpos] = '\0';
+    memcpy(text, con_buf, con_bufpos + 1);
+    con_bufpos = 0;
     hal_mutex_unlock( &buf_mutex );
     phantom_console_window_puts(text);
 }
@@ -131,7 +131,7 @@ static void flush_stdout(void * arg)
 static void put_buf( char c )
 {
     hal_mutex_lock( &buf_mutex );
-    cbuf[cbufpos++] = c;
+    con_buf[con_bufpos++] = c;
     hal_mutex_unlock( &buf_mutex );
 }
 
@@ -164,14 +164,14 @@ int phantom_console_window_putc(int c)
     switch(c)
     {
     case '\b':
-        if(cbufpos > 0) cbufpos--;
+        if(con_bufpos > 0) con_bufpos--;
         goto noflush;
         //return c;
 
     case '\t':
-        while(cbufpos % 8)
+        while(con_bufpos % 8)
         {
-            if(cbufpos >= BUFS)
+            if(con_bufpos >= BUFS)
                 break;
             put_buf(' ');
         }
@@ -185,7 +185,7 @@ int phantom_console_window_putc(int c)
 
     default:
         put_buf( c );
-        if( cbufpos >= BUFS )
+        if( con_bufpos >= BUFS )
             goto flush;
 
 noflush:

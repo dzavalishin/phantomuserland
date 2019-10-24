@@ -106,6 +106,19 @@ pvm_object_t     pvm_get_class( pvm_object_t o );
 pvm_object_t     pvm_exec_lookup_class_by_name( pvm_object_t name );
 
 /**
+ * 
+ * Run new VM instance in a new thread.
+ * 
+**/
+errno_t pvm_run_new_thread( pvm_object_t object );
+
+
+/**
+ * Lookup class in cache - do not attempt to load. Used for checks.
+**/
+pvm_object_t     pvm_get_class_noload(const char *class_name);
+
+/**
  *
  * Is equal
  *
@@ -276,7 +289,7 @@ void             pvm_release_thread_object( pvm_object_t thread );
 
 
 
-
+/// Is thread?
 void             pvm_check_is_thread( pvm_object_t new_thread );
 
 

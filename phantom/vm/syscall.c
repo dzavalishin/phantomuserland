@@ -1261,7 +1261,7 @@ static int si_bootstrap_17_register_class_loader( pvm_object_t me, pvm_object_t 
     SYSCALL_RETURN_NOTHING;
 }
 
-
+// TODO kill me?
 static int si_bootstrap_18_thread( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
@@ -1806,6 +1806,21 @@ static int si_world_8_getMyThread( pvm_object_t o, pvm_object_t *ret, struct dat
     SYSCALL_RETURN( ref_inc_o( out ) );
 }
 
+static int si_world_9_startThread( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    (void)o;
+    DEBUG_INFO;
+
+    CHECK_PARAM_COUNT(1);
+    pvm_object_t entry = args[0];
+
+    //ASSERT_CLASS_IS(entry, ".ru.dz.phantom.system.runnable" );
+
+    errno_t rc = pvm_run_new_thread( entry );
+
+    SYSCALL_RETURN_INT( rc );
+}
+
 
 syscall_func_t  syscall_table_4_world[16] =
 {
@@ -1814,7 +1829,7 @@ syscall_func_t  syscall_table_4_world[16] =
     &si_void_4_equals,              &si_world_5_tostring,
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
-    &si_world_8_getMyThread,        &invalid_syscall,
+    &si_world_8_getMyThread,        &si_world_9_startThread,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode

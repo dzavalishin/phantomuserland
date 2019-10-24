@@ -1,6 +1,7 @@
 include ../../config.mk
 
-SRCDIRS = $(filter-out $(EXCLUDED_SUBDIRS), src/phantom src/test src/ru.dz src/tetris ../roots/src/internal )
+SRCDIRS = $(filter-out $(EXCLUDED_SUBDIRS), src/phantom src/test src/ru.dz ../roots/src/internal )
+#SRCDIRS += $(filter-out $(EXCLUDED_SUBDIRS), src/tetris )
 BINDIR = $(PHANTOM_HOME)/plib/bin
 TARGET = classes
 
@@ -73,7 +74,7 @@ $(BINDIR)/phantom.osimpl.pc: phantom.os.time.pc
 $(BINDIR)/phantom.os.pc: phantom.os.time.pc phantom.osimpl.pc internal.world.pc
 $(BINDIR)/phantom.util.hashmap.pc: phantom.util.hashpair.pc
 
-$(BINDIR)/ru.dz.demo.chart.pc: phantom.os.pc internal.io.tty.pc internal.window.pc internal.connection.pc ru.dz.phantom.system.runnable.pc
+$(BINDIR)/ru.dz.demo.chart.pc: phantom.os.pc internal.io.tty.pc internal.window.pc internal.time.pc ru.dz.phantom.system.runnable.pc
 $(BINDIR)/ru.dz.demo.start.pc: ru.dz.demo.weather.pc ru.dz.demo.chart.pc
 $(BINDIR)/ru.dz.demo.weather.pc: ru.dz.demo.chart.pc internal.bitmap.pc
 
@@ -81,8 +82,8 @@ $(BINDIR)/ru.dz.phantom.backgrounds.pc: ../resources/backgrounds/phantom_dz_new_
 
 $(BINDIR)/ru.dz.phantom.system.boot.pc: ru.dz.phantom.system.regression_tests.pc ru.dz.phantom.system.class_loader.pc ru.dz.windows.root.pc ru.dz.phantom.system.thread_test.pc ru.dz.phantom.system.shell.pc internal.binary.pc test.suite.pc
 $(BINDIR)/ru.dz.phantom.system.iterator.pc: $(BINDIR)/ru.dz.phantom.system.iterable.pc
-$(BINDIR)/ru.dz.phantom.system.shell.pc: $(BINDIR)/ru.dz.phantom.system.runnable.pc $(BINDIR)/ru.dz.phantom.system.shell_callback.pc $(BINDIR)/test.toPhantom.PhantomPrinter.pc $(BINDIR)/internal.mutex.pc $(BINDIR)/ru.dz.demo.start.pc
-$(BINDIR)/ru.dz.phantom.system.shell_callback.pc: $(BINDIR)/internal.window.pc $(BINDIR)/internal.connection.pc $(BINDIR)/ru.dz.phantom.system.runnable.pc
+$(BINDIR)/ru.dz.phantom.system.shell.pc: $(BINDIR)/ru.dz.phantom.system.runnable.pc $(BINDIR)/ru.dz.phantom.system.shell_callback.pc $(BINDIR)/test.toPhantom.PhantomPrinter.pc $(BINDIR)/internal.mutex.pc $(BINDIR)/ru.dz.demo.start.pc $(BINDIR)/internal.stat.pc 
+$(BINDIR)/ru.dz.phantom.system.shell_callback.pc: $(BINDIR)/internal.window.pc $(BINDIR)/internal.io.pc $(BINDIR)/ru.dz.phantom.system.runnable.pc
 
 $(BINDIR)/ru.dz.phantom.tetris.figure.pc: $(BINDIR)/ru.dz.phantom.tetris.playingfield.pc
 $(BINDIR)/ru.dz.phantom.tetris.io.pc: $(BINDIR)/ru.dz.phantom.tetris.utilites.pc
