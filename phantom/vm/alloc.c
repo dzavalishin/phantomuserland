@@ -11,7 +11,7 @@
 
 #define DEBUG_MSG_PREFIX "vm.alloc"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -498,8 +498,9 @@ struct alloc_anyw {
 };
 
 
-static void try_alloc_anywhere( persistent_arena_t *ap, void *aap )
+static void try_alloc_anywhere( persistent_arena_t *ap, void *aap, void *arg2 )
 {
+    (void) arg2;
     struct alloc_anyw *aa = aap;
 
     if(aa->found) return;
@@ -528,7 +529,7 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
         aa.size = size;
         aa.found = 0;
 
-        alloc_for_all_arenas( try_alloc_anywhere, &aa );
+        alloc_for_all_arenas( try_alloc_anywhere, &aa, 0 );
 
         data = aa.found;
         if( data != 0 )
@@ -595,7 +596,7 @@ static inline pvm_object_t pvm_next_object(pvm_object_t op)
 // -----------------------------------------------------------------------
 
 
-static void memcheck_one( persistent_arena_t *ap, void *arg);
+static void memcheck_one( persistent_arena_t *ap, void *arg1, void *arg2);
 //static void memcheck_print_histogram(unsigned int i);
 
 
@@ -609,7 +610,7 @@ static void memcheck_one( persistent_arena_t *ap, void *arg);
 
 void pvm_memcheck()
 {
-    alloc_for_all_arenas( memcheck_one, 0 );
+    alloc_for_all_arenas( memcheck_one, 0, 0 );
 /*
     unsigned int i;
     for( i = 0; i < ARENAS; i++)
@@ -635,9 +636,10 @@ static void printmemsize( unsigned long sz, char *name )
     printf("%ld %s", sz, name );
 }
 
-static void  memcheck_one(persistent_arena_t *ap, void *arg)
+static void  memcheck_one(persistent_arena_t *ap, void *arg1, void *arg2)
 {
-    (void) arg;
+    (void) arg1;
+    (void) arg2;
 
     void * start = ap->base;
     void * end = start + ap->size;

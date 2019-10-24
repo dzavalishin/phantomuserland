@@ -129,6 +129,10 @@ void pvm_collapse_free(pvm_object_storage_t *op);
 // TODO add name
 // TODO add next arena ptr? for GC to not to collect? Or check by flag? Modify GC!
 
+// Used by arena processing of different kinds
+struct arena_visualisation_data; 
+struct arena_statistics_data; 
+
 /**
  * 
  * @brief Arena descriptor - object DA
@@ -136,6 +140,8 @@ void pvm_collapse_free(pvm_object_storage_t *op);
  * Data Area of the very first object in arena.
  * 
  * @note Object header must have PHANTOM_OBJECT_STORAGE_FLAG_IS_ARENA flag
+ * 
+ * @note This is a persistent object, changing it makes old OS images to be incompatible!
  * 
 **/
 struct data_area_4_arena
@@ -161,13 +167,23 @@ struct data_area_4_arena
 
     /// Previos arena of same type - used on additional arena allocation. Example is list of thread local arenas.
     pvm_object_t                        prev_arena; 
+
+    union {
+        char _for_any_case[128];
+
+        struct {
+            struct arena_visualisation_data * vis_data; 
+            struct arena_statistics_data    * stat_data; 
+
+        };
+    };
 };
 
 typedef struct data_area_4_arena persistent_arena_t;
 
 
-typedef void (*arena_iterator_t)( persistent_arena_t *, void *arg );
-void alloc_for_all_arenas( arena_iterator_t iter, void *arg );
+typedef void (*arena_iterator_t)( persistent_arena_t *, void *arg1, void *arg2 );
+void alloc_for_all_arenas( arena_iterator_t iter, void *arg1, void *arg2 );
 
 
 extern int is_object_storage_initialized( void );
@@ -187,8 +203,19 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size );
 
 
 
+// -----------------------------------------------------------------------
+// Scan object tree to find refcount errors
+// -----------------------------------------------------------------------
+
+typedef struct memory_scan_report
+{
+    int             n_objects;       // Number of objects traced - NOTE THAT DUPS POSSIBLE
+    int             max_ref_count;   // Max ref count in this tree
+    int             min_depth;       // Min depth we found
+} memory_scan_report_t;
 
 
-
+void pvm_scan_subtree( pvm_object_t start, memory_scan_report_t *report, int max_depth );
+void pvm_scan_print_subtree( pvm_object_t start, int max_depth );
 
 #endif // PVM_ALLOC_H

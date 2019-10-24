@@ -21,7 +21,7 @@
 
 #define DEBUG_MSG_PREFIX "vm.alloc"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -88,16 +88,16 @@ void pvm_alloc_clear_mem( void );
 // ------------------------------------------------------------
 
 
-void alloc_for_all_arenas( arena_iterator_t iter, void *arg )
+void alloc_for_all_arenas( arena_iterator_t iter, void *arg1, void *arg2 )
 {
-    iter( &curr_int_arena, arg );
-    iter( &curr_stack_arena, arg );
-    iter( &curr_small_arena, arg );
-    iter( &curr_static_arena, arg );
+    iter( &curr_int_arena, arg1, arg2 );
+    iter( &curr_stack_arena, arg1, arg2 );
+    iter( &curr_small_arena, arg1, arg2 );
+    iter( &curr_static_arena, arg1, arg2 );
 
     int i;
     for( i = 0; i < N_PER_SIZE_ARENAS; i++ )
-        iter( per_size_arena + i, arg );
+        iter( per_size_arena + i, arg1, arg2 );
 }
 
 
@@ -114,7 +114,15 @@ void alloc_for_all_arenas( arena_iterator_t iter, void *arg )
         LOG_FLOW( 1, "Alloc @%p - " __STRING(_arena) , as_curr ); \
         } while(0)
 
-
+/**
+ * 
+ * @brief Main arenas engine init entry point. Create or restore arenas.
+ * 
+ * If run in empty persistent RAM - creates arenas.
+ * 
+ * If we are restarted from snapshot - find ones.
+ * 
+**/
 void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
 {
     if( is_object_storage_initialized() )
@@ -142,9 +150,9 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
 
     ASSIGN_MEMORY( &curr_static_arena, as_curr, 4096*1024, as_total ); // TODO make it bigger
     
-    ASSIGN_MEMORY( &curr_int_arena, as_curr, as_total/10, as_total ); 
-    ASSIGN_MEMORY( &curr_small_arena, as_curr, as_total/10, as_total );
-    ASSIGN_MEMORY( &curr_stack_arena, as_curr, as_total/10, as_total );
+    ASSIGN_MEMORY( &curr_int_arena, as_curr,   PREV_PAGE_ALIGN(as_total/10), as_total ); 
+    ASSIGN_MEMORY( &curr_small_arena, as_curr, PREV_PAGE_ALIGN(as_total/10), as_total );
+    ASSIGN_MEMORY( &curr_stack_arena, as_curr, PREV_PAGE_ALIGN(as_total/10), as_total );
 
     int i;
     for( i = N_PER_SIZE_ARENAS - 1; i >= 0; i-- )
@@ -167,9 +175,17 @@ void alloc_init_arenas( void * _pvm_object_space_start, size_t o_space_size )
         // Give it all to smallest one just to fill to the end of address space
         // Or else vm code snap verificator whines
         if( 0 == i )
+        {
+            // Last one, use all the rest of memory
             ASSIGN_MEMORY( per_size_arena + i, as_curr, as_total, as_total );
+        }
         else
-            ASSIGN_MEMORY( per_size_arena + i, as_curr, as_total/2, as_total );
+        {
+            // Not last, page-align arena end (and start of next one)
+            size_t arena_size = PREV_PAGE_ALIGN( as_total/2 );
+            LOG_INFO_( 0, "new arena size = %d %x", arena_size, arena_size );
+            ASSIGN_MEMORY( per_size_arena + i, as_curr, arena_size, as_total );
+        }
     }
 
     // Create arena header objects in memory
@@ -197,6 +213,11 @@ void init_arena_flags( void )
 }
 
 
+/**
+ * 
+ * @brief Find existing arenas in memory.
+ * 
+**/
 
 static void alloc_find_arenas( void * start, size_t size )
 {
@@ -243,10 +264,19 @@ static void alloc_find_arenas( void * start, size_t size )
     }
 }
 
-
-static void alloc_clear_arena( persistent_arena_t *ap, void *arg)
+/**
+ * 
+ * @brief Build arena data structures in memory.
+ * 
+ * Create arena descriptor and huge unallocated arena-sized object.
+ * 
+ * @param arg Ignored.
+ * 
+**/
+static void alloc_clear_arena( persistent_arena_t *ap, void *arg1, void *arg2 )
 {
-    (void) arg;
+    (void) arg1;
+    (void) arg2;
 
     if( (ap->base == 0) || (ap->size == 0) )
     {
@@ -288,7 +318,7 @@ void pvm_alloc_clear_mem( void )
 {
     assert( pvm_object_space_start != 0 );
 
-    alloc_for_all_arenas( alloc_clear_arena, 0 );
+    alloc_for_all_arenas( alloc_clear_arena, 0, 0 );
 }
 
 
@@ -506,11 +536,22 @@ static void alloc_unload_arena( persistent_arena_t *our )
 
 //static rgba_t calc_object_pixel_color( int elem, int units_per_pixel );
 static void paint_arena_memory_map(window_handle_t w, rect_t *r, persistent_arena_t * a );
+static void mem_map_init_size(persistent_arena_t * a, void *arg, void *arg2);
+static void mem_map_paint_arena(persistent_arena_t * a, void *arg1, void *arg2);
+
+
+struct arena_visualisation_data 
+{
+    int vertical_start_for_arena;
+    int vertical_pixels_per_arena;
+};
+
+static int paint_object_memory_map_init_done = 0;
 
 
 /**
  * 
- * @brief Generic painter for any allocator using us.
+ * @brief Paint persistent memory map.
  * 
  * Used in debug window.
  * 
@@ -518,64 +559,24 @@ static void paint_arena_memory_map(window_handle_t w, rect_t *r, persistent_aren
  * @param[in] r Rectangle to paint inside
  * 
 **/
-
-//#define ARENAS (N_PER_SIZE_ARENAS+4)
-#define ARENAS N_PER_SIZE_ARENAS
-
-static int vertical_start_for_arena[ARENAS];
-static int vertical_pixels_per_arena[ARENAS];
-
 void paint_object_memory_map(window_handle_t w, rect_t *r )
 {
-    int i;
-
     if(!object_allocator_inited) return;
     
-    //pvm_memcheck();
-
-    if(vertical_pixels_per_arena[0] == 0)
-    {
-        int y = 0;
-
-        size_t omem_bytes = pvm_object_space_end - pvm_object_space_start;
-
-        for( i = 0; i < ARENAS; i++) 
+    if(!paint_object_memory_map_init_done)
         {
-            persistent_arena_t *ap;
+            rect_t prepare = *r;
+            prepare.y = 0;
 
-            if( i < N_PER_SIZE_ARENAS )
-                ap = per_size_arena+i;
-            else
-            {
-                return; // TODO other arenas TODO put to array too?
-            }
-            
-
-            size_t arena_bytes = ap->size;
-            size_t percentage = arena_bytes * 100 / omem_bytes;
-
-            int vpixels = (r->ysize * percentage) / 100;
-            LOG_FLOW( 0, "omem=%uK, arena mem=%uK, mem %%=%u, ysize %d, ysize part = %d",
-                omem_bytes/1024, arena_bytes/1024, percentage, r->ysize, vpixels
-                );
-
-            vertical_start_for_arena[i] = y;
-            vertical_pixels_per_arena[i] = vpixels;
-            y += vpixels;
+            alloc_for_all_arenas( mem_map_init_size, &prepare, 0 );
+            paint_object_memory_map_init_done = 1;
         }
-    }
 
     // now paint
-    for( i = 0; i < ARENAS; i++) 
-    {
-        rect_t ar = *r;
-        ar.y = vertical_start_for_arena[i];
-        ar.ysize = vertical_pixels_per_arena[i];
+    alloc_for_all_arenas( mem_map_paint_arena, r, w );
 
-        hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock - must be per arena
-        paint_arena_memory_map( w, &ar, per_size_arena+i );
-        hal_mutex_unlock( vm_alloc_mutex );
-    }
+    //pvm_memcheck();
+
 
 }
 
@@ -685,5 +686,44 @@ static rgba_t calc_object_pixel_color( int elem, int units_per_pixel )
 }
 */
 
+static void mem_map_init_size(persistent_arena_t *ap, void *arg1, void *arg2)
+{
+    (void) arg2;
+    rect_t *prepare = arg1;
+
+    size_t omem_bytes = pvm_object_space_end - pvm_object_space_start;
+
+ 
+    if( ap->vis_data == 0 )
+        ap->vis_data = calloc( 1, sizeof(struct arena_visualisation_data) );
+
+    size_t arena_bytes = ap->size;
+    size_t percentage = arena_bytes * 100 / omem_bytes;
+
+    int vpixels = (prepare->ysize * percentage) / 100;
+    LOG_FLOW( 0, "omem=%uK, arena mem=%uK, mem %%=%u, ysize %d, ysize part = %d",
+        omem_bytes/1024, arena_bytes/1024, percentage, prepare->ysize, vpixels
+        );
+
+    ap->vis_data->vertical_start_for_arena = prepare->y;
+    ap->vis_data->vertical_pixels_per_arena = vpixels;
+
+    prepare->y += vpixels;
+}
+
+
+static void mem_map_paint_arena(persistent_arena_t *ap, void *arg1, void *arg2)
+{
+    rect_t *r = arg1;
+    window_handle_t w = arg2;
+    rect_t ar = *r;
+
+    ar.y     = ap->vis_data->vertical_start_for_arena;
+    ar.ysize = ap->vis_data->vertical_pixels_per_arena;
+
+    hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock - must be per arena
+    paint_arena_memory_map( w, &ar, ap );
+    hal_mutex_unlock( vm_alloc_mutex );
+}
 
 
