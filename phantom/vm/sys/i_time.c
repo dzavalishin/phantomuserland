@@ -59,6 +59,38 @@ static int si_time_time_16( pvm_object_t me, pvm_object_t *ret, struct data_area
 }
 
 
+static int si_time_sleepSec_17( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    (void) me;
+    //struct data_area_4_udp      *da = pvm_data_area( me, udp );
+    DEBUG_INFO;
+
+    CHECK_PARAM_COUNT(1);
+    int seconds = AS_INT(args[0]);
+
+    vm_unlock_persistent_memory();
+    hal_sleep_msec( seconds * 1000 );
+    vm_lock_persistent_memory();
+
+    SYSCALL_RETURN_NOTHING;
+}
+
+
+static int si_time_sleepMSec_18( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    (void) me;
+    //struct data_area_4_udp      *da = pvm_data_area( me, udp );
+    DEBUG_INFO;
+
+    CHECK_PARAM_COUNT(1);
+    int msec = AS_INT(args[0]);
+
+    vm_unlock_persistent_memory();
+    hal_sleep_msec( msec );
+    vm_lock_persistent_memory();
+
+    SYSCALL_RETURN_NOTHING;
+}
 
 
 
@@ -66,10 +98,7 @@ static int si_time_time_16( pvm_object_t me, pvm_object_t *ret, struct data_area
 
 
 
-
-
-
-syscall_func_t  syscall_table_4_time[18] =
+syscall_func_t  syscall_table_4_time[19] =
 {
     &si_void_0_construct,               &si_void_1_destruct,
     &si_void_2_class,                   &si_void_3_clone,
@@ -81,8 +110,8 @@ syscall_func_t  syscall_table_4_time[18] =
     &invalid_syscall,                   &invalid_syscall,
     &invalid_syscall,                   &si_void_15_hashcode,
     // 16
-    &si_time_time_16,                   &invalid_syscall,
-
+    &si_time_time_16,                   &si_time_sleepSec_17,
+    &si_time_sleepMSec_18,
 
 
 };
