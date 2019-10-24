@@ -22,7 +22,9 @@
 // Internals
 //---------------------------------------------------------------------------
 
-extern hal_cond_t   	dpc_thread_sleep_stone;
+//extern hal_cond_t   	dpc_thread_sleep_stone;
+extern hal_sem_t        dpc_runnable_available;
+
 extern volatile int	dpc_stop_request;
 extern volatile int     dpc_init_ok;
 
@@ -107,9 +109,16 @@ void dpc_request_trigger(dpc_request *me, void *_arg)
     //spinlock_unlock( &dpc_request_lock, "trigger_dpc" );
     if( ie ) hal_sti();
 
-    hal_cond_signal( &dpc_thread_sleep_stone );
+    //hal_cond_signal( &dpc_thread_sleep_stone );
+    hal_sem_release( &dpc_runnable_available );
 }
 
+// -----------------------------------------------------------------------
+// Run function in a separate thread using thread pool
+// -----------------------------------------------------------------------
 
+typedef void (*runnable_t)( void *arg );
+
+void run_in_thread_pool( runnable_t, void *arg );
 
 #endif // KERNEL_DPC_H
