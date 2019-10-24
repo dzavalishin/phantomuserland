@@ -488,6 +488,9 @@ void dumpo( addr_t addr )
 
         struct data_area_4_string *da = (struct data_area_4_string *)&(o->da);
         int len = da->length;
+        // limit to realistic size
+        if( len < 0 ) len = 0;
+        if( len > 1024 ) len = 1024;
         unsigned const char *sp = da->data;
         while( len-- )
         {
