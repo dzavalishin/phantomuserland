@@ -650,6 +650,8 @@ static int si_string_20_parse_json( pvm_object_t me, pvm_object_t *ret, struct d
     DEBUG_INFO;    
     CHECK_PARAM_COUNT(0);
     pvm_object_t top = pvm_json_parse_ext( pvm_get_str_data(me), pvm_get_str_len(me) );
+    // TODO kill me
+    //pvm_scan_print_subtree( top, 20 );
     SYSCALL_RETURN( top );
 }
 
