@@ -526,3 +526,25 @@ err:
 
 #endif
 
+
+
+
+
+int udp_open(void **prot_data) { return -1; }
+int udp_bind(void *prot_data, void *addr) { return -1; }
+//errno_t udp_connect(void *prot_data, i4sockaddr *addr);
+//errno_t udp_listen(void *prot_data);
+//errno_t udp_accept(void *prot_data, i4sockaddr *addr, void **new_socket);
+int udp_close(void *prot_data) { return 0; }
+
+ssize_t udp_recvfrom(void *prot_data, void *buf, ssize_t len, void *saddr, int flags, long long timeout) { return -1; }
+ssize_t udp_sendto(void *prot_data, const void *buf, ssize_t len, void *addr) { return -1; }
+
+
+
+
+
+
+
+
+
