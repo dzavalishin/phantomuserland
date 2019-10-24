@@ -4,8 +4,8 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
+ *
+ * Shell - class that is started from boot env to let user run apps. Now just runs some test code.
  *
  *
 **/
@@ -16,9 +16,12 @@ import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
 //import .internal.mutex;
-import .internal.connection;
+import .internal.time;
+import .internal.stat;
+
 import .ru.dz.phantom.system.runnable;
 import .ru.dz.phantom.system.shell_callback;
+
 //import .test.suite;
 
 import .ru.dz.demo.start;
@@ -26,7 +29,7 @@ import .ru.dz.demo.start;
 attribute const * ->!;
 
 
-//class shell 
+//class shell
 class shell extends runnable
 {
     var console : .internal.io.tty;
@@ -41,30 +44,17 @@ class shell extends runnable
     var white : int;
 
     var win : .internal.window;
-    var conn : .internal.connection;
+    var timer : .internal.time;
 
-    //var fio : .internal.connection;
 
-    var stat_conn : .internal.connection;
+    var stat : .internal.stat;
 
     var cb : shell_callback;
 
     //var mtx : .internal.mutex;
 
     var demo : .ru.dz.demo.start;
-/*
-    void init()
-    {
-        //mtx = new .internal.mutex();
-        //mtx.lock();
-    }
 
-
-    void go()
-    {
-        //mtx.unlock();
-    }
-*/
     void run(var parent_object @const ) [8]
     {
 
@@ -87,35 +77,24 @@ class shell extends runnable
 
         console.moveWindow(10,10);
         console.setTitle("VM Shell");
-		console.setbgcolor( 0xFFFFFFFF );
-		console.clear();
+        console.setbgcolor( 0xFFFFFFFF );
+        console.clear();
 
-		// test of fio connection
-		//fio = new .internal.connection();
-        //fio.connect("fio:/amnt1/fio_log.txt");
-		//fio.block("written from phantom code", 1);
+        timer = new .internal.time();
 
-        // test of connections
-        conn = new .internal.connection();
-        conn.connect("tmr:");
+        // test of connections - TODO test new timer callback
+        //conn = new .internal.time();
 
-        cb = new shell_callback();
-        cb.init( console );
+        //cb = new shell_callback();
+        //cb.init( console );
 
-        conn.setCallback( cb, 17 );
+        //conn.runLater( cb, 20000 );
 
-        conn.invoke( 20000, 0 ); // op 0 - set timer, arg - msecs (20 sec)
 
-        stat_conn = new .internal.connection();
-        stat_conn.connect("stt:");
-/* moved to run in boot thread
-		// Run tests in plib/sys/src/test
-		var suite : .test.suite;
-		suite = new .test.suite();
-		suite.run();
-*/
-		demo = new .ru.dz.demo.start();
-		demo.run(console);
+        stat = new .internal.stat();
+
+        demo = new .ru.dz.demo.start();
+        demo.run(console);
 
         while(1)
         {
@@ -127,12 +106,12 @@ class shell extends runnable
             console.putws(incr.toString());
             console.putws("  ");
 
-            conn.block(null, 500);
+            timer.sleepMsec( 500 );
 
-            stat_val = stat_conn.block( 26, 0 ); // blk io per sec
+            stat_val = stat.getStat( 26, 0 ); // blk io per sec
             console.putws("blk io =. ");
 
-            cpu_idle = stat_conn.block( 0, 5 ); // cpu 0 idle
+            cpu_idle = stat.getIdle(); // cpu 0 idle
             console.putws("cpu idle = ");
             console.putws(cpu_idle.toString());
             console.putws("\n");
@@ -158,15 +137,15 @@ class shell extends runnable
             win.setFg( 0xFF0000FF ); // Blue
             win.drawLine( stat_pos-1, old_idle, 1, cpu_idle-old_idle );
 
-            old_idle = cpu_idle;            
+            old_idle = cpu_idle;
             stat_pos = stat_next_pos;
-            
+
             /*
-            if( stat_pos >= win.getXSize()-1 )
-	        win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
-            else
-                stat_pos = stat_pos + 1;
-            */
+             if( stat_pos >= win.getXSize()-1 )
+             win.scrollHor( 0, 0, win.getXSize(), win.getYSize(), 0-1 );
+             else
+             stat_pos = stat_pos + 1;
+             */
 
             win.update();
 

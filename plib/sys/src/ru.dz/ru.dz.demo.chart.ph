@@ -14,9 +14,7 @@ package .ru.dz.demo;
 import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
-import .internal.connection;
-//import .ru.dz.phantom.system.runnable;
-//import .internal.thread;
+import .internal.time;
 
 attribute const * ->!;
 
@@ -31,7 +29,7 @@ class chart // extends runnable
     var stat_next_pos :  int;
 
     var win : .internal.window;
-    var timer : .internal.connection;
+    var timer : .internal.time;
 
 
     void start()
@@ -54,18 +52,13 @@ class chart // extends runnable
         stat_pos = 0;
         old_idle = 0;
 
-        //white = 0xFFFFFFFF;
-
-
-        // test of connections
-        timer = new .internal.connection();
-        timer.connect("tmr:");
-
+        timer = new .internal.time();
 
         while(1)
         {
 
-            timer.block(null, 500);
+            timer.sleepSec(50);
+
             //stat_val = stat_conn.block( 26, 0 ); // blk io per sec
             //cpu_idle = stat_conn.block( 0, 5 ); // cpu 0 idle
 

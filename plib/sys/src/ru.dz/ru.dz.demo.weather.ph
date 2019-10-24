@@ -16,7 +16,7 @@ import .internal.io.tty;
 import .internal.window;
 import .internal.bitmap;
 import .internal.tcp;
-import .internal.connection;
+import .internal.time;
 import .internal.directory;
 import .internal.long;
 //import .ru.dz.phantom.system.runnable;
@@ -32,7 +32,7 @@ class weather
     var wbmp : .internal.bitmap[];
 
     var win : .internal.window;
-    var sleep : .internal.connection;
+    var sleep : .internal.time;
     //var curl : .internal.connection;
     var http : .internal.tcp;
 
@@ -80,12 +80,9 @@ class weather
 
 		//console.putws("Weather win: done init\n");
 
-		sleep = new .internal.connection();
-        sleep.connect("tmr:");
+		sleep = new .internal.time();
 
-        http = new .internal.tcp ();
-		//curl = new .internal.connection();
-		//curl.connect("url:http://smart.:8080/rest/items/Current_Outdoor_Air_Temp/state");
+        http = new .internal.tcp();
 
 		/*
 		temperature = curl.block(null, 0);
@@ -133,7 +130,7 @@ class weather
 
 			console.putws("Weather win: sleep\n");
 
-            sleep.block(null, 60000);
+            sleep.sleepSec( 60 );
 
             xpos = xpos+1;
             if( xpos > 358 ) xpos = 17;
@@ -148,8 +145,7 @@ class weather
 
         i = 0;
 
-        sleep = new .internal.connection();
-        sleep.connect("tmr:");
+        sleep = new .internal.time();
 
         //stat_conn = new .internal.connection();
         //stat_conn.connect("stt:");
@@ -160,7 +156,7 @@ class weather
         {
 			console.putws("Weather win: sleep\n");
 
-            sleep.block(null, 500);
+            sleep.sleepMsec( 500 );
 
 			console.putws("Weather win: repaint\n");
             
