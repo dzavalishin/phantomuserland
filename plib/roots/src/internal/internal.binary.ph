@@ -4,15 +4,12 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
  *
+ * Binary object - just an array of bytes. Used as a container for
+ * bitmaps, for example.
  *
-**/
-
-package .internal;
-
-/**
+ * TODO: Must be dynamically resizeable.
+ *
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will bever load its
@@ -21,14 +18,9 @@ package .internal;
  *
 **/
 
-/**
- *
- * Binary object - just an array of bytes. Used as a container for
- * bitmaps, for example.
- *
- * TODO: Must be dynamically resizeable.
- *
-**/
+package .internal;
+
+
 
 class binary
 {

@@ -4,16 +4,11 @@
  *
  * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * Double.
+ *
+ * TODO: fix toString
  *
  *
-**/
-
-package .internal;
-
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -22,13 +17,9 @@ package .internal;
  *
 **/
 
-/**
- *
- * Double.
- *
- * TODO: fix toString
- *
-**/
+package .internal;
+
+
 
 class .internal.double
 {

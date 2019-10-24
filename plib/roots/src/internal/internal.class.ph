@@ -4,15 +4,11 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
  *
+ * Classes are objects of this class.
  *
-**/
-
-package .internal;
-
-/**
+ * TODO: getName, getShortName, getFullName, isSubclassOf, isParentOf
+ *
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -21,19 +17,14 @@ package .internal;
  *
 **/
 
-/**
- *
- * Classes are objects of this class.
- *
- * TODO: getName, getShortName, getFullName, isSubclassOf
- *
-**/
+package .internal;
+
 
 class .internal."class"
 {
 
 	// Not implemented?
-	.internal."class" newClass() [8] {  }
+	//.internal."class" newClass() [8] {  }
 
 };
 

@@ -4,17 +4,8 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * Root of all evil. :)
  *
- *
-**/
-
-package .internal;
-
-import .internal."class";
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -23,11 +14,10 @@ import .internal."class";
  *
 **/
 
-/**
- *
- * Root of all evil. :)
- *
-**/
+package .internal;
+
+import .internal."class";
+
 
 class .internal.object
 {

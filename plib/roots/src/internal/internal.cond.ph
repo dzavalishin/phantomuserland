@@ -4,16 +4,8 @@
  *
  * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * Cond.
+ * Cond. Not tested.
  *
- *
-**/
-
-package .internal;
-
-import .internal.mutex;
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -21,6 +13,11 @@ import .internal.mutex;
  * class definition must be synchronized with VM implementation.
  *
 **/
+
+package .internal;
+
+import .internal.mutex;
+
 
 class .internal.cond
 {

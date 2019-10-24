@@ -6,12 +6,8 @@
  *
  * Simple map class inplemented in C.
  *
+ * Actually an hashmap with string (or arbitrary binary) as key.
  *
-**/
-
-package .internal;
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -20,11 +16,8 @@ package .internal;
  *
 **/
 
-/**
- *
- * Directory. Actually an hashmap with string (or arbitrary binary) as key.
- *
-**/
+package .internal;
+
 
 class .internal.directory
 {
@@ -32,6 +25,7 @@ class .internal.directory
 
 
 // TODO key can be of any type, modify syscall code and remove type here
+
 	int put( var key : .internal.string, var value )	[8] {}
 	.internal.object get( var key ) 			[9] {}
 
@@ -39,7 +33,7 @@ class .internal.directory
 
 	int size() 						[11] {}
 
-        // iterator iterate() [12] {}
+    // iterator iterate() [12] {}
 };
 
 

@@ -4,21 +4,16 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: Yes
- * Preliminary: Yes
+ *
+ * Object of this class is synthesized by kernel on OS
+ * instance creation. Very early and special kernel
+ * interface methods.
  *
  *
 **/
 
 package .internal;
 
-/**
- *
- * Object of this class is synthesized by kernel on OS
- * instance creation. Very early and special kernel
- * interface methods.
- *
-**/
 
 import .phantom.osimpl;
 import .internal.binary;
@@ -73,6 +68,12 @@ class bootstrap
     **/
 
     .internal.binary createBinary( var sizeBytes : int ) [19] {}
+
+    /**
+     *
+     * Sets screen backgroud. TODO - unfinished, does not survive restart.
+     *
+    **/
 
     void setScreenBackground( var bg : .internal.bitmap ) [20] {}
 

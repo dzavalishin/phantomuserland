@@ -4,15 +4,12 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * How to access world. Gives access to own thread object 
+ * which, in turn, can give access to global OS services.
+ *
+ * TODO: directly access some really global things?
  *
  *
-**/
-
-package .internal;
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -21,16 +18,9 @@ package .internal;
  *
 **/
 
-import .internal."thread";
+package .internal;
 
-/**
- *
- * How to access world. Gives access to own thread object 
- * which, in turn, can give access to global OS services.
- *
- * TODO: directly access some really global things?
- *
-**/
+import .internal."thread";
 
 class .internal.world
 {

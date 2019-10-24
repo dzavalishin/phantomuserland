@@ -4,17 +4,11 @@
  *
  * Copyright (C) 2005-2013 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * Long.
+ *
+ * TODO: fix toString
  *
  *
-**/
-
-package .internal;
-
-//import .internal."class";
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -23,13 +17,9 @@ package .internal;
  *
 **/
 
-/**
- *
- * Long.
- *
- * TODO: fix toString
- *
-**/
+package .internal;
+
+//import .internal."class";
 
 class .internal.long
 {

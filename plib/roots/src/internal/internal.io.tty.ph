@@ -15,11 +15,6 @@
  *
  * TODO: getwc is temp off
  *
-**/
-
-package .internal.io;
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -28,10 +23,8 @@ package .internal.io;
  *
 **/
 
-/**
- *
- *
-**/
+package .internal.io;
+
 
 class tty 
 {

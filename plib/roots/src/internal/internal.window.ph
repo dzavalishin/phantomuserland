@@ -4,16 +4,10 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * OS level window object.
+ * TODO: Must be dynamically resizeable.
  *
  *
-**/
-
-package .internal;
-import .ru.dz.phantom.handler;
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will bever load its
@@ -22,12 +16,9 @@ import .ru.dz.phantom.handler;
  *
 **/
 
-/**
- *
- * OS level window object.
- * TODO: Must be dynamically resizeable.
- *
-**/
+package .internal;
+import .ru.dz.phantom.handler;
+
 
 class window
 {
@@ -47,7 +38,7 @@ class window
     void    setBg( var bg : int ) [23] {}
     void    setFg( var fg : int ) [22] {}
 
-    // todo will need font parameter
+    // todo will need font parameter or setFont 
     void    drawString( var x : int, var y : int, var s : string ) [24] {}
     void    drawImage( var x : int, var y : int, var img : .internal.object ) [25] {} // error - param is bitmap
     // One can put bitmap with basic drawImage and redraw part with this call

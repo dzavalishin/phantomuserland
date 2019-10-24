@@ -4,18 +4,11 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * String. Can contain any binary data and 
+ * sometimes is used as binary buffer.
  *
+ * When used in a string context, treated as UTF-8.
  *
-**/
-
-package .internal;
-
-import .internal.int;
-import .internal.long;
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -24,18 +17,19 @@ import .internal.long;
  *
 **/
 
-/**
- *
- * String. For now can contain any binary junk and 
- * sometimes is used as binary buffer, which is wrong.
- *
-**/
+package .internal;
+
+import .internal.int;
+import .internal.long;
+
 
 class .internal.string
 {
 	int equals(var object) [4] { }
+
 	.internal.string substring( var index : int, var length : int ) [8] {}
-// todo short version of substring 
+
+    // todo short version of substring 
 
 	int charAt( var index : int ) [9] {}
 

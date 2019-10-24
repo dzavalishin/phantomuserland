@@ -4,14 +4,8 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Mutex.
+ * Mutex. Untested/
  *
- *
-**/
-
-package .internal;
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -19,6 +13,9 @@ package .internal;
  * class definition must be synchronized with VM implementation.
  *
 **/
+
+package .internal;
+
 
 class .internal.mutex
 {

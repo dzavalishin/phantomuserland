@@ -4,15 +4,9 @@
  *
  * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * IO - connection to Unix personality, file systems and so on. 
+ * IO - connection to Unix personality, file systems, devices and so on. 
  *
  *
- *
-**/
-
-package .internal;
-
-/**
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -20,6 +14,8 @@ package .internal;
  * class definition must be synchronized with VM implementation.
  *
 **/
+
+package .internal;
 
 
 class io

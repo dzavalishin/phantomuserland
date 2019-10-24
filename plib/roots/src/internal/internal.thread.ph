@@ -4,9 +4,15 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * Thread. 
  *
+ * Note that object of this type is NEVER TO BE CREATED from userland.
+ *
+ *
+ * This class has internal implementation (as everything in
+ * .internal package). It means that VM will never load its
+ * bytecode, and internal version will be used instead. This
+ * class definition must be synchronized with VM implementation.
  *
 **/
 
@@ -16,31 +22,17 @@ import .phantom.osimpl;
 import .phantom.user;
 import .phantom.environment;
 
-/**
- *
- * This class has internal implementation (as everything in
- * .internal package). It means that VM will never load its
- * bytecode, and internal version will be used instead. This
- * class definition must be synchronized with VM implementation.
- *
-**/
-
-/**
- *
- * Thread. 
- *
-**/
 
 class .internal."thread"
 {
 
 	.internal.string toString() [5] { }
 
-        /** pause thread */
-        void pause() [10] {}
+    /** pause thread */
+    void pause() [10] {}
 
-        /** let thread run again */
-        void unpause() [11] {}
+    /** let thread run again */
+    void unpause() [11] {}
 
         /**
          *
@@ -51,7 +43,7 @@ class .internal."thread"
          * @See .phantom.osimpl
          *
         **/
-        .phantom.osimpl getOsInterface() [14] { }
+    .phantom.osimpl getOsInterface() [14] { }
 
         /**
          *
@@ -59,14 +51,15 @@ class .internal."thread"
          * threads this can be null.
          *
         **/
-        .phantom.user getUser() [13] {}
+    .phantom.user getUser() [13] {}
 
         /**
          *
          * Return this thread's environment (Unix-style).
          *
         **/
-        .phantom.environment getEnvironment() [12] {}
+    .phantom.environment getEnvironment() [12] {}
+
 };
 
 

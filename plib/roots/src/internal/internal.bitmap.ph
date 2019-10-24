@@ -4,15 +4,11 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
  *
+ * Bitmap - RGBA + size;
  *
-**/
-
-package .internal;
-
-/**
+ * TODO: Getsize, load from binary, more formats to parse.
+ *
  *
  * This class has internal implementation (as everything in
  * .internal package). It means that VM will never load its
@@ -21,13 +17,8 @@ package .internal;
  *
 **/
 
-/**
- *
- * Bitmap - RGBA + size;
- *
- * TODO: Getsize, load from binary, more formats to parse.
- *
-**/
+package .internal;
+
 
 import .internal.io.tty;
 
@@ -37,6 +28,6 @@ class .internal.bitmap
     void loadFromString(var src : string) [8] {}
 
     // That's temp - define some 'paintable' interface?
-    void paintTo( var window : .internal.io.tty, var xpos : int, var ypos : int ) [9] {}
+    //void paintTo( var window : .internal.io.tty, var xpos : int, var ypos : int ) [9] {}
 };
 
