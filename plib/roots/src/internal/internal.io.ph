@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * IO - connection to Unix personality, file systems, devices and so on. 
+ * IO - path to Unix personality, file systems, devices and so on. 
  *
  *
  *
