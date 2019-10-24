@@ -478,6 +478,9 @@ errno_t net_curl( const char *url, char *obuf, size_t obufsize, const char *head
         buf[nread] = 0;
         strlcat( obuf, buf, obufsize );
         //bytes_recvd += nread;
+
+        if( nread < sizeof(buf)-1 )
+            break;
     }
 
 #else
