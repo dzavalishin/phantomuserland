@@ -32,6 +32,7 @@ roots:
 	@$(PLC) src/internal/internal.tcp.ph
 	@$(PLC) src/internal/internal.io.ph 
 	@$(PLC) src/internal/internal.time.ph 
+	@$(PLC) src/internal/internal.mutex.ph 
 
 %.pc: %.ph
 	@echo -:- $< - $@

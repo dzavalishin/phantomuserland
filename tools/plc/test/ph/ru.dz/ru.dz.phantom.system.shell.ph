@@ -17,7 +17,7 @@ import .internal.io.tty;
 import .internal.window;
 import .internal.mutex;
 import .internal.connection;
-import .ru.dz.phantom.system.runnable;
+import .phantom.runnable;
 import .ru.dz.phantom.system.shell_callback;
 
 attribute const * ->!;

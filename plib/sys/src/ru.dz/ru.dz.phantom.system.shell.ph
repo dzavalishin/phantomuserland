@@ -19,8 +19,10 @@ import .internal.window;
 import .internal.time;
 import .internal.stat;
 
-import .ru.dz.phantom.system.runnable;
+import .phantom.runnable;
 import .ru.dz.phantom.system.shell_callback;
+
+import .test.test_mutex.test_mutex;
 
 //import .test.suite;
 
@@ -30,7 +32,7 @@ attribute const * ->!;
 
 
 //class shell
-class shell extends runnable
+class shell extends .phantom.runnable
 {
     var console : .internal.io.tty;
     var incr :  int;
@@ -54,6 +56,7 @@ class shell extends runnable
     //var mtx : .internal.mutex;
 
     var demo : .ru.dz.demo.start;
+	var test_app : .test.test_mutex.test_mutex;
 
     void run(var parent_object @const ) [8]
     {
@@ -92,6 +95,9 @@ class shell extends runnable
 
 
         stat = new .internal.stat();
+
+		test_app = new .test.test_mutex.test_mutex();
+		test_app.start();
 
         demo = new .ru.dz.demo.start();
         demo.run(console);

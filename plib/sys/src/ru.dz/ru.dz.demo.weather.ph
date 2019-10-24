@@ -19,7 +19,7 @@ import .internal.tcp;
 import .internal.time;
 import .internal.directory;
 import .internal.long;
-//import .ru.dz.phantom.system.runnable;
+//import .phantom.runnable;
 
 attribute const * ->!;
 

@@ -108,22 +108,25 @@ pvm_exec_run_method(
 /**
  * @brief Run new runnable in thread.
  * 
- * @note Object must be of '.ru.dz.phantom.system.runnable' class, we run method no. 8.
+ * @param object Object, whci method no. 8 we will run.
+ * @param arg    Will be passed as argument.
+ * 
+ * @note Object must be of '.phantom.runnable' class, we run method no. 8.
  * 
 **/
-errno_t pvm_run_new_thread( pvm_object_t object ) //, int n_args, pvm_object_t args[] )
+errno_t pvm_run_new_thread( pvm_object_t object, pvm_object_t arg ) //, int n_args, pvm_object_t args[] )
 {
     // Don't need do SYS_FREE_O(object) since we store it as 'this'
 
     // Check object class to be runnable or subclass
-    if( !pvm_object_class_is_or_child( object, pvm_get_class_noload(".ru.dz.phantom.system.runnable") ) )
+    if( !pvm_object_class_is_or_child( object, pvm_get_class_noload(".phantom.runnable") ) )
         return EINVAL;
     
     pvm_object_t new_cf = pvm_create_call_frame_object();
     struct data_area_4_call_frame* cfda = pvm_object_da( new_cf, call_frame );
 
-    //pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), me ); // No args
-    pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), 0); // pass him real number of parameters
+    pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), arg ); // No args
+    pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), 1); // pass him real number of parameters
 
     pvm_object_t code = pvm_exec_find_method( object, 8, 0 ); // last arg is used in debug only
     pvm_exec_set_cs( cfda, code );

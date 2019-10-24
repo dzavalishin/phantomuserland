@@ -15,6 +15,9 @@ package .phantom;
 //import .phantom.util.map;
 // import .internal.bitmap;
 
+import .internal.world;
+import .phantom.runnable;
+
 /**
  *
  * Application: user-accessible object such as document, movie, etc.
@@ -23,14 +26,29 @@ package .phantom;
  *
 **/
 
-class application
+class application extends .phantom.runnable
 {
+	.internal.world w;
+
     // TODO! Constructor!
     //.phantom.util.map env;
 
+	void application()
+	{
+		w = new .internal.world();
+	}
 
-    void run( var command_line: .internal.string )
+	void start()
+	{
+		//var me : .phantom.runnable;
+		//me = this; // poor man's cast
+		//w.startThread( me, "" );
+		w.startThread( this, "" );
+	}
+
+    void run( var arg )
     {
+		throw "abstract app started";
     }
 
 	// tell something about self

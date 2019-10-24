@@ -109,8 +109,10 @@ pvm_object_t     pvm_exec_lookup_class_by_name( pvm_object_t name );
  * 
  * Run new VM instance in a new thread.
  * 
+ * @param object must be runnable
+ * 
 **/
-errno_t pvm_run_new_thread( pvm_object_t object );
+errno_t pvm_run_new_thread( pvm_object_t object, pvm_object_t arg );
 
 
 /**

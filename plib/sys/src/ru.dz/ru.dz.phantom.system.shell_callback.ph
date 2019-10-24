@@ -15,7 +15,7 @@ import .internal.io.tty;
 import .internal.window;
 import .internal.time;
 import .internal.io;
-import .ru.dz.phantom.system.runnable;
+import .phantom.runnable;
 
 attribute const * ->!;
 

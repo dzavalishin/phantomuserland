@@ -38,7 +38,7 @@ import .ru.dz.windows.root;
 
 import .ru.dz.phantom.system.thread_test;
 import .ru.dz.phantom.system.shell;
-import .ru.dz.phantom.system.runnable;
+import .phantom.runnable;
 
 import .ru.dz.phantom.backgrounds;
 import .internal.bitmap;
@@ -79,7 +79,7 @@ class boot
 
 //    var run : .ru.dz.phantom.system.thread_test;
 //    var run : .ru.dz.phantom.system.shell;
-    var run : .ru.dz.phantom.system.runnable;
+    var run : .phantom.runnable;
 
     var shell_name : string;
     var shell_class : .internal."class";

@@ -1811,15 +1811,31 @@ static int si_world_9_startThread( pvm_object_t o, pvm_object_t *ret, struct dat
     (void)o;
     DEBUG_INFO;
 
-    CHECK_PARAM_COUNT(1);
+    CHECK_PARAM_COUNT(2);
     pvm_object_t entry = args[0];
+    pvm_object_t arg = args[1];
 
-    //ASSERT_CLASS_IS(entry, ".ru.dz.phantom.system.runnable" );
+    //ASSERT_CLASS_IS(entry, ".phantom.runnable" );
 
-    errno_t rc = pvm_run_new_thread( entry );
+    errno_t rc = pvm_run_new_thread( entry, arg );
 
     SYSCALL_RETURN_INT( rc );
 }
+
+
+static int si_world_10_log( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
+{
+    (void)o;
+    DEBUG_INFO;
+
+    CHECK_PARAM_COUNT(1);
+    pvm_object_t msg = args[0];
+
+    pvm_object_print( msg );
+
+    SYSCALL_RETURN_NOTHING;
+}
+
 
 
 syscall_func_t  syscall_table_4_world[16] =
@@ -1830,7 +1846,7 @@ syscall_func_t  syscall_table_4_world[16] =
     &si_void_6_toXML,               &si_void_7_fromXML,
     // 8
     &si_world_8_getMyThread,        &si_world_9_startThread,
-    &invalid_syscall,               &invalid_syscall,
+    &si_world_10_log,               &invalid_syscall,
     &invalid_syscall,               &invalid_syscall,
     &invalid_syscall,               &si_void_15_hashcode
     // 16

@@ -21,11 +21,23 @@
 package .internal;
 
 import .internal."thread";
+import .phantom.runnable;
 
 class .internal.world
 {
 
 	.internal."thread" getMyThread() [8] {  }
+
+
+	// returns errno
+	//int startThread( var entry : .phantom.runnable, var arg : .internal.object ) [9] {  }
+	//int startThread( var entry : .phantom.runnable, var arg : .internal.string ) [9] {  }
+
+	// TEMP TODO fix me - needs .phantom.runnable to be compiled first
+	int startThread( var entry : .internal.object, var arg : .internal.object ) [9] {  }
+
+	// Print to system logging facility - practically it is a log window in real OS and stdout in pvm_*.exe
+	void log( var msg : .internal.string ) [10] {  }
 
 };
 
