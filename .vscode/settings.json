@@ -119,6 +119,7 @@
       "*.q1": "c",
       "*.q2": "c",
       "svn_version.h": "c",
-      "init.h": "c"
+      "init.h": "c",
+      "debug_graphical.h": "c"
     }
   }

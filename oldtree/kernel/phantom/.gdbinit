@@ -40,6 +40,5 @@ source -v ./.gdb-local
 #break ctl_text_field_paint
 #break ctl_text_field_events
 
-break alloc_clear_arena
 
 

@@ -562,7 +562,7 @@ static int paint_object_memory_map_init_done = 0;
 void paint_object_memory_map(window_handle_t w, rect_t *r )
 {
     if(!object_allocator_inited) return;
-    
+
     if(!paint_object_memory_map_init_done)
         {
             rect_t prepare = *r;
@@ -693,6 +693,7 @@ static void mem_map_init_size(persistent_arena_t *ap, void *arg1, void *arg2)
 
     size_t omem_bytes = pvm_object_space_end - pvm_object_space_start;
 
+    if( (ap->size == 0) || (ap->base == 0) ) return;
  
     if( ap->vis_data == 0 )
         ap->vis_data = calloc( 1, sizeof(struct arena_visualisation_data) );
@@ -717,6 +718,8 @@ static void mem_map_paint_arena(persistent_arena_t *ap, void *arg1, void *arg2)
     rect_t *r = arg1;
     window_handle_t w = arg2;
     rect_t ar = *r;
+
+    if( (ap->size == 0) || (ap->base == 0) ) return;
 
     ar.y     = ap->vis_data->vertical_start_for_arena;
     ar.ysize = ap->vis_data->vertical_pixels_per_arena;
