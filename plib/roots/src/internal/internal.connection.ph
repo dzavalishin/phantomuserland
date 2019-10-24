@@ -4,6 +4,8 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
+ * TODO KILL ME
+ *
  * General userland-kernel connection object.
  *
  *
@@ -22,15 +24,15 @@ package .internal;
 
 class .internal.connection
 {
-	int equals(var object) [4] { }
+	//int equals(var object) [4] { }
 
-	int setCallback( var callback_object, var n_method : int ) [12] {}
-	int connect( var destination : string ) [8] {}
-	int disconnect(  ) [9] {}
+	//int setCallback( var callback_object, var n_method : int ) [12] {}
+	//int connect( var destination : string ) [8] {}
+	//int disconnect(  ) [9] {}
 
-	int invoke( var object, var operation_id : int ) [11] {}
+	//int invoke( var object, var operation_id : int ) [11] {}
 
-	int block( var object, var operation_id : int ) [13] {}
+	//int block( var object, var operation_id : int ) [13] {}
 	//.internal.object block( var object, var operation_id : int ) [13] {}
 
 };

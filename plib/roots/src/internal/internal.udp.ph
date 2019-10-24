@@ -22,10 +22,11 @@ package .internal;
 
 class .internal.udp
 {
+	.internal.string bind( var port : .internal.int ) [16] {  }
 
-	.internal.string recvFrom( var addr : .internal.int ) [23] {  }
+	.internal.string recvFrom( var addr : .internal.int, var port : .internal.int ) [23] {  }
 
-	.internal.int sendTo( var addr : .internal.int, var data : .internal.string ) [25] {  }
+	.internal.int sendTo( var data : .internal.string, var addr : .internal.int, var port : .internal.int ) [25] {  }
 
 };
 

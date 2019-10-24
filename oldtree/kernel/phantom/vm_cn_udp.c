@@ -1,3 +1,4 @@
+#if 0 // killing connections
 /**
  *
  * Phantom OS
@@ -149,4 +150,5 @@ errno_t cn_udp_disconnect( struct data_area_4_connection *c )
 }
 
 
+#endif
 

@@ -6,10 +6,11 @@
                 "/usr/include",
                 "/usr/local/include",
                 "${workspaceRoot}",
-                "${workspaceRoot}/include"
+                "${workspaceRoot}/include",
+                "${workspaceRoot}/include/ia32/arch"
             ],
             "defines": [],
-            "intelliSenseMode": "clang-x64",
+            "intelliSenseMode": "gcc-x86",
             "browse": {
                 "path": [
                     "/usr/include",
@@ -26,7 +27,13 @@
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "c11",
-            "cppStandard": "c++17"
+            "cppStandard": "c++17",
+            "compilerArgs": [
+                "-m32"
+            ],
+            "forcedInclude": [
+                "${workspaceRoot}/include/kernel/config.h"
+            ]
         },
         {
             "name": "Linux",

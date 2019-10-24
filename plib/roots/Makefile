@@ -30,6 +30,8 @@ roots:
 	@$(PLC) src/internal/internal.directory.ph
 	@$(PLC) src/internal/internal.io.tty.ph
 	@$(PLC) src/internal/internal.tcp.ph
+	@$(PLC) src/internal/internal.io.ph 
+	@$(PLC) src/internal/internal.time.ph 
 
 %.pc: %.ph
 	@echo -:- $< - $@

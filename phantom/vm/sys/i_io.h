@@ -2,11 +2,12 @@
 #define _I_IO
 
 
+#define MAX_FILENAME_LEN 128
 
 struct data_area_4_io
 {
-    int32_t        _placeholder;
-    pvm_object_t   name; // name we got for open()
+    int32_t        fd;
+    pvm_object_t   name; // name we got for open() - for restart
 };
 
 /*
