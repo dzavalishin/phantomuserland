@@ -1,35 +1,31 @@
-#include ../../config.mk
+include ../../config.mk
 
-#all:: classes
+SRCDIRS = $(filter-out $(EXCLUDED_SUBDIRS), ../sys/src/phantom ../sys/src/test ../sys/src/ru.dz ../roots/src/internal ../apps/test-mutex )
+#SRCDIRS += $(filter-out $(EXCLUDED_SUBDIRS), src/tetris )
+BINDIR = $(PHANTOM_HOME)/plib/bin
+TARGET = classes
 
-#OFF=internal.object.pc internal.io.tty.pc 
+FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
+PHFILES := $(filter %.ph,$(notdir$(FILES)))
+#PCFILES := $(addprefix, $(BINDIR)/, $(patsubst %.ph,%.pc,$(notdir $(PHFILES))))
+PCFILES := $(patsubst %.ph,%.pc, $(PHFILES))
+D_FILES := $(patsubst %.ph,%.d,  $(PHFILES))
 
-## todo
-## ru.dz.phantom.system.iterable.pc ru.dz.phantom.system.iterator.pc \
+EXCLUDED_PCFILES = stub.class.pc stub.object.pc stub.thread.pc
 
-
-##test.util.pc 
-
-#classes: internal.int.pc internal.io.tty.pc internal.object.pc internal.string.pc \
-#ru.dz.phantom.system.boot.pc ru.dz.phantom.system.class_loader.pc \
-#ru.dz.phantom.system.regression_tests.pc phantom.runnable.pc \
-#ru.dz.phantom.system.thread_test.pc phantom.util.map.pc ru.dz.phantom.system.shell.pc \
-#ru.dz.windows.root.pc ru.dz.phantom.backgrounds.pc ru.dz.phantom.resources.pc \
-#phantom.osimpl.pc phantom.os.pc phantom.os.time.pc ru.dz.phantom.tetris.*.pc ru.dz.phantom.tetris.boot.pc \
-#internal.connection.pc
-##ru.dz.phantom.system.test*.pc 
-#	@echo --- Make class bundle
-#	@sh -c "$(MKBULK) classes $(filter-out $(OFF) ,$^)"
+vpath %.ph $(SRCDIRS)
+VPATH=$(SRCDIRS)
+GPATH=$(SRCDIRS)
 
 
-#%.pc: ../src/%.ph
-#	@echo --- plc $<
-#	@$(PLC) $<
+%.d: %.ph
+	@echo makedep :-- $@
+	gawk  -v src=$< -f ../ph_depend.awk $<
 
 
-#install: classes
-#	cp classes $(TFTP_PATH)
-#	cp classes $(BOOT_PATH)
+depend: $(D_FILES)
+#	@echo $(D_FILES)
 
 clean: 
 	-rm *.pc *.lst *.lstc classes *.d *.java *.c *.ll
+
