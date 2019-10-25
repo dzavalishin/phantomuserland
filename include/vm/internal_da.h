@@ -350,6 +350,11 @@ struct data_area_4_tcp
     uint32_t                            port;
 };
 
+
+// TODO BUG! Size hardcode! Redo with separate object!
+#define PVM_MAX_WIN_PIXELS 1024*1024
+
+
 // move to ../phantom/vm/sys/i_udp.h and include
 #include "../phantom/vm/sys/i_udp.h"
 #include "../phantom/vm/sys/i_net.h"
@@ -360,6 +365,7 @@ struct data_area_4_tcp
 #include "../phantom/vm/sys/i_port.h"
 #include "../phantom/vm/sys/i_ui_control.h"
 #include "../phantom/vm/sys/i_ui_font.h"
+#include "../phantom/vm/sys/i_window.h"
 
 
 
@@ -387,24 +393,6 @@ struct data_area_4_weakref
 };
 
 
-// TODO BUG! Size hardcode! Redo with separate object!
-#define PVM_MAX_WIN_PIXELS 1024*1024
-
-struct data_area_4_window
-{
-    pvm_object_t                        o_pixels;       //< .i.binary object containing bitmap for window
-    pvm_object_t                        connector;      // Used for callbacks - events
-
-    uint32_t                            x, y; // in pixels
-    rgba_t                              fg, bg; // colors
-
-    //pvm_object_t                      event_handler; // connection!
-    char                                title[PVM_MAX_TTY_TITLE+1]; // TODO wchar_t
-
-    uint32_t                            autoupdate;
-
-    drv_video_window_t                  w;
-};
 
 
 
