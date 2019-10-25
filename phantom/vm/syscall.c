@@ -957,11 +957,11 @@ static int si_class_14_instanceof( pvm_object_t me, pvm_object_t *ret, struct da
 
     pvm_object_t instance = args[0];
 
-#if VM_INSTOF_RECURSIVE
+//#if VM_INSTOF_RECURSIVE
     int is = pvm_object_class_is_or_child( instance, me );
-#else
-    int is = pvm_object_class_exactly_is( instance, me );
-#endif // VM_INSTOF_RECURSIVE
+//#else
+//    int is = pvm_object_class_exactly_is( instance, me );
+//#endif // VM_INSTOF_RECURSIVE
     SYS_FREE_O(instance);
 
     SYSCALL_RETURN(pvm_create_int_object( is ));
