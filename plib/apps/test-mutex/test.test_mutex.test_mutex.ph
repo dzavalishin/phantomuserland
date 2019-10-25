@@ -12,6 +12,7 @@ class test_mutex extends .phantom.application
 {
 	var sub1 : .test.test_mutex.sub;
 	var sub2 : .test.test_mutex.sub;
+	var sub3 : .test.test_mutex.sub;
 
 	var m : .internal.mutex;
 	var ww : .internal.world;
@@ -27,17 +28,21 @@ class test_mutex extends .phantom.application
 		// crashes compiler
 		//sub1 = new sub( m, ww, "Sub1" );
 		//sub2 = new sub( m, ww, "Sub2" );
+		//sub3 = new sub( m, ww, "Sub3" );
 
 		sub1 = new sub();
 		sub2 = new sub();
+		sub3 = new sub();
 
 		sub1.init( m, ww, "Sub1" );
 		sub2.init( m, ww, "Sub2" );
+		sub3.init( m, ww, "Sub3" );
 
 		ww.startThread( sub1, 0 );
 		ww.startThread( sub2, 0 );
+		ww.startThread( sub3, 0 );
 
-		ww.log("started 2 threads, exit");
+		ww.log("started 3 threads, exit");
     }
 
 	

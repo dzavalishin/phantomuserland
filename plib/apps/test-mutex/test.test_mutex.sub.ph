@@ -23,6 +23,7 @@ class sub extends .phantom.runnable
 		while(1)
 		{
 			m.lock();
+			w.log( "\n" );
 			w.log( s );
 			w.log(": message 1 ..");
 			w.log("message 2 ..");
