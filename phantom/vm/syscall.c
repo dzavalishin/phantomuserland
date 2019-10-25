@@ -528,6 +528,7 @@ static int si_string_8_substring( pvm_object_t me, pvm_object_t *ret, struct dat
     SYSCALL_RETURN(pvm_create_string_object_binary( (char *)meda->data + index, len ));
 }
 
+// TODO rename to byteat
 static int si_string_9_charat( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
