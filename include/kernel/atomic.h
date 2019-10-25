@@ -13,6 +13,7 @@
 #define ATOMIC_H
 
 #define ATOMIC_ADD_AND_FETCH( __ptr, __val ) __sync_add_and_fetch( __ptr, __val )
+#define ATOMIC_FETCH_AND_ADD( __ptr, __val ) __sync_fetch_and_add( __ptr, __val )
 
 // atomic_set can be used for non-intel?
 #define ATOMIC_FETCH_AND_SET( __ptr, __val ) __sync_lock_test_and_set( __ptr, __val )
