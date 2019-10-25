@@ -83,6 +83,11 @@ POSF(IS_CODE,0x01)
 // flags: o->_flags
 // These are set on creation by class
 // NB - 0x100000 is used below
+// TODO use lower byte for type id, mask off and let it be internal class index
+
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_DOUBLE        0x40000 // Allocation arena marker object
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_FLOAT         0x20000 // Allocation arena marker object
+#define PHANTOM_OBJECT_STORAGE_FLAG_IS_LONG          0x10000 // Allocation arena marker object
 
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_ARENA         0x8000 // Allocation arena marker object
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_ROOT          0x4000 // I am Root
@@ -97,6 +102,7 @@ POSF(IS_CODE,0x01)
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE 0x40
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING 0x20
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_INT 0x10
+// Unused, to kill
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_DECOMPOSEABLE 0x08
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS 0x04
 #define PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE 0x02

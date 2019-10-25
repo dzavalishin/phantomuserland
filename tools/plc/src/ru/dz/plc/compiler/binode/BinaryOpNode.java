@@ -76,7 +76,7 @@ public abstract class BinaryOpNode extends BiNode {
 			throw new PlcException("bin op preprocess", "not numeric type");
 
 		if( !_l.getType().equals(getType()) ) 
-			_l = new CastNode(_l, getType());
+			_l = new CastNode(_l, getType()); // TODO error no preprocess for cast node? Can't create nodes in prepr.? Or call preprocess from here?
 
 		if( !_r.getType().equals(getType()) ) 
 			_r = new CastNode(_r, getType());

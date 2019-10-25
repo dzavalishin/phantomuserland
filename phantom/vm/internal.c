@@ -107,7 +107,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_long),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE, // removed PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE|PHANTOM_OBJECT_STORAGE_FLAG_IS_LONG,
         0
     },
     {
@@ -403,7 +403,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_float),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE, // removed PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE|PHANTOM_OBJECT_STORAGE_FLAG_IS_FLOAT,
         0
     },
 
@@ -417,7 +417,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_double),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
-        PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE, // removed PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE|PHANTOM_OBJECT_STORAGE_FLAG_IS_DOUBLE, 
         0
     },
 
