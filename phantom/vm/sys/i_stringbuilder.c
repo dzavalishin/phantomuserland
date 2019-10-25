@@ -161,7 +161,7 @@ static int si_stringbuilder_10_concat( pvm_object_t me, pvm_object_t *ret, struc
 
     SYS_FREE_O(him);
 
-    SYSCALL_RETURN( oret );
+    SYSCALL_RETURN_INT( newlen );
 }
 
 

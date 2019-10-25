@@ -522,6 +522,18 @@ struct internal_class pvm_internal_classes[] =
         PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
         0
     },
+    {
+        ".internal.stringbuilder",
+        PVM_ROOT_OBJECT_STRING_CLASS,
+        syscall_table_4_stringbuilder,  &n_syscall_table_4_stringbuilder,
+        pvm_internal_init_stringbuilder,
+        pvm_gc_iter_stringbuilder,
+        0, // no finalizer
+        0, // no restart func
+        sizeof(struct data_area_4_stringbuilder), // Dynamic!
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
+        0
+    },
 
 
 };
