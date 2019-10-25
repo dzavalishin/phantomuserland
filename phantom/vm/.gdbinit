@@ -23,6 +23,8 @@ break e4c_exception_throw_verbatim_
 
 #break jsmn_parse
 #break w_add_control
-break init_task_bar
+#break gc.c:452
+break refdec.c:103
 
-run
+run -t -dd
+
