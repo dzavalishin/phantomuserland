@@ -468,16 +468,16 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
 
 
 
-struct phantom_cond_impl
+/*struct phantom_cond_impl
 {
     //CONDITION_VARIABLE cv;
     const char *name;
-};
+};*/
 
 
 int hal_mutex_init(hal_mutex_t *m, const char *name)
 {
-    m->impl = win_hal_mutex_init(name);
+    m->impl = gen_hal_mutex_init(name);
     assert( m->impl );
     return 0;
 }
@@ -485,30 +485,30 @@ int hal_mutex_init(hal_mutex_t *m, const char *name)
 int hal_mutex_lock(hal_mutex_t *m)
 {
     assert(m->impl);
-    return win_hal_mutex_lock(m->impl);
+    return gen_hal_mutex_lock(m->impl);
 }
 
 int hal_mutex_unlock(hal_mutex_t *m)
 {
     assert(m->impl);
-    return win_hal_mutex_unlock(m->impl);
+    return gen_hal_mutex_unlock(m->impl);
 }
 
 
 int hal_mutex_is_locked(hal_mutex_t *m)
 {
     assert(m->impl);
-    return win_hal_mutex_is_locked(m->impl);
+    return gen_hal_mutex_is_locked(m->impl);
 }
 
 
 errno_t hal_mutex_destroy(hal_mutex_t *m)
 {
-    struct phantom_mutex_impl *mi = m->impl;
+    //struct phantom_mutex_impl *mi = m->impl;
 
     //if(mi->owner != 0)        panic("locked mutex killed");
-    free(mi);
-
+    //free(mi);
+    // TODO
     m->impl = 0;
 
     return 0;
@@ -521,28 +521,37 @@ errno_t hal_mutex_destroy(hal_mutex_t *m)
 
 int hal_cond_init( hal_cond_t *c, const char *name )
 {
-    c->impl = calloc(1, sizeof(struct phantom_cond_impl)+16); // to prevent corruption if kernel hal mutex func will be called
-    //InitializeConditionVariable( &(c->impl.cv) );
-    c->impl->name = name;
+    c->impl = gen_hal_cond_init(name);
+    assert( c->impl );
     return 0;
+
+    //c->impl = calloc(1, sizeof(struct phantom_cond_impl)+16); // to prevent corruption if kernel hal mutex func will be called
+    //InitializeConditionVariable( &(c->impl.cv) );
+    //c->impl->name = name;
+    //return 0;
 }
 
 
 errno_t hal_cond_wait( hal_cond_t *c, hal_mutex_t *m )
 {
     assert(c->impl);
+    gen_hal_cond_wait( c->impl, m->impl );
+/*    
 hal_mutex_unlock(m);
     hal_sleep_msec(100);
     //SleepConditionVariableCS( &(c->impl.cv), &(m->impl->cs), 0 );
 hal_mutex_lock(m);
+*/
     return 0;
 }
 
 errno_t hal_cond_timedwait( hal_cond_t *c, hal_mutex_t *m, long msecTimeout )
 {
     assert(c->impl);
-    hal_sleep_msec(msecTimeout);
+    //hal_sleep_msec(msecTimeout);
     //SleepConditionVariableCS( &(c->impl.cv), &(m->impl->cs), msecTimeout );
+    gen_hal_cond_twait( c->impl, m->impl, msecTimeout );
+
     return 0;
 }
 
@@ -551,6 +560,7 @@ errno_t hal_cond_signal( hal_cond_t *c )
 {
     assert(c->impl);
     //WakeConditionVariable( &(c->impl.cv) );
+    gen_hal_cond_signal( c->impl );
     return 0;
 }
 
@@ -558,14 +568,15 @@ errno_t hal_cond_broadcast( hal_cond_t *c )
 {
     assert(c->impl);
     //WakeAllConditionVariable( &(c->impl->cv) );
+    gen_hal_cond_broadcast( c->impl );
     return 0;
 }
 
 errno_t hal_cond_destroy(hal_cond_t *c)
 {
-
     //if(m->impl.owner != 0)        panic("locked mutex killed");
     free(c->impl);
+    gen_hal_cond_destroy( c->impl );
     c->impl=0;
 
     return 0;

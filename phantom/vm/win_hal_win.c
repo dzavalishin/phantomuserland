@@ -56,7 +56,7 @@ unsigned long win_hal_start_thread( void (*thread)(void *arg), void *arg )
 
 
 
-
+#if 0 // use pthreads
 // -----------------------------------------------------------------------
 // TODO - implement mutex/sema code for win sim environment
 
@@ -104,7 +104,7 @@ int win_hal_mutex_is_locked(void *_m)
     //return impl->lock;
     return 1;
 }
-
+#endif
 /*
 //extern int errno;
 #include <errno.h>

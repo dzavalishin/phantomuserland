@@ -459,7 +459,7 @@ struct phantom_cond_impl
 
 int hal_mutex_init(hal_mutex_t *m, const char *name)
 {
-    m->impl = unix_hal_mutex_init(name);
+    m->impl = gen_hal_mutex_init(name);
     assert( m->impl );
     return 0;
 }
@@ -467,20 +467,20 @@ int hal_mutex_init(hal_mutex_t *m, const char *name)
 int hal_mutex_lock(hal_mutex_t *m)
 {
     assert(m->impl);
-    return unix_hal_mutex_lock(m->impl);
+    return gen_hal_mutex_lock(m->impl);
 }
 
 int hal_mutex_unlock(hal_mutex_t *m)
 {
     assert(m->impl);
-    return unix_hal_mutex_unlock(m->impl);
+    return gen_hal_mutex_unlock(m->impl);
 }
 
 
 int hal_mutex_is_locked(hal_mutex_t *m)
 {
     assert(m->impl);
-    return unix_hal_mutex_is_locked(m->impl);
+    return gen_hal_mutex_is_locked(m->impl);
 }
 
 

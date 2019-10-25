@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Deferred refcount decrement - done this way to fight races:
  *  - one thread reads object slot
@@ -10,7 +10,7 @@
  *  - first thread attempts to ref inc and corrupts memory
  *
  * Here we make sure that we decrement refcount only after making
- * sure that all threads pass bytecode instruction boundary.
+ * sure that all threads passed bytecode instruction boundary.
  *
 **/
 
@@ -38,9 +38,8 @@ INIT_ME( 0, deferred_refdec_init, 0 )
 //STOP_ME( deferred_refdec_stop )
 
 
-#define REFDEC_BUFFER_SIZE (1024*16)
-
-    // Where to start agressive action
+#define REFDEC_BUFFER_SIZE (1024*64)
+// Where to start agressive action
 #define REFDEC_BUFFER_RED_ZONE (REFDEC_BUFFER_SIZE/4)
 
 #define REFDEC_BUFFER_HALF (REFDEC_BUFFER_SIZE/2)
@@ -60,7 +59,7 @@ static void deferred_refdec_init(void)
     hal_cond_init(  &end_refdec_cond, "refdec end" );
 
     deferred_refdec_thread_id = hal_start_thread( deferred_refdec_thread, 0, 0 );
-    assert(deferred_refdec_thread_id > 0 );
+    //assert(deferred_refdec_thread_id > 0 ); // fails in usermode
 
     inited = 1;
 }
@@ -78,7 +77,8 @@ static void deferred_refdec_stop(void) //__attribute__((unused))
 // 2 pages
 static volatile pvm_object_storage_t *refdec_buffer[REFDEC_BUFFER_SIZE];
 static volatile int refdec_put_ptr = 0;
-//static volatile int npage = 0;
+static volatile int refdec_last_put_start = 0;
+
 
 
 void deferred_refdec(pvm_object_storage_t *os)
@@ -96,7 +96,33 @@ void deferred_refdec(pvm_object_storage_t *os)
         return;
     }
 #endif
+    //printf("refdec req @%d ", refdec_put_ptr);
 
+    if( (refdec_put_ptr >= REFDEC_BUFFER_SIZE) || (refdec_put_ptr == REFDEC_BUFFER_HALF) )
+    {
+        // Still no buffer switch, continue loosing
+        STAT_INC_CNT(DEFERRED_REFDEC_LOST);
+        goto trigger;
+    }
+
+    //long_way:
+    int pos = ATOMIC_FETCH_AND_ADD( (int *)&refdec_put_ptr, 1 );
+
+    // Overflow
+    if( (pos >= REFDEC_BUFFER_SIZE) || (pos == REFDEC_BUFFER_HALF) )
+    {
+        STAT_INC_CNT(DEFERRED_REFDEC_LOST);
+        // We just loose refdec - big GC will pick it up
+        //ATOMIC_FETCH_AND_ADD( (int *)&refdec_put_ptr, -1 );
+    }
+    else
+    {
+        refdec_buffer[pos] = os;
+    }
+    
+
+    
+trigger:
     STAT_INC_CNT(DEFERRED_REFDEC_REQS);
 
     if(
@@ -106,7 +132,7 @@ void deferred_refdec(pvm_object_storage_t *os)
       )
     {
         //hal_mutex_lock(  &deferred_refdec_mutex );
-
+        printf("trig @%d ", refdec_put_ptr );
         hal_cond_signal( &start_refdec_cond );
         //hal_cond_wait(   &end_refdec_cond, &deferred_refdec_mutex );
 
@@ -114,23 +140,48 @@ void deferred_refdec(pvm_object_storage_t *os)
     }
 
 
-    //long_way:
-    // TODO ERROR atomic_add returns not what we assume!
-    //int pos = atomic_add( (int *)&refdec_put_ptr, 1 );
-    int pos = ATOMIC_ADD_AND_FETCH( (int *)&refdec_put_ptr, 1 );
-
-    // Overflow
-    if( (pos >= REFDEC_BUFFER_SIZE) || (pos == REFDEC_BUFFER_HALF) )
-    {
-        STAT_INC_CNT(DEFERRED_REFDEC_LOST);
-        // We just loose refdec - big GC will pick it up
-        return;
-    }
-
-    refdec_buffer[pos] = os;
-
 
 }
+
+
+
+static void refdec_process_buf()
+{
+    // Triggered by mistake?
+    if( refdec_last_put_start == refdec_put_ptr )
+        return;
+
+    // Decide where to switch put pointer
+    int new_put_ptr = REFDEC_BUFFER_HALF + 1; // first one used to check low half overflow
+
+    // Was in upper page?
+    if( refdec_put_ptr >= REFDEC_BUFFER_HALF )
+        new_put_ptr = 0;
+
+    int last_pos = ATOMIC_FETCH_AND_SET( &refdec_put_ptr, new_put_ptr);
+    int read_pos = (last_pos >= REFDEC_BUFFER_HALF+1) ? REFDEC_BUFFER_HALF+1 : 0;
+
+    refdec_last_put_start = new_put_ptr;
+
+    // Check that all VM threads are either sleep or passed an bytecode instr boundary
+    //phantom_check_threads_pass_bytecode_instr_boundary();
+#warning fix me
+    printf("\n---------------\ndeferred refdec process from %d count %d\n", read_pos, last_pos - read_pos );
+    int pos;
+    for( pos = read_pos; pos < last_pos; pos++ )
+    {
+        pvm_object_storage_t volatile *os;
+        os = refdec_buffer[pos];
+
+        //assert( os->_ah.refCount > 0);
+        if( os == 0 ) { printf("drd obj 0 @ %d", pos ); continue; }
+        if( os->_ah.refCount  == 0 ) { printf("drd ref 0 @%d", pos ); continue; }
+
+        do_ref_dec_p((pvm_object_storage_t *)os);
+    }
+
+}
+
 
 /**
  *
@@ -155,32 +206,11 @@ static void deferred_refdec_thread(void *a)
 
         STAT_INC_CNT(DEFERRED_REFDEC_RUNS);
 
-        // Decide where to switch put pointer
-        int new_put_ptr = REFDEC_BUFFER_HALF + 1; // first one used to check low half overflow
+        refdec_process_buf();
 
-        // Was in upper page?
-        if( refdec_put_ptr >= REFDEC_BUFFER_HALF )
-            new_put_ptr = 0;
-
-        //int last_pos = atomic_set( &refdec_put_ptr, new_put_ptr);
-        int last_pos = ATOMIC_FETCH_AND_SET( &refdec_put_ptr, new_put_ptr);
-        int start_pos = (last_pos >= REFDEC_BUFFER_HALF) ? REFDEC_BUFFER_HALF+1 : 0;
-
-        // Check that all VM threads are either sleep or passed an bytecode instr boundary
-        phantom_check_threads_pass_bytecode_instr_boundary();
-
-        int pos;
-        for( pos = start_pos; pos < last_pos; pos++ )
-        {
-            pvm_object_storage_t volatile *os;
-            os = refdec_buffer[pos];
-
-            assert( os->_ah.refCount > 0);
-            do_ref_dec_p((pvm_object_storage_t *)os);
-        }
-
-        hal_cond_broadcast(   &end_refdec_cond );
+        hal_cond_broadcast( &end_refdec_cond );
         hal_mutex_unlock( &deferred_refdec_mutex );
+        hal_sleep_msec(1000); // TODO should not be so
     }
 }
 

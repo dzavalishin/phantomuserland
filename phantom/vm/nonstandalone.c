@@ -8,8 +8,10 @@
 
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <malloc.h>
 
 #include <setjmp.h>
 
@@ -527,6 +529,9 @@ err:
 #endif
 
 
+// -----------------------------------------------------------
+// TODO UDP
+// -----------------------------------------------------------
 
 
 
@@ -544,7 +549,153 @@ ssize_t udp_sendto(void *prot_data, const void *buf, ssize_t len, void *addr) { 
 
 
 
+// -----------------------------------------------------------
+// Mutex - pthread
+// -----------------------------------------------------------
 
+// -----------------------------------------------------------------------
+// TODO - implement mutex/sema code for unix sim environment
+
+
+struct phantom_mutex_impl
+{
+    pthread_mutex_t m;
+    const char *name;
+    int lock;
+};
+
+
+
+void * gen_hal_mutex_init(const char *name)
+{
+    struct phantom_mutex_impl *impl;
+    impl = calloc(1, sizeof(struct phantom_mutex_impl)+16); // to prevent corruption if kernel hal mutex func will be called
+    if(impl == 0) return 0;
+
+//    InitializeCriticalSection( &(impl->cs) );
+    int rc = pthread_mutex_init( &(impl->m), 0 );
+    if( rc )
+    {
+        perror("unix_hal_init pthread_mutex_init");
+        exit(33);
+    }
+
+    impl->name = name;
+    return impl;
+}
+
+int gen_hal_mutex_lock(void *_m)
+{
+    struct phantom_mutex_impl *impl = _m;
+    impl->lock++;
+//    EnterCriticalSection( &(impl->cs) );
+    int rc = pthread_mutex_lock(&(impl->m));
+    if( rc )
+        perror("gen_hal_mutex_lock");
+    return 0;
+}
+
+int gen_hal_mutex_unlock(void *_m)
+{
+    struct phantom_mutex_impl *impl = _m;
+//    LeaveCriticalSection( &(impl->cs) );
+    int rc = pthread_mutex_unlock(&(impl->m));
+    if( rc )
+        perror("gen_hal_mutex_unlock");
+    impl->lock--;
+    return 0;
+}
+
+int gen_hal_mutex_is_locked(void *_m)
+{
+    struct phantom_mutex_impl *impl = _m;
+    return impl->lock;
+}
+
+// -----------------------------------------------------------
+// Cond - pthread
+// -----------------------------------------------------------
+
+//#include <pthread.h>
+
+struct phantom_cond_impl
+{
+    pthread_cond_t c;
+    const char *name;
+    int lock;
+};
+
+
+void *gen_hal_cond_init(const char * name)
+{
+    struct phantom_cond_impl *impl;
+    impl = calloc(1, sizeof(struct phantom_cond_impl)+16); // to prevent corruption if kernel hal mutex func will be called
+    if(impl == 0) return 0;
+
+//    InitializeCriticalSection( &(impl->cs) );
+    int rc = pthread_cond_init( &(impl->c), 0 );
+    if( rc )
+    {
+        perror("pthread_cond_init");
+        exit(33);
+    }
+
+    impl->name = name;
+    return impl;
+}
+
+
+
+void gen_hal_cond_wait( void *c_impl, void *m_impl )
+{
+    struct phantom_cond_impl *cond = c_impl;
+    struct phantom_mutex_impl *mutex = m_impl;
+
+    int rc = pthread_cond_wait(&(cond->c), &(mutex->m));
+    if( rc ) perror("pthread_cond_wait");
+}
+
+#include <time.h>
+
+void gen_hal_cond_twait( void *c_impl, void *m_impl, long msecTimeout )
+{
+    struct phantom_cond_impl *cond = c_impl;
+    struct phantom_mutex_impl *mutex = m_impl;
+
+    struct timespec stime;
+
+    // TODO do we need to move seconds from tv_nsec to tv_sec
+    stime.tv_sec = time(NULL);
+    stime.tv_nsec = msecTimeout * 1000L;
+
+    int rc = pthread_cond_timedwait(&(cond->c), &(mutex->m), &stime);
+    if( rc ) perror("pthread_cond_wait");
+}
+
+
+
+void gen_hal_cond_signal( void *c_impl )
+{
+    struct phantom_cond_impl *cond = c_impl;
+    int rc = pthread_cond_signal(&(cond->c));
+    if( rc ) perror("pthread_cond_wait");
+}
+
+
+
+void gen_hal_cond_broadcast( void *c_impl )
+{
+    struct phantom_cond_impl *cond = c_impl;
+    int rc = pthread_cond_broadcast(&(cond->c));
+    if( rc ) perror("pthread_cond_wait");
+}
+
+void gen_hal_cond_destroy(void *c_impl)
+{
+    struct phantom_cond_impl *cond = c_impl;
+
+
+}
 
 
 

@@ -328,7 +328,21 @@ static void ref_dec_proccess_zero(pvm_object_storage_t *p)
 #if RECURSE_REF_DEC
     // FIXME must not be so in final OS, stack overflow possiblity!
     // TODO use some local pool too, instead of recursion
-    refzero_process_children( p );
+#if 1
+        refzero_process_children( p );
+#else    
+    if(vm_alloc_mutex) 
+    {
+        //hal_mutex_lock( vm_alloc_mutex ); // 25.10.2019 attempt to fight multithreading instability - CAN"T lock here - recursion
+        refzero_process_children( p );
+        //hal_mutex_unlock( vm_alloc_mutex );
+    }
+    else
+    {
+        refzero_process_children( p );
+    }
+#endif 
+    
 #else
     // postpone for delayed inspection (bug or feature?)
     DEBUG_PRINT("(X)");
@@ -436,10 +450,25 @@ void do_ref_dec_p(pvm_object_storage_t *p)
 
 void ref_dec_p(pvm_object_storage_t *p)
 {
-#if VM_DEFERRED_REFDEC
+#if VM_DEFERRED_REFDEC || 1
+    if( p == 0) // lot of places send us whatever they come over
+    {
+        //printf("ref_dec_p 0 ");
+        return;
+    }
     deferred_refdec(p);
 #else
+    /* can't - recursive mutex lock
+    if(vm_alloc_mutex)
+    {
+        hal_mutex_lock( vm_alloc_mutex );
+        do_ref_dec_p(p);
+        hal_mutex_unlock( vm_alloc_mutex );
+    }
+    else */
+    
     do_ref_dec_p(p);
+    
 #endif
 }
 

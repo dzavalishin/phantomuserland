@@ -47,7 +47,7 @@
 
 
 // vm class instanceof checks for parents
-#define VM_INSTOF_RECURSIVE 1
+//#define VM_INSTOF_RECURSIVE 1 // YES
 #define VM_DEFERRED_REFDEC 0
 
 #define OLD_VM_SLEEP #error do not use me

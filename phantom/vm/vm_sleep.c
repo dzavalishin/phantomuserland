@@ -127,13 +127,16 @@ resleep:
     vm_unlock_persistent_memory();    
     hal_mutex_lock( &snap_interlock_mutex );
     // TODO pass thread to unlock down there? Or is it ok to unlock here?
+    vm_lock_persistent_memory(); // thda->sleep_flag is in persistent!
     while(thda->sleep_flag)
     {
+        vm_unlock_persistent_memory();
         SHOW_ERROR(0, "new vm sleep used, th (da %zx)", (size_t)thda);
         hal_cond_wait( &vm_thread_wakeup_cond, &snap_interlock_mutex );
+        vm_lock_persistent_memory();
     }
     hal_mutex_unlock( &snap_interlock_mutex );
-    vm_lock_persistent_memory();
+    //vm_lock_persistent_memory();
 
 #warning check resleep on mutex
     // If we wake up after cond, there was some mutex unlocked by cond wait

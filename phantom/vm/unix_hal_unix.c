@@ -85,6 +85,8 @@ unsigned long unix_hal_start_thread( void (*thread)(void *arg), void *arg )
 
 
 
+
+#if 0 // goes to nonstandalone as portable way
 // -----------------------------------------------------------------------
 // TODO - implement mutex/sema code for unix sim environment
 
@@ -143,6 +145,8 @@ int unix_hal_mutex_is_locked(void *_m)
     struct phantom_mutex_impl *impl = _m;
     return impl->lock;
 }
+
+#endif
 
 /* to nonstandalone
 //extern int errno;

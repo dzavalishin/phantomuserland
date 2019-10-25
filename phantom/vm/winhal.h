@@ -38,10 +38,17 @@ void win_hal_enable_preemption(void);
 unsigned long win_hal_start_thread( void (*thread)(void *arg), void *arg );
 
 
-void * win_hal_mutex_init(const char *name);
-int win_hal_mutex_lock(void *_m);
-int win_hal_mutex_unlock(void *_m);
-int win_hal_mutex_is_locked(void *_m);
+void * gen_hal_mutex_init(const char *name);
+int gen_hal_mutex_lock(void *_m);
+int gen_hal_mutex_unlock(void *_m);
+int gen_hal_mutex_is_locked(void *_m);
+
+void *gen_hal_cond_init(const char * name);
+void gen_hal_cond_wait( void *c_impl, void *m_impl );
+void gen_hal_cond_twait( void *c_impl, void *m_impl, long msecTimeout );
+void gen_hal_cond_signal( void *c_impl );
+void gen_hal_cond_broadcast( void *c_impl );
+void gen_hal_cond_destroy( void *c_impl );
 
 
 void win_hal_open_kernel_log_file( const char *fn );
