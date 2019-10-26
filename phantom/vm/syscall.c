@@ -2061,7 +2061,7 @@ DECLARE_SIZE(directory);
 
 
 
-
+#if 0
 
 // --------- connection -------------------------------------------------------
 
@@ -2232,7 +2232,7 @@ syscall_func_t  syscall_table_4_connection[16] =
 };
 DECLARE_SIZE(connection);
 
-
+#endif
 
 
 

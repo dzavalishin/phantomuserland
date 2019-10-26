@@ -15,7 +15,6 @@ package .ru.dz.phantom.system;
 import .phantom.os;
 import .internal.io.tty;
 import .internal.window;
-import .internal.connection;
 import .ru.dz.phantom.system.runnable;
 
 attribute const * ->!;

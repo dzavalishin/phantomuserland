@@ -366,7 +366,7 @@ static void set_root_from_table()
 #endif
     SET_ROOT_CLASS(window, WINDOW);
     SET_ROOT_CLASS(directory, DIRECTORY);
-    SET_ROOT_CLASS(connection, CONNECTION);
+//    SET_ROOT_CLASS(connection, CONNECTION);
 
     SET_ROOT_CLASS(mutex,MUTEX);
     SET_ROOT_CLASS(cond,COND);
@@ -383,6 +383,9 @@ static void set_root_from_table()
     SET_ROOT_CLASS(port,PORT);
     SET_ROOT_CLASS(ui_control,UI_CONTROL);
     SET_ROOT_CLASS(ui_font,UI_FONT);
+
+    SET_ROOT_CLASS(strigbuilder,STRINGBUILDER);
+
 }
 
 
@@ -439,6 +442,7 @@ GCINLINE pvm_object_t     pvm_get_io_class() { return pvm_root.io_class; }
 GCINLINE pvm_object_t     pvm_get_port_class() { return pvm_root.port_class; }
 GCINLINE pvm_object_t     pvm_get_ui_control_class() { return pvm_root.ui_control_class; }
 GCINLINE pvm_object_t     pvm_get_ui_font_class() { return pvm_root.ui_font_class; }
+GCINLINE pvm_object_t     pvm_get_stringbuilder_class() { return pvm_root.stringbuilder_class; }
 
 
 #undef GCINLINE

@@ -208,7 +208,7 @@ static int si_stringbuilder_12_find( pvm_object_t me, pvm_object_t *ret, struct 
 
 
 
-syscall_func_t  syscall_table_4_window[16] =
+syscall_func_t  syscall_table_4_stringbuilder[16] =
 {
     &si_void_0_construct,           &si_void_1_destruct,
     &si_void_2_class,               &si_stringbuilder_3_clone,
@@ -222,102 +222,17 @@ syscall_func_t  syscall_table_4_window[16] =
     // 16
 
 };
-DECLARE_SIZE(window);
+DECLARE_SIZE(stringbuilder);
 
 
 
 
-void pvm_internal_init_window(pvm_object_t os)
-{
-    struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
-
-    //pvm_object_t bin = pvm_create_binary_object( PVM_MAX_TTY_PIXELS * 4 + sizeof(drv_video_window_t), 0 );
-    pvm_object_t bin = pvm_create_binary_object( drv_video_window_bytes( PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE ) + sizeof(drv_video_window_t), 0 );
-    da->o_pixels = bin;
-
-    struct data_area_4_binary *bda = (struct data_area_4_binary *)bin->da;
-
-    void *pixels = &bda->data;
-
-    strlcpy( da->title, "Window", sizeof(da->title) );
-
-    da->fg = COLOR_BLACK;
-    da->bg = COLOR_WHITE;
-    da->x = 0;
-    da->y = 0;
-    da->autoupdate = 1;
-
-    //lprintf("pvm_internal_init_window w %p pix %p\n", &(da->w), pixels );
-
-    drv_video_window_init( &(da->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
-
-    {
-    pvm_object_t o;
-    o = os;
-
-
-    da->connector = pvm_create_connection_object();
-    struct data_area_4_connection *cda = (struct data_area_4_connection *)(da->connector->da);
-
-    phantom_connect_object_internal(cda, 0, o, 0);
-
-    // This object needs OS attention at restart
-    // TODO do it by class flag in create fixed or earlier?
-    pvm_add_object_to_restart_list( o );
-    }
-
-}
-
-
-void pvm_gc_iter_window(gc_iterator_call_t func, pvm_object_t  os, void *arg)
-{
-    struct data_area_4_window *da = (struct data_area_4_window *)os->da;
-
-    func( arg, da->connector );
-    func( arg, da->o_pixels );
-}
 
 
 
-void pvm_gc_finalizer_window( pvm_object_t  os )
-{
-    // is it called?
-    struct data_area_4_window      *da = (struct data_area_4_window *)os->da;
-
-    //struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
-    //void *pixels = &bda->data;
-
-    drv_video_window_destroy(&(da->w));
-}
 
 
-void pvm_restart_window( pvm_object_t o )
-{
-    pvm_add_object_to_restart_list( o ); // Again!
 
-    struct data_area_4_window *da = pvm_object_da( o, window );
-
-    struct data_area_4_binary *bda = (struct data_area_4_binary *)da->o_pixels->da;
-    window_handle_t pixels = (window_handle_t)&bda->data;
-
-    printf("restart WIN\n");
-
-    w_restart_init( &(da->w), pixels );
-
-    //&(da->w)->title = da->title; // must be correct in snap? don't reset?
-    w_set_title( &(da->w), da->title );
-
-    /*
-    queue_init(&(da->w.events));
-    da->w.events_count = 0;
-
-    iw_enter_allwq( &da->w );
-
-    //event_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, &da->w );
-    ev_q_put_win( 0, 0, UI_EVENT_WIN_REDECORATE, &da->w );
-    */
-    w_restart_attach( &(da->w) );
-}
 
 
 
@@ -366,10 +281,8 @@ void pvm_internal_init_stringbuilder(pvm_object_t  os)
 
 void pvm_gc_iter_stringbuilder(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
-    (void)func;
-    (void)os;
-    (void)arg;
+	struct data_area_4_stringbuilder* sbda = (struct data_area_4_stringbuilder*)&(os->da);
     // TODO buffer
-
+    func( sbda->buffer, arg  );
 }
 

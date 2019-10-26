@@ -356,8 +356,15 @@ static int win_setHandler_32( pvm_object_t me, pvm_object_t *ret, struct data_ar
 
     CHECK_PARAM_COUNT(1);
 
-    pvm_object_t handler = args[0];
 
+    pvm_object_t handler = args[0];
+    ASSERT_CLASS_IS(handler,".phantom.runnable");
+#if 1
+    da->callback = handler; // TODO ref inc?
+    // TODO who calls?
+    // TODO send events with new dpc run in thread pool 
+    // facility
+#else
     // TODO check class!
     {
     struct data_area_4_connection  *cda = (struct data_area_4_connection *)da->connector->da;
@@ -365,6 +372,7 @@ static int win_setHandler_32( pvm_object_t me, pvm_object_t *ret, struct data_ar
     cda->callback_method = 8; // TODO BUG FIXME - lookup method by name?
     cda->callback = handler;
     }
+#endif
 
     SYSCALL_RETURN_NOTHING;
 }
@@ -540,12 +548,15 @@ void pvm_internal_init_window(pvm_object_t os)
     da->x = 0;
     da->y = 0;
     da->autoupdate = 1;
+    da->callback = 0;
 
     //lprintf("pvm_internal_init_window w %p pix %p\n", &(da->w), pixels );
 
     drv_video_window_init( &(da->w), pixels, PVM_DEF_TTY_XSIZE, PVM_DEF_TTY_YSIZE, 100, 100, da->bg, WFLAG_WIN_DECORATED, da->title );
 
-    {
+    // TODO set own event handler and use callback
+
+    /*{
     pvm_object_t o;
     o = os;
 
@@ -555,10 +566,11 @@ void pvm_internal_init_window(pvm_object_t os)
 
     phantom_connect_object_internal(cda, 0, o, 0);
 
+    }*/
+
     // This object needs OS attention at restart
     // TODO do it by class flag in create fixed or earlier?
-    pvm_add_object_to_restart_list( o );
-    }
+    pvm_add_object_to_restart_list( os );
 
 }
 
@@ -567,8 +579,8 @@ void pvm_gc_iter_window(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 {
     struct data_area_4_window *da = (struct data_area_4_window *)os->da;
 
-    func( arg, da->connector );
-    func( arg, da->o_pixels );
+    func( da->callback, arg );
+    func( da->o_pixels, arg );
 }
 
 

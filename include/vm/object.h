@@ -213,7 +213,7 @@ pvm_object_t     pvm_get_bitmap_class(void);
 pvm_object_t     pvm_get_weakref_class(void);
 pvm_object_t     pvm_get_window_class(void);
 pvm_object_t     pvm_get_directory_class(void);
-pvm_object_t     pvm_get_connection_class(void);
+//pvm_object_t     pvm_get_connection_class(void);
 
 pvm_object_t     pvm_get_mutex_class(void);
 pvm_object_t     pvm_get_cond_class(void);
@@ -235,6 +235,7 @@ pvm_object_t     pvm_get_io_class(void);
 pvm_object_t     pvm_get_ui_control_class(void);
 pvm_object_t     pvm_get_ui_font_class(void);
 
+pvm_object_t     pvm_get_stringbuider_class(void);
 
 
 
@@ -254,6 +255,9 @@ pvm_object_t     pvm_create_string_object_binary(const char *value, int length);
 pvm_object_t     pvm_create_string_object_binary_cat(
         const char *value1, int n_bytes1,
         const char *value2, int n_bytes2 );
+
+pvm_object_t     pvm_create_stringbuilder_object_binary(const char *value, int n_bytes);
+
 
 //pvm_object_t     pvm_create_array_object(void);
 #define pvm_create_array_object() pvm_create_object( pvm_get_array_class() )

@@ -380,7 +380,19 @@ struct internal_class pvm_internal_classes[] =
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,// TODO add DIR flag?
         0
     },
-
+    // kill
+#if 1
+    {
+        ".internal.connection.off",
+        -1,
+        0, 0, 0, 0,
+        0,
+        0,
+        0,
+        0,
+        0
+    },
+#else
     {
         ".internal.connection",
         PVM_ROOT_OBJECT_CONNECTION_CLASS,
@@ -392,7 +404,7 @@ struct internal_class pvm_internal_classes[] =
         PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
         0
     },
-
+#endif
     {
         ".internal.float",
         PVM_ROOT_OBJECT_FLOAT_CLASS, 

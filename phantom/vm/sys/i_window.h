@@ -5,7 +5,7 @@
 struct data_area_4_window
 {
     pvm_object_t                        o_pixels;       //< .i.binary object containing bitmap for window
-    pvm_object_t                        connector;      // Used for callbacks - events
+    pvm_object_t                        callback;      // Used for callbacks - events
 
     uint32_t                            x, y; // in pixels
     rgba_t                              fg, bg; // colors

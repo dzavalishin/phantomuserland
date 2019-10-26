@@ -95,6 +95,7 @@ struct pvm_root_t
     pvm_object_t           ui_control_class;
     pvm_object_t           ui_font_class;
 
+    pvm_object_t           stringbuilder_class;
 
     pvm_object_t           null_object;
     pvm_object_t           sys_interface_object;   // Each method is a consecutive syscall (sys 0 first, sys 1 second etc) + return
@@ -230,6 +231,7 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_UI_FONT_CLASS 40
 
+#define PVM_ROOT_OBJECT_STRINGBUILDER_CLASS 41
 
 
 
