@@ -278,18 +278,6 @@ void pvm_gc_iter_window(gc_iterator_call_t func, pvm_object_t  os, void *arg)
 }
 
 
-pvm_object_t     pvm_create_window_object(pvm_object_t owned )
-{
-    //pvm_object_t ret = pvm_object_create_fixed( pvm_get_window_class() );
-    pvm_object_t ret = pvm_create_object( pvm_get_window_class() );
-    struct data_area_4_window *da = (struct data_area_4_window *)ret->da;
-
-    //lprintf("pvm_create_window_object %p n", ret );
-
-    (void)da;
-
-    return ret;
-}
 
 void pvm_gc_finalizer_window( pvm_object_t  os )
 {
@@ -337,4 +325,51 @@ void pvm_restart_window( pvm_object_t o )
 
 
 
+
+pvm_object_t     pvm_create_stringbuilder_object_binary(const char *value, int n_bytes)
+{
+	pvm_object_t 	_data = pvm_object_create_string_binary( value, n_bytes );
+    assert(_data);
+
+	struct data_area_4_string* sda = (struct data_area_4_string*)&(_data->da);
+
+
+	pvm_object_t _me = pvm_object_create_fixed( pvm_get_stringbuilder_class() );
+    struct data_area_4_stringbuilder* sbda = (struct data_area_4_stringbuilder*)&(_data->da);
+
+	pvm_internal_init_stringbuilder(_me);
+
+    sbda->buffer = _data;
+    sbda->bufsize = sda->length;
+
+    sbda->str = sda->data;
+    sbda->len = sda->length;
+
+    sbda->update_count = 0;
+
+	return _me;
+}
+
+/*pvm_object_t     pvm_create_stringbuilder_object(const char *value)
+{
+	return pvm_create_stringbuilder_object_binary(value, strlen(value));
+}*/
+
+
+void pvm_internal_init_stringbuilder(pvm_object_t  os)
+{
+	struct data_area_4_stringbuilder* data_area = (struct data_area_4_stringbuilder*)&(os->da);
+
+	memset( (void *)data_area, 0, os->_da_size );
+	//data_area->length = 0;
+}
+
+void pvm_gc_iter_stringbuilder(gc_iterator_call_t func, pvm_object_t  os, void *arg)
+{
+    (void)func;
+    (void)os;
+    (void)arg;
+    // TODO buffer
+
+}
 
