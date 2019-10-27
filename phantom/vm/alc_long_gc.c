@@ -141,7 +141,7 @@ static void long_gc_build_map( void )
 
     lgc_map_size = map_size;
 
-    // Each vlue is memory range per map element on given level
+    // Each value is memory range per map element on given level
     long_gc_map_level_range[0] = map_size / ELEM_PER_PAGE;
     long_gc_map_level_range[1] = long_gc_map_level_range[0] / ELEM_PER_PAGE;
     long_gc_map_level_range[2] = long_gc_map_level_range[1] / ELEM_PER_PAGE;
@@ -154,6 +154,54 @@ static void long_gc_build_map( void )
     int i;
     for(i = 0; i < ELEM_PER_PAGE; i++)
         long_gc_map_root_array = pvm_create_array_sized( ELEM_PER_PAGE );
+
+}
+/**
+ * 
+ * @brief Get pointer to final list object that will contain element.
+ * 
+ * Create intermediate tables if needed.
+ * 
+**/
+static pvm_object_t long_gc_get_target_list( size_t address )
+{
+    // Shifted address - zero = start of our range
+    size_t saddr = address - lgc_mem_start;
+
+    size_t level0_elem = saddr / long_gc_map_level_range[0];
+    size_t level0_more = saddr % long_gc_map_level_range[0];
+
+    if( 0 == long_gc_map_root_array[level0_elem])
+    {
+        long_gc_map_root_array[level0_elem] = 
+            pvm_create_array_sized( ELEM_PER_PAGE );
+    }
+
+    pvm_object_t l1object = long_gc_map_root_array[level0_elem];
+    pvm_object_t *l1_array = (void *)l1object->da;
+
+    size_t level1_elem = level0_more / long_gc_map_level_range[1];
+    size_t level1_more = level0_more % long_gc_map_level_range[1];
+
+    if( 0 == l1_array[level1_elem])
+    {
+        l1_array[level1_elem] = 
+            pvm_create_array_sized( ELEM_PER_PAGE );
+    }
+
+    pvm_object_t l2object = l1_array[level1_elem];
+    pvm_object_t *l2_array = (void *)l2object->da;
+
+    size_t level2_elem = level1_more / long_gc_map_level_range[2];
+    //size_t level2_more = level1_more % long_gc_map_level_range[2];
+
+    if( 0 == l2_array[level2_elem])
+    {
+        l2_array[level2_elem] = 
+            pvm_create_array_object(  );
+    }
+
+    // last one is a list - we use - ?
 
 }
 
