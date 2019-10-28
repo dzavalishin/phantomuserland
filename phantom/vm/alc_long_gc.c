@@ -25,6 +25,11 @@
 #include <kernel/stats.h>
 #include <kernel/atomic.h>
 
+// TODO 64 bit problem - 512?
+#define ELEM_PER_PAGE 1024
+//#define ELEM_PER_PAGE (PAGE_SIZE/sizeof(void *))
+
+
 static void long_gc_build_map(size_t address_range);
 
 static size_t lgc_mem_start;
@@ -107,7 +112,6 @@ void pvm_snapshot_gc( void )
 
 }
 
-#define ELEM_PER_PAGE 1024
 // Range[0]*1024 must be bigger than mem range we need
 // Range[2] is memory range per one slot of 3rd level map
 static size_t long_gc_map_level_range[3];
@@ -250,9 +254,34 @@ typedef int (*long_gc_foreach_t)( size_t obj_addr, pvm_object_t obj_header, void
  * @brief Iterate through map objects calling func for each.
  * 
 **/
-static errno_t long_gc_map_foreach(long_gc_foreach_t func, void *arg)
+static errno_t long_gc_map_foreach(long_gc_foreach_t func, void *arg, size_t start_addr, size_t size )
 {
-    
+    int i,j,k,l;
+    for( i = 0; i < ELEM_PER_PAGE; i++)
+    {
+        pvm_object_t l0 = long_gc_map_root_array[i];
+        if( l0 == 0) continue;
+        pvm_object_t *l1_array = (void *)l0->da;
+
+        for( j = 0; j < ELEM_PER_PAGE; j++ )
+        {
+            pvm_object_t l1 = l1_array[j];
+            if( l1 == 0) continue;
+            pvm_object_t *l2_array = (void *)l1->da;
+
+            for( k = 0; k < ELEM_PER_PAGE; k++ )
+            {
+                pvm_object_t l2 = l2_array[j];
+                if( l2 == 0) continue;
+                //pvm_object_t *list = (void *)l1object->da;
+
+                // now scan through list
+
+            }
+
+        }
+    }
+
 }
 
 
@@ -317,7 +346,7 @@ static void long_gc_roots_phase(void)
 
     }
 
-    // Root object
+    // Find and add root object
     rc = long_gc_snap_foreach( long_gc_find_root, 0 );
     assert( rc = EEXIST );
 
@@ -326,6 +355,15 @@ static void long_gc_roots_phase(void)
 
 static void long_gc_scan_phase(void)
 {
+again: ;    
+    // scan part of map processing all unvisited objects
+    // limit scan to small range to attempt to be inside of
+    // cache for snapshot data
+
+
+    size_t part_start;
+    size_t part_size = 1024*1024*16; // 16M in one run - TODO cache size must be no less!
+
 
 }
 
