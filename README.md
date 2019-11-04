@@ -30,6 +30,12 @@ See [ChangeLog](https://github.com/dzavalishin/phantomuserland/wiki/ChangeLog), 
 
 ![](https://github.com/dzavalishin/phantomuserland/blob/master/doc/images/Phantom_screen_Controls_21_10_2019.png?raw=true)
 
+## Dox ##
+
+[![Documentation Status](https://readthedocs.org/projects/phantomdox/badge/?version=latest)](https://phantomdox.readthedocs.io/en/latest/?badge=latest)
+     
+[Web Documentation](https://phantomdox.readthedocs.io/en/latest/) and [PDF](https://buildmedia.readthedocs.org/media/pdf/phantomdox/latest/phantomdox.pdf)
+
 ## Build ##
 
   Set '''PHANTOM_HOME''' environment variable to the path to Phantom repository root directory,
