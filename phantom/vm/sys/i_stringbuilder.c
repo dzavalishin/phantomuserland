@@ -40,7 +40,7 @@ static int si_stringbuilder_3_clone( pvm_object_t me, pvm_object_t *ret, struct 
 {
     DEBUG_INFO;
     ASSERT_STRING(me);
-    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, string );
+    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, stringbuilder );
     SYSCALL_RETURN(pvm_create_stringbuilder_object_binary( (char *)sbda->str, sbda->len ));
 }
 
@@ -56,8 +56,8 @@ static int si_stringbuilder_4_equals( pvm_object_t me, pvm_object_t *ret, struct
     {
         ASSERT_STRING(him);
 
-        struct data_area_4_stringbuilder *sbda = pvm_object_da( me, string );
-        struct data_area_4_stringbuilder *himda = pvm_object_da( him, string );
+        struct data_area_4_stringbuilder *sbda = pvm_object_da( me, stringbuilder );
+        struct data_area_4_stringbuilder *himda = pvm_object_da( him, stringbuilder );
 
         iret =
             me->_class == him->_class &&
@@ -74,7 +74,7 @@ static int si_stringbuilder_4_equals( pvm_object_t me, pvm_object_t *ret, struct
 static int si_stringbuilder_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )
 {
     DEBUG_INFO;
-    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, string );
+    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, stringbuilder );
     SYSCALL_RETURN(pvm_create_string_object_binary( (char *)sbda->str, sbda->len ));
 
 }
@@ -83,7 +83,7 @@ static int si_stringbuilder_8_substring( pvm_object_t me, pvm_object_t *ret, str
 {
     DEBUG_INFO;
     ASSERT_STRING(me);
-    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, string );
+    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, stringbuilder );
     
     CHECK_PARAM_COUNT(2);
 
@@ -107,7 +107,7 @@ static int si_stringbuilder_9_byteat( pvm_object_t me, pvm_object_t *ret, struct
 {
     DEBUG_INFO;
     ASSERT_STRING(me);
-    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, string );
+    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, stringbuilder );
     
     CHECK_PARAM_COUNT(1);
     int index = AS_INT(args[0]);
@@ -129,7 +129,7 @@ static int si_stringbuilder_10_concat( pvm_object_t me, pvm_object_t *ret, struc
     pvm_object_t him = args[0];
     ASSERT_STRING(him);
 
-    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, string );
+    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, stringbuilder );
     struct data_area_4_string *himda = pvm_object_da( him, string );
 /*
     pvm_object_t oret = pvm_create_string_object_binary_cat(
@@ -169,7 +169,7 @@ static int si_stringbuilder_11_length( pvm_object_t me, pvm_object_t *ret, struc
 {
     DEBUG_INFO;
     ASSERT_STRING(me);
-    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, string );
+    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, stringbuilder );
     
     CHECK_PARAM_COUNT(0);
 
@@ -184,7 +184,7 @@ static int si_stringbuilder_12_find( pvm_object_t me, pvm_object_t *ret, struct 
     pvm_object_t him = args[0];
     ASSERT_STRING(him);
 
-    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, string );
+    struct data_area_4_stringbuilder *sbda = pvm_object_da( me, stringbuilder );
     struct data_area_4_string *himda = pvm_object_da( him, string );
 
     unsigned char * cret = (unsigned char *)strnstrn(

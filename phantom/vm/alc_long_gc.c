@@ -89,8 +89,8 @@ static size_t lgc_mem_size;
 void pvm_snapshot_gc( void )
 {
 // Get actual address space size
-    lgc_mem_start;
-    lgc_mem_end;
+    lgc_mem_start = hal.object_vspace;
+    lgc_mem_end = hal.object_vsize;
     lgc_mem_size = lgc_mem_end - lgc_mem_start;
 
 // Determine amount of memory we need for object map
@@ -161,7 +161,7 @@ static void long_gc_build_map( void )
 
     LOG_INFO_(1, "Map size %x", map_size );
 
-    size_t lgc_map_size = map_size;
+    //size_t lgc_map_size = map_size;
 
     // Each value is memory range per map element on given level
     long_gc_map_level_range[0] = map_size / ELEM_PER_PAGE;
@@ -170,13 +170,16 @@ static void long_gc_build_map( void )
 
     // Now create first two levels
 
-    long_gc_map_root = pvm_create_array_sized( ELEM_PER_PAGE );
+    //long_gc_map_root = pvm_create_array_sized( ELEM_PER_PAGE );
+    long_gc_map_root = pvm_create_array_object();
     long_gc_map_root_array = (void *)long_gc_map_root->da;
 
     int i;
     for(i = 0; i < ELEM_PER_PAGE; i++)
-        long_gc_map_root_array = pvm_create_array_sized( ELEM_PER_PAGE );
-
+    {
+        //long_gc_map_root_array = pvm_create_array_sized( ELEM_PER_PAGE );
+        long_gc_map_root_array = pvm_create_array_object();
+    }
 }
 /**
  * 
@@ -427,6 +430,8 @@ static void *long_snapshot_get_buffer( size_t buf_size, size_t mem_addr )
     assert(rc == 0);
 
     long_snapshot_cache_write_buffer( buf, buf_size, mem_addr );
+
+    return buf;
 }
 
 /**
@@ -591,6 +596,7 @@ static errno_t long_snapshot_read_buffer( void* buffer, size_t buf_size, size_t 
 {
 // TODO keep some map of pointers into list of snapshot buffers
 // TODO restructure snapshot to be a tree 
-
+#warning impl me
+    return EIO;
 }
 
