@@ -34,7 +34,8 @@ See [ChangeLog](https://github.com/dzavalishin/phantomuserland/wiki/ChangeLog), 
 
 [![Documentation Status](https://readthedocs.org/projects/phantomdox/badge/?version=latest)](https://phantomdox.readthedocs.io/en/latest/?badge=latest)
      
-[Web Documentation](https://phantomdox.readthedocs.io/en/latest/) and [PDF](https://buildmedia.readthedocs.org/media/pdf/phantomdox/latest/phantomdox.pdf)
+[Web Documentation](https://phantomdox.readthedocs.io/en/latest/) and [PDF](https://buildmedia.readthedocs.org/media/pdf/phantomdox/latest/phantomdox.pdf), 
+[Wiki](https://github.com/dzavalishin/phantomuserland/wiki)
 
 ## Build ##
 
@@ -69,11 +70,6 @@ trunk/plib/sys/src           - native phantom userland code
 
 trunk/run                    - QEMU run/test environment
 trunk/tools/plc              - phantom language compiler / java bytecode translator
-
-## Dox ##
-
-  <https://github.com/dzavalishin/phantomuserland/wiki>
-  doc/*
 
 ## Screenshots ##
 
