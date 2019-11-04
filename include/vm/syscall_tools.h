@@ -63,7 +63,7 @@
 
 #define ASSERT_CLASS_IS(_obj,_class_name) \
     do { \
-	if( !pvm_object_class_is_or_child( _obj, pvm_get_class_noload(_class_name) ) \
+	if( !pvm_object_class_is_or_child( _obj, pvm_get_class_noload(_class_name) ) ) \
         SYSCALL_THROW_STRING("arg class not " _class_name " : " __FILE__ ":" __XSTRING(__LINE__)  ); \
     } while(0)
 

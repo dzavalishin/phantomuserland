@@ -243,7 +243,7 @@ static int si_string_20_parse_json( pvm_object_t me, pvm_object_t *ret, struct d
     SYSCALL_RETURN( top );
 }
 
-
+extern int si_void_14_to_immutable( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
 
 syscall_func_t  syscall_table_4_string[21] =
 {

@@ -347,6 +347,7 @@ struct data_area_4_tcp
 #include "../phantom/vm/sys/i_window.h"
 #include "../phantom/vm/sys/i_directory.h"
 #include "../phantom/vm/sys/i_class.h"
+#include "../phantom/vm/sys/i_stringbuilder.h"
 
 
 

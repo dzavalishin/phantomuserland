@@ -6,6 +6,8 @@
  *
  * Internal class table.
  *
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
  *
 **/
 

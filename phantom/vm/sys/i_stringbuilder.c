@@ -196,7 +196,7 @@ static int si_stringbuilder_12_find( pvm_object_t me, pvm_object_t *ret, struct 
     int pos = -1;
 
     if( cret != 0 )
-        pos = cret - (sbda->str);
+        pos = ((void*)cret) - ((void *)(sbda->str));
 
     SYSCALL_RETURN(pvm_create_int_object( pos ));
 }
@@ -243,16 +243,18 @@ DECLARE_SIZE(stringbuilder);
 
 pvm_object_t     pvm_create_stringbuilder_object_binary(const char *value, int n_bytes)
 {
-	pvm_object_t 	_data = pvm_object_create_string_binary( value, n_bytes );
+	pvm_object_t 	_data = pvm_create_string_object_binary( value, n_bytes );
     assert(_data);
 
 	struct data_area_4_string* sda = (struct data_area_4_string*)&(_data->da);
 
 
-	pvm_object_t _me = pvm_object_create_fixed( pvm_get_stringbuilder_class() );
+	//pvm_object_t _me = pvm_object_create_fixed( pvm_get_stringbuilder_class() );
+    pvm_object_t _me = pvm_create_object( pvm_get_stringbuilder_class() ); // calls init
+
     struct data_area_4_stringbuilder* sbda = (struct data_area_4_stringbuilder*)&(_data->da);
 
-	pvm_internal_init_stringbuilder(_me);
+	//pvm_internal_init_stringbuilder(_me); // called by create_object
 
     sbda->buffer = _data;
     sbda->bufsize = sda->length;

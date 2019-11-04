@@ -21,6 +21,7 @@
 #include <vm/alloc.h>
 #include <vm/internal.h>
 #include <vm/object_flags.h>
+#include <vm/internal_da.h>
 
 #include <kernel/stats.h>
 #include <kernel/atomic.h>
@@ -30,7 +31,24 @@
 //#define ELEM_PER_PAGE (PAGE_SIZE/sizeof(void *))
 
 
-static void long_gc_build_map(size_t address_range);
+//static void long_gc_build_map(size_t address_range);
+static void long_gc_build_map( void );
+static void long_gc_roots_phase(void);
+static void long_gc_scan_phase(void);
+static void long_gc_mark_phase(void);
+static void long_gc_sweep_phase(void);
+
+static errno_t long_snapshot_get_object_header( pvm_object_t out, size_t mem_addr );
+static errno_t long_snapshot_get_object_data( void * out, size_t mem_addr, size_t data_size );
+
+static void * long_snapshot_cache_read_buffer( size_t buf_size, size_t mem_addr );
+static errno_t long_snapshot_cache_write_buffer( void* buffer, size_t buf_size, size_t mem_addr );
+static void * long_snapshot_cache_alloc_buffer( size_t buf_size );
+
+static errno_t long_snapshot_read_buffer( void* buffer, size_t buf_size, size_t mem_addr );
+
+static void lock_snapshot_from_deletion( bool lock );
+
 
 static size_t lgc_mem_start;
 static size_t lgc_mem_end;
@@ -143,7 +161,7 @@ static void long_gc_build_map( void )
 
     LOG_INFO_(1, "Map size %x", map_size );
 
-    lgc_map_size = map_size;
+    size_t lgc_map_size = map_size;
 
     // Each value is memory range per map element on given level
     long_gc_map_level_range[0] = map_size / ELEM_PER_PAGE;
@@ -324,7 +342,7 @@ static void long_gc_roots_phase(void)
     errno_t rc;
     // Arenas
     size_t arena_addr = 0;
-    while( arena_addr < lnc_mem_end)
+    while( arena_addr < lgc_mem_end)
     {
         pvm_object_storage_t arena_hdr;
         rc = long_snapshot_get_object_header( &arena_hdr, arena_addr );
@@ -335,7 +353,7 @@ static void long_gc_roots_phase(void)
         // TODO more checks
 
         // find out another arena addr
-        data_area_4_arena ada;
+        struct data_area_4_arena ada;
         rc = long_snapshot_get_object_data( &ada, arena_addr + sizeof(pvm_object_storage_t), sizeof(ada) );
         assert( 0 == rc);
 
@@ -403,7 +421,7 @@ static void *long_snapshot_get_buffer( size_t buf_size, size_t mem_addr )
     void *buf = long_snapshot_cache_read_buffer( buf_size, mem_addr );
     if( buf != 0 ) return buf;
 
-    buf = long_snapshot_cache_alloc_buffer( size_t buf_size )
+    buf = long_snapshot_cache_alloc_buffer( buf_size );
 
     rc =  long_snapshot_read_buffer( buf, buf_size, mem_addr );
     assert(rc == 0);
@@ -421,22 +439,22 @@ static void *long_snapshot_get_buffer( size_t buf_size, size_t mem_addr )
 **/
 static errno_t long_snapshot_get_object_header( pvm_object_t out, size_t mem_addr )
 {
-    size_t pg_mem_addr = PREV_PAGE_ALIGN(mem_addr)
+    size_t pg_mem_addr = PREV_PAGE_ALIGN(mem_addr);
 
     void* buf;
     buf = long_snapshot_get_buffer( PAGE_SIZE, pg_mem_addr );
 
-    size_t end_of_obj_header = mem_addr + sizeof(pvm_object_storage); // TODO check size
+    size_t end_of_obj_header = mem_addr + sizeof(struct pvm_object_storage); // TODO check size
     size_t obj_shift = mem_addr - pg_mem_addr;
 
     if( pg_mem_addr + PAGE_SIZE > end_of_obj_header )
     {
-        memcpy( out, buf + obj_shift, sizeof(pvm_object_storage) );
+        memcpy( out, buf + obj_shift, sizeof(struct pvm_object_storage) );
         return 0;
     }
 
-    size_t part1_size = PAGE_SIZE-obj_shit;
-    size_t part2_size = sizeof(pvm_object_storage) - part1_size;
+    size_t part1_size = PAGE_SIZE-obj_shift;
+    size_t part2_size = sizeof(struct pvm_object_storage) - part1_size;
 
     memcpy( out, buf + obj_shift, part1_size );
 
@@ -454,12 +472,12 @@ static errno_t long_snapshot_get_object_header( pvm_object_t out, size_t mem_add
 **/
 static errno_t long_snapshot_get_object_data( void * out, size_t mem_addr, size_t data_size )
 {
-    size_t pg_mem_addr = PREV_PAGE_ALIGN(mem_addr)
+    size_t pg_mem_addr = PREV_PAGE_ALIGN(mem_addr);
 
     void* buf;
     buf = long_snapshot_get_buffer( PAGE_SIZE, pg_mem_addr );
 
-    size_t end_of_data = mem_addr + sizeof(pvm_object_storage); // TODO check size
+    size_t end_of_data = mem_addr + sizeof(struct pvm_object_storage); // TODO check size
     size_t obj_shift = mem_addr - pg_mem_addr;
 
     if( pg_mem_addr + PAGE_SIZE > end_of_data )
@@ -468,7 +486,7 @@ static errno_t long_snapshot_get_object_data( void * out, size_t mem_addr, size_
         return 0;
     }
 
-    size_t part1_size = PAGE_SIZE-obj_shit;
+    size_t part1_size = PAGE_SIZE-obj_shift;
     size_t part2_size = data_size - part1_size;
 
     memcpy( out, buf + obj_shift, part1_size );

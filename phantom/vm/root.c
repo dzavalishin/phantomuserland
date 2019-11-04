@@ -6,6 +6,9 @@
  *
  * Virtual machine startup and root objects creation
  *
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
+ * 
 **/
 
 #define DEBUG_MSG_PREFIX "vm.root"
@@ -384,7 +387,7 @@ static void set_root_from_table()
     SET_ROOT_CLASS(ui_control,UI_CONTROL);
     SET_ROOT_CLASS(ui_font,UI_FONT);
 
-    SET_ROOT_CLASS(strigbuilder,STRINGBUILDER);
+    SET_ROOT_CLASS(stringbuilder,STRINGBUILDER);
 
 }
 
@@ -425,7 +428,7 @@ GCINLINE pvm_object_t     pvm_get_weakref_class() { return pvm_root.weakref_clas
 #endif
 GCINLINE pvm_object_t     pvm_get_window_class() { return pvm_root.window_class; }
 GCINLINE pvm_object_t     pvm_get_directory_class() { return pvm_root.directory_class; }
-GCINLINE pvm_object_t     pvm_get_connection_class() { return pvm_root.connection_class; }
+//GCINLINE pvm_object_t     pvm_get_connection_class() { return pvm_root.connection_class; }
 
 GCINLINE pvm_object_t     pvm_get_mutex_class() { return pvm_root.mutex_class; }
 GCINLINE pvm_object_t     pvm_get_cond_class() { return pvm_root.cond_class; }
@@ -726,7 +729,7 @@ static void runclass(int ac, char **av)
 
 
 
-
+#if 0
 
 int pvm_connect_object(pvm_object_t o, struct data_area_4_thread *tc)
 {
@@ -748,6 +751,6 @@ int pvm_disconnect_object(pvm_object_t o, struct data_area_4_thread *tc)
     return phantom_disconnect_object( da );
 }
 
-
+#endif
 
 

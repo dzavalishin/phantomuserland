@@ -1,3 +1,35 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
+ *
+ * .internal.thread class implementation
+ * 
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
+ *
+**/
+
+
+#define DEBUG_MSG_PREFIX "vm.sysc.thread"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
+#include <phantom_libc.h>
+
+#include "vm/object.h"
+#include "vm/internal.h"
+#include "vm/internal_da.h"
+#include "vm/syscall.h"
+#include "vm/root.h"
+#include "vm/p2c.h"
+#include "vm/alloc.h"
+
+static int debug_print = 0;
+
 // --------- thread ---------------------------------------------------------
 
 static int si_thread_5_tostring( pvm_object_t me, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args )

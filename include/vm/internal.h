@@ -6,6 +6,9 @@
  *
  * Internal (native) classes definitions.
  *
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
+ * 
 **/
 
 #ifndef VM_INTERNAL_H
@@ -107,6 +110,8 @@ DEF_I(io)
 DEF_I(port)
 DEF_I(ui_control)
 DEF_I(ui_font)
+
+DEF_I(stringbuilder)
 
 
 #undef DEF_I

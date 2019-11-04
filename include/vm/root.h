@@ -2,12 +2,14 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes?
+ * Root object - pointers to critical points of VM infrastructure.
  *
- *
- **/
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalClasses>
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/InternalMethodWritingGuide>
+ * 
+**/
 
 #ifndef PVM_ROOT_H
 #define PVM_ROOT_H
