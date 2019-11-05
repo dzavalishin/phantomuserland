@@ -1,1 +1,94 @@
-<mxfile host="www.draw.io" modified="2019-11-05T17:34:56.269Z" agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 YaBrowser/19.10.1.238 Yowser/2.5 Safari/537.36" version="12.2.0" etag="6zNfRgBvZCeqb9zS5YMA" type="github" pages="1"><diagram id="MmI_iWkdmgnguwUkRg-a">UzV2zq1wL0osyPDNT0nNUTV2VTV2LsrPL4GwciucU3NyVI0MMlNUjV1UjYwMgFjVyA2HrCFY1qAgsSg1rwSLBiADYTaQg2Y1AA==</diagram></mxfile>
+<mxfile host="www.draw.io" modified="2019-11-05T18:03:52.581Z" agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 YaBrowser/19.10.1.238 Yowser/2.5 Safari/537.36" etag="tWJuu9zsUdFBX848FQpu" version="12.2.0" type="github" pages="1">
+  <diagram id="MmI_iWkdmgnguwUkRg-a" name="Page-1">
+    <mxGraphModel dx="2583" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-1" value="" style="fillColor=#FFC82E;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="760" height="360" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-2" value="" style="fillColor=#7CCC6C;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="440" width="760" height="680" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-3" value="Disk IO" style="fillColor=#8C9AA6;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="640" y="940" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-4" value="Persistent pager" style="fillColor=#83389B;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="640" y="850" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-5" value="Block Drivers" style="fillColor=#78CDD1;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="640" y="1030" width="145" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-6" value="Bytecode VM" style="fillColor=#FFC82E;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="635" y="480" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-7" value="Video Drivers" style="fillColor=#78CDD1;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1040" width="145" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-8" value="Restart Manager" style="fillColor=#FFC82E;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="420" y="480" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-9" value="Persistent alloc" style="fillColor=#FFC82E;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="225" y="480" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-10" value="Persistent GC" style="fillColor=#FFC82E;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="250" y="558.5" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-11" value="Windows" style="fillColor=#8C9AA6;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="77.5" y="800" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-12" value="Controls" style="fillColor=#D2D6DF;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="80" y="730" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-13" value="Graphics" style="fillColor=#6666FF;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="80" y="965" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-14" value="Fonts" style="fillColor=#6666FF;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="75" y="875" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-15" value="Net Drivers" style="fillColor=#78CDD1;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="260" y="1040" width="145" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-16" value="TCP/IP" style="fillColor=#8C9AA6;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="260" y="965" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-17" value=".internal classes" style="fillColor=#83389B;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="430" y="710" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-18" value="Other Drivers" style="fillColor=#78CDD1;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="425" y="1030" width="145" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-19" value="Unix FS" style="fillColor=#009271;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="430" y="865" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-20" value="Unix API" style="fillColor=#009271;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="430" y="940" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-21" value="Unix ELF" style="fillColor=#009271;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="430" y="790" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-23" value="BeOS Ports" style="fillColor=#009271;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="259" y="790" width="140" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-24" value="Persistent Syscalls" style="fillColor=#FFC82E;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="412" y="558.5" width="150" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-25" value="Native app class" style="fillColor=#EAEDF2;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="105" y="110" width="205" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-26" value="OS service class" style="fillColor=#D2D6DF;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="105" y="250" width="180" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-28" value="Object Directory" style="fillColor=#78CDD1;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="360" y="275" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-29" value="ObjectLand Root" style="fillColor=#78CDD1;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="555" y="270" width="160" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="dQvQc72deKFeYz-QL_CX-30" value="Native app class" style="fillColor=#EAEDF2;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="337.5" y="110" width="205" height="50" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
