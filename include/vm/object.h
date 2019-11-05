@@ -261,6 +261,8 @@ pvm_object_t     pvm_create_stringbuilder_object_binary(const char *value, int n
 
 //pvm_object_t     pvm_create_array_object(void);
 #define pvm_create_array_object() pvm_create_object( pvm_get_array_class() )
+pvm_object_t     pvm_create_array_sized( size_t n_elem );
+
 pvm_object_t     pvm_create_page_object( int n_slots, pvm_object_t *init, int init_slots );
 pvm_object_t     pvm_create_thread_object( pvm_object_t start_call_frame );
 pvm_object_t     pvm_create_call_frame_object(void);

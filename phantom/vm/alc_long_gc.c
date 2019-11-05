@@ -89,7 +89,7 @@ static size_t lgc_mem_size;
 void pvm_snapshot_gc( void )
 {
 // Get actual address space size
-    lgc_mem_start = hal.object_vspace;
+    lgc_mem_start = (size_t)hal.object_vspace;
     lgc_mem_end = hal.object_vsize;
     lgc_mem_size = lgc_mem_end - lgc_mem_start;
 
@@ -170,15 +170,15 @@ static void long_gc_build_map( void )
 
     // Now create first two levels
 
-    //long_gc_map_root = pvm_create_array_sized( ELEM_PER_PAGE );
-    long_gc_map_root = pvm_create_array_object();
+    long_gc_map_root = pvm_create_array_sized( ELEM_PER_PAGE );
+    //long_gc_map_root = pvm_create_array_object();
     long_gc_map_root_array = (void *)long_gc_map_root->da;
 
     int i;
     for(i = 0; i < ELEM_PER_PAGE; i++)
     {
-        //long_gc_map_root_array = pvm_create_array_sized( ELEM_PER_PAGE );
-        long_gc_map_root_array = pvm_create_array_object();
+        long_gc_map_root_array[i] = pvm_create_array_sized( ELEM_PER_PAGE );
+        //long_gc_map_root_array[i] = pvm_create_array_object();
     }
 }
 /**
@@ -202,6 +202,7 @@ static pvm_object_t long_gc_get_target_list( size_t address )
     {
         long_gc_map_root_array[level0_elem] = 
             pvm_create_array_sized( ELEM_PER_PAGE );
+            //pvm_create_array_object();
     }
 
     pvm_object_t l1object = long_gc_map_root_array[level0_elem];
@@ -216,6 +217,7 @@ static pvm_object_t long_gc_get_target_list( size_t address )
     {
         l1_array[level1_elem] = 
             pvm_create_array_sized( ELEM_PER_PAGE );
+            //pvm_create_array_object();
     }
 
     pvm_object_t l2object = l1_array[level1_elem];

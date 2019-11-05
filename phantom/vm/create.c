@@ -96,8 +96,15 @@ pvm_object_t     pvm_create_object(pvm_object_t type)
 }
 
 
-
-
+// TODO this is a quick hack, it will create array of a wrong (bigger) size
+pvm_object_t pvm_create_array_sized( size_t n_elem )
+{
+    assert(n_elem >= 0);
+ 	//pvm_object_t ret = pvm_object_create_dynamic( pvm_get_array_class(), n_elem * sizeof(pvm_object_t) );
+    pvm_object_t ret = pvm_create_array_object();
+    pvm_set_array_ofield( ret, n_elem - 1, 0 ); // Enforce size
+    return ret;   
+}
 
 
 /**
