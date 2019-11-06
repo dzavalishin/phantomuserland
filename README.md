@@ -1,12 +1,19 @@
 # Welcome to Phantom OS #
 
-Hello there.
+Phantom OS is a persistent operating system. Its primary goal
+is to provide environment for programs that does survive OS
+reboot. Such an environment greatly simplifies software development
+and makes it possible to write programs that, for example, do not need filesystem.
 
-It is a repository for Phantom OS userland code and cross-development tools.
-de-facto it contains kernel sources as well, though.
+Nevertheless, Phantom supports filesystems and all of the modern OS features.
+
+For the details please refer to the [Phantom OS Programmer's guide](https://phantomdox.readthedocs.io/en/latest/).
+
+For the questions and discussion please visit [Google Group](https://groups.google.com/forum/?pli=1#!forum/phantom-os).
 
 ## What Phantom OS is ##
 
+*   [Phantom OS Programmer's guide](https://phantomdox.readthedocs.io/en/latest/)
 *   [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)
 *   [Short article in English - TheRegister](http://www.theregister.co.uk/2009/02/03/phantom_russian_os/)
 *   [Big article in Russian - Open Systems Magazine](http://www.osp.ru/os/2011/03/13008200/)
@@ -133,7 +140,9 @@ If you feel interested to take part in a project, please leave me a note. An iss
 
 Easiest way is to [Write e-mail to Dmitry Zavalishin](mailto:dz@dz.ru)
 
-Just for reference there was [Old Google forum](https://groups.google.com/forum/#!forum/phantom-os)
+Or leave a message in [Google group](https://groups.google.com/forum/#!forum/phantom-os)
+
+Or leave an issue in [tracker](https://github.com/dzavalishin/phantomuserland/issues)
 
 Here is an [Phantom Web Site](http://phantomos.org/), but since you're here you
 better look at [Wiki](https://github.com/dzavalishin/phantomuserland/wiki).
@@ -141,5 +150,4 @@ better look at [Wiki](https://github.com/dzavalishin/phantomuserland/wiki).
 <hr>
 
 Best regards, Dmitry Zavalishin,
-Phantom project... how to say... inventor? :)
-dz@dz.ru
+<dz@dz.ru>
