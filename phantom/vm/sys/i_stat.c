@@ -23,8 +23,8 @@
 #include <vm/syscall_net.h>
 #include <vm/alloc.h>
 #include <kernel/snap_sync.h>
-#include <kernel/net.h>
-#include <kernel/json.h>
+//#include <kernel/net.h>
+//#include <kernel/json.h>
 
 #include <kernel/profile.h>
 #include <kernel/stats.h>

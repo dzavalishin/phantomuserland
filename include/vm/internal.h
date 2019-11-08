@@ -2,7 +2,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Internal (native) classes definitions.
  *
@@ -113,6 +113,7 @@ DEF_I(ui_font)
 
 DEF_I(stringbuilder)
 
+DEF_I(crypt)
 
 #undef DEF_I
 

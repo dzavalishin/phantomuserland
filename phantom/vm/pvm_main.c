@@ -51,6 +51,7 @@ static char *envbuf[MAXENVBUF] = { 0 };
 
 static int arg_run_debugger = 0;
 static int arg_run_threads = 0;
+static char *arg_run_test = 0;
 
 
 
@@ -115,6 +116,7 @@ int main(int argc, char* argv[])
     run_init_functions( INIT_LEVEL_LATE );
 
 #if 0
+    
     //videotest();
     videotest_pbm();
     //videotest_overlay();
@@ -123,11 +125,20 @@ int main(int argc, char* argv[])
 #endif
 
 #if 0
+    if( 0 == strcmp( arg_run_test, "video" ) )
+    {
     new_videotest();
     getchar();
     exit(0);
+    }
 #endif
 
+    // If we are here and arg_run_test != 0
+    if(arg_run_test)
+    {
+        printf("\nTest '%s' not found\n", arg_run_test );
+        exit(33);
+    }
 
     char *dir = getenv("PHANTOM_HOME");
     char *rest = "plib/bin/classes";
@@ -207,6 +218,7 @@ static void usage()
            "Usage: pvm_test [-flags] [env_name=env_val]\n\n"
            "Flags:\n"
            "\t-t\t- run VM in multithreaded mode (else just startup code is run)\n"
+           "\t-Tname\t- run test with given name\n"
            "\t-di\t- debug (print) instructions\n"
            "\t-dt\t- print trace (class, method, IP)\n"
            "\t-dd\t- on finish start kernel debugger\n"
@@ -268,6 +280,11 @@ static void args(int argc, char* argv[])
         */
         case 't':
             arg_run_threads++;
+            break;
+
+        case 'T':
+            arg_run_test = arg;
+            printf("Will run test '%s'\n", arg_run_test );
             break;
 
         case 'd':

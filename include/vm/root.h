@@ -76,7 +76,7 @@ struct pvm_root_t
     pvm_object_t           window_class;
 
     pvm_object_t           directory_class;
-    pvm_object_t           connection_class;
+    pvm_object_t           crypt_class;
 
     pvm_object_t           mutex_class;
     pvm_object_t           cond_class;
@@ -235,6 +235,7 @@ extern struct pvm_root_t pvm_root;
 
 #define PVM_ROOT_OBJECT_STRINGBUILDER_CLASS 41
 
+#define PVM_ROOT_OBJECT_CRYPT_CLASS 42
 
 
 // Runtime restoration facilities

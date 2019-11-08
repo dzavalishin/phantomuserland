@@ -385,13 +385,14 @@ struct internal_class pvm_internal_classes[] =
     // kill
 #if 1
     {
-        ".internal.connection.off",
-        -1,
-        0, 0, 0, 0,
-        0,
-        0,
-        0,
-        0,
+        ".internal.crypt",
+        PVM_ROOT_OBJECT_CRYPT_CLASS,
+        IINIT(crypt),
+        pvm_gc_finalizer_crypt,
+        pvm_restart_crypt,
+        sizeof(struct data_area_4_crypt),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
         0
     },
 #else
@@ -538,7 +539,7 @@ struct internal_class pvm_internal_classes[] =
     },
     {
         ".internal.stringbuilder",
-        PVM_ROOT_OBJECT_STRING_CLASS,
+        PVM_ROOT_OBJECT_STRINGBUILDER_CLASS,
         syscall_table_4_stringbuilder,  &n_syscall_table_4_stringbuilder,
         pvm_internal_init_stringbuilder,
         pvm_gc_iter_stringbuilder,

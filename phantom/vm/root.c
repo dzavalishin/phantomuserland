@@ -369,7 +369,7 @@ static void set_root_from_table()
 #endif
     SET_ROOT_CLASS(window, WINDOW);
     SET_ROOT_CLASS(directory, DIRECTORY);
-//    SET_ROOT_CLASS(connection, CONNECTION);
+    SET_ROOT_CLASS(crypt, CRYPT);
 
     SET_ROOT_CLASS(mutex,MUTEX);
     SET_ROOT_CLASS(cond,COND);
@@ -428,7 +428,7 @@ GCINLINE pvm_object_t     pvm_get_weakref_class() { return pvm_root.weakref_clas
 #endif
 GCINLINE pvm_object_t     pvm_get_window_class() { return pvm_root.window_class; }
 GCINLINE pvm_object_t     pvm_get_directory_class() { return pvm_root.directory_class; }
-//GCINLINE pvm_object_t     pvm_get_connection_class() { return pvm_root.connection_class; }
+GCINLINE pvm_object_t     pvm_get_crypt_class() { return pvm_root.crypt_class; }
 
 GCINLINE pvm_object_t     pvm_get_mutex_class() { return pvm_root.mutex_class; }
 GCINLINE pvm_object_t     pvm_get_cond_class() { return pvm_root.cond_class; }
