@@ -9,15 +9,9 @@ http://www.cs.washington.edu/education/courses/cse501/01wi/project/sable-thesis.
 http://sablecc.sourceforge.net/downloads/thesis.pdf
 
 AHCI, drivers
-http://www.koders.com/c/fid38869AA8E32832BBA219DF1716C6D7266FE22806.aspx?s=mpc8560
-http://www.koders.com/c/fid381C26DE905A16202DB29C6F646214753DADC789.aspx
-http://www.koders.com/c/fid31F8BF4537FD6A62DBBA6897855D3AC258C7DF38.aspx?s=mpc8560
-http://www.koders.com/c/fidB5DD799FD1DADFB6AE35C8814DA39E9FF741862B.aspx
 
 http://www.freebsd.org/cgi/cvsweb.cgi/src/sys/dev/ahci/ahci.c?rev=1.1.2.64;content-type=text%2Fplain
 
-http://lxr.free-electrons.com/source/drivers/ata/ahci.h
-http://code.coreboot.org/p/seabios/source/tree/master/src/ahci.h
 
 
 
@@ -28,18 +22,14 @@ http://en.wikipedia.org/wiki/Vidix
 
 http://gcc.gnu.org/onlinedocs/gcc-4.4.2/gcc/Atomic-Builtins.html#Atomic-Builtins
 
-http://www.aarongray.org/AODUBL/bookmarks.html
 
-http://aodfaq.wikispaces.com/
 
-http://www.dosdriver.de/graph.php
 
 http://minirighi.sourceforge.net/html/modules.html
 
 http://groups.google.co.uk/group/alt.os.development/topics
 
 ELF dlls
-http://www.iecc.com/linker/linker10.html
 
 http://www.osdever.net/
 
@@ -47,21 +37,15 @@ http://www.osdever.net/bkerndev/index.php
 
 http://ru.wikipedia.org/wiki/%D0%A2%D0%B0%D0%B1%D0%BB%D0%B8%D1%86%D0%B0_%D1%80%D0%B0%D0%B7%D0%B4%D0%B5%D0%BB%D0%BE%D0%B2_GUID
 
-http://unununium.org/
 
 http://www.win.tue.nl/~aeb/partitions/partition_tables-2.html
 http://hdpt.page.by/
 
-http://jarios.org/
 
 http://people.apache.org/~xli/presentations/ossummit07-drlvm_overview.pdf
 http://xiao-feng.blogspot.com/2008/01/gc-safe-point-and-safe-region.html
 
-http://geezer.osdevbrasil.net/osd/index.htm
 
-http://home.worldonline.dk/finth/ whatvga
-
-http://www.nondot.org/sabre/os/articles
 
 http://www.o3one.org/
 
@@ -79,3 +63,25 @@ History:
 http://cm.bell-labs.com/cm/cs/who/bwk/
 http://cm.bell-labs.com/cm/cs/who/dmr/
 http://en.wikipedia.org/wiki/Ken_Thompson
+
+
+
+------
+
+Outdated
+
+http://www.koders.com/c/fid38869AA8E32832BBA219DF1716C6D7266FE22806.aspx?s=mpc8560
+http://www.koders.com/c/fid381C26DE905A16202DB29C6F646214753DADC789.aspx
+http://www.koders.com/c/fid31F8BF4537FD6A62DBBA6897855D3AC258C7DF38.aspx?s=mpc8560
+http://www.koders.com/c/fidB5DD799FD1DADFB6AE35C8814DA39E9FF741862B.aspx
+
+http://lxr.free-electrons.com/source/drivers/ata/ahci.h
+http://code.coreboot.org/p/seabios/source/tree/master/src/ahci.h
+
+http://www.aarongray.org/AODUBL/bookmarks.html
+
+http://www.dosdriver.de/graph.php
+
+http://www.iecc.com/linker/linker10.html
+
+http://unununium.org/

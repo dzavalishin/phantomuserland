@@ -42,6 +42,63 @@ typedef struct
 } IP_to_Line;
 
 
+typedef struct
+{
+    long Ordinal;
+    long MapSize;
+    IP_to_Line map[MapSize];
+} LineMapRecord;
+
+typedef struct
+{
+    PhantomString MethodName;
+    long Ordinal;
+    long nArgs;
+    long isConstructor;
+    PhantomType ReturnType;
+} SignatureRecord;
+
+typedef struct
+{
+    PhantomString ClassName; // <comment=ClassName.String>
+    long nFields;
+    long nMethods;
+    PhantomString BaseClassName;
+} ClassRecord;
+
+typedef struct
+{
+    PhantomString MethodName;
+    long Ordinal;
+} MethodRecord;
+
+/*
+typedef struct
+{
+    long ConstId;
+    PhantomType ConstType;
+    //PhantomString Constant;
+    // now there
+
+} ConstantRecord;
+*/
+
+void readPhantomConst(int64 finalPos)
+{
+    long ConstId;
+    PhantomType ConstType;
+    //char constant[ finalPos-FTell() ];
+}
+
+
+
+
+
+
+
+
+
+
 while(1)
 {
     bef_rec = FTell();
@@ -51,29 +108,48 @@ while(1)
     switch( h.record_type ) 
     {
     case 'C': // Class
-        PhantomString ClassName;
-        long nFields;
-        long nMethods;
-        PhantomString BaseClassName;
+        //PhantomString ClassName; // <comment=ClassName.String>
+        //long nFields;
+        //long nMethods;
+        //PhantomString BaseClassName;
+        ClassRecord classRec;
     break;
 
     case 'M': // Method
-        PhantomString MethodName;
-        long Ordinal;
+        MethodRecord methodRec;
     break;
 
     case 'S': // Signature
-        PhantomString MethodName;
-        long Ordinal;
-        long nArgs;
-        long isConstructor;
-        PhantomType ReturnType;
+        //PhantomString MethodName;
+        ///long Ordinal;
+        //long nArgs;
+        //long isConstructor;
+        //PhantomType ReturnType;
+        SignatureRecord sigRec;
     break;
 
     case 'l': // Line to IP map
-        long Ordinal;
-        long MapSize;
-        IP_to_Line map[MapSize];
+        //long Ordinal;
+        //long MapSize;
+        //IP_to_Line map[MapSize];
+        LineMapRecord mapRec;
+    break;
+
+    case 'c': // Const pool el
+        //long ConstId;
+        //PhantomType ConstType;
+        //PhantomString Constant;
+        //ConstantRecord constRec;
+        readPhantomConst(bef_rec + h.record_len);
+    break;
+
+    case 'f': // Field
+        //while( FTell() < bef_rec + h.record_len )
+        //{
+            PhantomString FieldName;
+            long FieldOrdinal;
+            PhantomType FieldType;
+        //}
     break;
 
 
@@ -81,4 +157,6 @@ while(1)
     }
 
     FSeek( bef_rec + h.record_len );
+    
+    if(FEof()) break;
 }
