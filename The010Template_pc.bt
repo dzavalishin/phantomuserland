@@ -1,0 +1,84 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+local int64 bef_rec;
+
+struct PC_Record_Header
+{
+    char marker[5];
+    char record_type;
+    long record_len;
+};
+
+typedef struct PhantomString
+{
+    long strLen;
+    char String[strLen];
+}  PhantomString;
+
+typedef struct 
+{
+    long isContainer;
+    PhantomString ClassName;
+    PhantomString ContainedClassName;
+} PhantomType;
+
+
+typedef struct 
+{
+    long IP;
+    long LineNum;
+} IP_to_Line;
+
+
+while(1)
+{
+    bef_rec = FTell();
+
+    struct PC_Record_Header h;
+
+    switch( h.record_type ) 
+    {
+    case 'C': // Class
+        PhantomString ClassName;
+        long nFields;
+        long nMethods;
+        PhantomString BaseClassName;
+    break;
+
+    case 'M': // Method
+        PhantomString MethodName;
+        long Ordinal;
+    break;
+
+    case 'S': // Signature
+        PhantomString MethodName;
+        long Ordinal;
+        long nArgs;
+        long isConstructor;
+        PhantomType ReturnType;
+    break;
+
+    case 'l': // Line to IP map
+        long Ordinal;
+        long MapSize;
+        IP_to_Line map[MapSize];
+    break;
+
+
+    default : return;
+    }
+
+    FSeek( bef_rec + h.record_len );
+}
