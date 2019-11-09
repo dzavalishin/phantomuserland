@@ -1,3 +1,4 @@
+#if 0
 #define DEBUG_MSG_PREFIX "vmcn.timer"
 #include <debug_ext.h>
 #define debug_level_flow 0
@@ -147,3 +148,4 @@ errno_t cn_timer_disconnect( struct data_area_4_connection *c )
 
 
 
+#endif

@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -216,3 +217,4 @@ errno_t cn_fio_disconnect( struct data_area_4_connection *c )
 
 
 
+#endif

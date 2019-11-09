@@ -1,3 +1,4 @@
+#if 0
 /**
  *
  * Phantom OS
@@ -619,3 +620,5 @@ errno_t phantom_connection_callback_int( struct data_area_4_connection *da, int 
 
 
 
+
+#endif
