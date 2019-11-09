@@ -1,4 +1,21 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
+ *
+ * PC Floppyh driver
+ *
+ * 
+**/
+
 #if ARCH_ia32
+
+#define DEBUG_MSG_PREFIX "drv.floppy"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 // code to access floppy drives.
 //
 // Copyright (C) 2008,2009  Kevin O'Connor <kevin@koconnor.net>
@@ -195,7 +212,11 @@ init_floppy(int floppyid, unsigned int ftype)
 static void
 addFloppy(int floppyid, int ftype)
 {
-    assert(floppyid < NFLOPPY);
+    if(floppyid >= NFLOPPY)
+    {
+        LOG_ERROR( 0, "Too much floppies: %d", floppyid );
+        return;
+    }
 
     struct drive_s *drive_g = init_floppy(floppyid, ftype);
     if (!drive_g)
@@ -923,19 +944,22 @@ static timedcall_t floppy_timer =
     0, { 0, 0 }, 0
 };
 
+static int floppy_basic_init_done = 0;
 static int seq_number = 0;
 phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 {
     (void) stage;
     (void) port;
     (void) irq;
+    errno_t rc;
 
     if (! CONFIG_FLOPPY)
         return 0;
 
     SHOW_FLOW( 3, "probe floppy %d", seq_number );
 
-    if( seq_number == 0 )
+    //if( seq_number == 0 )
+    if( !floppy_basic_init_done )
     {
         SHOW_FLOW0( 3, "init floppy controller" );
         init_dma();
@@ -948,11 +972,20 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         //hal_pv_alloc( &lowbuf_p, &lowbuf_v, LOWBUF_SZ );
         int npages = BYTES_TO_PAGES(LOWBUF_SZ);
 
-        assert( !hal_alloc_phys_pages_low( &lowbuf_p, npages ) );
-        assert( !hal_alloc_vaddress( &lowbuf_v, npages ) );
+        rc = hal_alloc_phys_pages_low( &lowbuf_p, npages );
+        if( rc )
+        {
+            LOG_ERROR( 0, "Can't allocate low mem, %d pages", npages );
+            return 0; // TODO cleanup?
+        }
+        rc = hal_alloc_vaddress( &lowbuf_v, npages );
+        if( rc )
+        {
+            LOG_ERROR( 0, "Can't allocate vaddress, %d pages", npages );
+            return 0; // TODO cleanup?
+        }
 
         hal_pages_control( lowbuf_p, lowbuf_v, npages, page_map_io, page_readwrite );
-
 
         outb( PORT_DMA1_MASK_REG, 0x02 );
 
@@ -968,6 +1001,7 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
         both = phantom_create_disk_partition_struct( size, 0, 0, startIo );
 
 #endif
+        floppy_basic_init_done = 1;
     }
 
     SHOW_FLOW0( 3, "init floppy drives" );
