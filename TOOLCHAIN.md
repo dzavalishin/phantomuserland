@@ -6,11 +6,16 @@
 ## Linux (tested on ubuntu 19.x):
   gcc
 
-  apt get install:
+  apt install:
 
     - gcc-multilib
     - libcunit1 libcunit1-dev
     - openjdk-8-jdk
+
+  for building images:
+
+    - genisoimage
+    - grub-common
 
   for working on ARM port:
 
