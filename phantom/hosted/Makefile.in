@@ -9,3 +9,37 @@ AR=ar
 RANLIB=@RANLIB@
 
 EXESUFFIX=@EXEEXT@
+
+TARGET=libhosted.a
+
+
+all: $(TARGET)
+
+clean:
+	-rm -rf *.[doa] *.bak depend $(CLEAN_FILES) d/*.d *.d
+
+
+clean-all: clean
+	-rm Makefile 
+	-rm -r autom4te.cache
+
+
+SRCDIRS = .
+CFLAGS += -I../../include
+
+FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
+CFILES := $(filter %.c,$(FILES))
+SFILES := $(filter %.S,$(FILES))
+OBJFILES += $(patsubst %.c,%.o,$(notdir $(CFILES)))
+OBJFILES += $(patsubst %.S,%.o,$(notdir $(SFILES)))
+
+$(TARGET): $(filter-out $(EXCLUDED_OBJFILES), $(OBJFILES) )
+	$(AR) $(ARFLAGS)  $@ $?
+	cp $@ ../lib
+	-@mkdir -p d
+	-@mv *.d d
+
+
+
+-include *.d
+-include d/*.d
