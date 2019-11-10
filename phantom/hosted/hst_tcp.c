@@ -1,3 +1,13 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Hosted TCP binding
+ *
+ *
+**/
 
 #include <sys/types.h>
 #include <sys/socket.h>
