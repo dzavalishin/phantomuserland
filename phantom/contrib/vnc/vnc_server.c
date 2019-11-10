@@ -262,7 +262,8 @@ errout_with_listener:
  *
  ****************************************************************************/
 
-int vnc_server(int argc, FAR char *argv[])
+//int vnc_server(int argc, FAR char *argv[])
+int vnc_server( void )
 {
   FAR struct vnc_session_s *session;
   FAR uint8_t *fb;
@@ -270,7 +271,7 @@ int vnc_server(int argc, FAR char *argv[])
   int ret;
 
   /* A single argument is expected:  A diplay port number in ASCII form */
-
+#if 0
   if (argc != 2)
     {
       /* In this case the start-up logic will probably hang, waiting for the
@@ -281,8 +282,9 @@ int vnc_server(int argc, FAR char *argv[])
       ret = -EINVAL;
       goto errout_with_hang;
     }
-
-  display = atoi(argv[1]);
+#endif
+  //display = atoi(argv[1]);
+  display = 0; //atoi(argv[1]);
   if (display < 0 || display >= RFB_MAX_DISPLAYS)
     {
       /* In this case the start-up logic will probably hang, waiting for the
@@ -326,7 +328,7 @@ int vnc_server(int argc, FAR char *argv[])
   /* Inform any waiter that we have started */
 
   vnc_reset_session(session, fb, display);
-  nxsem_post(&g_fbstartup[display].fbinit);
+  //nxsem_post(&g_fbstartup[display].fbinit);
 
   /* Loop... handling each each VNC client connection to this display.  Only
    * a single client is allowed for each display.
@@ -339,7 +341,7 @@ int vnc_server(int argc, FAR char *argv[])
        */
 
       vnc_reset_session(session, fb, display);
-      g_fbstartup[display].result = -EBUSY;
+      //g_fbstartup[display].result = -EBUSY;
       //nxsem_reset(&g_fbstartup[display].fbconnect, 0);
       hal_sem_zero( &g_fbstartup[display].fbconnect );
 
@@ -378,8 +380,8 @@ int vnc_server(int argc, FAR char *argv[])
            * updates.
            */
 
-          g_fbstartup[display].result = OK;
-          nxsem_post(&g_fbstartup[display].fbconnect);
+          //g_fbstartup[display].result = OK;
+          //nxsem_post(&g_fbstartup[display].fbconnect);
 
           /* Run the VNC receiver on this trhead.  The VNC receiver handles
            * all Client-to-Server messages.  The VNC receiver function does
@@ -405,8 +407,8 @@ errout_with_fb:
   kmm_free(fb);
 
 errout_with_post:
-  g_fbstartup[display].result = ret;
-  nxsem_post(&g_fbstartup[display].fbconnect);
+ //g_fbstartup[display].result = ret;
+  //nxsem_post(&g_fbstartup[display].fbconnect);
 
 errout_with_hang:
   return EXIT_FAILURE;

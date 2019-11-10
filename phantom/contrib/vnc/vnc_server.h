@@ -51,7 +51,7 @@
 //#include <semaphore.h>
 //#include <pthread.h>
 #include <kernel/sem.h>
-#include "queue.h"
+#include "vnc_queue.h"
 
 //#include <nuttx/video/fb.h>
 //#include <nuttx/video/rfb.h>
@@ -367,7 +367,8 @@ EXTERN struct fb_startup_s g_fbstartup[RFB_MAX_DISPLAYS];
  *
  ****************************************************************************/
 
-int vnc_server(int argc, FAR char *argv[]);
+//int vnc_server(int argc, FAR char *argv[]);
+int vnc_server( void );
 
 /****************************************************************************
  * Name: vnc_negotiate
