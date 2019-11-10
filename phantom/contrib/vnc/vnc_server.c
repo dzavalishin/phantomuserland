@@ -62,14 +62,22 @@
 #  define CONFIG_DEBUG_GRAPHICS_WARN  1
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
-#include <debug.h>
+//#include <debug.h>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-#include <nuttx/kmalloc.h>
-#include <nuttx/semaphore.h>
-#include <nuttx/net/net.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+//#include <netdb.h>
+
+//#include <nuttx/kmalloc.h>
+//#include <nuttx/semaphore.h>
+//#include <nuttx/net/net.h>
+
+#include <kernel/sem.h>
+#include <malloc.h>
+
 
 #include "vnc_server.h"
 
@@ -118,10 +126,12 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   /* [Re-]initialize the session. */
 
-  memset(&session->connect, 0, sizeof(struct socket));
-  session->connect.s_crefs = 1;
-  memset(&session->listen, 0, sizeof(struct socket));
-  session->listen.s_crefs = 1;
+  //memset(&session->connect, 0, sizeof(struct socket));
+  session->connect = 0;
+  //session->connect.s_crefs = 1;
+  //memset(&session->listen, 0, sizeof(struct socket));
+  session->listen = 0;
+  //session->listen.s_crefs = 1;
 
   /* Put all of the pre-allocated update structures into the freelist */
 
@@ -166,16 +176,22 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
 static int vnc_connect(FAR struct vnc_session_s *session, int port)
 {
-  struct sockaddr_in addr;
+  //struct sockaddr_in addr;
+  i4sockaddr addr, tmp_addr;
   int ret;
 
   ginfo("Connecting display %d\n", session->display);
 
   /* Create a listening socket */
 
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = INADDR_ANY;
+  //addr.sin_family = AF_INET;
+  //addr.sin_port = htons(port);
+  //addr.sin_addr.s_addr = INADDR_ANY;
+
+  addr.port = port;
+  addr.addr.len = 4;
+  addr.addr.type = ADDR_TYPE_IP;
+  NETADDR_TO_IPV4(addr.addr) = INADDR_ANY;
 
   ret = psock_socket(AF_INET, SOCK_STREAM, 0, &session->listen);
   if (ret < 0)
@@ -185,8 +201,8 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 
   /* Bind the listening socket to a local address */
 
-  ret = psock_bind(&session->listen, (struct sockaddr *)&addr,
-                   sizeof(struct sockaddr_in));
+  //ret = psock_bind(&session->listen, (struct sockaddr *)&addr,                   sizeof(struct sockaddr_in));
+  ret = tcp_bind(session->listen, &addr);
   if (ret < 0)
     {
       goto errout_with_listener;
@@ -194,7 +210,8 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 
   /* Listen for a connection */
 
-  ret = psock_listen(&session->listen, 5);
+  //ret = psock_listen(&session->listen, 5);
+  ret = tcp_listen(session->listen);
   if (ret < 0)
     {
       goto errout_with_listener;
@@ -204,7 +221,8 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
 
   ginfo("Accepting connection for Display %d\n", session->display);
 
-  ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
+  //ret = psock_accept(&session->listen, NULL, NULL, &session->connect);
+  ret = tcp_accept(session->listen, &tmp_addr, &session->connect);
   if (ret < 0)
     {
       goto errout_with_listener;

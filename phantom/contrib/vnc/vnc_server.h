@@ -40,19 +40,25 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+//#include <nuttx/config.h>
+#include <compat/nuttx/config.h>
 
 #include <stdint.h>
-#include <semaphore.h>
-#include <pthread.h>
-#include <queue.h>
+#include <threads.h>
+//#include <semaphore.h>
+//#include <pthread.h>
+#include "queue.h"
 
-#include <nuttx/video/fb.h>
-#include <nuttx/video/rfb.h>
-#include <nuttx/video/vnc.h>
-#include <nuttx/nx/nxglib.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/net/net.h>
+//#include <nuttx/video/fb.h>
+//#include <nuttx/video/rfb.h>
+//#include <nuttx/video/vnc.h>
+//#include <nuttx/nx/nxglib.h>
+//#include <nuttx/nx/nx.h>
+//#include <nuttx/net/net.h>
+#include "rfb.h"
+
+#include <kernel/net.h>
+#include <kernel/net/tcp.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,13 +66,13 @@
 
 /* Configuration */
 
-#ifndef CONFIG_NET_TCP_READAHEAD
-#  error CONFIG_NET_TCP_READAHEAD must be set to use VNC
-#endif
+//#ifndef CONFIG_NET_TCP_READAHEAD
+//#  error CONFIG_NET_TCP_READAHEAD must be set to use VNC
+//#endif
 
-#ifndef CONFIG_NX_UPDATE
-#  error CONFIG_NX_UPDATE must be set to use VNC
-#endif
+//#ifndef CONFIG_NX_UPDATE
+//#  error CONFIG_NX_UPDATE must be set to use VNC
+//#endif
 
 #if !defined(CONFIG_VNCSERVER_PROTO3p3) && !defined(CONFIG_VNCSERVER_PROTO3p8)
 #  error No VNC protocol selected
@@ -118,15 +124,15 @@
 #endif
 
 #ifndef CONFIG_VNCSERVER_SCREENWIDTH
-#  define CONFIG_VNCSERVER_SCREENWIDTH 320
+#  define CONFIG_VNCSERVER_SCREENWIDTH 1280
 #endif
 
 #ifndef CONFIG_VNCSERVER_SCREENHEIGHT
-#  define CONFIG_VNCSERVER_SCREENHEIGHT 240
+#  define CONFIG_VNCSERVER_SCREENHEIGHT 1024
 #endif
 
 #ifndef CONFIG_VNCSERVER_NAME
-#  define CONFIG_VNCSERVER_NAME "NuttX"
+#  define CONFIG_VNCSERVER_NAME "Phantom OS"
 #endif
 
 #ifndef CONFIG_VNCSERVER_PRIO
@@ -134,7 +140,7 @@
 #endif
 
 #ifndef CONFIG_VNCSERVER_STACKSIZE
-#  define CONFIG_VNCSERVER_STACKSIZE 2048
+#  define CONFIG_VNCSERVER_STACKSIZE 20480
 #endif
 
 #ifndef CONFIG_VNCSERVER_UPDATER_PRIO
@@ -142,7 +148,7 @@
 #endif
 
 #ifndef CONFIG_VNCSERVER_UPDATER_STACKSIZE
-#  define CONFIG_VNCSERVER_UPDATER_STACKSIZE 2048
+#  define CONFIG_VNCSERVER_UPDATER_STACKSIZE 20480
 #endif
 
 #ifndef CONFIG_VNCSERVER_INBUFFER_SIZE
@@ -231,18 +237,21 @@ struct vnc_fbupdate_s
 {
   FAR struct vnc_fbupdate_s *flink;
   bool whupd;                  /* True: whole screen update */
-  struct nxgl_rect_s rect;     /* The enqueued update rectangle */
+  //rect_t rect;     /* The enqueued update rectangle */
+  struct nxgl_rect_s rect;
 };
 
 struct vnc_session_s
 {
   /* Connection data */
 
-  struct socket listen;        /* Listen socket */
-  struct socket connect;       /* Connected socket */
+  //struct socket listen;        /* Listen socket */
+  //struct socket connect;       /* Connected socket */
+  void * listen;        /* Listen socket */
+  void * connect;       /* Connected socket */
   volatile uint8_t state;      /* See enum vnc_server_e */
   volatile uint8_t nwhupd;     /* Number of whole screen updates queued */
-  volatile bool change;        /* True: Frambebuffer data change since last whole screen update */
+  volatile int change;        /* True: Frambebuffer data change since last whole screen update */
 
   /* Display geometry and color characteristics */
 
@@ -255,8 +264,8 @@ struct vnc_session_s
 
   /* VNC client input support */
 
-  vnc_kbdout_t kbdout;         /* Callout when keyboard input is received */
-  vnc_mouseout_t mouseout;     /* Callout when keyboard input is received */
+  //vnc_kbdout_t kbdout;         /* Callout when keyboard input is received */
+  //vnc_mouseout_t mouseout;     /* Callout when keyboard input is received */
   FAR void *arg;               /* Argument that accompanies the callouts */
 
   /* Updater information */
@@ -268,8 +277,8 @@ struct vnc_session_s
   struct vnc_fbupdate_s updpool[CONFIG_VNCSERVER_NUPDATES];
   sq_queue_t updfree;
   sq_queue_t updqueue;
-  sem_t freesem;
-  sem_t queuesem;
+  hal_sem_t freesem;
+  hal_sem_t queuesem;
 
   /* I/O buffers for misc network send/receive */
 
@@ -283,8 +292,8 @@ struct vnc_session_s
 
 struct fb_startup_s
 {
-  sem_t fbinit;                 /* Wait for session creation */
-  sem_t fbconnect;              /* Wait for client connection */
+  hal_sem_t fbinit;                 /* Wait for session creation */
+  hal_sem_t fbconnect;              /* Wait for client connection */
   int16_t result;               /* OK: successfully initialized */
 };
 
