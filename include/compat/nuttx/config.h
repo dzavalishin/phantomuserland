@@ -13,6 +13,7 @@
 //#define CONFIG_VNCSERVER_PROTO3p8
 #define CONFIG_VNCSERVER_PROTO3p3 // start with simplest one, enable p8 later
 
+#define CONFIG_NX_KBD
 
 // ---------------------------
 // Compat
@@ -20,7 +21,8 @@
 
 #define pthread_t tid_t
 
-#define nxgl_rect_s rect_t
+// no - different
+//#define nxgl_rect_s rect_t
 
 #define sem_t hal_sem_t
 
@@ -49,7 +51,7 @@
 
 
 #ifndef true
-#define true 1
+#define true 0xFF
 #endif
 
 #ifndef false
@@ -60,10 +62,12 @@
 
 #define psock_close tcp_close
 #define psock_socket( __inet, __stream, __unkn, __sptr ) tcp_open( __sptr )
-
+#define psock_send( __sock, __ptr, __size, __ignore ) tcp_sendto( __sock, __ptr, __size,  0 )
+#define psock_recv( __sock, __ptr, __size, __ignore ) tcp_recvfrom( __sock, __ptr, __size,  0, 0, 0 )
 
 
 typedef int16_t nxgl_coord_t;
+#if 0
 
 
 
@@ -80,6 +84,7 @@ struct nxgl_rect_s
   struct nxgl_point_s pt1; /* Upper, left-hand corner */
   struct nxgl_point_s pt2; /* Lower, right-hand corner */
 };
+#endif
 
 #define FB_FMT_RGB32          13          /* BPP=32 */
 
@@ -93,6 +98,15 @@ struct nxgl_rect_s
 
 #define EPROTO ENXIO // why? 
 
+
+#define DEBUGASSERT(__expr) assert(__expr)
+
+
+
+#define gwarn(...) printf(__VA_ARGS__)
+#define gerr(...) printf(__VA_ARGS__)
+#define ginfo(...) printf(__VA_ARGS__)
+#define updinfo(...) printf(__VA_ARGS__)
 
 
 #endif // _CONFIG_NUTTX_H

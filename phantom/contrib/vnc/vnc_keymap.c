@@ -43,6 +43,7 @@
 #include <errno.h>
 
 //#include <nuttx/ascii.h>
+#include "ascii.h"
 
 #define XK_MISCELLANY 1 /* Select X11 character set */
 #define XK_LATIN1     1
@@ -52,6 +53,8 @@
 //#include <nuttx/video/vnc.h>
 //#include <nuttx/input/x11_keysymdef.h>
 //#include <nuttx/input/kbd_codec.h>
+
+#include "x11_keysymdef.h"
 
 #include "vnc_server.h"
 
@@ -138,7 +141,7 @@ static const struct vnc_keymap_s g_asciimap[] =
   /* Alternative encodings */
 
   {'`',              XK_dead_grave},
-  {'�',              XK_dead_acute},
+//  {'�',              XK_dead_acute},
   {ASCII_TILDE,      XK_dead_tilde},
   {ASCII_CARET,      XK_dead_circumflex},
 
@@ -647,8 +650,10 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 
 void vnc_kbdout(FAR void *arg, uint8_t nch, FAR const uint8_t *ch)
 {
+#warning implement me  
   DEBUGASSERT(arg != NULL);
-  (void)nx_kbdin((NXHANDLE)arg, nch, ch);
+  //(void)nx_kbdin((NXHANDLE)arg, nch, ch);
+  printf("VNC: key arg %p nch %x &ch %x", arg, nch, *ch );
 }
 
 #endif /* CONFIG_NX_KBD */

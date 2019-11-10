@@ -65,7 +65,7 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
+#if 0
 /****************************************************************************
  * Name: vnc_copy8
  *
@@ -94,8 +94,9 @@ static size_t vnc_copy8(FAR struct vnc_session_s *session,
   FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
   FAR uint8_t *dest;
-  nxgl_coord_t x;
-  nxgl_coord_t y;
+  //nxgl_coord_t x;
+  //nxgl_coord_t y;
+  int x, y;
 
   /* Destination rectangle start address */
 
@@ -195,7 +196,7 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
 
   return (size_t)((uintptr_t)dest - (uintptr_t)update->rect[0].data);
 }
-
+#endif
 /****************************************************************************
  * Name: vnc_copy32
  *
@@ -215,6 +216,10 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
  *
  ****************************************************************************/
 
+//static size_t vnc_copy32(FAR struct vnc_session_s *session,
+//                         nxgl_coord_t row, nxgl_coord_t col,
+//                         nxgl_coord_t height, nxgl_coord_t width,
+//                         vnc_convert32_t convert)
 static size_t vnc_copy32(FAR struct vnc_session_s *session,
                          nxgl_coord_t row, nxgl_coord_t col,
                          nxgl_coord_t height, nxgl_coord_t width,
@@ -224,8 +229,9 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
   FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
   FAR uint8_t *dest;
-  nxgl_coord_t x;
-  nxgl_coord_t y;
+  //nxgl_coord_t x;
+  //nxgl_coord_t y;
+  int x,y;
   uint32_t pixel;
   bool bigendian;
 
@@ -290,7 +296,7 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
  *
  ****************************************************************************/
 
-int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
+int vnc_raw(FAR struct vnc_session_s *session, rect_t *rect)
 {
   FAR struct rfb_framebufferupdate_s *update;
   FAR const uint8_t *src;
@@ -361,11 +367,11 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
    * In that case, we will have to emit multiple rectangles.
    */
 
-  DEBUGASSERT(rect->pt1.x <= rect->pt2.x);
-  srcwidth = rect->pt2.x - rect->pt1.x + 1;
+  DEBUGASSERT(rect->xsize >= 0);
+  srcwidth = rect->xsize;
 
-  DEBUGASSERT(rect->pt1.y <= rect->pt2.y);
-  srcheight = rect->pt2.y - rect->pt1.y + 1;
+  DEBUGASSERT(rect->ysize >= 0);
+  srcheight = rect->ysize;
 
   deststride = srcwidth * bytesperpixel;
   if (deststride > maxwidth)
@@ -393,7 +399,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
    * asynchronously.
    */
 
-  for (y = rect->pt1.y;
+  for (y = rect->y;
        srcheight > 0 && colorfmt == session->colorfmt;
        srcheight -= updheight, y += updheight)
     {
@@ -418,7 +424,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
        * changes asynchronously.
        */
 
-      for (width = srcwidth, x = rect->pt1.x;
+      for (width = srcwidth, x = rect->x;
            width > 0 && colorfmt == session->colorfmt;
            width -= updwidth, x += updwidth)
         {
@@ -436,16 +442,14 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
           /* Transfer the frame buffer data into the rectangle,
            * performing the necessary color conversions.
            */
-
+/*
           if (bytesperpixel == 1)
             {
-              size = vnc_copy8(session, y, x, updheight, updwidth,
-                               convert.bpp8);
+              size = vnc_copy8(session, y, x, updheight, updwidth,                               convert.bpp8);
             }
           else if (bytesperpixel == 2)
             {
-              size = vnc_copy16(session, y, x, updheight, updwidth,
-                                convert.bpp16);
+              size = vnc_copy16(session, y, x, updheight, updwidth,                                convert.bpp16);
             }
           else /* bytesperpixel == 4 */
             {

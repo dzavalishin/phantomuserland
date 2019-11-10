@@ -276,7 +276,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
           case RFB_FBUPDATEREQ_MSG:    /* FramebufferUpdateRequest */
             {
               FAR struct rfb_fbupdatereq_s *update;
-              struct nxgl_rect_s rect;
+              rect_t rect;
 
               ginfo("Received FramebufferUpdateRequest\n");
 
@@ -296,10 +296,14 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 
                   update = (FAR struct rfb_fbupdatereq_s *)session->inbuf;
 
-                  rect.pt1.x = rfb_getbe16(update->xpos);
-                  rect.pt1.y = rfb_getbe16(update->ypos);
-                  rect.pt2.x = rect.pt1.x + rfb_getbe16(update->width);
-                  rect.pt2.y = rect.pt1.y + rfb_getbe16(update->height);
+                  //rect.pt1.x = rfb_getbe16(update->xpos);
+                  //rect.pt1.y = rfb_getbe16(update->ypos);
+                  //rect.pt2.x = rect.pt1.x + rfb_getbe16(update->width);
+                  //rect.pt2.y = rect.pt1.y + rfb_getbe16(update->height);
+                  rect.x = rfb_getbe16(update->xpos);
+                  rect.y = rfb_getbe16(update->ypos);
+                  rect.xsize = rfb_getbe16(update->width);
+                  rect.ysize = rfb_getbe16(update->height);
 
                   ret = vnc_update_rectangle(session, &rect, false);
                   if (ret < 0)

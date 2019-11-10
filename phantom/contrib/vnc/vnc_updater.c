@@ -82,7 +82,7 @@
 #ifdef VNCSERVER_SEM_DEBUG
 static sem_t g_errsem = SEM_INITIALIZER(1);
 #endif
-
+#if 0
 /* A rectangle represent the entire local framebuffer */
 
 static const struct nxgl_rect_s g_wholescreen =
@@ -96,7 +96,7 @@ static const struct nxgl_rect_s g_wholescreen =
     CONFIG_VNCSERVER_SCREENHEIGHT - 1
   }
 };
-
+#endif
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -426,8 +426,8 @@ static FAR void *vnc_updater(FAR void *arg)
       DEBUGASSERT(srcrect != NULL);
 
       updinfo("Dequeued {(%d, %d),(%d, %d)}\n",
-              srcrect->rect.pt1.x, srcrect->rect.pt1.y,
-              srcrect->rect.pt2.x, srcrect->rect.pt2.y);
+              srcrect->rect.x, srcrect->rect.y,
+              srcrect->rect.xsize, srcrect->rect.ysize);
 
       /* Attempt to use RRE encoding */
 
@@ -569,28 +569,40 @@ int vnc_stop_updater(FAR struct vnc_session_s *session)
  *   any failure.
  *
  ****************************************************************************/
+extern int scr_get_xsize(void);
+extern int scr_get_ysize(void);
 
 int vnc_update_rectangle(FAR struct vnc_session_s *session,
-                         FAR const struct nxgl_rect_s *rect, bool change)
+                         rect_t *rect, bool change)
 {
   FAR struct vnc_fbupdate_s *update;
-  struct nxgl_rect_s intersection;
+  rect_t intersection;
   bool whupd;
+
+  rect_t scr_r;
+  //scr_get_rect( &scr_r );
+
+  scr_r.x = 0;
+  scr_r.y = 0;
+  scr_r.xsize = scr_get_xsize();
+  scr_r.ysize = scr_get_ysize();
+
 
   /* Clip rectangle to the screen dimensions */
 
-  nxgl_rectintersect(&intersection, rect, &g_wholescreen);
+  //nxgl_rectintersect(&intersection, rect, &g_wholescreen);
 
   /* Make sure that the clipped rectangle has a area */
+  int in_screen = rect_mul( &intersection, &scr_r, rect );
 
-  if (!nxgl_nullrect(&intersection))
+  if (in_screen)
     {
       /* Check for a whole screen update.  The RealVNC client sends a lot
        * of these (especially when it is confused)
        */
 
-      whupd = (memcmp(&intersection, &g_wholescreen,
-                      sizeof(struct nxgl_rect_s)) == 0);
+      //whupd = (memcmp(&intersection, &g_wholescreen,                      sizeof(struct nxgl_rect_s)) == 0);
+      whupd = rect_includes( rect, &scr_r );
 
       /* Ignore any client update requests if there have been no changes to
        * the framebuffer since the last whole screen update.
@@ -656,15 +668,16 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
           /* Copy the clipped rectangle into the update structure */
 
           update->whupd = whupd;
-          nxgl_rectcopy(&update->rect, &intersection);
+          //nxgl_rectcopy(&update->rect, &intersection);
+          rect_copy(&update->rect, &intersection);
 
           /* Add the update to the end of the update queue. */
 
           vnc_add_queue(session, update);
 
           updinfo("Queued {(%d, %d),(%d, %d)}\n",
-                  intersection.pt1.x, intersection.pt1.y,
-                  intersection.pt2.x, intersection.pt2.y);
+                  intersection.x, intersection.y,
+                  intersection.xsize, intersection.ysize);
         }
 
       sched_unlock();

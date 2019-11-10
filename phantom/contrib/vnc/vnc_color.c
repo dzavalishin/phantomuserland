@@ -289,7 +289,7 @@ uint32_t vnc_convert_rgb32_888(lfb_color_t rgb)
  *
  ****************************************************************************/
 
-int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
+int vnc_colors(FAR struct vnc_session_s *session, rect_t *rect,
                unsigned int maxcolors, FAR lfb_color_t *colors)
 {
   FAR const lfb_color_t *rowstart;
@@ -308,16 +308,16 @@ int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
   /* Pointer to the first pixel in the first row in the local framebuffer */
 
   rowstart = (FAR lfb_color_t *)
-    (session->fb + RFB_STRIDE * rect->pt1.y + RFB_BYTESPERPIXEL * rect->pt1.x);
+    (session->fb + RFB_STRIDE * rect->y + RFB_BYTESPERPIXEL * rect->x);
 
   /* Loop for each row in the rectangle */
 
-  for (y = rect->pt1.y; y <= rect->pt2.y; y++)
+  for (y = rect->y; y < rect->y + rect->ysize; y++)
     {
       /* Loop for each column in the row */
 
       pixptr = rowstart;
-      for (x = rect->pt1.x; x <= rect->pt2.x; x++)
+      for (x = rect->x; x < rect->x + rect->xsize; x++)
         {
           /* Compare this pix to all of the others we have seen */
 

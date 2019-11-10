@@ -43,6 +43,9 @@
 //#include <nuttx/config.h>
 #include <compat/nuttx/config.h>
 
+#include <video/rect.h>
+//#include <video/screen.h>
+
 #include <stdint.h>
 #include <threads.h>
 //#include <semaphore.h>
@@ -190,7 +193,7 @@
 #endif
 
 /* Debug */
-
+#if 0
 #ifdef CONFIG_VNCSERVER_UPDATE_DEBUG
 #  ifdef CONFIG_CPP_HAVE_VARARGS
 #    define upderr(format, ...)    _err(format, ##__VA_ARGS__)
@@ -212,10 +215,17 @@
 #    define updinfo                (void)
 #  endif
 #endif
+#endif
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+typedef CODE void (*vnc_mouseout_t)(FAR void *arg, nxgl_coord_t x,
+                                    nxgl_coord_t y, uint8_t buttons);
+typedef CODE void (*vnc_kbdout_t)(FAR void *arg, uint8_t nch,
+                                  FAR const uint8_t *ch);
+
 
 /* This enumeration indicates the state of the VNC server */
 
@@ -238,9 +248,9 @@ struct vnc_fbupdate_s
 {
   FAR struct vnc_fbupdate_s *flink;
   bool whupd;                  /* True: whole screen update */
-  //rect_t rect;     /* The enqueued update rectangle */
+  rect_t rect;     /* The enqueued update rectangle */
   //struct nxgl_rect_s rect;
-  struct nxgl_rect_s rect;     /* The enqueued update rectangle */
+  //struct nxgl_rect_s rect;     /* The enqueued update rectangle */
 };
 
 struct vnc_session_s
@@ -266,8 +276,8 @@ struct vnc_session_s
 
   /* VNC client input support */
 
-  //vnc_kbdout_t kbdout;         /* Callout when keyboard input is received */
-  //vnc_mouseout_t mouseout;     /* Callout when keyboard input is received */
+  vnc_kbdout_t kbdout;         /* Callout when keyboard input is received */
+  vnc_mouseout_t mouseout;     /* Callout when keyboard input is received */
   FAR void *arg;               /* Argument that accompanies the callouts */
 
   /* Updater information */
@@ -467,7 +477,7 @@ int vnc_stop_updater(FAR struct vnc_session_s *session);
  ****************************************************************************/
 
 int vnc_update_rectangle(FAR struct vnc_session_s *session,
-                         FAR const struct nxgl_rect_s *rect,
+                         rect_t *rect,
                          bool change);
 
 /****************************************************************************
@@ -507,7 +517,7 @@ int vnc_receiver(FAR struct vnc_session_s *session);
  *
  ****************************************************************************/
 
-int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
+int vnc_rre(FAR struct vnc_session_s *session, rect_t *rect);
 
 /****************************************************************************
  * Name: vnc_raw
@@ -527,7 +537,7 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
  *
  ****************************************************************************/
 
-int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
+int vnc_raw(FAR struct vnc_session_s *session, rect_t *rect);
 
 /****************************************************************************
  * Name: vnc_key_map
@@ -598,7 +608,7 @@ uint32_t vnc_convert_rgb32_888(lfb_color_t rgb);
  *
  ****************************************************************************/
 
-int vnc_colors(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect,
+int vnc_colors(FAR struct vnc_session_s *session, rect_t *rect,
                unsigned int maxcolors, FAR lfb_color_t *colors);
 
 #undef EXTERN
