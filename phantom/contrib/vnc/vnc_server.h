@@ -47,6 +47,7 @@
 #include <threads.h>
 //#include <semaphore.h>
 //#include <pthread.h>
+#include <kernel/sem.h>
 #include "queue.h"
 
 //#include <nuttx/video/fb.h>
@@ -238,7 +239,8 @@ struct vnc_fbupdate_s
   FAR struct vnc_fbupdate_s *flink;
   bool whupd;                  /* True: whole screen update */
   //rect_t rect;     /* The enqueued update rectangle */
-  struct nxgl_rect_s rect;
+  //struct nxgl_rect_s rect;
+  struct nxgl_rect_s rect;     /* The enqueued update rectangle */
 };
 
 struct vnc_session_s

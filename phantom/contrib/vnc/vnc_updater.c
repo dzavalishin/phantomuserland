@@ -275,7 +275,7 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
   nxsem_post(&session->freesem);
 
   vnc_sem_debug(session, "After free", 0);
-  DEBUGASSERT(session->freesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
+  //DEBUGASSERT(session->freesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
 
   sched_unlock();
 }
@@ -380,7 +380,8 @@ static void vnc_add_queue(FAR struct vnc_session_s *session,
   nxsem_post(&session->queuesem);
 
   vnc_sem_debug(session, "After add", 0);
-  DEBUGASSERT(session->queuesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
+  //DEBUGASSERT(session->queuesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
+  //sem_get_count(hal_sem_t *s, int *count);
 
   sched_unlock();
 }
@@ -476,8 +477,8 @@ static FAR void *vnc_updater(FAR void *arg)
 
 int vnc_start_updater(FAR struct vnc_session_s *session)
 {
-  pthread_attr_t attr;
-  struct sched_param param;
+  //pthread_attr_t attr;
+  //struct sched_param param;
   int status;
 
   ginfo("Starting updater for Display %d\n", session->display);
@@ -486,18 +487,20 @@ int vnc_start_updater(FAR struct vnc_session_s *session)
 
   session->state = VNCSERVER_RUNNING;
 
-  DEBUGVERIFY(pthread_attr_init(&attr));
-  DEBUGVERIFY(pthread_attr_setstacksize(&attr, CONFIG_VNCSERVER_UPDATER_STACKSIZE));
+  //DEBUGVERIFY(pthread_attr_init(&attr));
+  //DEBUGVERIFY(pthread_attr_setstacksize(&attr, CONFIG_VNCSERVER_UPDATER_STACKSIZE));
 
-  param.sched_priority = CONFIG_VNCSERVER_UPDATER_PRIO;
-  DEBUGVERIFY(pthread_attr_setschedparam(&attr, &param));
-
-  status = pthread_create(&session->updater, &attr, vnc_updater,
-                          (pthread_addr_t)session);
+  //param.sched_priority = CONFIG_VNCSERVER_UPDATER_PRIO;
+  //DEBUGVERIFY(pthread_attr_setschedparam(&attr, &param));
+/*
+  status = pthread_create(&session->updater, &attr, vnc_updater,                          (pthread_addr_t)session);
   if (status != 0)
     {
       return -status;
     }
+*/
+  tid_t tid = hal_start_thread(vnc_updater, session, 0 );
+  if( tid < 0 ) return ENOMEM;
 
   return OK;
 }
@@ -519,6 +522,8 @@ int vnc_start_updater(FAR struct vnc_session_s *session)
 
 int vnc_stop_updater(FAR struct vnc_session_s *session)
 {
+#if 0  
+ TODO write me  
   pthread_addr_t result;
   int status;
 
@@ -544,7 +549,7 @@ int vnc_stop_updater(FAR struct vnc_session_s *session)
     }
 
   /* Not running?  Just say we stopped the thread successfully. */
-
+#endif
   return OK;
 }
 

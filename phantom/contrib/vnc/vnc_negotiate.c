@@ -59,14 +59,14 @@
 #  define CONFIG_DEBUG_GRAPHICS_WARN  1
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
-#include <debug.h>
+//#include <debug.h>
 
 #ifdef CONFIG_NET_SOCKOPTS
 #  include <sys/time.h>
 #endif
 
-#include <nuttx/video/fb.h>
-#include <nuttx/video/rfb.h>
+//#include <nuttx/video/fb.h>
+//#include <nuttx/video/rfb.h>
 
 #include "vnc_server.h"
 
@@ -119,10 +119,10 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   ssize_t nsent;
   ssize_t nrecvd;
   size_t len;
+  int ret;
 
 #ifdef CONFIG_NET_SOCKOPTS
   struct timeval tv;
-  int ret;
 
   /* Set a receive timeout so that we don't hang if the client does not
    * respond according to RFB 3.3 protocol.
@@ -478,7 +478,7 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
       gerr("ERROR: No support for palette colors\n");
       return -ENOSYS;
     }
-
+#if 0
   if (pixelfmt->bpp == 8 && pixelfmt->depth == 6)
     {
       ginfo("Client pixel format: RGB8 2:2:2\n");
@@ -507,6 +507,7 @@ int vnc_client_pixelformat(FAR struct vnc_session_s *session,
       session->bpp       = 16;
       session->bigendian = (pixelfmt->bigendian != 0) ? true : false;
     }
+#endif    
   else if (pixelfmt->bpp == 32 && pixelfmt->depth == 24)
     {
       ginfo("Client pixel format: RGB32 8:8:8\n");

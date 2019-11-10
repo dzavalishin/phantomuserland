@@ -69,6 +69,7 @@ static errno_t do_hal_sem_init(hal_sem_t *c, const char *name )
 }
 
 
+
 // BUG This is wrong - can't call malloc under spinlock (blocks)
 static void checkinit(hal_sem_t *c)
 {
@@ -394,6 +395,18 @@ static void do_hal_sem_destroy(hal_sem_t *c)
 errno_t hal_sem_init(hal_sem_t *c, const char *name ) {
     return do_hal_sem_init(c, name );
 }
+
+
+static errno_t hal_sem_init_etc(hal_sem_t *c, const char *name, int value )
+{
+    errno_t rc = do_hal_sem_init( c, name );
+    if( rc ) return rc;
+    
+    c->impl->value = value;
+    return 0;
+}
+
+
 // TODO just call acquire_etc with default values
 //errno_t hal_sem_acquire(hal_sem_t *c) { return do_hal_sem_acquire(c); }
 

@@ -58,7 +58,7 @@
 #  define CONFIG_DEBUG_GRAPHICS_WARN  1
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
-#include <debug.h>
+//#include <debug.h>
 
 #include "vnc_server.h"
 
@@ -249,6 +249,7 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
 
           switch (session->colorfmt)
             {
+#if 0              
               case FB_FMT_RGB8_222:
                 nbytes += vnc_rre8(session,
                                    (FAR struct rre_encode8_s *)rrect->data,
@@ -272,7 +273,7 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
                                     (FAR struct rre_encode16_s *)rrect->data,
                                     rect, vnc_convert_rgb16_565(bgcolor));
                 break;
-
+#endif
               case FB_FMT_RGB32:
                 nbytes += vnc_rre32(session,
                                     (FAR struct rre_encode32_s *)rrect->data,

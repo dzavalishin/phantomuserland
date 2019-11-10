@@ -57,17 +57,17 @@
 #  define CONFIG_DEBUG_GRAPHICS_WARN  1
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
-#include <debug.h>
+//#include <debug.h>
 
 #ifdef CONFIG_NET_SOCKOPTS
 #  include <sys/time.h>
 #endif
 
-#include <nuttx/net/net.h>
-#include <nuttx/video/rfb.h>
-#include <nuttx/video/vnc.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxglib.h>
+//#include <nuttx/net/net.h>
+//#include <nuttx/video/rfb.h>
+//#include <nuttx/video/vnc.h>
+//#include <nuttx/nx/nx.h>
+//#include <nuttx/nx/nxglib.h>
 
 #include "vnc_server.h"
 

@@ -1,3 +1,4 @@
+#if 0 // temp off?
 /****************************************************************************
  * graphics/vnc/server/vnc_fbdev.c
  *
@@ -59,12 +60,12 @@
 #  define CONFIG_DEBUG_GRAPHICS_WARN  1
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
-#include <debug.h>
+//#include <debug.h>
 
-#include <nuttx/kthread.h>
-#include <nuttx/semaphore.h>
-#include <nuttx/video/fb.h>
-#include <nuttx/video/vnc.h>
+//#include <nuttx/kthread.h>
+//#include <nuttx/semaphore.h>
+//#include <nuttx/video/fb.h>
+//#include <nuttx/video/vnc.h>
 
 #include "vnc_server.h"
 
@@ -891,4 +892,6 @@ void nx_notify_rectangle(FAR NX_PLANEINFOTYPE *pinfo,
         }
     }
 }
+#endif
+
 #endif

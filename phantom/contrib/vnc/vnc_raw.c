@@ -58,7 +58,7 @@
 #  define CONFIG_DEBUG_GRAPHICS_WARN  1
 #  define CONFIG_DEBUG_GRAPHICS_INFO  1
 #endif
-#include <debug.h>
+//#include <debug.h>
 
 #include "vnc_server.h"
 
@@ -330,6 +330,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
   colorfmt = session->colorfmt;
   switch (colorfmt)
     {
+#if 0      
       case FB_FMT_RGB8_222:
         convert.bpp8 = vnc_convert_rgb8_222;
         break;
@@ -345,7 +346,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
       case FB_FMT_RGB16_565:
         convert.bpp16 = vnc_convert_rgb16_565;
         break;
-
+#endif
       case FB_FMT_RGB32:
         convert.bpp32 = vnc_convert_rgb32_888;
         break;

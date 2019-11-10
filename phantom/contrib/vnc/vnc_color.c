@@ -206,7 +206,7 @@ uint8_t vnc_convert_rgb8_222(lfb_color_t rgb)
 
   return (uint8_t)(((rgb >> 18) & 0x00000030)  |
                    ((rgb >> 12) & 0x0000000c)  |
-                    (rgb >> 6)  & 0x00000003));
+                    ((rgb >> 6)  & 0x00000003));
 }
 
 uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
@@ -218,9 +218,9 @@ uint8_t vnc_convert_rgb8_332(lfb_color_t rgb)
    *                            RRRGGGBB
    */
 
-  return (uint8_t)(((rgb >> 16) & 0x00000070)  |
+  return (uint8_t)( ((rgb >> 16) & 0x00000070)  |
                    ((rgb >> 11) & 0x0000001c)  |
-                    (rgb >> 6)  & 0x00000003));
+                    ((rgb >> 6)  & 0x00000003));
 }
 
 uint16_t vnc_convert_rgb16_555(lfb_color_t rgb)

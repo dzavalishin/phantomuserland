@@ -24,6 +24,13 @@
 
 #define sem_t hal_sem_t
 
+#define nxsem_init( __sem, __pshared, __value) hal_sem_init_etc( __sem, "nxsem", __value )
+
+
+#define vnc_sem_debug(__a,__b,__c)
+#define nxsem_post(__sem) hal_sem_release(__sem)
+#define nxsem_wait(__sem) hal_sem_acquire(__sem)
+
 
 #define FAR
 #define CODE
@@ -73,6 +80,18 @@ struct nxgl_rect_s
   struct nxgl_point_s pt1; /* Upper, left-hand corner */
   struct nxgl_point_s pt2; /* Lower, right-hand corner */
 };
+
+#define FB_FMT_RGB32          13          /* BPP=32 */
+
+
+
+
+#define sched_lock() hal_spinlock_t __spin_lock_local; hal_spin_init( &__spin_lock_local ); hal_spin_lock_cli( &__spin_lock_local );
+#define sched_unlock() hal_spin_unlock_sti( &__spin_lock_local );
+
+
+
+#define EPROTO ENXIO // why? 
 
 
 

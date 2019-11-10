@@ -42,16 +42,16 @@
 #include <stdint.h>
 #include <errno.h>
 
-#include <nuttx/ascii.h>
+//#include <nuttx/ascii.h>
 
 #define XK_MISCELLANY 1 /* Select X11 character set */
 #define XK_LATIN1     1
 #define XK_XKB_KEYS   1
 
-#include <nuttx/nx/nx.h>
-#include <nuttx/video/vnc.h>
-#include <nuttx/input/x11_keysymdef.h>
-#include <nuttx/input/kbd_codec.h>
+//#include <nuttx/nx/nx.h>
+//#include <nuttx/video/vnc.h>
+//#include <nuttx/input/x11_keysymdef.h>
+//#include <nuttx/input/kbd_codec.h>
 
 #include "vnc_server.h"
 
@@ -138,7 +138,7 @@ static const struct vnc_keymap_s g_asciimap[] =
   /* Alternative encodings */
 
   {'`',              XK_dead_grave},
-  {'´',              XK_dead_acute},
+  {'ï¿½',              XK_dead_acute},
   {ASCII_TILDE,      XK_dead_tilde},
   {ASCII_CARET,      XK_dead_circumflex},
 
