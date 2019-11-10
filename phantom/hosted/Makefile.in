@@ -20,8 +20,8 @@ clean:
 
 
 clean-all: clean
-	-rm Makefile 
-	-rm -r autom4te.cache
+	-rm -r autom4te.cache config.h config.log config.status configure 
+#	-rm Makefile 
 
 
 SRCDIRS = .
