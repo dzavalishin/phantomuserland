@@ -29,7 +29,7 @@
 #define nxsem_init( __sem, __pshared, __value) hal_sem_init_etc( __sem, "nxsem", __value )
 
 
-#define vnc_sem_debug(__a,__b,__c)
+//#define vnc_sem_debug(__a,__b,__c)
 #define nxsem_post(__sem) hal_sem_release(__sem)
 #define nxsem_wait(__sem) hal_sem_acquire(__sem)
 
@@ -40,6 +40,10 @@
 
 #define OK 0
 #define EXIT_FAILURE ENXIO // why?
+
+
+#define UNUSED(__val)
+
 
 #ifndef NULL
 #define NULL 0

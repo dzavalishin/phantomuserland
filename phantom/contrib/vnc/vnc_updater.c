@@ -401,7 +401,8 @@ static void vnc_add_queue(FAR struct vnc_session_s *session,
  *
  ****************************************************************************/
 
-static FAR void *vnc_updater(FAR void *arg)
+//static FAR void *vnc_updater(FAR void *arg)
+static void vnc_updater(FAR void *arg)
 {
   FAR struct vnc_session_s *session = (FAR struct vnc_session_s *)arg;
   FAR struct vnc_fbupdate_s *srcrect;
@@ -453,7 +454,7 @@ static FAR void *vnc_updater(FAR void *arg)
     }
 
   session->state = VNCSERVER_STOPPED;
-  return NULL;
+  //return NULL;
 }
 
 /****************************************************************************
@@ -479,7 +480,7 @@ int vnc_start_updater(FAR struct vnc_session_s *session)
 {
   //pthread_attr_t attr;
   //struct sched_param param;
-  int status;
+  //int status;
 
   ginfo("Starting updater for Display %d\n", session->display);
 
@@ -636,7 +637,8 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
 
               curr = (FAR struct vnc_fbupdate_s *)session->updqueue.head;
               sq_init(&session->updqueue);
-              nxsem_reset(&session->queuesem, 0);
+              //nxsem_reset(&session->queuesem, 0);
+              hal_sem_zero( &session->queuesem );
 
               for (; curr != NULL; curr = next)
                 {

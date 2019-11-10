@@ -145,8 +145,15 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   /* Set the INITIALIZED state */
 
-  nxsem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
-  nxsem_reset(&session->queuesem, 0);
+  //nxsem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
+  //nxsem_reset(&session->queuesem, 0);
+  hal_sem_zero( &session->queuesem );
+
+  {
+    int i;
+    for( i = 0; i < CONFIG_VNCSERVER_NUPDATES; i++ )
+      hal_sem_release( &session->freesem );
+  }
 
   session->fb      = fb;
   session->display = display;
@@ -333,7 +340,8 @@ int vnc_server(int argc, FAR char *argv[])
 
       vnc_reset_session(session, fb, display);
       g_fbstartup[display].result = -EBUSY;
-      nxsem_reset(&g_fbstartup[display].fbconnect, 0);
+      //nxsem_reset(&g_fbstartup[display].fbconnect, 0);
+      hal_sem_zero( &g_fbstartup[display].fbconnect );
 
       /* Establish a connection with the VNC client */
 

@@ -442,7 +442,7 @@ int vnc_raw(FAR struct vnc_session_s *session, rect_t *rect)
           /* Transfer the frame buffer data into the rectangle,
            * performing the necessary color conversions.
            */
-/*
+#if 0
           if (bytesperpixel == 1)
             {
               size = vnc_copy8(session, y, x, updheight, updwidth,                               convert.bpp8);
@@ -452,6 +452,7 @@ int vnc_raw(FAR struct vnc_session_s *session, rect_t *rect)
               size = vnc_copy16(session, y, x, updheight, updwidth,                                convert.bpp16);
             }
           else /* bytesperpixel == 4 */
+#endif          
             {
               size = vnc_copy32(session, y, x, updheight, updwidth,
                                 convert.bpp32);

@@ -772,7 +772,8 @@ struct rfb_rrerect32_s
  *  bits:"
  */
 
-#define RFB_SUBENCODING_RAW      1  /* Raw */
+// 2 differend definitions
+//#define RFB_SUBENCODING_RAW      1  /* Raw */
 #define RFB_SUBENCODING_BACK     2  /* BackgroundSpecified*/
 #define RFB_SUBENCODING_FORE     4  /* ForegroundSpecified*/
 #define RFB_SUBENCODING_ANY      8  /* AnySubrects*/
@@ -923,7 +924,8 @@ struct rfb_srle_s
  *  indicate a palette of that size. The possible values of subencoding are:"
  */
 
-#define RFB_SUBENCODING_RAW      0   /* Raw pixel data */
+// 2 differend definitions
+//#define RFB_SUBENCODING_RAW      0   /* Raw pixel data */
 #define RFB_SUBENCODING_SOLID    1   /* A solid tile of a single color */
 #define RFB_SUBENCODING_PACKED1  2   /* Packed palette types */
 #define RFB_SUBENCODING_PACKED2  3
