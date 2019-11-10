@@ -1,0 +1,11 @@
+# @configure_input@
+
+CFLAGS += @CFLAGS@
+# make dependencies files
+CFLAGS += -MD -MP 
+CC=@CC@
+#AR=@AR@
+AR=ar
+RANLIB=@RANLIB@
+
+EXESUFFIX=@EXEEXT@

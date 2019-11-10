@@ -51,6 +51,7 @@ static char *envbuf[MAXENVBUF] = { 0 };
 
 static int arg_run_debugger = 0;
 static int arg_run_threads = 0;
+static int arg_vnc_screen = 0;
 static char *arg_run_test = 0;
 
 
@@ -92,7 +93,13 @@ int main(int argc, char* argv[])
 
     pvm_bulk_init( bulk_seek_f, bulk_read_f );
 
-    if( pvm_video_init() )
+    int rc;
+    if(arg_vnc_screen)
+        rc = vnc_pvm_video_init();
+    else
+        rc = pvm_video_init();
+
+    if( rc )
     {
         printf("Video init failed\n");
         exit(22);
@@ -217,6 +224,7 @@ static void usage()
     printf(
            "Usage: pvm_test [-flags] [env_name=env_val]\n\n"
            "Flags:\n"
+           "\t-v\t- run as VNC server\n"
            "\t-t\t- run VM in multithreaded mode (else just startup code is run)\n"
            "\t-Tname\t- run test with given name\n"
            "\t-di\t- debug (print) instructions\n"
@@ -278,6 +286,10 @@ static void args(int argc, char* argv[])
             }
             break;
         */
+        case 'v':
+            arg_vnc_screen++;
+            break;
+
         case 't':
             arg_run_threads++;
             break;
