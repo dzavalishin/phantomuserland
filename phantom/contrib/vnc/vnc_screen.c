@@ -60,13 +60,26 @@ bitblt:(void*)vid_null,
 };
 
 
+static void vnc_update_all( void )
+{
+    rect_t scr_r;
+    scr_get_rect( &scr_r );
+
+    vnc_update_rectangle(g_vnc_sessions[0], &scr_r, true );
+}
 
 //static int init_ok = 0;
 //static int init_err = 0;
 
+static hal_mutex_t vnc_lock;
+
+
+void vnc_mutex_lock( void ) { hal_mutex_lock( &vnc_lock ); }
+void vnc_mutex_unlock( void ) { hal_mutex_unlock( &vnc_lock ); }
 
 void pvm_vnc_init_funcs( void )
 {
+    hal_mutex_init( &vnc_lock, "VNC" );
     int i;
     for( i = 0; i < VSCREEN_WIDTH * VSCREEN_HEIGHT * 3; i++)
     {
@@ -77,7 +90,7 @@ void pvm_vnc_init_funcs( void )
     drv_video_vnc.xsize = VSCREEN_WIDTH;
     drv_video_vnc.ysize = VSCREEN_HEIGHT;
     // TODO need it?    
-    //drv_video_vnc.update = &win_scr_screen_update;
+    drv_video_vnc.update = &vnc_update_all; // TODO remove me, do more detailed update
 #if 1
     drv_video_vnc.bitblt = &vid_bitblt_forw;
 #if VIDEO_DRV_WINBLT
@@ -98,12 +111,13 @@ void pvm_vnc_init_funcs( void )
     drv_video_vnc.mouse_enable = &vid_mouse_on_deflt;
 
     //init_ok = 1;
+    switch_screen_bitblt_to_32bpp( 1 );
 
 
     //win_scr_event_loop();
 }
 
-
+/*
 void win_scr_mk_mouse_event(int wParam, int xPos, int yPos )
 {
     drv_video_vnc.mouse_x = xPos;
@@ -123,9 +137,9 @@ void win_scr_mk_mouse_event(int wParam, int xPos, int yPos )
     ev_q_put_any( &e );
     //printf("-ms-");            printf("%d,%d\n", xPos, yPos );
 }
+*/
 
-
-int pvm_video_init()
+int vnc_pvm_video_init()
 {
     video_drv = &drv_video_vnc;
 

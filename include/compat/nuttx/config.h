@@ -95,8 +95,14 @@ struct nxgl_rect_s
 
 
 
-#define sched_lock() hal_spinlock_t __spin_lock_local; hal_spin_init( &__spin_lock_local ); hal_spin_lock_cli( &__spin_lock_local );
-#define sched_unlock() hal_spin_unlock_sti( &__spin_lock_local );
+//#define sched_lock() hal_spinlock_t __spin_lock_local; hal_spin_init( &__spin_lock_local ); hal_spin_lock_cli( &__spin_lock_local );
+//#define sched_unlock() hal_spin_unlock_sti( &__spin_lock_local );
+
+void vnc_mutex_lock( void );
+void vnc_mutex_unlock( void );
+
+#define sched_lock vnc_mutex_lock
+#define sched_unlock vnc_mutex_unlock
 
 
 
