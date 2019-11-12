@@ -1,1 +1,12 @@
+# Running Phantom
+
 Here you can run Phantom kernel with QEMU.
+
+
+## Making Image
+
+Use make_system_image.sh to create .iso image.
+you still will need a Phantom formatted HDD:
+
+zero_ph_img.cmd will make empty formatted phantom disk in phantom.img 
+for virtualbox rename phantom.img to phantom.hdd and attach
