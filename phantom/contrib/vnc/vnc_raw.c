@@ -243,7 +243,7 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
   /* Source rectangle start address (left/top)*/
 
   srcleft = (FAR lfb_color_t *)
-    (session->fb + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+    (session->framebuf + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
   /* Transfer each row from the source buffer into the update buffer */
 
@@ -491,7 +491,7 @@ int vnc_raw(FAR struct vnc_session_s *session, rect_t *rect)
 
               do
                 {
-                  nsent = psock_send(&session->connect, src, size, 0);
+                  nsent = psock_send(session->connect, src, size, 0);
                   if (nsent < 0)
                     {
                       gerr("ERROR: Send FrameBufferUpdate failed: %d\n",

@@ -272,7 +272,7 @@ struct vnc_session_s
   volatile uint8_t bpp;        /* Remote bits per pixel */
   volatile bool bigendian;     /* True: Remote expect data in big-endian format */
   volatile bool rre;           /* True: Remote supports RRE encoding */
-  FAR uint8_t *fb;             /* Allocated local frame buffer */
+  FAR uint8_t *framebuf;             /* Allocated local frame buffer */
 
   /* VNC client input support */
 
@@ -368,7 +368,9 @@ EXTERN FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
  ****************************************************************************/
 
 //int vnc_server(int argc, FAR char *argv[]);
-int vnc_server( void );
+void vnc_server( void *fb );
+
+int vnc_receive_one_message(FAR struct vnc_session_s *session);
 
 /****************************************************************************
  * Name: vnc_negotiate

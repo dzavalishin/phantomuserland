@@ -120,8 +120,8 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
 
   if (session->state >= VNCSERVER_CONNECTED)
     {
-      psock_close(&session->connect);
-      psock_close(&session->listen);
+      psock_close(session->connect);
+      psock_close(session->listen);
     }
 
   /* [Re-]initialize the session. */
@@ -155,7 +155,7 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
       hal_sem_release( &session->freesem );
   }
 
-  session->fb      = fb;
+  session->framebuf= fb;
   session->display = display;
   session->state   = VNCSERVER_INITIALIZED;
   session->nwhupd  = 0;
@@ -220,9 +220,10 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
   //ret = psock_listen(&session->listen, 5);
   ret = tcp_listen(session->listen);
   if (ret < 0)
-    {
+  {
+      printf("listen err %d\n", ret );
       goto errout_with_listener;
-    }
+  }
 
   /* Connect to the client */
 
@@ -263,10 +264,10 @@ errout_with_listener:
  ****************************************************************************/
 
 //int vnc_server(int argc, FAR char *argv[])
-int vnc_server( void )
+void vnc_server( void *fb )
 {
   FAR struct vnc_session_s *session;
-  FAR uint8_t *fb;
+  //FAR uint8_t *fb;
   int display;
   int ret;
 
@@ -301,7 +302,7 @@ int vnc_server( void )
   /* Allocate the framebuffer memory.  We rely on the fact that
    * the KMM allocator will align memory to 32-bits or better.
    */
-
+#if 0
   fb = (FAR uint8_t *)kmm_zalloc(RFB_SIZE);
   if (fb == NULL)
     {
@@ -310,7 +311,7 @@ int vnc_server( void )
       ret = -ENOMEM;
       goto errout_with_post;
     }
-
+#endif
   /* Allocate a session structure for this display */
 
   session = kmm_zalloc(sizeof(struct vnc_session_s));
@@ -327,7 +328,7 @@ int vnc_server( void )
 
   /* Inform any waiter that we have started */
 
-  vnc_reset_session(session, fb, display);
+  //vnc_reset_session(session, fb, display);
   //nxsem_post(&g_fbstartup[display].fbinit);
 
   /* Loop... handling each each VNC client connection to this display.  Only
@@ -406,10 +407,11 @@ int vnc_server( void )
 errout_with_fb:
   kmm_free(fb);
 
-errout_with_post:
+//errout_with_post:
  //g_fbstartup[display].result = ret;
   //nxsem_post(&g_fbstartup[display].fbconnect);
 
 errout_with_hang:
-  return EXIT_FAILURE;
+  ;
+  //return EXIT_FAILURE;
 }

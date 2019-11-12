@@ -294,7 +294,7 @@ int vnc_rre(FAR struct vnc_session_s *session, rect_t *rect)
                * and there are a limited number of IOBs available.
                */
 
-              nsent = psock_send(&session->connect, rre, nbytes, 0);
+              nsent = psock_send(session->connect, rre, nbytes, 0);
               if (nsent < 0)
                 {
                   gerr("ERROR: Send RRE FrameBufferUpdate failed: %d\n",

@@ -308,7 +308,7 @@ int vnc_colors(FAR struct vnc_session_s *session, rect_t *rect,
   /* Pointer to the first pixel in the first row in the local framebuffer */
 
   rowstart = (FAR lfb_color_t *)
-    (session->fb + RFB_STRIDE * rect->y + RFB_BYTESPERPIXEL * rect->x);
+    (session->framebuf + RFB_STRIDE * rect->y + RFB_BYTESPERPIXEL * rect->x);
 
   /* Loop for each row in the rectangle */
 

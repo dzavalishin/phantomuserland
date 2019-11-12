@@ -166,9 +166,14 @@ int vnc_pvm_video_init()
 
     }*/
 
+    if( 0 == drv_video_vnc.screen )
+    {
+        printf("ERROR: drv_video_vnc.screen sill zero\n");
+        return ENXIO;
+    }
 //int vnc_server( void );
 
-    hal_start_thread((void *)vnc_server, 0, 0);
+    hal_start_thread(vnc_server, drv_video_vnc.screen, 0);
 
     return 0;
 }

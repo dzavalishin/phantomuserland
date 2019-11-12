@@ -33,6 +33,8 @@ int tcp_open(void **prot_data)
 
 	*prot_data = tc;
 
+	tc->fd = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
+
 	return 0;
 }
 
@@ -89,10 +91,16 @@ int tcp_accept(void *prot_data, i4sockaddr *addr, void **new_socket)
 
     socklen_t peer_addr_size = sizeof(peer_addr);
 	int newsock = accept( tc->fd, (struct sockaddr *)&peer_addr, &peer_addr_size );
-	if( newsock < 0 ) return errno;
+	if( newsock < 0 ) 
+	{
+		free( new_tc );
+		return errno;
+	}
 
 	*new_socket = new_tc;
 	new_tc->fd = newsock;
+	//printf("tcp_accept new fd %d\n", new_tc->fd );
+
 
 	if( addr )
 	{
@@ -134,7 +142,7 @@ ssize_t tcp_recvfrom(void *prot_data, void *buf, ssize_t len, i4sockaddr *saddr,
 
 	ssize_t rc = read( tc->fd, buf, len );
 
-	return rc;
+	return rc < 0 ? -errno : rc;
 }
 
 ssize_t tcp_sendto(void *prot_data, const void *buf, ssize_t len, i4sockaddr *addr)
@@ -142,8 +150,10 @@ ssize_t tcp_sendto(void *prot_data, const void *buf, ssize_t len, i4sockaddr *ad
 	(void) addr;
 	struct tcp_conn *tc = prot_data;
 
+	//printf("tcp_sendto fd %d\n", tc->fd );
+
 	ssize_t rc = write( tc->fd, buf, len );
 
-	return rc;
+	return rc < 0 ? -errno : rc;
 }
 
