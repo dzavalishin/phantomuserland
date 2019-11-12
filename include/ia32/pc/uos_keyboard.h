@@ -5,7 +5,8 @@ typedef struct _keyboard_ps2_t {
 	//keyboard_interface_t *interface;
         //mutex_t lock;
 
-        hal_spinlock_t lock;
+    //hal_spinlock_t lock;
+	hal_mutex_t lock;
 
 	//ARRAY (stack, KBD_STACKSZ);		/* task receive stack */
 	keyboard_event_t in_buf [KBD_INBUFSZ];	/* keyboard event queue */

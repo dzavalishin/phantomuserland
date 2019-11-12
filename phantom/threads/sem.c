@@ -397,7 +397,7 @@ errno_t hal_sem_init(hal_sem_t *c, const char *name ) {
 }
 
 
-static errno_t hal_sem_init_etc(hal_sem_t *c, const char *name, int value )
+errno_t hal_sem_init_etc(hal_sem_t *c, const char *name, int value )
 {
     errno_t rc = do_hal_sem_init( c, name );
     if( rc ) return rc;

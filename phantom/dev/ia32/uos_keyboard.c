@@ -42,8 +42,8 @@ static void keyboard_ps2_wait_event (keyboard_ps2_t *u, keyboard_event_t *data);
 // Local compat defs
 //---------------------------------------------------------------------------
 
-#define mutex_lock hal_spin_lock_cli
-#define mutex_unlock hal_spin_unlock_sti
+//#define mutex_lock hal_spin_lock_cli
+//#define mutex_unlock hal_spin_unlock_sti
 
 //---------------------------------------------------------------------------
 // END - Local compat defs

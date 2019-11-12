@@ -15,6 +15,8 @@
 #define PHANTOM_TYPES_H
 
 #include <arch/arch-types.h>
+#include <bits/bool_t.h>
+#include <bits/bigtime_t.h>
 
 
 typedef u_int32_t       wchar_t;
@@ -32,10 +34,6 @@ typedef	u_int64_t   	u_quad_t;	/* quads (deprecated) */
 typedef	int64_t		quad_t;
 
 
-#ifndef __cplusplus
-typedef u_int8_t        bool;
-typedef u_int8_t        Bool; // vmware svga
-#endif
 
 
 typedef u_int32_t 	disk_page_no_t;
@@ -66,7 +64,6 @@ typedef _sigset_t	sigset_t;
 
 // time
 
-typedef u_int64_t   	bigtime_t;
 
 #ifndef _TIME_T
 #ifndef _TIME_T_DECLARED

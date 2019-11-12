@@ -18,50 +18,7 @@
 
 #include <device.h>
 
-// Becomes nonzero after TCPIP stack is initialized and some network
-// card is, possibly, activated.
-extern int phantom_tcpip_active;
-
-
-/* contains common network stuff */
-
-typedef struct netaddr {
-	uint8 len;
-	uint8 type;
-	uint8 pad0;
-	uint8 pad1;
-	uint8 addr[12];
-} netaddr;
-
-enum {
-	SOCK_PROTO_NULL = 0,
-	SOCK_PROTO_UDP,
-	SOCK_PROTO_TCP
-};
-
-enum {
-	ADDR_TYPE_NULL = 0,
-	ADDR_TYPE_ETHERNET,
-	ADDR_TYPE_IP
-};
-
-#define SOCK_FLAG_TIMEOUT 1
-
-typedef struct i4sockaddr {
-	netaddr addr;
-	int port;
-} i4sockaddr;
-
-enum {
-	IP_PROT_ICMP = 1,
-	IP_PROT_TCP = 6,
-	IP_PROT_UDP = 17,
-};
-
-typedef uint32 ipv4_addr;
-#define NETADDR_TO_IPV4(naddr) (*(ipv4_addr *)(&((&(naddr))->addr[0])))
-#define IPV4_DOTADDR_TO_ADDR(a, b, c, d) \
-	(((ipv4_addr)(a) << 24) | (((ipv4_addr)(b) & 0xff) << 16) | (((ipv4_addr)(c) & 0xff) << 8) | ((ipv4_addr)(d) & 0xff))
+#include <kernel/net/net_types.h>
 
 
 errno_t parse_ipv4_addr( ipv4_addr *out, const char *str );
@@ -226,6 +183,8 @@ int ipv4_init(void);
 int if_init(void);
 
 
+int tcp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_address);
+int tcp_init(void);
 
 
 int net_timer_init(void);

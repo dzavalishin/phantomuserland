@@ -48,7 +48,10 @@
 //extern int errno;			/* global error number */
 //#endif
 
+#ifndef __ERRNO_T_DEFINED
+#define __ERRNO_T_DEFINED
 typedef int errno_t;
+#endif //__ERRNO_T_DEFINED
 
 
 int strerror_r(errno_t errnum, char *strerrbuf, size_t buflen);

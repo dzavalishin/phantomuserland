@@ -343,7 +343,7 @@ int vnc_server( void )
       vnc_reset_session(session, fb, display);
       //g_fbstartup[display].result = -EBUSY;
       //nxsem_reset(&g_fbstartup[display].fbconnect, 0);
-      hal_sem_zero( &g_fbstartup[display].fbconnect );
+      //hal_sem_zero( &g_fbstartup[display].fbconnect );
 
       /* Establish a connection with the VNC client */
 

@@ -1,3 +1,14 @@
+/**
+ *
+ * Phantom OS
+ *
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
+ *
+ * Chained buffers
+ *
+ *
+**/
+
 /*
 ** Copyright 2001-2002, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.
@@ -5,10 +16,15 @@
 #ifndef _KERNEL_CBUF_H
 #define _KERNEL_CBUF_H
 
+/*
 #include <phantom_libc.h>
 #include <phantom_types.h>
 
 #include "hal.h"
+*/
+
+#include <stdint.h>
+#include <bits/bool_t.h>
 
 
 #define CBUF_LEN 2048

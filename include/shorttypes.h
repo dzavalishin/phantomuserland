@@ -36,5 +36,10 @@ typedef	u_int64_t	uint64_t;
 #define	_UINT16_T_DECLARED
 #define	_UINT32_T_DECLARED
 
+#ifndef __ERRNO_T_DEFINED
+#define __ERRNO_T_DEFINED
+typedef int errno_t;
+#endif //__ERRNO_T_DEFINED
+
 
 #endif // SHORTTYPES_H

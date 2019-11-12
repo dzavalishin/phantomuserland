@@ -25,7 +25,9 @@ clean-all: clean
 
 
 SRCDIRS = .
-CFLAGS += -I../../include
+CFLAGS += -idirafter ../../include -idirafter ../../include/ia32 -DARCH_ia32
+#CFLAGS += -I../../include -I../../include/ia32 -DARCH_ia32
+#CFLAGS +=  -I../../include/ia32 -DARCH_ia32
 
 FILES := $(foreach DIR,$(SRCDIRS),$(wildcard $(DIR)/*))
 CFILES := $(filter %.c,$(FILES))

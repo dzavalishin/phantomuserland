@@ -347,7 +347,7 @@ EXTERN FAR struct vnc_session_s *g_vnc_sessions[RFB_MAX_DISPLAYS];
 
 /* Used to synchronize the server thread with the framebuffer driver. */
 
-EXTERN struct fb_startup_s g_fbstartup[RFB_MAX_DISPLAYS];
+//EXTERN struct fb_startup_s g_fbstartup[RFB_MAX_DISPLAYS];
 
 /****************************************************************************
  * Public Function Prototypes

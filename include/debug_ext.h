@@ -42,7 +42,8 @@
 //  DEBUG_WAIT_ON_MSG (for flow and info)
 //  DEBUG_WAIT_ON_ERROR (for error)
 
-#include "console.h"
+#include <console.h>
+#include <phantom_libc.h>
 
 #ifdef DEBUG_WAIT_ON_MSG
 #define DEBUG_WAIT thread_snooze( DEBUG_WAIT_ON_MSG );

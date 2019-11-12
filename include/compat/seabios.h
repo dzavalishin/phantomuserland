@@ -75,8 +75,14 @@ unsigned int usb_intr_pipe_count(int ms);
 #define memalign_low memalign
 #define memalign_tmphigh memalign
 
-#define mutex_lock hal_mutex_lock
-#define mutex_unlock hal_mutex_unlock
+//#define mutex_lock hal_mutex_lock
+//#define mutex_unlock hal_mutex_unlock
+
+#ifndef mutex_lock
+#  define mutex_lock hal_mutex_lock
+#  define mutex_unlock hal_mutex_unlock
+#endif // mutex_lock
+
 #define malloc_high malloc
 #define malloc_low malloc
 #define malloc_tmphigh malloc

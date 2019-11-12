@@ -9,21 +9,63 @@
  *
 **/
 
+#include <unistd.h>
+#include <stdlib.h>
 
-#include "../../include/kernel/sem.h"
+typedef int errno_t;
+
+//#include "../../include/kernel/sem.h"
+//#include "../../include/kernel/atomic.h"
+#include <bits/errno_t.h>
+#include <kernel/sem.h>
+#include <kernel/atomic.h>
 
 
+struct phantom_sem_impl
+{
+    //int spinlock;
+    int value;
+};
 
 
-errno_t                 hal_sem_init_etc(hal_sem_t *c, const char *name, int value );
+errno_t hal_sem_init_etc(hal_sem_t *c, const char *name, int value )
+{
+	struct phantom_sem_impl *si = calloc( 1, sizeof(struct phantom_sem_impl) );
+    if( 0 == si ) return ENOMEM;
 
-void 					hal_sem_release( hal_sem_t *s );
+	//si->spinlock = 0;
+	si->value = value;
+
+	return 0;
+}
+
+void hal_sem_release( hal_sem_t *s )
+{
+    struct phantom_sem_impl *si = s->impl;
+    ATOMIC_ADD_AND_FETCH( &si->value, 1 );
+}
 
 
 void 					hal_sem_destroy( hal_sem_t *s );
 
 
-int 					hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec );
+int hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
+{
+	struct phantom_sem_impl *si = s->impl;
+
+	if( flags ) printf("ERROR: sem flags != 0");
+
+	while(1)
+	{
+
+		int val = ATOMIC_ADD_AND_FETCH( &si->value, -val );
+		if( val >= 0 ) return 0;
+
+		ATOMIC_ADD_AND_FETCH( &si->value, val ); // put back
+
+		usleep(10000); // actually spinlock - TODO make me better!
+	}
+}
 
 
 
