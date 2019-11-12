@@ -587,7 +587,7 @@ errno_t hal_cond_destroy(hal_cond_t *c)
 
 
 
-
+/*
 
 int hal_sem_acquire( hal_sem_t *s )
 {
@@ -609,7 +609,7 @@ int hal_sem_init( hal_sem_t *s, const char *name )
 }
 
 
-
+*/
 
 
 void console_set_fg_color( struct rgba_t c )

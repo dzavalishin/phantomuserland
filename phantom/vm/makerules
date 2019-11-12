@@ -45,7 +45,7 @@ x11_display.o: x11_display.c
 
 GLLIB=../lib/libTinyGL.a  ../libc/strnstrn.o 
 
-COMMON_LIB= ../lib/libtuned.a  ../lib/libphantom.a ../lib/libwin.a ../lib/libfreetype.a ../lib/libphantom.a ../lib/libvnc.a
+COMMON_LIB= ../lib/libtuned.a  ../lib/libphantom.a ../lib/libwin.a ../lib/libfreetype.a ../lib/libphantom.a ../lib/libvnc.a ../lib/libhosted.a
 
 ifeq ($(OSTYPE),cygwin)
 OSLIB = -lgdi32 $(COMMON_LIB) 

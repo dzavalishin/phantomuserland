@@ -136,3 +136,5 @@ tools/pfsextract/last_snap.data
 tools/pfsextract/prev_snap.data
 build/phantom.code-workspace
 run/VirtualBox.log
+run/Bochs.log
+run/bochs-log.txt

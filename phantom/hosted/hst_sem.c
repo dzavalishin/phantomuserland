@@ -36,6 +36,8 @@ errno_t hal_sem_init_etc(hal_sem_t *c, const char *name, int value )
 	//si->spinlock = 0;
 	si->value = value;
 
+	c->impl = si;
+
 	return 0;
 }
 

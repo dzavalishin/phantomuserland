@@ -43,7 +43,8 @@
 //#include <semaphore.h>
 //#include <sched.h>
 //#include <pthread.h>
-#include "queue.h"
+//#include "queue.h"
+#include "vnc_queue.h"
 #include <assert.h>
 #include <errno.h>
 
