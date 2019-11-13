@@ -39,11 +39,16 @@
 
 #include <compat/nuttx/config.h>
 
+#include <compat/nuttx/config.h>
+
 #include <stdint.h>
 #include <errno.h>
 
 //#include <nuttx/ascii.h>
 #include "ascii.h"
+
+#include <compat/uos/keyboard.h>
+#include <event.h>
 
 #define XK_MISCELLANY 1 /* Select X11 character set */
 #define XK_LATIN1     1
@@ -175,74 +180,77 @@ static const struct vnc_keymap_s g_asciimap[] =
 
 #define G_ASCIIMAP_NELEM (sizeof(g_asciimap) / sizeof(struct vnc_keymap_s))
 
-#ifdef CONFIG_VNCSERVER_KBDENCODE
+
 static const struct vnc_keymap_s g_cursor[] =
 {
-  {KEYCODE_BACKDEL,  XK_BackSpace},
-  {KEYCODE_FWDDEL,   XK_Delete},
-  {KEYCODE_FWDDEL,   XK_KP_Delete},
-  {KEYCODE_HOME,     XK_Home},
-  {KEYCODE_HOME,     XK_KP_Home},
-  {KEYCODE_END,      XK_End},
-  {KEYCODE_END,      XK_KP_End},
-  {KEYCODE_LEFT,     XK_Left},
-  {KEYCODE_LEFT,     XK_KP_Left},
-  {KEYCODE_RIGHT,    XK_Right},
-  {KEYCODE_RIGHT,    XK_KP_Right},
-  {KEYCODE_UP,       XK_Up},
-  {KEYCODE_UP,       XK_KP_Up},
-  {KEYCODE_DOWN,     XK_Down},
-  {KEYCODE_DOWN,     XK_KP_Down},
-  {KEYCODE_PAGEUP,   XK_Page_Up},
-  {KEYCODE_PAGEUP,   XK_KP_Prior},
-  {KEYCODE_PAGEUP,   XK_KP_Page_Up},
-  {KEYCODE_PAGEDOWN, XK_Page_Down},
-  {KEYCODE_PAGEDOWN, XK_KP_Next},
-  {KEYCODE_PAGEDOWN, XK_KP_Page_Down},
-  {KEYCODE_INSERT,   XK_Insert},
-  {KEYCODE_INSERT,   XK_KP_Insert},
+  {KEY_BACKSPACE,  XK_BackSpace},
+  {KEY_DELETE,   XK_Delete},
+  {KEY_DELETE,   XK_KP_Delete},
+  {KEY_HOME,     XK_Home},
+  {KEY_HOME,     XK_KP_Home},
+  {KEY_END,      XK_End},
+  {KEY_END,      XK_KP_End},
+  {KEY_LEFT,     XK_Left},
+  {KEY_LEFT,     XK_KP_Left},
+  {KEY_RIGHT,    XK_Right},
+  {KEY_RIGHT,    XK_KP_Right},
+  {KEY_UP,       XK_Up},
+  {KEY_UP,       XK_KP_Up},
+  {KEY_DOWN,     XK_Down},
+  {KEY_DOWN,     XK_KP_Down},
+  {KEY_PAGEUP,   XK_Page_Up},
+  {KEY_PAGEUP,   XK_KP_Prior},
+  {KEY_PAGEUP,   XK_KP_Page_Up},
+  {KEY_PAGEDOWN, XK_Page_Down},
+  {KEY_PAGEDOWN, XK_KP_Next},
+  {KEY_PAGEDOWN, XK_KP_Page_Down},
+  {KEY_INSERT,   XK_Insert},
+  {KEY_INSERT,   XK_KP_Insert},
 
-  {KEYCODE_SELECT,   XK_Select},
-  {KEYCODE_EXECUTE,  XK_Execute},
-  {KEYCODE_HELP,     XK_Help},
-  {KEYCODE_MENU,     XK_Alt_L},
-  {KEYCODE_MENU,     XK_Alt_R},
-  {KEYCODE_PAUSE,    XK_Pause},
-  {KEYCODE_PRTSCRN,  XK_Print},
-  {KEYCODE_CLEAR,    XK_Clear},
-  {MOD_SCROLLLOCK,   XK_Scroll_Lock},
-  {MOD_NUMLOCK,      XK_Num_Lock},
+  //{KEYCODE_SELECT,   XK_Select},
+  {KEY_ACCEPT,  XK_Execute},
+  //{KEYCODE_HELP,     XK_Help},
+  {KEY_MENU,     XK_Alt_L}, // TODO make shift
+  {KEY_MENU,     XK_Alt_R},
+  {KEY_PAUSE,    XK_Pause},
+  {KEY_PRINT,  XK_Print},
+  //{KEYCODE_CLEAR,    XK_Clear},
+  //{MOD_SCROLLLOCK,   XK_Scroll_Lock}, // TODO make shift
+  //{MOD_NUMLOCK,      XK_Num_Lock},
 
-  {KEYCODE_F1,       XK_KP_F1},
-  {KEYCODE_F1,       XK_F1},
-  {KEYCODE_F2,       XK_KP_F2},
-  {KEYCODE_F2,       XK_F2},
-  {KEYCODE_F3,       XK_KP_F3},
-  {KEYCODE_F3,       XK_F3},
-  {KEYCODE_F4,       XK_KP_F4},
-  {KEYCODE_F4,       XK_F4},
-  {KEYCODE_F5,       XK_F5},
-  {KEYCODE_F6,       XK_F6},
-  {KEYCODE_F7,       XK_F7},
-  {KEYCODE_F8,       XK_F8},
-  {KEYCODE_F9,       XK_F9},
-  {KEYCODE_F10,      XK_F10},
-  {KEYCODE_F11,      XK_F11},
-  {KEYCODE_F12,      XK_F12},
-  {KEYCODE_F13,      XK_F13},
-  {KEYCODE_F14,      XK_F14},
-  {KEYCODE_F15,      XK_F15},
-  {KEYCODE_F16,      XK_F16},
-  {KEYCODE_F17,      XK_F17},
-  {KEYCODE_F18,      XK_F18},
-  {KEYCODE_F19,      XK_F19},
-  {KEYCODE_F20,      XK_F20},
-  {KEYCODE_F21,      XK_F21},
-  {KEYCODE_F22,      XK_F22},
-  {KEYCODE_F23,      XK_F23},
-  {KEYCODE_F24,      XK_F24},
+  {KEY_F1,       XK_KP_F1},
+  {KEY_F1,       XK_F1},
+  {KEY_F2,       XK_KP_F2},
+  {KEY_F2,       XK_F2},
+  {KEY_F3,       XK_KP_F3},
+  {KEY_F3,       XK_F3},
+  {KEY_F4,       XK_KP_F4},
+  {KEY_F4,       XK_F4},
+  {KEY_F5,       XK_F5},
+  {KEY_F6,       XK_F6},
+  {KEY_F7,       XK_F7},
+  {KEY_F8,       XK_F8},
+  {KEY_F9,       XK_F9},
+  {KEY_F10,      XK_F10},
+  {KEY_F11,      XK_F11},
+  {KEY_F12,      XK_F12},
+#if 0  
+  {KEY_F13,      XK_F13},
+  {KEY_F14,      XK_F14},
+  {KEY_F15,      XK_F15},
+  {KEY_F16,      XK_F16},
+  {KEY_F17,      XK_F17},
+  {KEY_F18,      XK_F18},
+  {KEY_F19,      XK_F19},
+  {KEY_F20,      XK_F20},
+  {KEY_F21,      XK_F21},
+  {KEY_F22,      XK_F22},
+  {KEY_F23,      XK_F23},
+  {KEY_F24,      XK_F24},
+#endif  
 };
-#endif
+#define G_CURSOR_NELEM (sizeof(g_cursor) / sizeof(struct vnc_keymap_s))
+
 
 /* Changes the case of a character.  Based on US keyboard layout */
 
@@ -282,125 +290,6 @@ static bool g_modstate[NMODIFIERS];
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: vnc_kbd_encode
- *
- * Description:
- *   Encode one escape sequence command into the proivded buffer.
- *
- * Input Parameters:
- *   buffer     - The location to write the sequence
- *   keycode    - The command to be added to the output stream.
- *   terminator - Escape sequence terminating character.
- *
- * Returned Value:
- *   Number of bytes written
- *
- ****************************************************************************/
-
-#ifdef CONFIG_VNCSERVER_KBDENCODE
-static inline int vnc_kbd_encode(FAR uint8_t *buffer, uint8_t keycode,
-                                 uint8_t terminator)
-{
-  *buffer++ = ASCII_ESC;
-  *buffer++ = ASCII_LBRACKET;
-  *buffer++ = keycode;
-  *buffer   = terminator;
-  return 4;
-}
-#endif
-
-/****************************************************************************
- * Name: vnc_kbd_press
- *
- * Description:
- *   Indicates a normal key press event.  Put one byte of normal keyboard
- *   data into the user provided buffer.
- *
- * Input Parameters:
- *   buffer - The location to write the sequence
- *   ch     - The character to be added to the output stream.
- *
- * Returned Value:
- *   Number of bytes written
- *
- ****************************************************************************/
-
-#ifdef CONFIG_VNCSERVER_KBDENCODE
-static inline void vnc_kbd_press(FAR uint8_t *buffer, uint8_t ch)
-{
-  *buffer = ch;
-  return 1;
-}
-#endif
-
-/****************************************************************************
- * Name: vnc_kbd_release
- *
- * Description:
- *   Encode the release of a normal key.
- *
- * Input Parameters:
- *   buffer  - The location to write the sequence
- *   ch - The character associated with the key that was releared.
- *
- * Returned Value:
- *   Number of bytes written
- *
- ****************************************************************************/
-
-#ifdef CONFIG_VNCSERVER_KBDENCODE
-static inline void vnc_kbd_release(FAR uint8_t *buffer, uint8_t ch)
-{
-  return vnc_kbd_encode(buffer, ch, ('a' + KBD_RELEASE));
-}
-#endif
-
-/****************************************************************************
- * Name: vnc_kbd_specpress
- *
- * Description:
- *   Denotes a special key press event.  Put one special keyboard command
- *   into the user provided buffer.
- *
- * Input Parameters:
- *   buffer  - The location to write the sequence
- *   keycode - The command to be added to the output stream.
- *
- * Returned Value:
- *   Number of bytes written
- *
- ****************************************************************************/
-
-#ifdef CONFIG_VNCSERVER_KBDENCODE
-static inline void vnc_kbd_specpress(FAR uint8_t *buffer, uint8_t keycode)
-{
-  return vnc_kbd_encode(buffer, keycode, stream, ('a' + KBD_SPECPRESS));
-}
-#endif
-
-/****************************************************************************
- * Name: vnc_kbd_specrel
- *
- * Description:
- *   Denotes a special key release event.  Put one special keyboard
- *   command into the user provided buffer.
- *
- * Input Parameters:
- *   buffer  - The location to write the sequence
- *   keycode - The command to be added to the output stream.
- *
- * Returned Value:
- *   Number of bytes written
- *
- ****************************************************************************/
-
-#ifdef CONFIG_VNCSERVER_KBDENCODE
-static inline void vnc_kbd_specrel(FAR uint8_t *buffer, uint8_t keycode)
-{
-  return vnc_kbd_encode(buffer, keycode, stream, ('a' + KBD_SPECREL));
-}
-#endif
 
 /****************************************************************************
  * Name: vnc_kbd_lookup
@@ -458,6 +347,19 @@ static int vnc_kbd_ascii(uint16_t keysym)
   return vnc_kbd_lookup(g_asciimap, G_ASCIIMAP_NELEM, keysym);
 }
 
+static inline int mk_modifiers( int key_down )
+{
+  int shifts = 0;
+
+  if(!key_down) shifts |= UI_MODIFIER_KEYUP;
+
+  if( g_modstate[MOD_CONTROL]) shifts |= UI_MODIFIER_CTRL;
+  if( g_modstate[MOD_ALT])     shifts |= UI_MODIFIER_ALT;
+  if( g_modstate[MOD_SHIFT])   shifts |= UI_MODIFIER_SHIFT;
+
+  return shifts;
+}
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -483,12 +385,7 @@ static int vnc_kbd_ascii(uint16_t keysym)
 void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
                  bool keydown)
 {
-#ifdef CONFIG_VNCSERVER_KBDENCODE
-  uint8_t buffer[4]
-  int nch;
-#else
-  uint8_t buffer;
-#endif
+  //uint8_t buffer;
   int16_t keych;
 
   /* Check for modifier keys */
@@ -497,25 +394,6 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
   if (keych >= 0)
     {
       g_modstate[keych] = keydown;
-      return;
-    }
-
-#ifndef CONFIG_VNCSERVER_KBDENCODE
-  /* If we are not encoding key presses, then we have to ignore key release
-   * events.
-   */
-
-  if (!keydown)
-    {
-      return;
-    }
-#endif
-
-  /* If no external keyboard input handler has been provided, then we have to drop the keyboard input.
-   */
-
-  if (session->kbdout == NULL)
-    {
       return;
     }
 
@@ -579,33 +457,12 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
               keych = g_caseswap[keych];
             }
         }
-
-#ifdef CONFIG_VNCSERVER_KBDENCODE
-      /* Encode the normal character */
-
-      if (keydown)
-        {
-          nch = vnc_kbd_press(buffer, keych);
-        }
-      else
-        {
-          nch = vnc_kbd_release(buffer, keych);
-        }
-
-      /* Inject the normal character sequence into NX */
-
-      session->kbdout(session->arg, nch, buffer);
-#else
-      /* Inject the single key press into NX */
-
-      buffer = (uint8_t)keych;
-      session->kbdout(session->arg, 1, &buffer);
-#endif
+      ev_q_put_key( keych, keych, mk_modifiers(keydown) );
+      return;
     }
 
   /* Not mappable to an ASCII LATIN1 character */
 
-#ifdef CONFIG_VNCSERVER_KBDENCODE
   else
     {
       /* Lookup cursor movement/screen control keysyms */
@@ -613,25 +470,24 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
       keych = vnc_kbd_lookup(g_modifiers, G_MODIFIERS_NELEM, keysym);
       if (keych >= 0)
         {
-          /* Encode the speical character */
-
-          if (keydown)
-            {
-              nch = vnc_kbd_specpress(buffer, keych);
-            }
-          else
-            {
-              nch = vnc_kbd_specrel(buffer, keych);
-            }
-
-          /* Inject the special character sequence into NX */
-
-          session->kbdout(session->arg, nch, buffer);
+        ev_q_put_key( keych, keych, mk_modifiers(keydown) );
         }
-    }
-#endif
-}
+      else
+      {
+        keych = vnc_kbd_lookup(g_cursor, G_CURSOR_NELEM, keysym);
+        if (keych >= 0)
+          {
+            /* Encode the speical character */
+          ev_q_put_key( keych, keych, mk_modifiers(keydown) );
+          }
+      }
+      
 
+        
+    }
+
+}
+#if 0
 /****************************************************************************
  * Name: vnc_kbdout
  *
@@ -650,10 +506,10 @@ void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
 
 void vnc_kbdout(FAR void *arg, uint8_t nch, FAR const uint8_t *ch)
 {
-#warning implement me  
   DEBUGASSERT(arg != NULL);
   //(void)nx_kbdin((NXHANDLE)arg, nch, ch);
   printf("VNC: key arg %p nch %x &ch %x", arg, nch, *ch );
 }
+#endif
 
 #endif /* CONFIG_NX_KBD */

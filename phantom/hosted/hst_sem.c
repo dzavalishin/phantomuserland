@@ -38,7 +38,7 @@ errno_t hal_sem_init_etc(hal_sem_t *c, const char *name, int value )
 	si->value = value;
 
 	c->impl = si;
-	printf("!!Sem Init %d ", si->value );
+	//printf("!!Sem Init %d ", si->value );
 	return 0;
 }
 
@@ -47,7 +47,7 @@ void hal_sem_release( hal_sem_t *s )
     struct phantom_sem_impl *si = s->impl;
     if(s->impl == 0 )
         return; // EINVAL; // TODO
-    printf("!!Sem SIGNAL!! ");
+    //printf("!!Sem SIGNAL!! ");
 	ATOMIC_ADD_AND_FETCH( &si->value, 1 );
 }
 
@@ -69,15 +69,15 @@ int hal_sem_acquire_etc( hal_sem_t *s, int val, int flags, long uSec )
 		int prev = ATOMIC_ADD_AND_FETCH( &si->value, -val );
 		if( prev >= 0 ) 
 		{
-			printf("!!Sem WAKE!! ");
+			//printf("!!Sem WAKE!! ");
 			return 0;
 		}
 		//printf(" prev %d!! ", prev );
 
 		ATOMIC_ADD_AND_FETCH( &si->value, val ); // put back
 
-		//usleep(10000); // actually spinlock - TODO make me better!
-		sleep(1); // tmp for debug
+		usleep(100000); // actually spinlock - TODO make me better!
+		//sleep(1); // tmp for debug
 	}
 }
 

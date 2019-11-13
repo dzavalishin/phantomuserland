@@ -603,7 +603,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
   scr_r.ysize = scr_get_ysize();
 
 
-  printf("--upd--");
+  //printf("--upd--");
   /* Clip rectangle to the screen dimensions */
 
   //nxgl_rectintersect(&intersection, rect, &g_wholescreen);
