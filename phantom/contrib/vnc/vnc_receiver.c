@@ -319,19 +319,20 @@ int vnc_receive_one_message(FAR struct vnc_session_s *session)
                   gerr("ERROR: Failed to read PointerEvent message: %d\n",
                        ret);
                 }
-              /* REVISIT:  How will be get the NX handle? */
-
-              else if (session->mouseout != NULL)
+              else //if (session->mouseout != NULL)
                 {
                   struct rfb_pointerevent_s *event = (FAR struct rfb_pointerevent_s *)session->inbuf;
+
+                  int mousex = (nxgl_coord_t)rfb_getbe16(event->xpos);
+                  int mousey = CONFIG_VNCSERVER_SCREENHEIGHT - (nxgl_coord_t)rfb_getbe16(event->ypos) - 1;
 
                  /* Map buttons bitmap.  Bits 0-7 are buttons 1-8, 0=up,
                   * 1=down.  By convention Bit 0 = left button, Bit 1 =
                   * middle button, and Bit 2 = right button.
                   */
                   ginfo("Received PointerEvent %d/%d btn %x\n", 
-                    (nxgl_coord_t)rfb_getbe16(event->xpos), 
-                    (nxgl_coord_t)rfb_getbe16(event->ypos),
+                    mousex, 
+                    mousey,
                     event->buttons
                     );
 
@@ -351,7 +352,7 @@ int vnc_receive_one_message(FAR struct vnc_session_s *session)
                     {
                       buttons |= NX_MOUSE_RIGHTBUTTON;
                     }
-
+                  if (session->mouseout != NULL)
                   session->mouseout(session->arg,
                                     (nxgl_coord_t)rfb_getbe16(event->xpos),
                                     (nxgl_coord_t)rfb_getbe16(event->ypos),
@@ -500,11 +501,12 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
       printf("Got encoding %d\n", encoding);
 
       /* Only a limited support for of RRE is vailable now. */
-
+#if 0 // debug raw, turn on after
       if (encoding == RFB_ENCODING_RRE)
         {
           session->rre = true;
         }
+#endif        
     }
 
   session->change = true;

@@ -242,10 +242,16 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
 
   /* Source rectangle start address (left/top)*/
 
-  srcleft = (FAR lfb_color_t *)
-    (session->framebuf + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
+  int upside_row = ( CONFIG_VNCSERVER_SCREENHEIGHT - row - 1 );
+  //int upside_row = ( CONFIG_VNCSERVER_SCREENWIDTH - (row - height) - 1 );
+  //int upside_row = (height + row) - 1;
+  //int upside_row = (height + row) - 1;
 
-  const void *src_start = srcleft;
+  srcleft = (FAR lfb_color_t *)
+    //(session->framebuf + RFB_STRIDE * ( CONFIG_VNCSERVER_SCREENWIDTH - row - 1) + RFB_BYTESPERPIXEL * col);
+    (session->framebuf + RFB_STRIDE * upside_row + RFB_BYTESPERPIXEL * col);
+
+  //const void *src_start = srcleft;
 
   /* Transfer each row from the source buffer into the update buffer */
 
@@ -270,11 +276,13 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
           src++;
         }
 
-      srcleft = (FAR lfb_color_t *)((uintptr_t)srcleft + RFB_STRIDE);
+      srcleft = (FAR lfb_color_t *)((uintptr_t)srcleft - RFB_STRIDE);
+      //srcleft = (FAR lfb_color_t *)((uintptr_t)srcleft + RFB_STRIDE);
     }
 
   //return (size_t)((uintptr_t)srcleft - (uintptr_t)update->rect[0].data); // WHY??? compared pointers from src and dest??
-  return (size_t) ( ((void *)srcleft) - src_start);
+  //return (size_t) ( ((void *)srcleft) - src_start);
+  return (size_t) height * width * RFB_BYTESPERPIXEL;
 }
 
 /****************************************************************************

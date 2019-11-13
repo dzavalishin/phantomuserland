@@ -9,13 +9,13 @@
 //#define DRV_VIDEO_FORWARD_LINESTART(ypos) ( (video_drv->xsize * ypos) * bit_mover_byte_step + video_drv->screen)
 
 
-#define DRV_VIDEO_REVERSE_LINESTART(ypos) \
+#define DRV_VIDEO_REVERSE_LINESTART(__ypos) \
     ( bit_mover_byte_step ? \
-      ( (video_drv->xsize * ((video_drv->ysize-1) - ypos) ) * bit_mover_byte_step + video_drv->screen ) \
+      ( (video_drv->xsize * ((video_drv->ysize-1) - (__ypos)) ) * bit_mover_byte_step + video_drv->screen ) \
       : \
-      ( (video_drv->xsize * ((video_drv->ysize-1) - ypos) ) / 4 + video_drv->screen ) \
+      ( (video_drv->xsize * ((video_drv->ysize-1) - (__ypos)) ) / 4 + video_drv->screen ) \
     )
-#define DRV_VIDEO_FORWARD_LINESTART(ypos) ( (video_drv->xsize * ypos) * bit_mover_byte_step + video_drv->screen)
+#define DRV_VIDEO_FORWARD_LINESTART(__ypos) ( (video_drv->xsize * (__ypos)) * bit_mover_byte_step + video_drv->screen)
 
 /*
 extern void (*bit_zbmover_to_screen)( void *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos );
