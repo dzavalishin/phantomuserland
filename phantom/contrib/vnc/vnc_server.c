@@ -148,13 +148,13 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
   //nxsem_reset(&session->freesem, CONFIG_VNCSERVER_NUPDATES);
   //nxsem_reset(&session->queuesem, 0);
   hal_sem_zero( &session->queuesem );
-
+#if 0
   {
     int i;
     for( i = 0; i < CONFIG_VNCSERVER_NUPDATES; i++ )
       hal_sem_release( &session->freesem );
   }
-
+#endif
   session->framebuf= fb;
   session->display = display;
   session->state   = VNCSERVER_INITIALIZED;
@@ -164,6 +164,11 @@ static void vnc_reset_session(FAR struct vnc_session_s *session,
   /* Careful not to disturb the keyboard/mouse callouts set by
    * vnc_fbinitialize().  Client related data left in garbage state.
    */
+
+  // [dz] if client sent no pixelformat msg
+  session->colorfmt  = FB_FMT_RGB32;
+  session->bpp       = 32;
+  session->bigendian = 0; // ?
 }
 
 /****************************************************************************
@@ -323,7 +328,7 @@ void vnc_server( void *fb )
     }
 
   g_vnc_sessions[display] = session;
-  nxsem_init(&session->freesem, 0, CONFIG_VNCSERVER_NUPDATES);
+  //nxsem_init(&session->freesem, 0, CONFIG_VNCSERVER_NUPDATES);
   nxsem_init(&session->queuesem, 0, 0);
 
   /* Inform any waiter that we have started */

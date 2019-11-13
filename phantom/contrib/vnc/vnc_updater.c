@@ -208,6 +208,10 @@ static FAR struct vnc_fbupdate_s *
 vnc_alloc_update(FAR struct vnc_session_s *session)
 {
   FAR struct vnc_fbupdate_s *update;
+
+  #if 1
+    update = calloc( 1, sizeof( struct vnc_fbupdate_s ) );
+  #else
   int ret;
 
   /* Reserve one element from the free list.  Lock the scheduler to assure
@@ -238,7 +242,7 @@ vnc_alloc_update(FAR struct vnc_session_s *session)
 
   vnc_sem_debug(session, "After alloc", 1);
   sched_unlock();
-
+#endif
   DEBUGASSERT(update != NULL);
   return update;
 }
@@ -263,7 +267,9 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
   /* Reserve one element from the free list.  Lock the scheduler to assure
    * that the sq_addlast() and the nxsem_post() are atomic.
    */
-
+#if 1
+  free(update);
+#else
   sched_lock();
   vnc_sem_debug(session, "Before free", 1);
 
@@ -279,6 +285,7 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
   //DEBUGASSERT(session->freesem.semcount <= CONFIG_VNCSERVER_NUPDATES);
 
   sched_unlock();
+#endif  
 }
 
 /****************************************************************************
@@ -682,12 +689,14 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
           rect_copy(&update->rect, &intersection);
 
           /* Add the update to the end of the update queue. */
+          sched_unlock();
 
           vnc_add_queue(session, update);
 
           updinfo("Queued {(%d, %d),(%d, %d)}\n",
                   intersection.x, intersection.y,
                   intersection.xsize, intersection.ysize);
+          return OK;
         }
 
       sched_unlock();

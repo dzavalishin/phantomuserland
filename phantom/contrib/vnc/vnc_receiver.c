@@ -211,7 +211,7 @@ int vnc_receive_one_message(FAR struct vnc_session_s *session)
                   nencodings = rfb_getbe16(encodings->nencodings);
 
                   ret = vnc_read_remainder(session,
-                                           (nencodings-0) * sizeof(uint32_t), // one encoding is what we already got above
+                                           (nencodings-0) * sizeof(uint32_t), // one encoding is what we already got above - NO??! Seems that nencodings is already -1
                                            SIZEOF_RFB_SETENCODINGS_S(0));
                                            //SIZEOF_RFB_SERVERINIT_S(0));
                   if (ret < 0)

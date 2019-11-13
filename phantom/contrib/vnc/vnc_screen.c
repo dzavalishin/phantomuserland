@@ -112,7 +112,7 @@ void pvm_vnc_init_funcs( void )
 
     //init_ok = 1;
     switch_screen_bitblt_to_32bpp( 1 );
-
+    scr_zbuf_init();
 
     //win_scr_event_loop();
 }

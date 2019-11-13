@@ -264,7 +264,7 @@ int vnc_negotiate( struct vnc_session_s *session )
   ssize_t nsent;
   ssize_t nrecvd;
   size_t len;
-  int ret;
+  //int ret;
 
 #ifdef CONFIG_NET_SOCKOPTS
   struct timeval tv;

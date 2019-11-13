@@ -164,7 +164,8 @@
 #endif
 
 #ifndef CONFIG_VNCSERVER_UPDATE_BUFSIZE
-#  define CONFIG_VNCSERVER_UPDATE_BUFSIZE 4096
+//#  define CONFIG_VNCSERVER_UPDATE_BUFSIZE 4096
+#  define CONFIG_VNCSERVER_UPDATE_BUFSIZE 1024*1024*4
 #endif
 
 #define VNCSERVER_UPDATE_BUFSIZE \
@@ -289,7 +290,7 @@ struct vnc_session_s
   struct vnc_fbupdate_s updpool[CONFIG_VNCSERVER_NUPDATES];
   sq_queue_t updfree;
   sq_queue_t updqueue;
-  hal_sem_t freesem;
+  //hal_sem_t freesem;
   hal_sem_t queuesem;
 
   /* I/O buffers for misc network send/receive */

@@ -245,6 +245,8 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
   srcleft = (FAR lfb_color_t *)
     (session->framebuf + RFB_STRIDE * row + RFB_BYTESPERPIXEL * col);
 
+  const void *src_start = srcleft;
+
   /* Transfer each row from the source buffer into the update buffer */
 
   bigendian = session->bigendian;
@@ -271,7 +273,8 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
       srcleft = (FAR lfb_color_t *)((uintptr_t)srcleft + RFB_STRIDE);
     }
 
-  return (size_t)((uintptr_t)srcleft - (uintptr_t)update->rect[0].data);
+  //return (size_t)((uintptr_t)srcleft - (uintptr_t)update->rect[0].data); // WHY??? compared pointers from src and dest??
+  return (size_t) ( ((void *)srcleft) - src_start);
 }
 
 /****************************************************************************
