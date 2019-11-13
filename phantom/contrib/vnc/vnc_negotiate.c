@@ -83,6 +83,151 @@ static const char g_nosecurity[] = "No security types are supported";
 static const char g_vncname[] = CONFIG_VNCSERVER_NAME;
 
 /****************************************************************************
+ * Process one answer to our messages. Detect type by first byte.
+ ****************************************************************************/
+# if 0
+static int vnc_recv_fixed(struct vnc_session_s *session, void *ptr, size_t size)
+{
+  ginfo("Receive fixed %d\n", size);
+
+  ssize_t nrecvd = psock_recv(session->connect, ptr, size, 0);
+  if (nrecvd < 0)
+    {
+      gerr("ERROR: Receive answer fixed failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
+    }
+  else if (nrecvd == 0)
+    {
+      gwarn("WARNING: Connection closed\n");
+      return -ECONNABORTED;
+    }
+  else if (nrecvd != size)
+    {
+      gerr("ERROR: wrong fixed size: %d, expect %d\n", (int)nrecvd, size);
+      return -EPROTO;
+    }
+
+    return 0;
+}
+
+
+
+static int vnc_recv_rest(struct vnc_session_s *session, size_t size)
+{
+  ginfo("Receive rest %d\n", size);
+
+  // One byte is already there
+  size--;
+# if 1
+  return vnc_recv_fixed(session, session->inbuf + 1, size);
+#else
+  ssize_t nrecvd = psock_recv(session->connect, session->inbuf + 1, size, 0);
+  if (nrecvd < 0)
+    {
+      gerr("ERROR: Receive answer rest failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
+    }
+  else if (nrecvd == 0)
+    {
+      gwarn("WARNING: Connection closed\n");
+      return -ECONNABORTED;
+    }
+  else if (nrecvd != size)
+    {
+      gerr("ERROR: wrong rest size: %d, expect %d\n", (int)nrecvd, size);
+      return -EPROTO;
+    }
+
+    return 0;
+#endif    
+}
+
+
+static int vnc_recv_setpixelfmt(struct vnc_session_s *session)
+{
+  int rc = vnc_recv_rest( session, sizeof(struct rfb_setpixelformat_s) );
+  if( rc ) return rc;
+
+  struct rfb_setpixelformat_s *setformat;
+  setformat = (FAR struct rfb_setpixelformat_s *)session->inbuf;
+
+  rc = vnc_client_pixelformat(session, &setformat->format);
+  if (rc < 0)
+    {
+      /* We do not support this pixel format */
+      gerr("ERROR: PixelFormat not supported\n");
+    }
+  return rc;
+}
+
+
+
+static int vnc_recv_setencoding(struct vnc_session_s *session)
+{
+  //int rc = vnc_recv_rest( session, sizeof(struct rfb_setencodings_s) );
+  int rc = vnc_recv_fixed(session, session->inbuf + 1, 3);
+  if( rc ) return rc;
+
+  // Actual answer is var size. We read header part only - 3 bytes, padding and n encodings
+  struct rfb_setencodings_s *ehead = (struct rfb_setencodings_s *)session->inbuf;;
+
+  int n_encodings = /*f..ing byte order, hope it is <256 */ ehead->nencodings[0] + ehead->nencodings[1];
+
+  printf("Got %d encodings\n", n_encodings );
+
+  while( n_encodings > 0 )
+  {
+    char buf[4]; // enc is 4 bytes
+    rc = vnc_recv_fixed(session, buf, sizeof buf);
+    if( rc ) return rc;
+
+
+  }
+
+}
+
+
+static int vnc_process_answer(struct vnc_session_s *session)
+{
+  /* We now expect to receive the SetPixelFormat message from the client.
+   * This may override some of our framebuffer settings.
+   */
+  //ginfo("Receive SetPixelFormat\n");
+  ginfo("Receive answer\n");
+
+
+  ssize_t nrecvd = psock_recv(session->connect, session->inbuf, 1, 0);
+  if (nrecvd < 0)
+    {
+      gerr("ERROR: Receive answer failed: %d\n", (int)nrecvd);
+      return (int)nrecvd;
+    }
+  else if (nrecvd == 0)
+    {
+      gwarn("WARNING: Connection closed\n");
+      return -ECONNABORTED;
+    }
+  else if (nrecvd != 1)
+    {
+      gerr("ERROR: wrong size: %d, expect 1\n", (int)nrecvd);
+      return -EPROTO;
+    }
+
+  // Got message type in first byte, choose
+
+  size_t req_size = 0;
+  switch( session->inbuf[0] )
+  {
+    case RFB_SETPIXELFMT_MSG:     return vnc_recv_setpixelfmt(session);
+    case RFB_SETENCODINGS_MSG:    return vnc_recv_setencoding(session);
+    default:
+      printf("Unknown VNC MSG %d", session->inbuf[0]);
+      return -ENOPROTOOPT; // Why?
+  }
+
+}
+#endif
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -102,7 +247,7 @@ static const char g_vncname[] = CONFIG_VNCSERVER_NAME;
  *
  ****************************************************************************/
 
-int vnc_negotiate(FAR struct vnc_session_s *session)
+int vnc_negotiate( struct vnc_session_s *session )
 {
 #ifdef CONFIG_VNCSERVER_PROTO3p3
   FAR struct rfb_sectype_s *sectype;
@@ -114,8 +259,8 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 #endif
   FAR struct rfb_serverinit_s *serverinit;
   FAR struct rfb_pixelfmt_s *pixelfmt;
-  FAR struct rfb_setpixelformat_s *setformat;
-  FAR struct rfb_setencodings_s *encodings;
+  //FAR struct rfb_setpixelformat_s *setformat;
+  //FAR struct rfb_setencodings_s *encodings;
   ssize_t nsent;
   ssize_t nrecvd;
   size_t len;
@@ -131,7 +276,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   tv.tv_sec  = 5;
   tv.tv_usec = 0;
 
-  ret = psock_setsockopt(&session->connect, SOL_SOCKET, SO_RCVTIMEO,
+  ret = psock_setsockopt(session->connect, SOL_SOCKET, SO_RCVTIMEO,
                          &tv, sizeof(struct timeval));
   if (ret < 0)
     {
@@ -145,7 +290,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   ginfo("Send protocol version: %s\n", g_vncproto);
 
   len = strlen(g_vncproto);
-  nsent = psock_send(&session->connect, g_vncproto, len, 0);
+  nsent = psock_send(session->connect, g_vncproto, len, 0);
   if (nsent < 0)
     {
       gerr("ERROR: Send ProtocolVersion failed: %d\n", (int)nsent);
@@ -158,7 +303,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   ginfo("Receive echo from VNC client\n");
 
-  nrecvd = psock_recv(&session->connect, session->inbuf, len, 0);
+  nrecvd = psock_recv(session->connect, session->inbuf, len, 0);
   if (nrecvd < 0)
     {
       gerr("ERROR: Receive protocol confirmation failed: %d\n", (int)nrecvd);
@@ -183,7 +328,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   sectype = (FAR struct rfb_sectype_s *)session->outbuf;
   rfb_putbe32(sectype->type, RFB_SECTYPE_NONE);
 
-  nsent = psock_send(&session->connect, sectype,
+  nsent = psock_send(session->connect, sectype,
                      sizeof(struct rfb_sectype_s), 0);
   if (nsent < 0)
     {
@@ -204,7 +349,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   sectypes->ntypes = 1;
   sectypes->type[0] = RFB_SECTYPE_NONE;
 
-  nsent = psock_send(&session->connect, sectypes,
+  nsent = psock_send&session->connect, sectypes,
                      SIZEOF_RFB_SUPPORTED_SECTYPES_S(1), 0);
   if (nsent < 0)
     {
@@ -223,7 +368,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   sectype = (FAR struct rfb_selected_sectype_s *)session->inbuf;
 
-  nrecvd = psock_recv(&session->connect, sectype,
+  nrecvd = psock_recv(session->connect, sectype,
                       sizeof(struct rfb_selected_sectype_s), 0);
   if (nrecvd < 0)
     {
@@ -250,7 +395,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
       rfb_putbe32(secresult->result, RFB_SECTYPE_FAIL);
 
-      nsent = psock_send(&session->connect, secresult,
+      nsent = psock_send(session->connect, secresult,
                          sizeof(struct rfb_sectype_result_s), 0);
       if (nsent < 0)
         {
@@ -267,7 +412,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       rfb_putbe32(secfail->len, len);
       memcpy(secfail->str, g_nosecurity, len);
 
-      nsent = psock_send(&session->connect, secfail,
+      nsent = psock_send(session->connect, secfail,
                          SIZEOF_RFB_SECTYPE_FAIL_S(len), 0);
       if (nsent < 0)
         {
@@ -281,7 +426,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   rfb_putbe32(secresult->result, RFB_SECTYPE_SUCCESS);
 
-  nsent = psock_send(&session->connect, secresult,
+  nsent = psock_send(session->connect, secresult,
                      sizeof(struct rfb_sectype_result_s), 0);
   if (nsent < 0)
     {
@@ -304,7 +449,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   ginfo("Receive ClientInit\n");
 
-  nrecvd = psock_recv(&session->connect, session->inbuf,
+  nrecvd = psock_recv(session->connect, session->inbuf,
                       sizeof(struct rfb_clientinit_s), 0);
   if (nrecvd < 0)
     {
@@ -358,7 +503,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   rfb_putbe32(serverinit->namelen, len);
   memcpy(serverinit->name, g_vncname, len);
 
-  nsent = psock_send(&session->connect, serverinit,
+  nsent = psock_send(session->connect, serverinit,
                      SIZEOF_RFB_SERVERINIT_S(len), 0);
   if (nsent < 0)
     {
@@ -368,15 +513,15 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
 
   DEBUGASSERT(nsent == SIZEOF_RFB_SERVERINIT_S(len));
 
+  //ginfo("Receive SetPixelFormat\n");
+#if 0
   /* We now expect to receive the SetPixelFormat message from the client.
    * This may override some of our framebuffer settings.
    */
 
-  ginfo("Receive SetPixelFormat\n");
-
   setformat = (FAR struct rfb_setpixelformat_s *)session->inbuf;
 
-  nrecvd = psock_recv(&session->connect, setformat,
+  nrecvd = psock_recv(session->connect, setformat,
                       sizeof(struct rfb_setpixelformat_s), 0);
   if (nrecvd < 0)
     {
@@ -397,6 +542,7 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
     }
   else if (setformat->msgtype != RFB_SETPIXELFMT_MSG)
     {
+      //if(setformat->msgtype == RFB_SETENCODINGS_MSG) goto pix_format_again; // TODO HACK, parse too!
       gerr("ERROR: Not a SetPixelFormat message: %d\n",
            (int)setformat->msgtype);
       return -EPROTO;
@@ -414,14 +560,20 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
       gerr("ERROR: PixelFormat not supported\n");
       return ret;
     }
+#else
+  //vnc_process_answer(session);
+  //ret = vnc_receive_one_message(session);
+  //if( ret ) return ret;
+#endif
 
+  //ginfo("Receive encoding types\n");
+#if 0
   /* Receive supported encoding types from client. */
 
-  ginfo("Receive encoding types\n");
 
   encodings = (FAR struct rfb_setencodings_s *)session->inbuf;
 
-  nrecvd = psock_recv(&session->connect, encodings,
+  nrecvd = psock_recv(session->connect, encodings,
                       CONFIG_VNCSERVER_INBUFFER_SIZE, 0);
   if (nrecvd < 0)
     {
@@ -447,6 +599,13 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
           return ret;
         }
     }
+#else
+  //vnc_process_answer(session);
+  //ret = vnc_receive_one_message(session);
+  //if( ret ) return ret;
+#endif
+
+  ginfo("Negotiated\n");
 
   session->state = VNCSERVER_CONFIGURED;
   return OK;

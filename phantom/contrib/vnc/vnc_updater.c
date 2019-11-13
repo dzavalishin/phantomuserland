@@ -309,9 +309,9 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
    * while we wait.
    */
 
-  sched_lock();
+  //sched_lock();
   vnc_sem_debug(session, "Before remove", 0);
-
+again:
   do
     {
       /* Take the semaphore (perhaps waiting) */
@@ -327,9 +327,15 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
   while (ret == -EINTR);
 
   /* It is reserved.. go get it */
-
+  sched_lock();
   rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
 
+  /// TODO hack
+  if( rect == 0 ) 
+  {
+    sched_unlock();
+    goto again;
+  }
   vnc_sem_debug(session, "After remove", 0);
   DEBUGASSERT(rect != NULL);
 
@@ -590,6 +596,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
   scr_r.ysize = scr_get_ysize();
 
 
+  printf("--upd--");
   /* Clip rectangle to the screen dimensions */
 
   //nxgl_rectintersect(&intersection, rect, &g_wholescreen);

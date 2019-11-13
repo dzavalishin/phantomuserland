@@ -97,7 +97,7 @@ class shell extends .phantom.runnable
         stat = new .internal.stat();
 
 		test_app = new .test.test_mutex.test_mutex();
-		test_app.start();
+		//test_app.start(); // temp off to debug VNC
 
         demo = new .ru.dz.demo.start();
         demo.run(console);

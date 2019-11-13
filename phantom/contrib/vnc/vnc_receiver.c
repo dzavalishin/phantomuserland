@@ -103,7 +103,7 @@ int vnc_read_remainder(FAR struct vnc_session_s *session, size_t msglen,
     {
       /* Receive more of the message */
 
-      nrecvd = psock_recv(&session->connect, &session->inbuf[offset],
+      nrecvd = psock_recv(session->connect, &session->inbuf[offset],
                           msglen - ntotal, 0);
       if (nrecvd < 0)
         {
@@ -118,58 +118,16 @@ int vnc_read_remainder(FAR struct vnc_session_s *session, size_t msglen,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: vnc_receiver
- *
- * Description:
- *   This function handles all Client-to-Server messages.
- *
- * Input Parameters:
- *   session - An instance of the session structure.
- *
- * Returned Value:
- *   At present, always returns OK
- *
- ****************************************************************************/
-
-int vnc_receiver(FAR struct vnc_session_s *session)
+int vnc_receive_one_message(FAR struct vnc_session_s *session)
 {
-#ifdef CONFIG_NET_SOCKOPTS
-  struct timeval tv;
-#endif
   ssize_t nrecvd;
   int ret;
-
-  DEBUGASSERT(session);
-  ginfo("Receiver running for Display %d\n", session->display);
-
-#ifdef CONFIG_NET_SOCKOPTS
-  /* Disable the receive timeout so that we will wait indefinitely for the
-   * next Client-to-Server message.
-   */
-
-  tv.tv_sec  = 0;
-  tv.tv_usec = 0;
-  ret = psock_setsockopt(&session->connect, SOL_SOCKET, SO_RCVTIMEO,
-                         &tv, sizeof(struct timeval));
-  if (ret < 0)
-    {
-      gerr("ERROR: Failed to disable receive timeout: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  /* Loop until the client disconnects or an unhandled error occurs */
-
-  for (; ; )
-    {
       /* Set up to read one byte which should be the message type of the
        * next Client-to-Server message.  We will block here until the message
        * is received.
        */
 
-      nrecvd = psock_recv(&session->connect, session->inbuf, 1, 0);
+      nrecvd = psock_recv(session->connect, session->inbuf, 1, 0);
       if (nrecvd < 0)
         {
           gerr("ERROR: Receive byte failed: %d\n", (int)nrecvd);
@@ -237,7 +195,8 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                */
 
               ret = vnc_read_remainder(session,
-                                       SIZEOF_RFB_SERVERINIT_S(0) - 1,
+                                       //SIZEOF_RFB_SERVERINIT_S(0) - 1,
+                                       SIZEOF_RFB_SETENCODINGS_S(0) - 1,
                                        1);
               if (ret < 0)
                 {
@@ -252,8 +211,9 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   nencodings = rfb_getbe16(encodings->nencodings);
 
                   ret = vnc_read_remainder(session,
-                                           nencodings * sizeof(uint32_t),
-                                           SIZEOF_RFB_SERVERINIT_S(0));
+                                           (nencodings-0) * sizeof(uint32_t), // one encoding is what we already got above
+                                           SIZEOF_RFB_SETENCODINGS_S(0));
+                                           //SIZEOF_RFB_SERVERINIT_S(0));
                   if (ret < 0)
                     {
                       gerr("ERROR: Failed to read encodings: %d\n",
@@ -318,8 +278,6 @@ int vnc_receiver(FAR struct vnc_session_s *session)
             {
               FAR struct rfb_keyevent_s *keyevent;
 
-              ginfo("Received KeyEvent\n");
-
               /* Read the rest of the KeyEvent message */
 
               ret = vnc_read_remainder(session,
@@ -335,6 +293,9 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   /* Inject the key press/release event into NX */
 
                   keyevent = (FAR struct rfb_keyevent_s *)session->inbuf;
+                  int key = rfb_getbe16(keyevent->key);
+                  ginfo("Received KeyEvent %x '%c'\n", key, key );
+
                   vnc_key_map(session, rfb_getbe16(keyevent->key),
                               (bool)keyevent->down);
                 }
@@ -347,7 +308,6 @@ int vnc_receiver(FAR struct vnc_session_s *session)
               FAR struct rfb_pointerevent_s *event;
               uint8_t buttons;
 #endif
-              ginfo("Received PointerEvent\n");
 
               /* Read the rest of the PointerEvent message */
 
@@ -359,18 +319,23 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   gerr("ERROR: Failed to read PointerEvent message: %d\n",
                        ret);
                 }
-#ifdef CONFIG_NX_XYINPUT
               /* REVISIT:  How will be get the NX handle? */
 
               else if (session->mouseout != NULL)
                 {
-                  event = (FAR struct rfb_pointerevent_s *)session->inbuf;
+                  struct rfb_pointerevent_s *event = (FAR struct rfb_pointerevent_s *)session->inbuf;
 
                  /* Map buttons bitmap.  Bits 0-7 are buttons 1-8, 0=up,
                   * 1=down.  By convention Bit 0 = left button, Bit 1 =
                   * middle button, and Bit 2 = right button.
                   */
+                  ginfo("Received PointerEvent %d/%d btn %x\n", 
+                    (nxgl_coord_t)rfb_getbe16(event->xpos), 
+                    (nxgl_coord_t)rfb_getbe16(event->ypos),
+                    event->buttons
+                    );
 
+#ifdef CONFIG_NX_XYINPUT
                   buttons = 0;
                   if ((event->buttons & (1 << 0)) != 0)
                     {
@@ -391,8 +356,8 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                                     (nxgl_coord_t)rfb_getbe16(event->xpos),
                                     (nxgl_coord_t)rfb_getbe16(event->ypos),
                                     buttons);
-                }
 #endif
+                }
             }
             break;
 
@@ -441,8 +406,56 @@ int vnc_receiver(FAR struct vnc_session_s *session)
             gerr("ERROR: Unsynchronized, msgtype=%d\n", session->inbuf[0]);
             return -EPROTO;
         }
-    }
+  return 0;
+}
+/****************************************************************************
+ * Name: vnc_receiver
+ *
+ * Description:
+ *   This function handles all Client-to-Server messages.
+ *
+ * Input Parameters:
+ *   session - An instance of the session structure.
+ *
+ * Returned Value:
+ *   At present, always returns OK
+ *
+ ****************************************************************************/
 
+int vnc_receiver(FAR struct vnc_session_s *session)
+{
+#ifdef CONFIG_NET_SOCKOPTS
+  struct timeval tv;
+#endif
+  //ssize_t nrecvd;
+  //int ret;
+
+  DEBUGASSERT(session);
+  ginfo("Receiver running for Display %d\n", session->display);
+
+#ifdef CONFIG_NET_SOCKOPTS
+  /* Disable the receive timeout so that we will wait indefinitely for the
+   * next Client-to-Server message.
+   */
+
+  tv.tv_sec  = 0;
+  tv.tv_usec = 0;
+  ret = psock_setsockopt(session->connect, SOL_SOCKET, SO_RCVTIMEO,
+                         &tv, sizeof(struct timeval));
+  if (ret < 0)
+    {
+      gerr("ERROR: Failed to disable receive timeout: %d\n", ret);
+      return ret;
+    }
+#endif
+
+  /* Loop until the client disconnects or an unhandled error occurs */
+
+  for (; ; )
+  {
+    int rc = vnc_receive_one_message(session);
+    if( rc ) return rc;
+  }
   return -ENOSYS;
 }
 
@@ -483,6 +496,8 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
       /* Get the next encoding */
 
       encoding = rfb_getbe32(&encodings->encodings[i << 2]);
+
+      printf("Got encoding %d\n", encoding);
 
       /* Only a limited support for of RRE is vailable now. */
 
