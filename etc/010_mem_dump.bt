@@ -1,0 +1,43 @@
+//------------------------------------------------
+//--- 010 Editor v9.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: Phantom mem dump (last_snap.data)
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct allocHeader
+{
+    int32 marker;
+    int32 refCount;
+    char alloc_flags;
+    char gc_flags;
+    char fill[2];
+    int32 objectSize;
+};
+
+
+struct pvm_object_storage
+{
+    struct allocHeader ah;
+
+    //struct pvm_object_storage *         _class;
+    //struct pvm_object_storage *         _satellites; // Points to chain of objects related to this one
+
+    int32 classPtr;
+    int32 satPtr;
+
+    int32                           _flags; 
+    unsigned int                    _da_size; // in bytes!
+
+    //struct pvm_object_storage *         da[_da_size/4];
+    int32         da[_da_size/4];
+};
+
+
+struct pvm_object_storage o;
