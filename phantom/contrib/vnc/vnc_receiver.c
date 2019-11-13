@@ -41,6 +41,7 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <event.h>
 
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
 #  undef  CONFIG_DEBUG_ERROR
@@ -336,28 +337,17 @@ int vnc_receive_one_message(FAR struct vnc_session_s *session)
                     event->buttons
                     );
 
-#ifdef CONFIG_NX_XYINPUT
-                  buttons = 0;
-                  if ((event->buttons & (1 << 0)) != 0)
-                    {
-                      buttons |= NX_MOUSE_LEFTBUTTON;
-                    }
 
-                  if ((event->buttons & (1 << 1)) != 0)
-                    {
-                      buttons |= NX_MOUSE_CENTERBUTTON;
-                    }
+                  int buttons = 0;
+                  if ((event->buttons & (1 << 0)) != 0) buttons |= 1 << 0;
+                  if ((event->buttons & (1 << 1)) != 0) buttons |= 1 << 2;
+                  if ((event->buttons & (1 << 2)) != 0) buttons |= 1 << 1;
 
-                  if ((event->buttons & (1 << 2)) != 0)
-                    {
-                      buttons |= NX_MOUSE_RIGHTBUTTON;
-                    }
+                  ev_update_mouse(mousex, mousey, buttons);
+
                   if (session->mouseout != NULL)
-                  session->mouseout(session->arg,
-                                    (nxgl_coord_t)rfb_getbe16(event->xpos),
-                                    (nxgl_coord_t)rfb_getbe16(event->ypos),
-                                    buttons);
-#endif
+                    session->mouseout(session->arg, mousex, mousey, buttons);
+
                 }
             }
             break;

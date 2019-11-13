@@ -388,6 +388,9 @@ handle_mouse(struct mouseevent *data)
     x += data->x;
     y -= data->y;
 
+#if 1
+    ev_update_mouse( x, y, data->buttons );
+#else
     struct ui_event e;
     ev_make_mouse_event( &e, x, y, data->buttons );
 
@@ -398,7 +401,7 @@ handle_mouse(struct mouseevent *data)
         video_drv->mouse_redraw_cursor();
 
     ev_q_put_any( &e );
-
+#endif
 #if 0
     s8 x = data->x, y = -data->y;
     u8 flag = ((data->buttons & 0x7) | (1<<3)

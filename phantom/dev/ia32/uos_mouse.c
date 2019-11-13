@@ -351,6 +351,9 @@ mouse_ps2_task(void)
 
         LOG_FLOW( 2, "send evnt, x %d, y %d,buttons %x", state_xpos, state_ypos, ps2m_buttons );
 
+#if 1
+        ev_update_mouse( state_xpos, state_ypos, ps2m_buttons );
+#else
         struct ui_event e;
         ev_make_mouse_event( &e, state_xpos, state_ypos, ps2m_buttons );
 
@@ -364,6 +367,7 @@ mouse_ps2_task(void)
         } */
 
         ev_q_put_any( &e );
+#endif        
 #endif
 
     }

@@ -16,11 +16,13 @@
 #define debug_level_info 10
 
 
+#include <event.h>
 
 #include "ev_private.h"
 
 #include <dev/key_event.h>
 
+#include <video/screen.h>
 
 
 void w_set_focused( window_handle_t toFocus )
@@ -122,6 +124,25 @@ void ev_q_put_mouse( int x, int y, int buttons )
     ev_put_event(e);
 }
 */
+
+//! Put mouse event onto the main e q
+void ev_update_mouse( int x, int y, int buttons )
+{
+    struct ui_event e;
+    ev_make_mouse_event( &e, x, y, buttons );
+
+    if(video_drv)
+    {
+        video_drv->mouse_x = x;
+        video_drv->mouse_y = y;
+
+        if(video_drv->mouse_redraw_cursor != NULL)
+            video_drv->mouse_redraw_cursor();
+    }
+
+    ev_q_put_any( &e );
+}
+
 
 #if NEW_WINDOWS
 

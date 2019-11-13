@@ -180,8 +180,12 @@ typedef struct ui_event ui_event_t;
 //! Construct mouse event
 void ev_make_mouse_event( struct ui_event *e, int x, int y, int buttons );
 
+//! Construct mouse event and update inscreen cursor
+void ev_update_mouse( int x, int y, int buttons );
+
+
 //! Put mouse event onto the main e q
-void ev_q_put_mouse( int x, int y, int buttons );
+//void ev_q_put_mouse( int x, int y, int buttons );
 
 //! Put key event onto the main e q
 void ev_q_put_key( int vkey, int ch, int modifiers );
