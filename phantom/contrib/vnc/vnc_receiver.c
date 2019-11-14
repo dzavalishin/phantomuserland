@@ -43,6 +43,8 @@
 #include <errno.h>
 #include <event.h>
 
+#include <video/screen.h>
+
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
 #  undef  CONFIG_DEBUG_ERROR
 #  undef  CONFIG_DEBUG_WARN
@@ -142,7 +144,8 @@ int vnc_receive_one_message(FAR struct vnc_session_s *session)
       else if (nrecvd == 0)
         {
           gwarn("WARNING: Connection closed\n");
-          return OK;
+          //return OK;
+          return EAGAIN;
         }
 
       DEBUGASSERT(nrecvd == 1);
@@ -257,14 +260,16 @@ int vnc_receive_one_message(FAR struct vnc_session_s *session)
 
                   update = (FAR struct rfb_fbupdatereq_s *)session->inbuf;
 
-                  //rect.pt1.x = rfb_getbe16(update->xpos);
-                  //rect.pt1.y = rfb_getbe16(update->ypos);
-                  //rect.pt2.x = rect.pt1.x + rfb_getbe16(update->width);
-                  //rect.pt2.y = rect.pt1.y + rfb_getbe16(update->height);
                   rect.x = rfb_getbe16(update->xpos);
                   rect.y = rfb_getbe16(update->ypos);
+                  //rect.y = Y_HOST_TO_PHANTOM( rfb_getbe16(update->ypos) );
                   rect.xsize = rfb_getbe16(update->width);
                   rect.ysize = rfb_getbe16(update->height);
+
+                  //rect_dump( &rect );
+                  printf("FramebufferUpdateRequest {(%d, %d),(%d, %d)}\n",
+                    rect.x, rect.y,
+                    rect.xsize, rect.ysize);
 
                   ret = vnc_update_rectangle(session, &rect, false);
                   if (ret < 0)
@@ -440,7 +445,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
   for (; ; )
   {
     int rc = vnc_receive_one_message(session);
-    if( rc ) return rc;
+    if( rc ) return (rc == EAGAIN)? OK : rc;
   }
   return -ENOSYS;
 }
@@ -498,30 +503,3 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
   return OK;
 }
 
-/****************************************************************************
- * Name: vnc_mouse
- *
- * Description:
- *   This is the default keyboard/mouse callout function.  This is simply a
- *   wrapper around nx_mousein().  When
- *   configured using vnc_fbinitialize(), the 'arg' must be the correct
- *   NXHANDLE value.
- *
- * Input Parameters:
- *   See vnc_mouseout_t and vnc_kbdout_t typde definitions above.  These
- *   callouts have arguments that match the inputs to nx_kbdin() and
- *   nx_mousein() (if arg is really of type NXHANDLE).
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NX_XYINPUT
-void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
-                  uint8_t buttons)
-{
-  DEBUGASSERT(arg != NULL);
-  (void)nx_mousein((NXHANDLE)arg, x, y, buttons);
-}
-#endif

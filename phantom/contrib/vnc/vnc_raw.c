@@ -43,6 +43,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <video/screen.h>
+
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
 #  undef  CONFIG_DEBUG_ERROR
 #  undef  CONFIG_DEBUG_WARN
@@ -478,6 +480,7 @@ int vnc_raw(FAR struct vnc_session_s *session, rect_t *rect)
 
           rfb_putbe16(update->rect[0].xpos, x);
           rfb_putbe16(update->rect[0].ypos, y);
+          //rfb_putbe16(update->rect[0].ypos, Y_PHANTOM_TO_HOST( y ));
           rfb_putbe16(update->rect[0].width, updwidth);
           rfb_putbe16(update->rect[0].height, updheight);
           rfb_putbe32(update->rect[0].encoding, RFB_ENCODING_RAW);
@@ -516,8 +519,8 @@ int vnc_raw(FAR struct vnc_session_s *session, rect_t *rect)
                 }
               while (size > 0);
 
-              updinfo("Sent {(%d, %d),(%d, %d)}\n",
-                      x, y, x + updwidth -1, y + updheight - 1);
+              //updinfo("Sent {(%d, %d),(%d, %d)}\n",                      x, y, x + updwidth -1, y + updheight - 1);
+              updinfo("Sent {(%d, %d),(%d, %d)}\n",                      x, y, updwidth, updheight );
             }
         }
     }

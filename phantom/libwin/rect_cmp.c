@@ -2,9 +2,9 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
- * Windowing system helpers.
+ * Windowing system helpers: rectangle operations.
  *
  *
 **/
@@ -13,12 +13,10 @@
 #include <assert.h>
 #include <phantom_libc.h>
 #include <event.h>
-//#include <spinlock.h>
 
-//#include <video/internal.h>
 #include <video/window.h>
-
-//#include "win_local.h"
+#include <video/screen.h>
+#include <video/rect.h>
 
 // min/max
 #include <sys/libkern.h>
@@ -292,10 +290,30 @@ checky:
     return 0;
 */
 }
+/* meaningless. coordinates are the same. that is framebuffer addres that is differs
+//! Convert coordinates from Phantom to traditional 
+int rect_from_phantom( rect_t *dst, rect_t *src )
+{
+    assert(src);
+    assert(dst);
+    assert(video_drv);
 
+    *dst = *src;
+    dst->y = Y_PHANTOM_TO_HOST( src-> y );
+}
 
+//! Convert coordinates from traditional to Phantom
+int rect_to_phantom( rect_t *dst, rect_t *src )
+{
+    assert(src);
+    assert(dst);
+    assert(video_drv);
 
+    *dst = *src;
+    dst->y = Y_HOST_TO_PHANTOM( src-> y );
+}
 
+*/
 
 
 

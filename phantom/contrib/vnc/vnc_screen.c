@@ -60,20 +60,51 @@ bitblt:(void*)vid_null,
 };
 
 
+#define REQ_WHOLE 0
+
 static void vnc_update_all( void )
 {
+#if REQ_WHOLE
     rect_t scr_r;
     scr_get_rect( &scr_r );
 
     vnc_update_rectangle(g_vnc_sessions[0], &scr_r, true );
+#endif    
 }
 
-//static int init_ok = 0;
-//static int init_err = 0;
+static void vnc_vid_bitblt_forw(const struct rgba_t *from, int xpos, int ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags  )
+{
+    vid_bitblt_forw(from, xpos, ypos, xsize, ysize, zpos, flags  );
+#if !REQ_WHOLE
+    rect_t upd_r;
+
+    upd_r.x = xpos;
+    upd_r.y = ypos;
+    upd_r.xsize = xsize;
+    upd_r.ysize = ysize;
+
+    vnc_update_rectangle(g_vnc_sessions[0], &upd_r, true );
+#endif
+}
+
+static void vnc_vid_bitblt_part_forw(const rgba_t *from, int src_xsize, int src_ysize, int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize, zbuf_t zpos, u_int32_t flags )
+{
+    vid_bitblt_part_forw( from, src_xsize, src_ysize, src_xpos, src_ypos, dst_xpos, dst_ypos, xsize, ysize, zpos, flags );
+#if !REQ_WHOLE
+    rect_t upd_r;
+
+    upd_r.x = dst_xpos;
+    upd_r.y = dst_ypos;
+    upd_r.xsize = xsize;
+    upd_r.ysize = ysize;
+
+    vnc_update_rectangle(g_vnc_sessions[0], &upd_r, true );
+#endif
+}
 
 static hal_mutex_t vnc_lock;
 
-
+// TODO kill me and make there local mutex
 void vnc_mutex_lock( void ) { hal_mutex_lock( &vnc_lock ); }
 void vnc_mutex_unlock( void ) { hal_mutex_unlock( &vnc_lock ); }
 
@@ -92,12 +123,12 @@ void pvm_vnc_init_funcs( void )
     // TODO need it?    
     drv_video_vnc.update = &vnc_update_all; // TODO remove me, do more detailed update
 #if 1
-    drv_video_vnc.bitblt = &vid_bitblt_forw;
+    drv_video_vnc.bitblt = &vnc_vid_bitblt_forw;
 #if VIDEO_DRV_WINBLT
     drv_video_vnc.winblt = &vid_win_winblt;
 #endif
     drv_video_vnc.readblt = &vid_readblt_forw;
-    drv_video_vnc.bitblt_part = &vid_bitblt_part_forw;
+    drv_video_vnc.bitblt_part = &vnc_vid_bitblt_part_forw;
 #else
     drv_video_vnc.bitblt = &drv_video_bitblt_rev;
     drv_video_vnc.winblt = &drv_video_win_winblt_rev;

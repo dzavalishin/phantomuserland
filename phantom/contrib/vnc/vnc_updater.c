@@ -611,8 +611,14 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
   /* Make sure that the clipped rectangle has a area */
   int in_screen = rect_mul( &intersection, &scr_r, rect );
 
-  if (in_screen)
+  if(!in_screen)
     {
+      printf("upd !inScreen {(%d, %d),(%d, %d)}\n",
+                  rect->x, rect->y,
+                  rect->xsize, rect->ysize);
+      return OK;
+    }
+    
       /* Check for a whole screen update.  The RealVNC client sends a lot
        * of these (especially when it is confused)
        */
@@ -625,6 +631,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
        */
 
       sched_lock();
+#if 1      
       if (!change && !session->change)
         {
           /* No.. ignore the client update.  We have nothing new to report. */
@@ -632,7 +639,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
           sched_unlock();
           return OK;
         }
-
+#endif
       /* Ignore all updates if there is a queued whole screen update */
 
       if (session->nwhupd == 0)
@@ -700,7 +707,7 @@ int vnc_update_rectangle(FAR struct vnc_session_s *session,
         }
 
       sched_unlock();
-    }
+    
 
   /* Since we ignore bad rectangles and wait for update structures, there is
    * really no way a failure can occur.

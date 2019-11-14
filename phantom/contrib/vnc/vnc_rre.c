@@ -43,6 +43,8 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <video/screen.h>
+
 #if defined(CONFIG_VNCSERVER_DEBUG) && !defined(CONFIG_DEBUG_GRAPHICS)
 #  undef  CONFIG_DEBUG_ERROR
 #  undef  CONFIG_DEBUG_WARN
@@ -166,7 +168,8 @@ ssize_t vnc_rre32(FAR struct vnc_session_s *session,
   rfb_putbe32(dest->rect.pixel,  bgcolor);
   rfb_putbe16(dest->rect.xpos,   rect->x);
   rfb_putbe16(dest->rect.xpos,   rect->x);
-  rfb_putbe16(dest->rect.ypos,   rect->y);
+  rfb_putbe16(dest->rect.ypos,   rect->y );
+  //rfb_putbe16(dest->rect.ypos,   Y_PHANTOM_TO_HOST( rect->y ));
 
   rfb_putbe16(dest->rect.width,  rect->xsize);
   rfb_putbe16(dest->rect.height, rect->ysize);
@@ -236,6 +239,7 @@ int vnc_rre(FAR struct vnc_session_s *session, rect_t *rect)
           rrect         = (FAR struct rfb_rectangle_s *)&rre->rect;
           rfb_putbe16(rrect->xpos,         rect->x);
           rfb_putbe16(rrect->ypos,         rect->y);
+          //rfb_putbe16(rrect->ypos,         Y_PHANTOM_TO_HOST( rect->y ));
           rfb_putbe16(rrect->width,        width);
           rfb_putbe16(rrect->height,       height);
           rfb_putbe32(rrect->encoding,     RFB_ENCODING_RRE);
