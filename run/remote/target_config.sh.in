@@ -1,10 +1,12 @@
 #!/bin/sh
 
+## Copy this file to target_config.sh and modify for corect settings
+
 # Machine to upload to
 TARGET_HOST=ubuntu.
 
 # User on target machine
-TARGET_USER=phantom
+TARGET_USER=dz
 
 # Directory on target machine which is accessible 
 # as `/boot/phantom/` to grub at boot time
@@ -12,5 +14,5 @@ TARGET_USER=phantom
 # Note that `set root=(hd1,msdos7)` in `target/custom.cfg` must
 # point to disk which is mounted at `/mnt/boot`
 #
-TARGET_BOOT_DIR=/mnt/boot/phantom/
+TARGET_BOOT_DIR=/mnt/boot/phantom
 

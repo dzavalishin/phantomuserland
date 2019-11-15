@@ -35,3 +35,18 @@ The `target` subdir contains scripts to be run on remote system.
 
 Phantom krenel will print diagnostics info into the first
 serial port @0x3F8 at 115200 baud.
+
+
+## Grub config
+
+There must be following code in `grub.cfg` on target machine:
+
+```
+### BEGIN /etc/grub.d/41_custom ###
+if [ -f  ${config_directory}/custom.cfg ]; then
+  source ${config_directory}/custom.cfg
+elif [ -z "${config_directory}" -a -f  $prefix/custom.cfg ]; then
+  source $prefix/custom.cfg;
+fi
+### END /etc/grub.d/41_custom ###
+```

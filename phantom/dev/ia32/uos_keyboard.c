@@ -595,6 +595,7 @@ uos_keyboard_ps2_init (keyboard_ps2_t *u)
     u->delay = 500;
     u->state = STATE_BASE;
     u->in_first = u->in_last = u->in_buf;
+    hal_mutex_init(&u->lock, "ps2keyb");
 
     /* Create keyboard receive task. */
     //task_create (keyboard_ps2_task, u, "kbd", prio,	u->stack, sizeof (u->stack));
