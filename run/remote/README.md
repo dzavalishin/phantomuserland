@@ -3,13 +3,15 @@
 This directory contains scripts used to run Phantom
 on a remote computer.
 
+
 ## Prequisites
 
 *  Target PC wunning Ubuntu (or any Unix with grub as bootloader)
-*  Free disk partition on a target PC which can be formatted as Phantom disk - IDE, not SATA drive!
+*  Free disk partition on a target PC which can be formatted as Phantom disk - IDE, not SATA controller mode
 *  Network connection between this computer and target one
 *  Good to have: hardware watchdog for a target PC
 *  Good to have: serial connection to target serial port for debug info
+
 
 ## Configuration
 
@@ -19,9 +21,6 @@ and remote directory, login, etc.
 An /mnt/boot/phantom/ directory on target PC must be on a disk which is 
 accessible by grub during boot
 
-## Format Phantom OS disk
-
-Just dd =if=../img/phantom.superblock of=/dev/target_disk
 
 ## Scripts
 
@@ -31,9 +30,15 @@ The `target` subdir contains scripts to be run on remote system.
 * `target_reboot.sh` - reboot target host into the Phantom OS
 
 
+## Format Phantom OS disk
+
+From target command prompt execute `mkfs_phantom.sh /dev/phantom-disk`
+while being in $TARGET_BOOT_DIR directory
+
+
 ## Debugging
 
-Phantom krenel will print diagnostics info into the first
+Phantom kernel will print diagnostics info into the first
 serial port @0x3F8 at 115200 baud.
 
 

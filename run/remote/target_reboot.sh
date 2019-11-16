@@ -11,6 +11,6 @@
 
 # grub-editenv /boot/grub/grubenv unset next_entry
 
-ssh -lphantom ubuntu. sudo reboot
+ssh -l$TARGET_USER $TARGET_HOST sudo reboot
 
 #ssh -l$TARGET_USER@ TARGET_HOST reboot

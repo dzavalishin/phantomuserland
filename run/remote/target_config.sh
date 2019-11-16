@@ -14,3 +14,10 @@ TARGET_USER=phantom
 #
 TARGET_BOOT_DIR=/mnt/boot/phantom/
 
+TARGET_CLASS_DIR=/mnt/files/class/
+
+# Device on target computer that contains Phantom OS
+# disk image.
+#
+
+TARGET_PHANTOM_DEV=/dev/sbd2
