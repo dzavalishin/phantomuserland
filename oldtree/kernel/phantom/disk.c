@@ -4,15 +4,15 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * (new and unused) disk IO stack, incl. partitioning and fs search.
+ * Disk IO stack, incl. partitioning and fs search.
  *
 **/
 
 #define DEBUG_MSG_PREFIX "DiskIO"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 1
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 1
 
 #include <disk.h>
 #include <pc/disk_partition.h>
@@ -271,7 +271,9 @@ static void register_partition(phantom_disk_partition_t *p)
     }
 
     partitions[nPartitions] = *p;
-    //dump_partition(p);
+#if 0
+    dump_partition(p);
+#endif
     print_partition(p);
     find_subpartitions(p);
 }
