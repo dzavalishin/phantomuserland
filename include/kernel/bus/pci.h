@@ -55,8 +55,8 @@ typedef struct
 	
 } pci_cfg_t;
 
-int		phantom_pci_find(pci_cfg_t *cfg, u_int16_t vendor_id, u_int16_t device_id);
-int 		phantom_pci_find_class( pci_cfg_t *cfg, u_int8_t class_id, u_int8_t subclass_id );
+int         phantom_pci_find(pci_cfg_t *cfg, u_int16_t vendor_id, u_int16_t device_id);
+int         phantom_pci_find_class( pci_cfg_t *cfg, u_int8_t class_id, u_int8_t subclass_id );
 
 
 u_int32_t 	phantom_pci_read(int bus, int dev, int func, int reg, int bytes);
