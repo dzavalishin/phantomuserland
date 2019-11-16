@@ -431,6 +431,10 @@ struct multiboot_module *phantom_multiboot_find(const char *string)
             continue;
         const char *mn = (char*)phystokv(m[i].string);
 
+#if 1
+        printf("Boot module '%s'\n", mn );
+#endif
+
         mn = skip_path(mn);
 
         if( strcmp(mn, (char *)string) == 0)
