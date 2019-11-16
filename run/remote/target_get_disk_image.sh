@@ -4,6 +4,8 @@
 
 echo "Will get image of Phantom disk from target computer"
 
-#ssh -lphantom ubuntu. sudo reboot
+ssh -l$TARGET_USER $TARGET_HOST sudo cp $TARGET_PHANTOM_DEV /tmp/phantom.img
 
-scp $TARGET_USER@$TARGET_HOST:$TARGET_PHANTOM_DEV target_phantom.img
+scp $TARGET_USER@$TARGET_HOST:/tmp/phantom.img target_phantom.img
+
+ssh -l$TARGET_USER $TARGET_HOST sudo rm /tmp/phantom.img

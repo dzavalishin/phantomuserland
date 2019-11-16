@@ -20,4 +20,4 @@ TARGET_CLASS_DIR=/mnt/files/class/
 # disk image.
 #
 
-TARGET_PHANTOM_DEV=/dev/sbd2
+TARGET_PHANTOM_DEV=/dev/sdb2
