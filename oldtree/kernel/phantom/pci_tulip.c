@@ -168,7 +168,7 @@ typedef  int32_t   s32;
 #define put_unaligned(val, ptr) ((void)( *(ptr) = (val) ))
 #define get_u16(ptr) (*(u16 *)(ptr))
 
-#warning physmem
+//#warning physmem
 //#define virt_to_le32desc(addr)  virt_to_bus(addr)
 
 #include "pci_tulip.h"
@@ -185,14 +185,14 @@ typedef  int32_t   s32;
 /* Note: transmit and receive buffers must be longword aligned and
    longword divisable */
 
-#warning fix me static
+//#warning fix me static
 #define TX_RING_SIZE	2
-static struct tulip_tx_desc tx_ring[TX_RING_SIZE] __attribute__ ((aligned(4)));
-static unsigned char txb[BUFLEN] __attribute__ ((aligned(4)));
+//static unsigned char txb[BUFLEN] __attribute__ ((aligned(4)));
+//static struct tulip_tx_desc tx_ring[TX_RING_SIZE] __attribute__ ((aligned(4)));
 
 #define RX_RING_SIZE	4
-static struct tulip_rx_desc rx_ring[RX_RING_SIZE] __attribute__ ((aligned(4)));
-static unsigned char rxb[RX_RING_SIZE * BUFLEN] __attribute__ ((aligned(4)));
+//static struct tulip_rx_desc rx_ring[RX_RING_SIZE] __attribute__ ((aligned(4)));
+//static unsigned char rxb[RX_RING_SIZE * BUFLEN] __attribute__ ((aligned(4)));
 
 struct tulip_private {
     int cur_rx;
@@ -224,7 +224,21 @@ struct tulip_private {
 
     unsigned char	node_addr[ETH_ALEN]; // MAC address
 
+    unsigned char *                  txb;
+    physaddr_t                       txb_phys;
+
+    unsigned char *                  rxb; //[RX_RING_SIZE * BUFLEN] __attribute__ ((aligned(4)));
+    physaddr_t                       rxb_phys; 
+
+    volatile struct tulip_tx_desc *  tx_ring[TX_RING_SIZE]; // __attribute__ ((aligned(4)));
+    physaddr_t                       tx_ring_phys[TX_RING_SIZE]; // __attribute__ ((aligned(4)));
+
+    volatile struct tulip_rx_desc *  rx_ring[RX_RING_SIZE]; // __attribute__ ((aligned(4)));
+    physaddr_t                       rx_ring_phys[RX_RING_SIZE]; // __attribute__ ((aligned(4)));
+
 }; // tpx;
+
+
 
 //static struct tulip_private *tp;
 
@@ -716,33 +730,66 @@ static void tulip_init_ring(phantom_device_t *dev)
     whereami("tulip_init_ring\n");
 #endif
 
+    void *txa;
+    hal_pv_alloc( &tp->txb_phys, &txa, BUFLEN );
+    tp->txb = txa;
+
+    void *rxa;
+    hal_pv_alloc( &tp->rxb_phys, &rxa, RX_RING_SIZE * BUFLEN );
+    tp->rxb = rxa;
+
+    assert( ((sizeof(struct tulip_tx_desc) * TX_RING_SIZE) + (sizeof(struct tulip_rx_desc) * RX_RING_SIZE)) < PAGE_SIZE );
+
+    physaddr_t desc_pa;
+    void *     desc_va;
+    hal_pv_alloc( &desc_pa, &desc_va, PAGE_SIZE );
+
     tp->cur_rx = 0;
 
-    for (i = 0; i < RX_RING_SIZE; i++) {
-	rx_ring[i].status  = cpu_to_le32(0x80000000);
-	rx_ring[i].length  = cpu_to_le32(BUFLEN);
-	rx_ring[i].buffer1 = virt_to_le32desc(&rxb[i * BUFLEN]);
-	rx_ring[i].buffer2 = virt_to_le32desc(&rx_ring[i+1]);
+    for (i = 0; i < RX_RING_SIZE; i++) 
+    {
+        tp->rx_ring[i] = desc_va;
+        tp->rx_ring_phys[i] = desc_pa;
+
+        desc_va += sizeof(struct tulip_rx_desc);
+        desc_pa += sizeof(struct tulip_rx_desc);
+
+	    tp->rx_ring[i]->status  = cpu_to_le32(0x80000000);
+	    tp->rx_ring[i]->length  = cpu_to_le32(BUFLEN);
+	    tp->rx_ring[i]->buffer1 = tp->rxb_phys + (i * BUFLEN);
+	    tp->rx_ring[i]->buffer2 = tp->rx_ring_phys[i+1];
     }
     /* Mark the last entry as wrapping the ring. */
-    rx_ring[i-1].length    = cpu_to_le32(DESC_RING_WRAP | BUFLEN);
-    rx_ring[i-1].buffer2   = virt_to_le32desc(&rx_ring[0]);
+    tp->rx_ring[i-1]->length    = cpu_to_le32(DESC_RING_WRAP | BUFLEN);
+    tp->rx_ring[i-1]->buffer2   = tp->rx_ring_phys[0];
 
     /* We only use 1 transmit buffer, but we use 2 descriptors so
        transmit engines have somewhere to point to if they feel the need */
 
-    tx_ring[0].status  = 0x00000000;
-    tx_ring[0].buffer1 = virt_to_le32desc(&txb[0]);
-    tx_ring[0].buffer2 = virt_to_le32desc(&tx_ring[1]);
+    tp->tx_ring[0] = desc_va;
+    tp->tx_ring_phys[0] = desc_pa;
+
+    desc_va += sizeof(struct tulip_rx_desc);
+    desc_pa += sizeof(struct tulip_rx_desc);
+
+    tp->tx_ring[0]->status  = 0x00000000;
+    tp->tx_ring[0]->buffer1 = tp->txb_phys;
+    tp->tx_ring[0]->buffer2 = tp->tx_ring_phys[1];
 
     /* this descriptor should never get used, since it will never be owned
        by the machine (status will always == 0) */
-    tx_ring[1].status  = 0x00000000;
-    tx_ring[1].buffer1 = virt_to_le32desc(&txb[0]);
-    tx_ring[1].buffer2 = virt_to_le32desc(&tx_ring[0]);
+    tp->tx_ring[1] = desc_va;
+    tp->tx_ring_phys[1] = desc_pa;
+
+    desc_va += sizeof(struct tulip_rx_desc);
+    desc_pa += sizeof(struct tulip_rx_desc);
+
+    tp->tx_ring[1]->status  = 0x00000000;
+    tp->tx_ring[1]->buffer1 = tp->txb_phys; // NB! Same buffer! If making real buffering, alloc more
+    tp->tx_ring[1]->buffer2 = tp->tx_ring_phys[0];
 
     /* Mark the last entry as wrapping the ring, though this should never happen */
-    tx_ring[1].length  = cpu_to_le32(DESC_RING_WRAP | BUFLEN);
+    tp->tx_ring[1]->length  = cpu_to_le32(DESC_RING_WRAP | BUFLEN);
 }
 
 
@@ -835,22 +882,22 @@ static void tulip_reset(phantom_device_t *dev)
 	/* construct perfect filter frame with mac address as first match
 	   and broadcast address for all others */
 	for (i=0; i<192; i++) 
-	    txb[i] = 0xFF;
-	txb[0] = tp->node_addr[0];
-	txb[1] = tp->node_addr[1];
-	txb[4] = tp->node_addr[2];
-	txb[5] = tp->node_addr[3];
-	txb[8] = tp->node_addr[4];
-	txb[9] = tp->node_addr[5];
+	    tp->txb[i] = 0xFF;
+	tp->txb[0] = tp->node_addr[0];
+	tp->txb[1] = tp->node_addr[1];
+	tp->txb[4] = tp->node_addr[2];
+	tp->txb[5] = tp->node_addr[3];
+	tp->txb[8] = tp->node_addr[4];
+	tp->txb[9] = tp->node_addr[5];
 
-	tx_ring[0].length  = cpu_to_le32(tx_flags);
-	tx_ring[0].buffer1 = virt_to_le32desc(&txb[0]);
-	tx_ring[0].status  = cpu_to_le32(0x80000000);
+	tp->tx_ring[0]->length  = cpu_to_le32(tx_flags);
+	tp->tx_ring[0]->buffer1 = tp->txb_phys;
+	tp->tx_ring[0]->status  = cpu_to_le32(0x80000000);
     }
 
     /* Point to rx and tx descriptors */
-    outl_reverse(virt_to_le32desc(&rx_ring[0]), ioaddr + CSR3);
-    outl_reverse(virt_to_le32desc(&tx_ring[0]), ioaddr + CSR4);
+    outl_reverse( tp->rx_ring_phys[0], ioaddr + CSR3);
+    outl_reverse( tp->tx_ring_phys[0], ioaddr + CSR4);
 
     init_media(dev);
 
@@ -869,7 +916,7 @@ static void tulip_reset(phantom_device_t *dev)
     set_polled_timeout( &pto, 2*1000L*1000 );
 
 	//while ((tx_ring[0].status & 0x80000000) && (currticks() < to))
-    while ((tx_ring[0].status & 0x80000000) && !check_polled_timeout( &pto ) )
+    while ((tp->tx_ring[0]->status & 0x80000000) && !check_polled_timeout( &pto ) )
 	    /* wait */ ;
 
 	//if (currticks() >= to) {
@@ -909,8 +956,8 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
     /* Disable Tx */
     outl_reverse(csr6 & ~0x00002000, ioaddr + CSR6);
 #if 1
-    if( len > sizeof(txb) ) len = sizeof(txb);
-    memcpy(txb, buf, len);
+    if( len > BUFLEN ) len = BUFLEN; //sizeof(txb);
+    memcpy(tp->txb, buf, len);
     int s = len;
 #else
     memcpy(txb, d, ETH_ALEN);
@@ -924,7 +971,7 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
 #endif
     /* pad to minimum packet size */
     while (s < ETH_ZLEN)  
-        txb[s++] = '\0';
+        tp->txb[s++] = '\0';
 
 #ifdef TULIP_DEBUG
     if (tulip_debug > 1)
@@ -933,11 +980,11 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
         
     /* setup the transmit descriptor */
     /* 0x60000000 = no interrupt on completion */
-    tx_ring[0].length = cpu_to_le32(0x60000000 | s);
-    tx_ring[0].status = cpu_to_le32(0x80000000);
+    tp->tx_ring[0]->length = cpu_to_le32(0x60000000 | s);
+    tp->tx_ring[0]->status = cpu_to_le32(0x80000000);
 
     /* Point to transmit descriptor */
-    outl_reverse(virt_to_le32desc(&tx_ring[0]), ioaddr + CSR4);
+    outl_reverse(tp->tx_ring_phys[0], ioaddr + CSR4);
 
     /* Enable Tx */
     outl_reverse(csr6 | 0x00002000, ioaddr + CSR6);
@@ -948,7 +995,7 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
     set_polled_timeout( &pto, 2*1000L*1000 );
     //to = currticks() + TX_TIME_OUT;
     //while ((tx_ring[0].status & 0x80000000) && (currticks() < to))
-    while ((tx_ring[0].status & 0x80000000) && !check_polled_timeout( &pto ) )
+    while ((tp->tx_ring[0]->status & 0x80000000) && !check_polled_timeout( &pto ) )
         /* wait */ ;
 
     //if (currticks() >= to) {
@@ -974,19 +1021,19 @@ static int tulip_poll(phantom_device_t *dev, void *read_buf, size_t read_len )
 #endif
 
     /* no packet waiting. packet still owned by NIC */
-    if (rx_ring[tp->cur_rx].status & 0x80000000)
+    if (tp->rx_ring[tp->cur_rx]->status & 0x80000000)
         return 0;
 
 #ifdef TULIP_DEBUG_WHERE
     whereami("tulip_poll got one\n");
 #endif
 
-    size_t packetlen = (rx_ring[tp->cur_rx].status & 0x3FFF0000) >> 16;
+    size_t packetlen = (tp->rx_ring[tp->cur_rx]->status & 0x3FFF0000) >> 16;
 
     /* if we get a corrupted packet. throw it away and move on */
-    if (rx_ring[tp->cur_rx].status & 0x00008000) {
+    if (tp->rx_ring[tp->cur_rx]->status & 0x00008000) {
 	/* return the descriptor and buffer to receive ring */
-        rx_ring[tp->cur_rx].status = 0x80000000;
+        tp->rx_ring[tp->cur_rx]->status = 0x80000000;
 	    //tp->cur_rx = (++tp->cur_rx) % RX_RING_SIZE;
 	    tp->cur_rx++;
 	    tp->cur_rx %= RX_RING_SIZE;
@@ -999,10 +1046,10 @@ static int tulip_poll(phantom_device_t *dev, void *read_buf, size_t read_len )
         packetlen = read_len;
     }
     /* copy packet to working buffer */
-    memcpy(read_buf, rxb + tp->cur_rx * BUFLEN, packetlen);
+    memcpy(read_buf, tp->rxb + tp->cur_rx * BUFLEN, packetlen);
 
     /* return the descriptor and buffer to receive ring */
-    rx_ring[tp->cur_rx].status = 0x80000000;
+    tp->rx_ring[tp->cur_rx]->status = 0x80000000;
     //tp->cur_rx = (++tp->cur_rx) % RX_RING_SIZE;
     tp->cur_rx++;
     tp->cur_rx %= RX_RING_SIZE;

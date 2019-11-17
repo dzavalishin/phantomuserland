@@ -228,7 +228,9 @@ struct mediainfo {
 #define eeprom_delay()  inl(ee_addr)
 
 /* Size of transmit and receive buffers */
-#define BUFLEN 1536
+//#define BUFLEN 1536
+// We alloc in pages, so make it bigger a bit
+#define BUFLEN 2048
 
 /* Ring-wrap flag in length field, use for last ring entry.
    0x01000000 means chain on buffer2 address,
