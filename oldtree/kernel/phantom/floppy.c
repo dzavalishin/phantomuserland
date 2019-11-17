@@ -13,9 +13,9 @@
 
 #define DEBUG_MSG_PREFIX "drv.floppy"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 0
 // code to access floppy drives.
 //
 // Copyright (C) 2008,2009  Kevin O'Connor <kevin@koconnor.net>
@@ -44,10 +44,10 @@ phantom_device_t * driver_isa_floppy_probe( int port, int irq, int stage )
 }
 #else // HAVE_FLOPPY
 
-#define DEBUG_MSG_PREFIX "floppy"
-#define debug_level_flow 0
-#define debug_level_info 0
-#define debug_level_error 10
+//#define DEBUG_MSG_PREFIX "floppy"
+//#define debug_level_flow 0
+//#define debug_level_info 0
+//#define debug_level_error 10
 
 #include <ia32/pio.h>
 #include <device.h>

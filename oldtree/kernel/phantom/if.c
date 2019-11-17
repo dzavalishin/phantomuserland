@@ -28,6 +28,7 @@
 
 #include "misc.h"
 
+#define dprintf printf
 
 
 #define IF_PRIO 1

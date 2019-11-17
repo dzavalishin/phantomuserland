@@ -31,6 +31,7 @@
 
 #include "misc.h"
 
+#define dprintf printf
 
 
 #define MIN_ETHERNET2_LEN 46
@@ -41,11 +42,20 @@ typedef struct ethernet2_header {
     uint16 type;
 } ethernet2_header;
 
+void dump_mac_addr(char * addr)
+{
+    printf("%2x:%2x:%2x:%2x:%2x:%2x", 
+        0xFF & addr[0], 0xFF & addr[1], 
+        0xFF & addr[2], 0xFF & addr[3], 
+        0xFF & addr[4], 0xFF & addr[5]);
+}
+
+
 void dump_ethernet_addr(ethernet_addr addr)
 {
 #if NET_CHATTY
-    dprintf("%x:%x:%x:%x:%x:%x",
-            addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+    //dprintf("%x:%x:%x:%x:%x:%x",            addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
+    dump_mac_addr(addr);
 #else
     (void) addr;
 #endif

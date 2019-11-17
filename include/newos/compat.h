@@ -56,7 +56,7 @@ typedef int thread_id;
 
 
 
-#define dprintf printf
+//#define dprintf printf
 //#define kmalloc malloc
 #define kfree free
 

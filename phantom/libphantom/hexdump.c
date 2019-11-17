@@ -11,6 +11,7 @@
 
 
 #include <phantom_libc.h>
+#include <kernel/debug.h>
 
 
 void

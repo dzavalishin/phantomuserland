@@ -39,6 +39,7 @@ static void dump_alldevs( int ac, char **av );
 
 
 phantom_device_t * driver_bochs_svga_probe( pci_cfg_t *pci, int stage );
+phantom_device_t * driver_tulip_probe( pci_cfg_t *pci, int stage );
 
 
 
@@ -84,6 +85,8 @@ static pci_probe_t pci_drivers[] =
     { "RTL 8169", 	driver_rtl_8169_probe, 		1, RTL8139_VENDORID, 0x8169, 0 },
     { "RTL 8129", 	driver_rtl_8169_probe, 		1, RTL8139_VENDORID, 0x8129, 0 },
     { "RTL 8168", 	driver_rtl_8169_probe, 		1, RTL8139_VENDORID, 0x8168, 0 }, // TODO problems possible
+
+    { "DEC Tulip 21142", 	driver_tulip_probe, 		1, 0x1011, 0x0019, 0 },
 
 #endif // HAVE_NET
 

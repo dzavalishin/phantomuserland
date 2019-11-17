@@ -42,6 +42,8 @@
 
 #include "misc.h"
 
+#define dprintf printf
+
 
 #define DEBUG_REF_COUNT 0
 

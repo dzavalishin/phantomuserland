@@ -30,6 +30,7 @@
 
 #include "misc.h"
 
+#define dprintf printf
 
 //#include <arpa/inet.h>
 

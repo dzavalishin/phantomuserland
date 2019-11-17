@@ -31,4 +31,13 @@ void phantom_dump_windows_buf(char *bp, int len);
 void lprintf(char const *format, ...);
 
 
+#define	HD_COLUMN_MASK	0xff
+#define	HD_DELIM_MASK	0xff00
+#define	HD_OMIT_COUNT	(1 << 16)
+#define	HD_OMIT_HEX	(1 << 17)
+#define	HD_OMIT_CHARS	(1 << 18)
+
+void hexdump(const void *ptr, int length, const char *hdr, int flags);
+
+
 #endif // KERNEL_DEBUG_H

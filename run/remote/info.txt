@@ -1,0 +1,6 @@
+tulip: at ioaddr 0x%h MAC 0:ffffff80:ffffffad:ffffffb6:22:ffffff83
+
+tulip: at ioaddr 0x%h MAC 0:80:ad:b6:22:83
+
+linux reads:             00:80:ad:b6:22:83
+

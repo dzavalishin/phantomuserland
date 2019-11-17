@@ -25,6 +25,7 @@
 #include <endian.h>
 #include <hal.h>
 
+#define dprintf printf
 
 
 typedef struct icmp_header {

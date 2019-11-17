@@ -12,6 +12,9 @@
 
 #include "misc.h"
 
+#define dprintf printf
+
+
 #if DEBUG > 1
 #define VALIDATE_CBUFS 1
 #else

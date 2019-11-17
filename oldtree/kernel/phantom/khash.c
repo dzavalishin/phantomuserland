@@ -14,6 +14,7 @@
 #include <hal.h>
 #include <kernel/khash.h>
 
+#define dprintf printf
 
 #define VERIFY_TABLE 0
 

@@ -110,13 +110,13 @@ extern const char	hex2ascii_data[];
 
 
 
-#define	HD_COLUMN_MASK	0xff
-#define	HD_DELIM_MASK	0xff00
-#define	HD_OMIT_COUNT	(1 << 16)
-#define	HD_OMIT_HEX	(1 << 17)
-#define	HD_OMIT_CHARS	(1 << 18)
+//#define	HD_COLUMN_MASK	0xff
+//#define	HD_DELIM_MASK	0xff00
+//#define	HD_OMIT_COUNT	(1 << 16)
+//#define	HD_OMIT_HEX	(1 << 17)
+//#define	HD_OMIT_CHARS	(1 << 18)
 
-void hexdump(const void *ptr, int length, const char *hdr, int flags);
+//void hexdump(const void *ptr, int length, const char *hdr, int flags);
 
 
 

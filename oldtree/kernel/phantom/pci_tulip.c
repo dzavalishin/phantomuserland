@@ -18,6 +18,7 @@
 #define debug_level_info 10
 
 #include <kernel/drivers.h>
+#include <kernel/debug.h>
 #include <sys/libkern.h>
 
 #include <ia32/pio.h>
@@ -731,18 +732,18 @@ static void tulip_init_ring(phantom_device_t *dev)
 #endif
 
     void *txa;
-    hal_pv_alloc( &tp->txb_phys, &txa, BUFLEN );
+    hal_pv_alloc_ext( &tp->txb_phys, &txa, BUFLEN, page_map_io );
     tp->txb = txa;
 
     void *rxa;
-    hal_pv_alloc( &tp->rxb_phys, &rxa, RX_RING_SIZE * BUFLEN );
+    hal_pv_alloc_ext( &tp->rxb_phys, &rxa, RX_RING_SIZE * BUFLEN, page_map_io );
     tp->rxb = rxa;
 
     assert( ((sizeof(struct tulip_tx_desc) * TX_RING_SIZE) + (sizeof(struct tulip_rx_desc) * RX_RING_SIZE)) < PAGE_SIZE );
 
     physaddr_t desc_pa;
     void *     desc_va;
-    hal_pv_alloc( &desc_pa, &desc_va, PAGE_SIZE );
+    hal_pv_alloc_ext( &desc_pa, &desc_va, PAGE_SIZE, page_map_io );
 
     tp->cur_rx = 0;
 
@@ -951,6 +952,7 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
 
 #ifdef TULIP_DEBUG_WHERE    
     whereami("tulip_transmit\n");
+    hexdump( buf, len, "tulip xmit", 0 );
 #endif
 
     /* Disable Tx */
@@ -1062,7 +1064,11 @@ static int tulip_read( struct phantom_device *dev, void *buf, int len)
     while(1)
     {
         size_t ret = tulip_poll(dev, buf, len);
-        if( ret ) return ret;
+        if( ret ) 
+        {
+            hexdump( buf, ret, "tulip recv", 0 );
+            return ret;
+        }
         hal_sleep_msec(500); // TODO interrupts!
     }
 }
@@ -1122,7 +1128,8 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
     tp->if_port = 0;
     tp->default_port = 0;
 
-    adjust_pci_device(dev);
+    //adjust_pci_device(dev);
+    phantom_pci_enable( pci, 1 ); // TODO adjust_pci_device also updates latency - do we need it?
 
     /* disable interrupts */
     outl_reverse(0x00000000, ioaddr + CSR7);
@@ -1271,7 +1278,9 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
     for (i = 0; i < ETH_ALEN; i++)
         last_phys_addr[i] = tp->node_addr[i];
 
-    printf("%s: %! at ioaddr %hX\n", tp->nic_name, tp->node_addr, ioaddr);
+    printf("%s: at ioaddr 0x%h MAC ", tp->nic_name, ioaddr);
+    dump_mac_addr(tp->node_addr);
+    printf("\n");
 
     tp->chip_id = chip_idx;
     tp->revision = chip_rev;
@@ -2046,9 +2055,9 @@ phantom_device_t * driver_tulip_probe( pci_cfg_t *pci, int stage )
     nic->nic_name   = dev->name;
 
     int rc = tulip_probe( dev, pci );
-    if( rc )
+    if( !rc )
     {
-        printf(DEV_NAME "Probe failed for %s", dev->name );
+        printf(DEV_NAME "Probe failed for %s\n", dev->name );
         goto free_nic;
     }
 
@@ -2069,7 +2078,7 @@ free_nic:
     free(nic);
 
 out_of_mem:    
-    if(DEBUG) printf(DEV_NAME "out of mem\n");
+    if(DEBUG) printf(DEV_NAME " out of mem\n");
     return 0;
 }
 

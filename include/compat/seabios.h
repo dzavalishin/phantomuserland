@@ -23,7 +23,7 @@ unsigned int usb_intr_pipe_count(int ms);
 
 #include <dev/pci/pci_regs.h>
 
-
+/*
 #include <debug_ext.h>
 
 #ifndef debug_level_flow
@@ -37,7 +37,7 @@ unsigned int usb_intr_pipe_count(int ms);
 #ifndef debug_level_info
 #define debug_level_info 10
 #endif
-
+*/
 
 
 
@@ -259,7 +259,7 @@ static inline u32 __fls(u32 word)
 
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+//#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
 #define container_of(ptr, type, member) ({                      \
         const typeof( ((type *)0)->member ) *__mptr = (ptr);    \

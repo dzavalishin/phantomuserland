@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <malloc.h>
 #include <phantom_libc.h>
+#include <kernel/debug.h>
 #include <string.h>
 #include <kernel/vm.h>
 #include <kernel/page.h>

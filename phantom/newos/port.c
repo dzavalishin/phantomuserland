@@ -713,7 +713,7 @@ phantom_port_write_etc(port_id id,
 
     if (res != 0) {
         if(res != ETIMEDOUT)
-            dprintf("write_port_etc: res unknown error %d\n", res);
+            LOG_ERROR( 1, "res unknown error %d", res);
         return res;
     }
 
@@ -1038,16 +1038,16 @@ errno_t phantom_port_delete_owned_ports(tid_t owner, int *o_count)
 static void _dump_port_info(struct port_entry *port)
 {
     int cnt;
-    dprintf("PORT:   %p\n", port);
-    dprintf("name:  '%s'\n", port->name);
-    dprintf("owner: 0x%x\n", port->owner);
-    dprintf("cap:  %d\n", port->capacity);
-    dprintf("head: %d\n", port->head);
-    dprintf("tail: %d\n", port->tail);
+    printf("PORT:   %p\n", port);
+    printf("name:  '%s'\n", port->name);
+    printf("owner: 0x%x\n", port->owner);
+    printf("cap:  %d\n", port->capacity);
+    printf("head: %d\n", port->head);
+    printf("tail: %d\n", port->tail);
     sem_get_count(&(port->read_sem), &cnt);
-    dprintf("read_sem:  %d\n", cnt);
+    printf("read_sem:  %d\n", cnt);
     sem_get_count(&(port->write_sem), &cnt);
-    dprintf("write_sem: %d\n", cnt);
+    printf("write_sem: %d\n", cnt);
 }
 
 errno_t pool_dump_port(pool_t *pool, void *el, pool_handle_t handle, void *arg)
@@ -1064,7 +1064,7 @@ errno_t pool_dump_port(pool_t *pool, void *el, pool_handle_t handle, void *arg)
 static void dump_port_info(int argc, char **argv)
 {
     if(argc < 2) {
-        dprintf("port: not enough arguments\n");
+        printf("port: not enough arguments\n");
         return;
     }
 
@@ -1085,7 +1085,7 @@ static void dump_port_info(int argc, char **argv)
 #else
         unsigned slot = num % MAX_PORTS;
         if(ports[slot].id != (int)num) {
-            dprintf("port 0x%lx doesn't exist!\n", num);
+            printf("port 0x%lx doesn't exist!\n", num);
             return;
         }
         _dump_port_info(&ports[slot]);
@@ -1231,7 +1231,7 @@ port_create(int32 queue_length, const char *name)
     //kfree(q);
     //kfree(temp_name);
     retval = -ENOMEM;
-    dprintf("port_create(): ERR_PORT_OUT_OF_SLOTS\n");
+    printf("port_create(): ERR_PORT_OUT_OF_SLOTS\n");
 
     // cleanup
     sem_delete(sem_w);
@@ -1251,7 +1251,7 @@ void dump_port_list(int argc, char **argv)
 
     for(i=0; i<MAX_PORTS; i++) {
         if(ports[i].id >= 0) {
-            dprintf("%p\tid: 0x%x\t\tname: '%s'\n", &ports[i], ports[i].id, ports[i].name);
+            printf("%p\tid: 0x%x\t\tname: '%s'\n", &ports[i], ports[i].id, ports[i].name);
         }
     }
 }
@@ -1319,7 +1319,7 @@ port_delete(port_id id)
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
         //int_restore_interrupts();
-        dprintf("port_delete: invalid port_id %d\n", id);
+        printf("port_delete: invalid port_id %d\n", id);
         return -EINVAL;
     }
 
@@ -1412,7 +1412,7 @@ port_get_info(port_id id, struct port_info *info)
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
         //int_restore_interrupts();
-        dprintf("port_get_info: invalid port_id %d\n", id);
+        printf("port_get_info: invalid port_id %d\n", id);
         return -EINVAL;
     }
 
@@ -1515,7 +1515,7 @@ phantom_port_buffer_size_etc(port_id id,
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
         int_restore_interrupts();
-        dprintf("port_get_info: invalid port_id %d\n", id);
+        printf("port_get_info: invalid port_id %d\n", id);
         return -EINVAL;
     }
     RELEASE_PORT_LOCK(ports[slot]);
@@ -1575,7 +1575,7 @@ port_count(port_id id)
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
         //int_restore_interrupts();
-        dprintf("port_count: invalid port_id %d\n", id);
+        printf("port_count: invalid port_id %d\n", id);
         return -EINVAL;
     }
 
@@ -1633,7 +1633,7 @@ port_read_etc(port_id id,
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
         //if(ei) hal_sti();
-        dprintf("read_port_etc: invalid port_id %d\n", id);
+        printf("read_port_etc: invalid port_id %d\n", id);
         return -EINVAL;
     }
     // store sem_id in local variable
@@ -1655,7 +1655,7 @@ port_read_etc(port_id id,
 
     if (res != 0) {
         if(res != ETIMEDOUT)
-            dprintf("write_port_etc: res unknown error %d\n", res);
+            printf("write_port_etc: res unknown error %d\n", res);
         goto reterr;
     }
 
@@ -1729,7 +1729,7 @@ port_set_owner(port_id id, proc_id proc)
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
         int_restore_interrupts();
-        dprintf("port_set_owner: invalid port_id %d\n", id);
+        printf("port_set_owner: invalid port_id %d\n", id);
         return -EINVAL;
     }
 
@@ -1788,14 +1788,14 @@ port_write_etc(port_id id,
     if(ports[slot].id != id) {
         RELEASE_PORT_LOCK(ports[slot]);
         if(ei) hal_sti();
-        dprintf("write_port_etc: invalid port_id %d\n", id);
+        printf("write_port_etc: invalid port_id %d\n", id);
         return -EINVAL;
     }
 
     if (ports[slot].closed) {
         RELEASE_PORT_LOCK(ports[slot]);
         if(ei) hal_sti();
-        dprintf("write_port_etc: port %d closed\n", id);
+        printf("write_port_etc: port %d closed\n", id);
         return -EPERM;
     }
 
@@ -1819,7 +1819,7 @@ port_write_etc(port_id id,
 
     if (res != 0) {
         if(res != ETIMEDOUT)
-            dprintf("write_port_etc: res unknown error %d\n", res);
+            printf("write_port_etc: res unknown error %d\n", res);
         return -res; // negative errno
     }
 

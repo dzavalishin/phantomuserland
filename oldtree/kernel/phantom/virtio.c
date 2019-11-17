@@ -22,6 +22,7 @@
 #include <virtio_pci.h>
 #include <ia32/pio.h>
 #include <phantom_libc.h>
+#include <kernel/debug.h>
 #include <kernel/vm.h>
 #include <kernel/barriers.h>
 #include <kernel/page.h>

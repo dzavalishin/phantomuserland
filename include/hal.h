@@ -144,12 +144,16 @@ void                                    hal_free_phys_pages(physaddr_t  page, in
 errno_t                                 hal_alloc_vaddress(void **result, int n_pages); // alloc address of a page, but not memory
 void                                    hal_free_vaddress(void *addr, int n_pages);
 
-// Allocate physmem, address space for it, and map. Panics if out of anything.
+
+
+//! Allocate physmem, address space for it, and map. Panics if out of anything.
 void                                    hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes );
-// Unmap, free addr space and physmem
+//! Allocate physmem, address space for it, and map using given mode (usually page_map_io). Panics if out of anything.
+void                                    hal_pv_alloc_ext( physaddr_t *pa, void **va, int size_bytes, page_mapped_t map_mode );
+//! Unmap, free addr space and physmem
 void                                    hal_pv_free( physaddr_t pa, void *va, int size_bytes );
 
-// Low ( < 1M ) mem. Identically mapped all the time!
+//! Low ( < 1M ) mem. Identically mapped all the time!
 errno_t                                 hal_alloc_phys_pages_low(physaddr_t *result, int npages);
 void                                    hal_free_phys_pages_low(physaddr_t  paddr, int npages);
 

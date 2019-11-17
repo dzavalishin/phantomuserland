@@ -17,6 +17,7 @@
 
 
 #include <kernel/config.h>
+#include <kernel/debug.h>
 #include <phantom_libc.h>
 #include <errno.h>
 #include <assert.h>

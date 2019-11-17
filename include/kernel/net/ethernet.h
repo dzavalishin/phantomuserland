@@ -30,6 +30,7 @@ int ethernet_output(cbuf *buf, ifnet *i, netaddr *target, int protocol_type);
 //int ethernet_init(void);
 
 void dump_ethernet_addr(ethernet_addr addr);
+void dump_mac_addr(char * addr);
 
 #endif
 

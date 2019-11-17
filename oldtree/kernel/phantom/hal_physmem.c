@@ -350,7 +350,7 @@ void paint_physmem_allocator_memory_map(window_handle_t w, rect_t *r )
 // -----------------------------------------------------------------------
 
 
-void hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes )
+void hal_pv_alloc_ext( physaddr_t *pa, void **va, int size_bytes, page_mapped_t map_mode )
 {
     int npages = ((size_bytes-1)/PAGE_SIZE) + 1;
 
@@ -360,7 +360,12 @@ void hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes )
     if( hal_alloc_phys_pages( pa, npages) )
         panic("out of physmem");
 
-    hal_pages_control( *pa, *va, npages, page_map, page_rw );
+    hal_pages_control( *pa, *va, npages, map_mode, page_rw );
+}
+
+void hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes )
+{
+    hal_pv_alloc_ext( pa, va, size_bytes, page_map );
 }
 
 void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
