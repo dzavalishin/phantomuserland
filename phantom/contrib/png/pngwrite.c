@@ -13,6 +13,8 @@
 #include "png.h"
 #ifdef PNG_WRITE_SUPPORTED
 
+#include <phantom_time.h>
+
 /* Writes all the PNG information.  This is the suggested way to use the
  * library.  If you have a new chunk to add, make a function to write it,
  * and put it in the correct location here.  If you want the chunk written
@@ -409,11 +411,11 @@ png_convert_from_struct_tm(png_timep ptime, struct tm FAR * ttime)
 void PNGAPI
 png_convert_from_time_t(png_timep ptime, time_t ttime)
 {
-   struct tm *tbuf;
+   struct tm tbuf;
 
    png_debug(1, "in png_convert_from_time_t\n");
-   tbuf = gmtime(&ttime);
-   png_convert_from_struct_tm(ptime, tbuf);
+   gmtime_r(&ttime, &tbuf);
+   png_convert_from_struct_tm(ptime, &tbuf);
 }
 #endif
 #endif
@@ -1101,9 +1103,9 @@ png_set_filter(png_structp png_ptr, int method, int filters)
    {
       switch (filters & (PNG_ALL_FILTERS | 0x07))
       {
-         case 5:
-         case 6:
-         case 7: png_warning(png_ptr, "Unknown row filter for method 0");
+         case 5: 
+         case 6: 
+         case 7: png_warning(png_ptr, "Unknown row filter for method 0"); /* FALLTHROUGH */
          case PNG_FILTER_VALUE_NONE:  png_ptr->do_filter=PNG_FILTER_NONE; break;
          case PNG_FILTER_VALUE_SUB:   png_ptr->do_filter=PNG_FILTER_SUB;  break;
          case PNG_FILTER_VALUE_UP:    png_ptr->do_filter=PNG_FILTER_UP;   break;

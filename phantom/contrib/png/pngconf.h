@@ -21,6 +21,8 @@
 #include "pngusr.h"
 #endif
 
+#include <threads.h>
+
 /* This is the size of the compression buffer, and thus the size of
  * an IDAT chunk.  Make this whatever size you feel is best for your
  * machine.  One of these will be allocated per png_struct.  When this
@@ -1289,7 +1291,8 @@ typedef z_stream FAR *  png_zstreamp;
  */
 
 #ifndef PNG_ABORT
-#  define PNG_ABORT() abort()
+//#  define PNG_ABORT() abort()
+#  define PNG_ABORT() panic("libpng")
 #endif
 
 #ifdef PNG_SETJMP_SUPPORTED

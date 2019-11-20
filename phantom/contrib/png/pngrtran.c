@@ -37,6 +37,7 @@ png_set_crc_action(png_structp png_ptr, int crit_action, int ancil_action)
          break;
       case PNG_CRC_WARN_DISCARD:    /* not a valid action for critical data */
          png_warning(png_ptr, "Can't discard critical data on CRC error.");
+         /* FALLTHROUGH */
       case PNG_CRC_ERROR_QUIT:                                /* error/quit */
       case PNG_CRC_DEFAULT:
       default:

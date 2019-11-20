@@ -121,6 +121,7 @@
       "svn_version.h": "c",
       "init.h": "c",
       "debug_graphical.h": "c",
-      "vnc_server.h": "c"
+      "vnc_server.h": "c",
+      "png.h": "c"
     }
   }
