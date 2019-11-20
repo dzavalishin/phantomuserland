@@ -13,9 +13,9 @@
 #define DEV_NAME "tulip"
 #define DEBUG_MSG_PREFIX "tulip"
 #include <debug_ext.h>
-#define debug_level_flow 10
+#define debug_level_flow 11
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 11
 
 #include <kernel/drivers.h>
 #include <kernel/debug.h>
@@ -27,6 +27,9 @@
 #include <hal.h>
 #include <time.h>
 #include <sys/ioctl.h>
+
+#include <kernel/net/ethernet.h>
+
 
 static int DEBUG = 1;
 
@@ -143,8 +146,6 @@ static int DEBUG = 1;
 #include <compat/etherboot.h>
 #include <stdint.h>
 
-//#include "nic.h"
-//#include "pci.h"
 
 /* User settable parameters */
 
@@ -180,8 +181,8 @@ typedef  int32_t   s32;
 /*********************************************************************/
 
 //static u32 ioaddr;
-#warning fix me
-#define ioaddr (dev->iobase)
+//#warning fix me
+//#define ioaddr (dev->iobase)
 
 /* Note: transmit and receive buffers must be longword aligned and
    longword divisable */
@@ -389,19 +390,19 @@ int mdio_read(phantom_device_t *dev, int phy_id, int location)
     int i;
     int read_cmd = (0xf6 << 10) | (phy_id << 5) | location;
     int retval = 0;
-    long mdio_addr = ioaddr + CSR9;
+    long mdio_addr = dev->iobase + CSR9;
 
 #ifdef TULIP_DEBUG_WHERE
-    whereami("mdio_read\n");
+    //whereami("mdio_read\n");
 #endif
 
     if (tp->chip_id == LC82C168) {
 	int i = 1000;
-	outl_reverse(0x60020000 + (phy_id<<23) + (location<<18), ioaddr + 0xA0);
-	inl(ioaddr + 0xA0);
-	inl(ioaddr + 0xA0);
+	outl_reverse(0x60020000 + (phy_id<<23) + (location<<18), dev->iobase + 0xA0);
+	inl(dev->iobase + 0xA0);
+	inl(dev->iobase + 0xA0);
 	while (--i > 0)
-	    if ( ! ((retval = inl(ioaddr + 0xA0)) & 0x80000000))
+	    if ( ! ((retval = inl(dev->iobase + 0xA0)) & 0x80000000))
 		return retval & 0xffff;
 	return 0xffff;
     }
@@ -409,11 +410,11 @@ int mdio_read(phantom_device_t *dev, int phy_id, int location)
     if (tp->chip_id == COMET) {
 	if (phy_id == 1) {
 	    if (location < 7)
-		return inl(ioaddr + 0xB4 + (location<<2));
+		return inl(dev->iobase + 0xB4 + (location<<2));
 	    else if (location == 17)
-		return inl(ioaddr + 0xD0);
+		return inl(dev->iobase + 0xD0);
 	    else if (location >= 29 && location <= 31)
-		return inl(ioaddr + 0xD4 + ((location-29)<<2));
+		return inl(dev->iobase + 0xD4 + ((location-29)<<2));
 	}
 	return 0xffff;
     }
@@ -451,7 +452,7 @@ void mdio_write(phantom_device_t *dev, int phy_id, int location, int value)
 
     int i;
     int cmd = (0x5002 << 16) | (phy_id << 23) | (location<<18) | value;
-    long mdio_addr = ioaddr + CSR9;
+    long mdio_addr = dev->iobase + CSR9;
 
 #ifdef TULIP_DEBUG_WHERE
     whereami("mdio_write\n");
@@ -459,9 +460,9 @@ void mdio_write(phantom_device_t *dev, int phy_id, int location, int value)
 
     if (tp->chip_id == LC82C168) {
 	int i = 1000;
-	outl_reverse(cmd, ioaddr + 0xA0);
+	outl_reverse(cmd, dev->iobase + 0xA0);
 	do
-	    if ( ! (inl(ioaddr + 0xA0) & 0x80000000))
+	    if ( ! (inl(dev->iobase + 0xA0) & 0x80000000))
 		break;
 	while (--i > 0);
 	return;
@@ -471,11 +472,11 @@ void mdio_write(phantom_device_t *dev, int phy_id, int location, int value)
 	if (phy_id != 1)
 	    return;
 	if (location < 7)
-	    outl_reverse(value, ioaddr + 0xB4 + (location<<2));
+	    outl_reverse(value, dev->iobase + 0xB4 + (location<<2));
 	else if (location == 17)
-	    outl_reverse(value, ioaddr + 0xD0);
+	    outl_reverse(value, dev->iobase + 0xD0);
 	else if (location >= 29 && location <= 31)
-	    outl_reverse(value, ioaddr + 0xD4 + ((location-29)<<2));
+	    outl_reverse(value, dev->iobase + 0xD4 + ((location-29)<<2));
 	return;
     }
 
@@ -519,7 +520,7 @@ static int read_eeprom(unsigned long io_addr, int location, int addr_len)
     int read_cmd = location | EE_READ_CMD;
 
 #ifdef TULIP_DEBUG_WHERE
-    whereami("read_eeprom\n");
+    //whereami("read_eeprom\n");
 #endif
 
     outl_reverse(EE_ENB & ~EE_CS, ee_addr);
@@ -608,7 +609,7 @@ static void parse_eeprom(phantom_device_t *dev)
     if (ee_data[27] == 0) {             /* No valid media table. */
 #ifdef TULIP_DEBUG
         if (tulip_debug > 1) {
-            printf("%s:  No Valid Media Table. ee_data[27] = %hhX\n", 
+            printf("%s:  No Valid Media Table. ee_data[27] = %x\n", 
                    tp->nic_name, ee_data[27]);
         }
 #endif
@@ -617,7 +618,7 @@ static void parse_eeprom(phantom_device_t *dev)
         int count = p[2];
         p += 3;
 
-        printf("%s: 21041 Media table, default media %hX (%s).\n",
+        printf("%s: 21041 Media table, default media %x (%s).\n",
                tp->nic_name, media,
                media & 0x0800 ? "Autosense" : medianame[media & 15]);
         for (i = 0; i < count; i++) {
@@ -797,7 +798,7 @@ static void tulip_init_ring(phantom_device_t *dev)
 static void set_rx_mode(phantom_device_t *dev) {
     struct tulip_private *tp = dev->drv_private;
 
-	int csr6 = inl(ioaddr + CSR6) & ~0x00D5;
+	int csr6 = inl(dev->iobase + CSR6) & ~0x00D5;
 
 	tp->csr6 &= ~0x00D5;
  
@@ -805,11 +806,21 @@ static void set_rx_mode(phantom_device_t *dev) {
 	tp->csr6 |= AcceptAllMulticast;
 	csr6 |= AcceptAllMulticast;
 
-	outl_reverse(csr6, ioaddr + CSR6);
-
-	
-	
+	outl_reverse(csr6, dev->iobase + CSR6);	
 }
+
+static void tulip_set_loopback( phantom_device_t *dev )
+{
+    struct tulip_private *tp = dev->drv_private;
+
+	int csr6 = inl(dev->iobase + CSR6);
+
+	tp->csr6 |= InternalLoopBack;
+	csr6 |= InternalLoopBack;
+
+	outl( dev->iobase + CSR6, csr6 );
+}
+
 
 /*********************************************************************/
 /* eth_reset - Reset adapter                                         */
@@ -825,19 +836,19 @@ static void tulip_reset(phantom_device_t *dev)
 #endif
 
     /* Stop Tx and RX */
-    outl_reverse(inl(ioaddr + CSR6) & ~0x00002002, ioaddr + CSR6);
+    outl_reverse(inl(dev->iobase + CSR6) & ~0x00002002, dev->iobase + CSR6);
 
     /* On some chip revs we must set the MII/SYM port before the reset!? */
     if (tp->mii_cnt  ||  (tp->mtable  &&  tp->mtable->has_mii)) {
-	outl_reverse(0x814C0000, ioaddr + CSR6);
+	outl_reverse(0x814C0000, dev->iobase + CSR6);
     }
  
     /* Reset the chip, holding bit 0 set at least 50 PCI cycles. */
-    outl_reverse(0x00000001, ioaddr + CSR0);
+    outl_reverse(0x00000001, dev->iobase + CSR0);
     tulip_wait(1);
 
     /* turn off reset and set cache align=16lword, burst=unlimit */
-    outl_reverse(tp->csr0, ioaddr + CSR0);
+    outl_reverse(tp->csr0, dev->iobase + CSR0);
 
     /*  Wait the specified 50 PCI cycles after a reset */
     tulip_wait(1);
@@ -850,8 +861,8 @@ static void tulip_reset(phantom_device_t *dev)
         /* This address setting does not appear to impact chip operation?? */
         outl_reverse((tp->node_addr[5]<<8) + tp->node_addr[4] +
              (tp->node_addr[3]<<24) + (tp->node_addr[2]<<16),
-             ioaddr + 0xB0);
-        outl_reverse(addr_high + (addr_high<<16), ioaddr + 0xB8);
+             dev->iobase + 0xB0);
+        outl_reverse(addr_high + (addr_high<<16), dev->iobase + 0xB8);
     }
 
     /* MC_HASH_ONLY boards don't support setup packets */
@@ -861,19 +872,19 @@ static void tulip_reset(phantom_device_t *dev)
 
 	/* clear multicast hash filters and setup MAC address filters */
 	if (tp->flags & IS_ASIX) {
-            outl_reverse(0, ioaddr + CSR13);
-            outl_reverse(addr_low,  ioaddr + CSR14);
-            outl_reverse(1, ioaddr + CSR13);
-            outl_reverse(addr_high, ioaddr + CSR14);
-	    outl_reverse(2, ioaddr + CSR13);
-	    outl_reverse(0, ioaddr + CSR14);
-	    outl_reverse(3, ioaddr + CSR13);
-	    outl_reverse(0, ioaddr + CSR14);
+            outl_reverse(0, dev->iobase + CSR13);
+            outl_reverse(addr_low,  dev->iobase + CSR14);
+            outl_reverse(1, dev->iobase + CSR13);
+            outl_reverse(addr_high, dev->iobase + CSR14);
+	    outl_reverse(2, dev->iobase + CSR13);
+	    outl_reverse(0, dev->iobase + CSR14);
+	    outl_reverse(3, dev->iobase + CSR13);
+	    outl_reverse(0, dev->iobase + CSR14);
 	} else if (tp->chip_id == COMET) {
-            outl_reverse(addr_low,  ioaddr + 0xA4);
-            outl_reverse(addr_high, ioaddr + 0xA8);
-            outl_reverse(0, ioaddr + 0xAC);
-            outl_reverse(0, ioaddr + 0xB0);
+            outl_reverse(addr_low,  dev->iobase + 0xA4);
+            outl_reverse(addr_high, dev->iobase + 0xA8);
+            outl_reverse(0, dev->iobase + 0xAC);
+            outl_reverse(0, dev->iobase + 0xB0);
 	}
     } else {
 	/* for other boards we send a setup packet to initialize
@@ -897,20 +908,20 @@ static void tulip_reset(phantom_device_t *dev)
     }
 
     /* Point to rx and tx descriptors */
-    outl_reverse( tp->rx_ring_phys[0], ioaddr + CSR3);
-    outl_reverse( tp->tx_ring_phys[0], ioaddr + CSR4);
+    outl_reverse( tp->rx_ring_phys[0], dev->iobase + CSR3);
+    outl_reverse( tp->tx_ring_phys[0], dev->iobase + CSR4);
 
     init_media(dev);
 
     /* set the chip's operating mode (but don't turn on xmit and recv yet) */
-    outl_reverse((tp->csr6 & ~0x00002002), ioaddr + CSR6);
+    outl_reverse((tp->csr6 & ~0x00002002), dev->iobase + CSR6);
 
     /* send setup packet for cards that support it */
     if (!(tp->flags & MC_HASH_ONLY)) {
 	/* enable transmit  wait for completion */
-	outl_reverse(tp->csr6 | 0x00002000, ioaddr + CSR6);
+	outl_reverse(tp->csr6 | 0x00002000, dev->iobase + CSR6);
 	/* immediate transmit demand */
-	outl_reverse(0, ioaddr + CSR1);
+	outl_reverse(0, dev->iobase + CSR1);
 
 	//to = currticks() + TX_TIME_OUT;
     polled_timeout_t pto;
@@ -932,7 +943,7 @@ static void tulip_reset(phantom_device_t *dev)
     set_rx_mode(dev); 	
         
     /* enable transmit and receive */
-    outl_reverse(tp->csr6 | 0x00002002, ioaddr + CSR6);
+    outl_reverse(tp->csr6 | 0x00002002, dev->iobase + CSR6);
 }
 
 
@@ -944,7 +955,7 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
 {
     //u16 nstype;
     //u32 to;
-    u32 csr6 = inl(ioaddr + CSR6);
+    u32 csr6 = inl(dev->iobase + CSR6);
 
     struct tulip_private *tp = dev->drv_private;
 
@@ -952,11 +963,11 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
 
 #ifdef TULIP_DEBUG_WHERE    
     whereami("tulip_transmit\n");
-    hexdump( buf, len, "tulip xmit", 0 );
+    hexdump( buf, len, "tulip TX ", 0 );
 #endif
 
     /* Disable Tx */
-    outl_reverse(csr6 & ~0x00002000, ioaddr + CSR6);
+    outl_reverse(csr6 & ~0x00002000, dev->iobase + CSR6);
 #if 1
     if( len > BUFLEN ) len = BUFLEN; //sizeof(txb);
     memcpy(tp->txb, buf, len);
@@ -986,12 +997,12 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
     tp->tx_ring[0]->status = cpu_to_le32(0x80000000);
 
     /* Point to transmit descriptor */
-    outl_reverse(tp->tx_ring_phys[0], ioaddr + CSR4);
+    outl_reverse(tp->tx_ring_phys[0], dev->iobase + CSR4);
 
     /* Enable Tx */
-    outl_reverse(csr6 | 0x00002000, ioaddr + CSR6);
+    outl_reverse(csr6 | 0x00002000, dev->iobase + CSR6);
     /* immediate transmit demand */
-    outl_reverse(0, ioaddr + CSR1);
+    outl_reverse(0, dev->iobase + CSR1);
 
     polled_timeout_t pto;
     set_polled_timeout( &pto, 2*1000L*1000 );
@@ -1006,7 +1017,7 @@ static int tulip_transmit(phantom_device_t *dev, const void *buf, int len)
     }
 
     /* Disable Tx */
-    outl_reverse(csr6 & ~0x00002000, ioaddr + CSR6);
+    outl_reverse(csr6 & ~0x00002000, dev->iobase + CSR6);
 
     return len;
 }
@@ -1027,13 +1038,38 @@ static int tulip_poll(phantom_device_t *dev, void *read_buf, size_t read_len )
         return 0;
 
 #ifdef TULIP_DEBUG_WHERE
-    whereami("tulip_poll got one\n");
+    ///whereami("tulip_poll got one\n");
 #endif
 
     size_t packetlen = (tp->rx_ring[tp->cur_rx]->status & 0x3FFF0000) >> 16;
+    LOG_FLOW( 2, "got %d bytes", packetlen );
 
     /* if we get a corrupted packet. throw it away and move on */
-    if (tp->rx_ring[tp->cur_rx]->status & 0x00008000) {
+    if (tp->rx_ring[tp->cur_rx]->status & 0x00008000) 
+    {
+        int st = tp->rx_ring[tp->cur_rx]->status;
+        LOG_ERROR( 1, "Corrupt packet, status %x", st );
+
+        if( st & (1 << 1)) LOG_ERROR0( 2, "st CRC" );
+        if( st & (1 << 2)) LOG_ERROR0( 2, "st Dribble" );
+        if( st & (1 << 3)) LOG_ERROR0( 2, "st RE" );
+        if( st & (1 << 4)) LOG_ERROR0( 2, "st RW" );
+
+        if( st & (1 << 5)) LOG_ERROR0( 2, "st IsEther" );
+        if( st & (1 << 6)) LOG_ERROR0( 2, "st CS" );
+        if( st & (1 << 7)) LOG_ERROR0( 2, "st TooLong" );
+        if( st & (1 << 8)) LOG_ERROR0( 2, "st LastDesc" );
+
+        if( st & (1 << 9)) LOG_ERROR0( 2, "st FirstDesc" );
+        if( st & (1 << 10)) LOG_ERROR0( 2, "st MultiCast" );
+
+        if( st & (1 << 14)) LOG_ERROR0( 2, "st DE (truncated)" );
+        if( st & (1 << 15)) LOG_ERROR0( 2, "st ErrSummary" );
+        if( st & (1 << 30)) LOG_ERROR0( 2, "st FilterFail" );
+        
+        LOG_ERROR( 2, "st DataType %d", (st >> 12) & 0x3 );
+
+
 	/* return the descriptor and buffer to receive ring */
         tp->rx_ring[tp->cur_rx]->status = 0x80000000;
 	    //tp->cur_rx = (++tp->cur_rx) % RX_RING_SIZE;
@@ -1064,9 +1100,9 @@ static int tulip_read( struct phantom_device *dev, void *buf, int len)
     while(1)
     {
         size_t ret = tulip_poll(dev, buf, len);
-        if( ret ) 
+        if( ret > 0 ) 
         {
-            hexdump( buf, ret, "tulip recv", 0 );
+            hexdump( buf, ret, "tulip RX ", 0 );
             return ret;
         }
         hal_sleep_msec(500); // TODO interrupts!
@@ -1088,13 +1124,13 @@ static int tulip_disable(phantom_device_t *dev)
     tulip_reset(dev);
 
     /* disable interrupts */
-    outl_reverse(0x00000000, ioaddr + CSR7);
+    outl_reverse(0x00000000, dev->iobase + CSR7);
 
     /* Stop the chip's Tx and Rx processes. */
-    outl_reverse(inl(ioaddr + CSR6) & ~0x00002002, ioaddr + CSR6);
+    outl_reverse(inl(dev->iobase + CSR6) & ~0x00002002, dev->iobase + CSR6);
 
     /* Clear the missed-packet counter. */
-    (volatile unsigned long)inl(ioaddr + CSR8);
+    (volatile unsigned long)inl(dev->iobase + CSR8);
 
     return 0;
 }
@@ -1116,7 +1152,7 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
     if (dev->iobase == 0)
         return 0;
 
-    ioaddr = dev->iobase;
+    //ioaddr = dev->iobase;
 
     /* point to private storage */
     //tp = &tpx;
@@ -1132,13 +1168,13 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
     phantom_pci_enable( pci, 1 ); // TODO adjust_pci_device also updates latency - do we need it?
 
     /* disable interrupts */
-    outl_reverse(0x00000000, ioaddr + CSR7);
+    outl_reverse(0x00000000, dev->iobase + CSR7);
 
     /* Stop the chip's Tx and Rx processes. */
-    outl_reverse(inl(ioaddr + CSR6) & ~0x00002002, ioaddr + CSR6);
+    outl_reverse(inl(dev->iobase + CSR6) & ~0x00002002, dev->iobase + CSR6);
 
     /* Clear the missed-packet counter. */
-    (volatile unsigned long)inl(ioaddr + CSR8);
+    (volatile unsigned long)inl(dev->iobase + CSR8);
 
     printf("\n");                /* so we start on a fresh line */
 #ifdef TULIP_DEBUG_WHERE
@@ -1188,9 +1224,9 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
         //pcibios_write_config_dword(pci->bus, pci->devfn, 0x40, 0x00000000);
         phantom_pci_write(pci->bus, pci->dev, pci->func, 0x40, 0x00000000, 4 );
 
-    if (inl(ioaddr + CSR5) == 0xFFFFFFFF) {
+    if (inl(dev->iobase + CSR5) == 0xFFFFFFFF) {
         printf("%s: The Tulip chip at %X is not functioning.\n",
-               tp->nic_name, ioaddr);
+               tp->nic_name, dev->iobase);
         return 0;
     }
    
@@ -1198,10 +1234,10 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
     chip_rev = phantom_pci_read(pci->bus, pci->dev, pci->func, PCI_REVISION, 1 );
 
     printf("%s: [chip: %s] rev %d at %hX\n", tp->nic_name,
-           tulip_tbl[chip_idx].chip_name, chip_rev, ioaddr);
+           tulip_tbl[chip_idx].chip_name, chip_rev, dev->iobase);
     printf("%s: Vendor=%hX  Device=%hX", tp->nic_name, tp->vendor_id, tp->dev_id);
 
-    if (chip_idx == DC21041  &&  inl(ioaddr + CSR9) & 0x8000) {
+    if (chip_idx == DC21041  &&  inl(dev->iobase + CSR9) & 0x8000) {
         printf(" 21040 compatible mode.");
         chip_idx = DC21040;
     }
@@ -1211,11 +1247,11 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
     /* The SROM/EEPROM interface varies dramatically. */
     sum = 0;
     if (chip_idx == DC21040) {
-        outl_reverse(0, ioaddr + CSR9);         /* Reset the pointer with a dummy write. */
+        outl_reverse(0, dev->iobase + CSR9);         /* Reset the pointer with a dummy write. */
         for (i = 0; i < ETH_ALEN; i++) {
             int value, boguscnt = 100000;
             do
-                value = inl(ioaddr + CSR9);
+                value = inl(dev->iobase + CSR9);
             while (value < 0  && --boguscnt > 0);
             tp->node_addr[i] = value;
             sum += value & 0xff;
@@ -1223,27 +1259,27 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
     } else if (chip_idx == LC82C168) {
         for (i = 0; i < 3; i++) {
             int value, boguscnt = 100000;
-            outl_reverse(0x600 | i, ioaddr + 0x98);
+            outl_reverse(0x600 | i, dev->iobase + 0x98);
             do
-                value = inl(ioaddr + CSR9);
+                value = inl(dev->iobase + CSR9);
             while (value < 0  && --boguscnt > 0);
             put_unaligned(le16_to_cpu(value), ((u16*)tp->node_addr) + i);
             sum += value & 0xffff;
         }
     } else if (chip_idx == COMET) {
         /* No need to read the EEPROM. */
-        put_unaligned(inl(ioaddr + 0xA4), (u32 *)tp->node_addr);
-        put_unaligned(inl(ioaddr + 0xA8), (u16 *)(tp->node_addr + 4));
+        put_unaligned(inl(dev->iobase + 0xA4), (u32 *)tp->node_addr);
+        put_unaligned(inl(dev->iobase + 0xA8), (u16 *)(tp->node_addr + 4));
         for (i = 0; i < ETH_ALEN; i ++)
             sum += tp->node_addr[i];
     } else {
         /* A serial EEPROM interface, we read now and sort it out later. */
         int sa_offset = 0;
-        int ee_addr_size = read_eeprom(ioaddr, 0xff, 8) & 0x40000 ? 8 : 6;
+        int ee_addr_size = read_eeprom(dev->iobase, 0xff, 8) & 0x40000 ? 8 : 6;
 
         for (i = 0; i < sizeof(ee_data)/2; i++)
             ((u16 *)ee_data)[i] =
-                le16_to_cpu(read_eeprom(ioaddr, i, ee_addr_size));
+                le16_to_cpu(read_eeprom(dev->iobase, i, ee_addr_size));
 
         /* DEC now has a specification (see Notes) but early board makers
            just put the address in the first EEPROM locations. */
@@ -1278,8 +1314,8 @@ static int tulip_probe(phantom_device_t * dev, pci_cfg_t *pci )
     for (i = 0; i < ETH_ALEN; i++)
         last_phys_addr[i] = tp->node_addr[i];
 
-    printf("%s: at ioaddr 0x%h MAC ", tp->nic_name, ioaddr);
-    dump_mac_addr(tp->node_addr);
+    printf("%s: at dev->iobase 0x%x MAC ", tp->nic_name, dev->iobase);
+    dump_mac_addr((char *)tp->node_addr);
     printf("\n");
 
     tp->chip_id = chip_idx;
@@ -1389,30 +1425,30 @@ static void start_link(phantom_device_t *dev)
     /* Reset the xcvr interface and turn on heartbeat. */
     switch (tp->chip_id) {
     case DC21040:
-        outl_reverse(0x00000000, ioaddr + CSR13);
-        outl_reverse(0x00000004, ioaddr + CSR13);
+        outl_reverse(0x00000000, dev->iobase + CSR13);
+        outl_reverse(0x00000004, dev->iobase + CSR13);
         break;
     case DC21041:
         /* This is nway_start(). */
         if (tp->sym_advertise == 0)
             tp->sym_advertise = 0x0061;
-        outl_reverse(0x00000000, ioaddr + CSR13);
-        outl_reverse(0xFFFFFFFF, ioaddr + CSR14);
-        outl_reverse(0x00000008, ioaddr + CSR15); /* Listen on AUI also. */
-        outl_reverse(inl(ioaddr + CSR6) | 0x0200, ioaddr + CSR6);
-        outl_reverse(0x0000EF01, ioaddr + CSR13);
+        outl_reverse(0x00000000, dev->iobase + CSR13);
+        outl_reverse(0xFFFFFFFF, dev->iobase + CSR14);
+        outl_reverse(0x00000008, dev->iobase + CSR15); /* Listen on AUI also. */
+        outl_reverse(inl(dev->iobase + CSR6) | 0x0200, dev->iobase + CSR6);
+        outl_reverse(0x0000EF01, dev->iobase + CSR13);
         break;
     case DC21140: default:
         if (tp->mtable)
-            outl_reverse(tp->mtable->csr12dir | 0x100, ioaddr + CSR12);
+            outl_reverse(tp->mtable->csr12dir | 0x100, dev->iobase + CSR12);
         break;
     case DC21142:
     case PNIC2:
         if (tp->mii_cnt  ||  media_cap[tp->if_port] & MediaIsMII) {
-            outl_reverse(0x82020000, ioaddr + CSR6);
-            outl_reverse(0x0000, ioaddr + CSR13);
-            outl_reverse(0x0000, ioaddr + CSR14);
-            outl_reverse(0x820E0000, ioaddr + CSR6);
+            outl_reverse(0x82020000, dev->iobase + CSR6);
+            outl_reverse(0x0000, dev->iobase + CSR13);
+            outl_reverse(0x0000, dev->iobase + CSR14);
+            outl_reverse(0x820E0000, dev->iobase + CSR6);
         } else
             nway_start(dev);
         break;
@@ -1420,21 +1456,21 @@ static void start_link(phantom_device_t *dev)
         if ( ! tp->mii_cnt) {
             tp->nway = 1;
             tp->nwayset = 0;
-            outl_reverse(0x00420000, ioaddr + CSR6);
-            outl_reverse(0x30, ioaddr + CSR12);
-            outl_reverse(0x0001F078, ioaddr + 0xB8);
-            outl_reverse(0x0201F078, ioaddr + 0xB8); /* Turn on autonegotiation. */
+            outl_reverse(0x00420000, dev->iobase + CSR6);
+            outl_reverse(0x30, dev->iobase + CSR12);
+            outl_reverse(0x0001F078, dev->iobase + 0xB8);
+            outl_reverse(0x0201F078, dev->iobase + 0xB8); /* Turn on autonegotiation. */
         }
         break;
     case MX98713: case COMPEX9881:
-        outl_reverse(0x00000000, ioaddr + CSR6);
-        outl_reverse(0x000711C0, ioaddr + CSR14); /* Turn on NWay. */
-        outl_reverse(0x00000001, ioaddr + CSR13);
+        outl_reverse(0x00000000, dev->iobase + CSR6);
+        outl_reverse(0x000711C0, dev->iobase + CSR14); /* Turn on NWay. */
+        outl_reverse(0x00000001, dev->iobase + CSR13);
         break;
     case MX98715: case MX98725:
-        outl_reverse(0x01a80000, ioaddr + CSR6);
-        outl_reverse(0xFFFFFFFF, ioaddr + CSR14);
-        outl_reverse(0x00001000, ioaddr + CSR12);
+        outl_reverse(0x01a80000, dev->iobase + CSR6);
+        outl_reverse(0xFFFFFFFF, dev->iobase + CSR14);
+        outl_reverse(0x00001000, dev->iobase + CSR12);
         break;
     case COMET:
         /* No initialization necessary. */
@@ -1465,19 +1501,19 @@ static void nway_start(phantom_device_t *dev)
         printf("%s: Restarting internal NWay autonegotiation, %X.\n",
                tp->nic_name, csr14);
 #endif
-    outl_reverse(0x0001, ioaddr + CSR13);
-    outl_reverse(csr14, ioaddr + CSR14);
+    outl_reverse(0x0001, dev->iobase + CSR13);
+    outl_reverse(csr14, dev->iobase + CSR14);
     tp->csr6 = 0x82420000 | (tp->sym_advertise & 0x0040 ? 0x0200 : 0);
-    outl_reverse(tp->csr6, ioaddr + CSR6);
+    outl_reverse(tp->csr6, dev->iobase + CSR6);
     if (tp->mtable  &&  tp->mtable->csr15dir) {
-        outl_reverse(tp->mtable->csr15dir, ioaddr + CSR15);
-        outl_reverse(tp->mtable->csr15val, ioaddr + CSR15);
+        outl_reverse(tp->mtable->csr15dir, dev->iobase + CSR15);
+        outl_reverse(tp->mtable->csr15val, dev->iobase + CSR15);
     } else if (tp->chip_id != PNIC2)
-        outw_reverse(0x0008, ioaddr + CSR15);
+        outw_reverse(0x0008, dev->iobase + CSR15);
     if (tp->chip_id == DC21041)                 /* Trigger NWAY. */
-        outl_reverse(0xEF01, ioaddr + CSR12);
+        outl_reverse(0xEF01, dev->iobase + CSR12);
     else
-        outl_reverse(0x1301, ioaddr + CSR12);
+        outl_reverse(0x1301, dev->iobase + CSR12);
 }
 
 static void init_media(phantom_device_t *dev)
@@ -1529,9 +1565,9 @@ static void init_media(phantom_device_t *dev)
     if (tp->if_port) {
         if (tp->chip_id == DC21143  &&  media_cap[tp->if_port] & MediaIsMII) {
             /* We must reset the media CSRs when we force-select MII mode. */
-            outl_reverse(0x0000, ioaddr + CSR13);
-            outl_reverse(0x0000, ioaddr + CSR14);
-            outl_reverse(0x0008, ioaddr + CSR15);
+            outl_reverse(0x0000, dev->iobase + CSR13);
+            outl_reverse(0x0000, dev->iobase + CSR14);
+            outl_reverse(0x0008, dev->iobase + CSR15);
         }
         select_media(dev, 1);
         return;
@@ -1549,11 +1585,11 @@ static void init_media(phantom_device_t *dev)
                 printf("%s: Using MII transceiver %d, status %hX.\n",
                        tp->nic_name, tp->phys[0], mdio_read(dev, tp->phys[0], 1));
 #endif
-            outl_reverse(0x82020000, ioaddr + CSR6);
+            outl_reverse(0x82020000, dev->iobase + CSR6);
             tp->csr6 = 0x820E0000;
             tp->if_port = 11;
-            outl_reverse(0x0000, ioaddr + CSR13);
-            outl_reverse(0x0000, ioaddr + CSR14);
+            outl_reverse(0x0000, dev->iobase + CSR13);
+            outl_reverse(0x0000, dev->iobase + CSR14);
         } else
             nway_start(dev);
         break;
@@ -1564,28 +1600,28 @@ static void init_media(phantom_device_t *dev)
         if (tp->mii_cnt) {
             tp->if_port = 11;
             tp->csr6 = 0x814C0000 | (tp->full_duplex ? 0x0200 : 0);
-            outl_reverse(0x0001, ioaddr + CSR15);
-        } else if (inl(ioaddr + CSR5) & TPLnkPass)
+            outl_reverse(0x0001, dev->iobase + CSR15);
+        } else if (inl(dev->iobase + CSR5) & TPLnkPass)
             pnic_do_nway(dev);
         else {
             /* Start with 10mbps to do autonegotiation. */
-            outl_reverse(0x32, ioaddr + CSR12);
+            outl_reverse(0x32, dev->iobase + CSR12);
             tp->csr6 = 0x00420000;
-            outl_reverse(0x0001B078, ioaddr + 0xB8);
-            outl_reverse(0x0201B078, ioaddr + 0xB8);
+            outl_reverse(0x0001B078, dev->iobase + 0xB8);
+            outl_reverse(0x0201B078, dev->iobase + 0xB8);
         }
         break;
     case MX98713: case COMPEX9881:
         tp->if_port = 0;
         tp->csr6 = 0x01880000 | (tp->full_duplex ? 0x0200 : 0);
-        outl_reverse(0x0f370000 | inw(ioaddr + 0x80), ioaddr + 0x80);
+        outl_reverse(0x0f370000 | inw(dev->iobase + 0x80), dev->iobase + 0x80);
         break;
     case MX98715: case MX98725:
         /* Provided by BOLO, Macronix - 12/10/1998. */
         tp->if_port = 0;
         tp->csr6 = 0x01a80200;
-        outl_reverse(0x0f370000 | inw(ioaddr + 0x80), ioaddr + 0x80);
-        outl_reverse(0x11000 | inw(ioaddr + 0xa0), ioaddr + 0xa0);
+        outl_reverse(0x0f370000 | inw(dev->iobase + 0x80), dev->iobase + 0x80);
+        outl_reverse(0x11000 | inw(dev->iobase + 0xa0), dev->iobase + 0xa0);
         break;
     case COMET:
         tp->if_port = 0;
@@ -1603,7 +1639,7 @@ static void pnic_do_nway(phantom_device_t *dev)
 {
     struct tulip_private *tp = dev->drv_private;
 
-    u32 phy_reg = inl(ioaddr + 0xB8);
+    u32 phy_reg = inl(dev->iobase + 0xB8);
     u32 new_csr6 = tp->csr6 & ~0x40C40200;
 
 #ifdef TULIP_DEBUG_WHERE
@@ -1617,9 +1653,9 @@ static void pnic_do_nway(phantom_device_t *dev)
         else if (phy_reg & 0x08000000)  tp->if_port = 0;
         tp->nwayset = 1;
         new_csr6 = (tp->if_port & 1) ? 0x01860000 : 0x00420000;
-        outl_reverse(0x32 | (tp->if_port & 1), ioaddr + CSR12);
+        outl_reverse(0x32 | (tp->if_port & 1), dev->iobase + CSR12);
         if (tp->if_port & 1)
-            outl_reverse(0x1F868, ioaddr + 0xB8);
+            outl_reverse(0x1F868, dev->iobase + 0xB8);
         if (phy_reg & 0x30000000) {
             tp->full_duplex = 1;
             new_csr6 |= 0x00000200;
@@ -1631,8 +1667,8 @@ static void pnic_do_nway(phantom_device_t *dev)
 #endif
         if (tp->csr6 != new_csr6) {
             tp->csr6 = new_csr6;
-            outl_reverse(tp->csr6 | 0x0002, ioaddr + CSR6);     /* Restart Tx */
-            outl_reverse(tp->csr6 | 0x2002, ioaddr + CSR6);
+            outl_reverse(tp->csr6 | 0x0002, dev->iobase + CSR6);     /* Restart Tx */
+            outl_reverse(tp->csr6 | 0x2002, dev->iobase + CSR6);
         }
     }
 }
@@ -1662,8 +1698,8 @@ static void select_media(phantom_device_t *dev, int startup)
 #endif
             tp->if_port = p[0];
             if (startup)
-                outl_reverse(mtable->csr12dir | 0x100, ioaddr + CSR12);
-            outl_reverse(p[1], ioaddr + CSR12);
+                outl_reverse(mtable->csr12dir | 0x100, dev->iobase + CSR12);
+            outl_reverse(p[1], dev->iobase + CSR12);
             new_csr6 = 0x02000000 | ((p[2] & 0x71) << 18);
             break;
         case 2: case 4: {
@@ -1685,7 +1721,7 @@ static void select_media(phantom_device_t *dev, int startup)
                            tp->nic_name);
 #endif
                 for (i = 0; i < rst[0]; i++)
-                    outl_reverse(get_u16(rst + 1 + (i<<1)) << 16, ioaddr + CSR15);
+                    outl_reverse(get_u16(rst + 1 + (i<<1)) << 16, dev->iobase + CSR15);
             }
 #ifdef TULIP_DEBUG
             if (tulip_debug > 1)
@@ -1698,11 +1734,11 @@ static void select_media(phantom_device_t *dev, int startup)
                 csr14val = setup[1];
                 csr15dir = (setup[3]<<16) | setup[2];
                 csr15val = (setup[4]<<16) | setup[2];
-                outl_reverse(0, ioaddr + CSR13);
-                outl_reverse(csr14val, ioaddr + CSR14);
-                outl_reverse(csr15dir, ioaddr + CSR15); /* Direction */
-                outl_reverse(csr15val, ioaddr + CSR15); /* Data */
-                outl_reverse(csr13val, ioaddr + CSR13);
+                outl_reverse(0, dev->iobase + CSR13);
+                outl_reverse(csr14val, dev->iobase + CSR14);
+                outl_reverse(csr15dir, dev->iobase + CSR15); /* Direction */
+                outl_reverse(csr15val, dev->iobase + CSR15); /* Data */
+                outl_reverse(csr13val, dev->iobase + CSR13);
             } else {
                 csr13val = 1;
                 csr14val = 0x0003FF7F;
@@ -1711,12 +1747,12 @@ static void select_media(phantom_device_t *dev, int startup)
                 if (tp->if_port <= 4)
                     csr14val = t21142_csr14[tp->if_port];
                 if (startup) {
-                    outl_reverse(0, ioaddr + CSR13);
-                    outl_reverse(csr14val, ioaddr + CSR14);
+                    outl_reverse(0, dev->iobase + CSR13);
+                    outl_reverse(csr14val, dev->iobase + CSR14);
                 }
-                outl_reverse(csr15dir, ioaddr + CSR15); /* Direction */
-                outl_reverse(csr15val, ioaddr + CSR15); /* Data */
-                if (startup) outl_reverse(csr13val, ioaddr + CSR13);
+                outl_reverse(csr15dir, dev->iobase + CSR15); /* Direction */
+                outl_reverse(csr15val, dev->iobase + CSR15); /* Data */
+                if (startup) outl_reverse(csr13val, dev->iobase + CSR13);
             }
 #ifdef TULIP_DEBUG
             if (tulip_debug > 1)
@@ -1743,21 +1779,21 @@ static void select_media(phantom_device_t *dev, int startup)
                 misc_info = reset_sequence + reset_length;
                 if (startup)
                     for (i = 0; i < reset_length; i++)
-                        outl_reverse(get_u16(&reset_sequence[i]) << 16, ioaddr + CSR15);
+                        outl_reverse(get_u16(&reset_sequence[i]) << 16, dev->iobase + CSR15);
                 for (i = 0; i < init_length; i++)
-                    outl_reverse(get_u16(&init_sequence[i]) << 16, ioaddr + CSR15);
+                    outl_reverse(get_u16(&init_sequence[i]) << 16, dev->iobase + CSR15);
             } else {
                 u8 *init_sequence = p + 2;
                 u8 *reset_sequence = p + 3 + init_length;
                 int reset_length = p[2 + init_length];
                 misc_info = (u16*)(reset_sequence + reset_length);
                 if (startup) {
-                    outl_reverse(mtable->csr12dir | 0x100, ioaddr + CSR12);
+                    outl_reverse(mtable->csr12dir | 0x100, dev->iobase + CSR12);
                     for (i = 0; i < reset_length; i++)
-                        outl_reverse(reset_sequence[i], ioaddr + CSR12);
+                        outl_reverse(reset_sequence[i], dev->iobase + CSR12);
                 }
                 for (i = 0; i < init_length; i++)
-                    outl_reverse(init_sequence[i], ioaddr + CSR12);
+                    outl_reverse(init_sequence[i], dev->iobase + CSR12);
             }
             tp->advertising[phy_num] = get_u16(&misc_info[1]) | 1;
             if (startup < 2) {
@@ -1781,7 +1817,7 @@ static void select_media(phantom_device_t *dev, int startup)
         if (tulip_debug > 1)
             printf("%s: Using media type %s, CSR12 is %hhX.\n",
                    tp->nic_name, medianame[tp->if_port],
-                   inl(ioaddr + CSR12) & 0xff);
+                   inl(dev->iobase + CSR12) & 0xff);
 #endif
     } else if (tp->chip_id == DC21041) {
         int port = tp->if_port <= 4 ? tp->if_port : 0;
@@ -1789,12 +1825,12 @@ static void select_media(phantom_device_t *dev, int startup)
         if (tulip_debug > 1)
             printf("%s: 21041 using media %s, CSR12 is %hX.\n",
                    tp->nic_name, medianame[port == 3 ? 12: port],
-                   inl(ioaddr + CSR12));
+                   inl(dev->iobase + CSR12));
 #endif
-        outl_reverse(0x00000000, ioaddr + CSR13); /* Reset the serial interface */
-        outl_reverse(t21041_csr14[port], ioaddr + CSR14);
-        outl_reverse(t21041_csr15[port], ioaddr + CSR15);
-        outl_reverse(t21041_csr13[port], ioaddr + CSR13);
+        outl_reverse(0x00000000, dev->iobase + CSR13); /* Reset the serial interface */
+        outl_reverse(t21041_csr14[port], dev->iobase + CSR14);
+        outl_reverse(t21041_csr15[port], dev->iobase + CSR15);
+        outl_reverse(t21041_csr13[port], dev->iobase + CSR13);
         new_csr6 = 0x80020000;
     } else if (tp->chip_id == LC82C168) {
         if (startup && ! tp->medialock)
@@ -1802,31 +1838,31 @@ static void select_media(phantom_device_t *dev, int startup)
 #ifdef TULIP_DEBUG
         if (tulip_debug > 1)
 	    printf("%s: PNIC PHY status is %hX, media %s.\n",
-                   tp->nic_name, inl(ioaddr + 0xB8), medianame[tp->if_port]);
+                   tp->nic_name, inl(dev->iobase + 0xB8), medianame[tp->if_port]);
 #endif
         if (tp->mii_cnt) {
             new_csr6 = 0x810C0000;
-            outl_reverse(0x0001, ioaddr + CSR15);
-            outl_reverse(0x0201B07A, ioaddr + 0xB8);
+            outl_reverse(0x0001, dev->iobase + CSR15);
+            outl_reverse(0x0201B07A, dev->iobase + 0xB8);
         } else if (startup) {
             /* Start with 10mbps to do autonegotiation. */
-            outl_reverse(0x32, ioaddr + CSR12);
+            outl_reverse(0x32, dev->iobase + CSR12);
             new_csr6 = 0x00420000;
-            outl_reverse(0x0001B078, ioaddr + 0xB8);
-            outl_reverse(0x0201B078, ioaddr + 0xB8);
+            outl_reverse(0x0001B078, dev->iobase + 0xB8);
+            outl_reverse(0x0201B078, dev->iobase + 0xB8);
         } else if (tp->if_port == 3  ||  tp->if_port == 5) {
-            outl_reverse(0x33, ioaddr + CSR12);
+            outl_reverse(0x33, dev->iobase + CSR12);
             new_csr6 = 0x01860000;
             /* Trigger autonegotiation. */
-            outl_reverse(startup ? 0x0201F868 : 0x0001F868, ioaddr + 0xB8);
+            outl_reverse(startup ? 0x0201F868 : 0x0001F868, dev->iobase + 0xB8);
         } else {
-            outl_reverse(0x32, ioaddr + CSR12);
+            outl_reverse(0x32, dev->iobase + CSR12);
             new_csr6 = 0x00420000;
-            outl_reverse(0x1F078, ioaddr + 0xB8);
+            outl_reverse(0x1F078, dev->iobase + 0xB8);
         }
     } else if (tp->chip_id == DC21040) {                                        /* 21040 */
         /* Turn on the xcvr interface. */
-        int csr12 = inl(ioaddr + CSR12);
+        int csr12 = inl(dev->iobase + CSR12);
 #ifdef TULIP_DEBUG
         if (tulip_debug > 1)
             printf("%s: 21040 media type is %s, CSR12 is %hhX.\n",
@@ -1836,16 +1872,16 @@ static void select_media(phantom_device_t *dev, int startup)
             tp->full_duplex = 1;
         new_csr6 = 0x20000;
         /* Set the full duplux match frame. */
-        outl_reverse(FULL_DUPLEX_MAGIC, ioaddr + CSR11);
-        outl_reverse(0x00000000, ioaddr + CSR13); /* Reset the serial interface */
+        outl_reverse(FULL_DUPLEX_MAGIC, dev->iobase + CSR11);
+        outl_reverse(0x00000000, dev->iobase + CSR13); /* Reset the serial interface */
         if (t21040_csr13[tp->if_port] & 8) {
-            outl_reverse(0x0705, ioaddr + CSR14);
-            outl_reverse(0x0006, ioaddr + CSR15);
+            outl_reverse(0x0705, dev->iobase + CSR14);
+            outl_reverse(0x0006, dev->iobase + CSR15);
         } else {
-            outl_reverse(0xffff, ioaddr + CSR14);
-            outl_reverse(0x0000, ioaddr + CSR15);
+            outl_reverse(0xffff, dev->iobase + CSR14);
+            outl_reverse(0x0000, dev->iobase + CSR15);
         }
-        outl_reverse(0x8f01 | t21040_csr13[tp->if_port], ioaddr + CSR13);
+        outl_reverse(0x8f01 | t21040_csr13[tp->if_port], dev->iobase + CSR13);
     } else {                                    /* Unknown chip type with no media table. */
         if (tp->default_port == 0)
             tp->if_port = tp->mii_cnt ? 11 : 3;
@@ -1860,7 +1896,7 @@ static void select_media(phantom_device_t *dev, int startup)
             printf("%s: No media description table, assuming "
                    "%s transceiver, CSR12 %hhX.\n",
                    tp->nic_name, medianame[tp->if_port],
-                   inl(ioaddr + CSR12));
+                   inl(dev->iobase + CSR12));
 #endif
     }
 
@@ -1992,6 +2028,45 @@ static int tulip_get_address( struct phantom_device *dev, void *buf, int len)
 }
 
 
+#define DUMP_INTR( mask ) do { if( csr5 & mask ) LOG_INFO0( 0, "intr " #mask ); } while(0)
+
+static void tulip_interrupt( void * arg )
+{
+    struct phantom_device *dev = arg;
+    //struct tulip_private *tp = dev->drv_private;
+
+    // Get interrupts status
+	int csr5 = inl(dev->iobase + CSR5);
+    // Ack all interrupts we know about
+    outl(dev->iobase + CSR5, csr5); 
+
+    LOG_FLOW( 11, "ints 0x%x", csr5 );
+
+    //if( csr5 & RxIntr )
+    //if( csr5 & TxIntr )
+
+    DUMP_INTR( RxJabber );
+    DUMP_INTR( RxDied );
+    DUMP_INTR( RxNoBuf );
+    DUMP_INTR( RxIntr );
+
+    DUMP_INTR( TxFIFOUnderflow );
+    DUMP_INTR( TxJabber );
+    DUMP_INTR( TxNoBuf );
+    DUMP_INTR( TxDied );
+    DUMP_INTR( TxIntr );
+
+    DUMP_INTR( TimerInt );
+
+    if( csr5 & TPLnkFail ) LOG_ERROR0( 0, "Link failed" );
+    if( csr5 & TPLnkPass ) LOG_FLOW0( 1, "Link passed" );
+
+    int tx_state = (csr5 >> 20) & 0x7;
+    int rx_state = (csr5 >> 17) & 0x7;
+
+    LOG_INFO_( 1, "rx state %d, x state %d", rx_state, tx_state );
+}
+
 
 
 
@@ -2060,6 +2135,24 @@ phantom_device_t * driver_tulip_probe( pci_cfg_t *pci, int stage )
         printf(DEV_NAME "Probe failed for %s\n", dev->name );
         goto free_nic;
     }
+
+    if( hal_irq_alloc( pci->interrupt, &tulip_interrupt, dev, HAL_IRQ_SHAREABLE ) )
+    {
+        //if(DEBUG)
+        printf(DEV_NAME "IRQ %d is busy\n", pci->interrupt );
+        goto free_nic;
+    }
+    printf(DEV_NAME "use IRQ %d\n", pci->interrupt );
+
+    tulip_set_loopback( dev );
+
+    /* enable interrupts */
+    outl( dev->iobase + CSR7, 
+        NormalIntr|AbnormalIntr|
+        TPLnkFail|TPLnkPass| 
+        RxIntr|TxIntr
+    );
+
 
     ifnet *interface;
     if( if_register_interface( IF_TYPE_ETHERNET, &interface, dev) )

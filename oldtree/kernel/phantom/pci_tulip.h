@@ -169,6 +169,7 @@ enum status_bits {
     NormalIntr=0x10000, AbnormalIntr=0x8000,
     RxJabber=0x200, RxDied=0x100, RxNoBuf=0x80, RxIntr=0x40,
     TxFIFOUnderflow=0x20, TxJabber=0x08, TxNoBuf=0x04, TxDied=0x02, TxIntr=0x01,
+    //LinkFail = (1 << 12),
 };
 
 /* The configuration bits in CSR6. */
@@ -176,6 +177,7 @@ enum csr6_mode_bits {
 	TxOn=0x2000, RxOn=0x0002, FullDuplex=0x0200,
 	AcceptBroadcast=0x0100, AcceptAllMulticast=0x0080,
 	AcceptAllPhys=0x0040, AcceptRunt=0x0008,
+    InternalLoopBack = (1 << 10),
 };
 
 
