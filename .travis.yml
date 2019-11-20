@@ -44,6 +44,7 @@ before_install:
   - sudo apt-get update
 #  - sudo apt-get install -y lua5.1 # no socket
 #  - sudo apt-get -y install luarocks
+  - cd phantom/hosted ; ./configure
 
 
 script:
