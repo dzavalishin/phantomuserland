@@ -1,3 +1,4 @@
+#if 0 // temp off
 /* gzio.c -- IO on .gz files
  * Copyright (C) 1995-2003 Jean-loup Gailly.
  * For conditions of distribution and use, see copyright notice in zlib.h
@@ -1001,3 +1002,5 @@ void ZEXPORT gzclearerr (file)
     s->z_eof = 0;
     clearerr(s->file);
 }
+
+#endif
