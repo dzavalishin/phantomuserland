@@ -462,7 +462,7 @@ int pcnet32_init(pcnet32 *nic)
             goto unmap_irq; // TODO free softirq!
         }
 
-        hal_pages_control( (int)nic->phys_base, va, pages, page_map, page_rw );
+        hal_pages_control( (int)nic->phys_base, va, pages, page_map_io, page_rw );
 
         nic->virt_base = (int)va;
 
