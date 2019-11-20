@@ -53,12 +53,7 @@ void dump_mac_addr(char * addr)
 
 void dump_ethernet_addr(ethernet_addr addr)
 {
-#if NET_CHATTY
-    //dprintf("%x:%x:%x:%x:%x:%x",            addr[0], addr[1], addr[2], addr[3], addr[4], addr[5]);
     dump_mac_addr(addr);
-#else
-    (void) addr;
-#endif
 }
 
 static void dump_ethernet_header(ethernet2_header *head)
