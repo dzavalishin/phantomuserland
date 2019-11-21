@@ -41,6 +41,8 @@ static void dump_alldevs( int ac, char **av );
 phantom_device_t * driver_bochs_svga_probe( pci_cfg_t *pci, int stage );
 phantom_device_t * driver_tulip_probe( pci_cfg_t *pci, int stage );
 
+phantom_device_t * driver_s3_virge_pci_probe( pci_cfg_t *pci, int stage );
+
 
 
 #define SPECIAL_VIRTIO_MAP 0
@@ -59,7 +61,8 @@ typedef struct
 } pci_probe_t;
 
 #define VIRTIO_VENDOR 0x1AF4
-
+#define S3_VENDORID 0x5333
+#define S3_VIRGE_DEV_ID 0x5631
 
 #if HAVE_PCI
 
@@ -121,6 +124,8 @@ static pci_probe_t pci_drivers[] =
 
     // Bochs pseudo-SVGA - QEMU
     { "Bochs SVGA",     driver_bochs_svga_probe,     0, 0x1234, 0x1111, 0 },
+
+    { "S3 Virge Video",     driver_s3_virge_pci_probe,     1, S3_VENDORID, S3_VIRGE_DEV_ID, 0 },
 
 };
 
