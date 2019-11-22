@@ -108,13 +108,13 @@ static isa_probe_t board_drivers[] =
     { "NE2000", 	driver_isa_ne2000_probe,1, 0x360, 11 },
 #endif
 
-#if 0
-    { "SB16",           driver_isa_sb16_probe,  2, 0x210, 5 },
+#if 1
+    //{ "SB16",           driver_isa_sb16_probe,  2, 0x210, 5 },
     { "SB16",           driver_isa_sb16_probe,  2, 0x220, 5 },
-    { "SB16",           driver_isa_sb16_probe,  2, 0x230, 5 },
-    { "SB16",           driver_isa_sb16_probe,  2, 0x240, 5 },
-    { "SB16",           driver_isa_sb16_probe,  2, 0x250, 5 },
-    { "SB16",           driver_isa_sb16_probe,  2, 0x260, 5 },
+    //{ "SB16",           driver_isa_sb16_probe,  2, 0x230, 5 },
+    //{ "SB16",           driver_isa_sb16_probe,  2, 0x240, 5 },
+    //{ "SB16",           driver_isa_sb16_probe,  2, 0x250, 5 },
+    //{ "SB16",           driver_isa_sb16_probe,  2, 0x260, 5 },
 #endif
 //    { "AdLib",         driver_isa_sdlib_probe, 3, 0x388, 8 },
 

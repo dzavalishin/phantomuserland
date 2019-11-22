@@ -16,7 +16,7 @@
 #define debug_level_error 10
 #define debug_level_info 10
 
-#include "driver_map.h"
+//#include "driver_map.h"
 
 #include <ia32/pio.h>
 #include <sys/libkern.h>
@@ -90,12 +90,14 @@ typedef struct
 
     hal_spinlock_t      lock;
 
-    hal_mutex_t mutex; // unused?
-
+    //hal_mutex_t mutex; // unused?
     // write
-    hal_cond_t 	canWrite;
-    int 	avail4write;
-    void *	start4write;
+    //hal_cond_t 	canWrite;
+
+    hal_sem_t writeSema;
+
+    volatile int 	avail4write;
+    volatile void *	start4write;
 } sb_t;
 
 
@@ -124,6 +126,7 @@ static void sb_interrupt( void *_dev );
 
 static errno_t sb_detect( phantom_device_t *dev );
 static void hw_codec_read_dma_setup(phantom_device_t* dev);
+static void hw_codec_read_irq_setup(phantom_device_t* dev);
 
 
 // TODO this is to be moved to driver_map.c and be kept in driver tables
@@ -135,7 +138,10 @@ phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage )
 
     physaddr_t physbuf;
     if( hal_alloc_phys_pages_low( &physbuf, BUFFER_PAGES ) )
+    {
+        SHOW_ERROR( 0, "Can't allocate low mem, %d pages", BUFFER_PAGES );
         return 0;
+    }
 
     phantom_device_t * dev = calloc(sizeof(phantom_device_t), 1);
     if(dev == 0)
@@ -166,9 +172,11 @@ phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage )
 
     sb->active = 0;
 
-    hal_mutex_init( &sb->mutex, "SB16" ); // unused?
+    //hal_mutex_init( &sb->mutex, "SB16" ); // unused?
+    //hal_cond_init( &sb->canWrite, "SB16 Write" );
 
-    hal_cond_init( &sb->canWrite, "SB16 Write" );
+    hal_sem_init( &sb->writeSema, "SB16 Write" );
+
     sb->avail4write = 0;
     sb->start4write = 0;
 
@@ -177,13 +185,13 @@ phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage )
     sb->dma16 = 5;
 
     SHOW_FLOW( 1, "@%x", dev->iobase );
-/*
+
     if( sb_detect(dev) )
     {
         SHOW_ERROR( 0, "SB16 not found at 0x%x", port );
         goto free4;
     }
-*/
+
 
     if( SB_Init(dev) )
     {
@@ -193,6 +201,7 @@ phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage )
 
     SHOW_FLOW( 1, "SB16 found @%x", dev->iobase );
     hw_codec_read_dma_setup(dev);
+    hw_codec_read_irq_setup(dev);
 
     sb->physbuf = physbuf;
 
@@ -201,8 +210,8 @@ phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage )
     int rpt = 100;
     while(rpt--)
     {
-        //char meander[] = "zzzzzzzz        zzzzzzzz        zzzzzzzz        ";
-        char meander[] = "adgjlorzzroljgda                "; // really poor man's sine ;)
+        char meander[] = "zzzzzzzz        zzzzzzzz        zzzzzzzz        ";
+        //char meander[] = "adgjlorzzroljgda                "; // really poor man's sine ;)
         sb_write(dev, meander, sizeof(meander));
     }
     sb_stop(dev);
@@ -238,7 +247,7 @@ static errno_t SB_Init(phantom_device_t * dev)
     SHOW_FLOW( 1, "Init @%x", dev->iobase );
 
     /* Reset DSP, get version, choose output mode */
-    if(SB_ResetDSP(dev))
+    if(SB_ResetDSP(dev)) // TODO this reset is duplicate, remove?
         return ENXIO;
 
     SHOW_FLOW( 1, "Reset ok @%x", dev->iobase );
@@ -293,13 +302,41 @@ static void sb_interrupt( void *_dev )
     int unit = dev->seq_number;
     //int addr = dev->iobase;
 
-    volatile sb_t *sb = (sb_t *)(dev->drv_private);
+    sb_t *sb = (sb_t *)(dev->drv_private);
 
     SHOW_FLOW( 9, "sound blaster %d interrupt", unit );
 
     sb->intcount++;
 
     hal_sti();
+
+
+    /* read the IRQ interrupt status register */
+    int status = hw_codec_reg_read(dev, SB16_IRQ_STATUS);
+
+    /* check if this hardware raised this interrupt */
+    if (status & 0x03) {
+
+        /* acknowledge DMA memory transfers */
+        if (status & 0x01)   inb(dev->iobase + SB16_CODEC_ACK_8_BIT);
+        if (status & 0x02)   inb(dev->iobase + SB16_CODEC_ACK_16_BIT);
+
+#if 0
+        /* handle buffer finished interrupt */
+        if (((dev->playback_stream.bits >> 3) & status) != 0) {
+            sb16_stream_buffer_done(&dev->playback_stream);
+        }
+        if (((dev->record_stream.bits >> 3) & status) != 0) {
+            sb16_stream_buffer_done(&dev->record_stream);
+        }
+
+        if ((status & 0x04) != 0) {
+            /* MIDI stream done */
+        }
+#endif        
+    }
+
+
 
     // Clean buffer so that if no incoming data available,
     // No sound will be produced
@@ -313,7 +350,8 @@ static void sb_interrupt( void *_dev )
     hal_spin_unlock( &sb->lock );
     if(ie) hal_sti();
 
-    hal_cond_signal( &sb->canWrite );
+    //hal_cond_signal( &sb->canWrite );
+    hal_sem_release( &sb->writeSema );
 
     sb->curblock = !sb->curblock;  // Toggle block
 
@@ -381,7 +419,7 @@ static int sb_start(phantom_device_t *dev)
     int addr = dev->iobase;
     int unit = dev->seq_number;
 
-    volatile sb_t *sb = (sb_t *)(dev->drv_private);
+    sb_t *sb = (sb_t *)(dev->drv_private);
 
     //take_dev_irq(dev);
     SHOW_INFO( 1, "start sb16 port = %x, unit %d", addr, unit);
@@ -435,27 +473,32 @@ static int sb_read(struct phantom_device *dev, void *buf, int len)
 
 static int sb_write(struct phantom_device *dev, const void *buf, int len)
 {
-    volatile sb_t *sb = (sb_t *)dev->drv_private;
+    sb_t *sb = (sb_t *)dev->drv_private;
+
+    SHOW_FLOW( 1, "write len %d", len );
 
     while(len > 1)
     {
         // fictive
-        hal_mutex_lock(&sb->mutex);
+        //hal_mutex_lock(&sb->mutex);
         while(sb->avail4write == 0)
         {
             if( !sb->active )
                 return -ENXIO;
 
-            SHOW_FLOW0( 1, "wait 4 buffer");
-            hal_cond_timedwait( &sb->canWrite, &sb->mutex, 1000 );
+            SHOW_FLOW( 1, "wait 4 buffer, sb->avail4write = %d", sb->avail4write );
+            //hal_cond_timedwait( &sb->canWrite, &sb->mutex, 1000 );
+            hal_sem_acquire_etc( &sb->writeSema, 1, SEM_FLAG_TIMEOUT, 1000000L );
         }
-        hal_mutex_unlock(&sb->mutex);
+        //hal_mutex_unlock(&sb->mutex);
+
+        SHOW_FLOW( 1, "write available %d", sb->avail4write );
 
         int ie = hal_save_cli();
         hal_spin_lock( &sb->lock );
 
         int avail = sb->avail4write;
-        void * data = sb->start4write;
+        void * data = (void *)sb->start4write;
 
         assert(avail);
         assert(data);
@@ -467,6 +510,8 @@ static int sb_write(struct phantom_device *dev, const void *buf, int len)
 
         hal_spin_unlock( &sb->lock );
         if(ie) hal_sti();
+
+        SHOW_FLOW( 1, "write tocopy %d", tocopy );
 
         memcpy( data, buf, tocopy * 2 );
         len -= tocopy*2;
@@ -512,7 +557,7 @@ static errno_t SB_ResetDSP(phantom_device_t *dev)
     outb(sb->resetport, 1);
     //phantom_spinwait_msec(10);
     hal_sleep_msec(10);
-    hal_sleep_msec(100);
+    //hal_sleep_msec(100);
     outb(sb->resetport, 0);
 
     int i = 100;
@@ -581,12 +626,17 @@ hw_codec_read_irq_setup(phantom_device_t* dev)
     /* query the current IRQ line resource */
     int mask = hw_codec_reg_read(dev, SB16_IRQ_SETUP);
 
-    dev->irq = 5;
+    //dev->irq = 5;
+    uint32_t irq = 0;
 
-    if (mask & 0x01)		dev->irq = 2;
-    if (mask & 0x02)		dev->irq = 5;
-    if (mask & 0x04)		dev->irq = 7;
-    if (mask & 0x08)		dev->irq = 10;
+    if (mask & 0x01)		irq = 2;
+    if (mask & 0x02)		irq = 5;
+    if (mask & 0x04)		irq = 7;
+    if (mask & 0x08)		irq = 10;
+
+    SHOW_INFO( 1, "Current IRQ in dev = %d", irq );
+
+    //dev->irq = irq;
 }
 
 static void
@@ -623,6 +673,8 @@ hw_codec_write_irq_setup(phantom_device_t* dev)
     if (dev->irq == 10)		mask = 0x08;
 
     hw_codec_reg_write(dev, SB16_IRQ_SETUP, mask);
+
+    SHOW_INFO( 1, "Set dev IRQ to %d", dev->irq );
 }
 
 static void
@@ -693,6 +745,8 @@ hw_codec_reset(phantom_device_t *dev)
 {
     int times, delay;
 
+    SHOW_FLOW( 1, "Reset @%x", dev->iobase );
+
     /* try to reset the DSP hardware */
     for (times = 0; times < 10; times++)
     {
@@ -702,9 +756,11 @@ hw_codec_reset(phantom_device_t *dev)
             inb(dev->iobase + SB16_CODEC_RESET);
 
         outb( dev->iobase + SB16_CODEC_RESET, 0);
-
-        if (hw_codec_read_byte(dev) == 0xaa)
+        uint8_t ans = hw_codec_read_byte(dev);
+        if( ans == 0xaa)
             return 0;
+
+        SHOW_ERROR( 1, "Codec answer = @%x", ans );
     }
 
     return ENXIO;

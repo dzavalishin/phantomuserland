@@ -37,8 +37,8 @@ static int s3_video_start();
 static int s3_video_stop();
 
 static int s3_init();
-
-
+static void setCursorImage( drv_video_bitmap_t *cb );
+static void s3_mouse_redraw_cursor(void);
 
 struct drv_video_screen_t        video_driver_s3 =
 {
@@ -55,6 +55,10 @@ probe: 			s3_video_probe,
 start: 			s3_video_start,
 stop:   		s3_video_stop,
 
+.mouse_redraw_cursor = s3_mouse_redraw_cursor,  
+.mouse_set_cursor = setCursorImage,
+
+
 #if 0
 update: 		vid_null,
 bitblt: 		drv_video_bitblt_rev,
@@ -64,11 +68,8 @@ bitblt_part:            drv_video_bitblt_part_rev,
 
 mouse:    		vid_null,
 
-redraw_mouse_cursor: 	drv_video_draw_mouse_deflt,
-set_mouse_cursor: 	drv_video_set_mouse_cursor_deflt,
-mouse_disable:          drv_video_mouse_off_deflt,
-mouse_enable:          	drv_video_mouse_on_deflt,
 #endif
+
 
 };
 
@@ -89,7 +90,7 @@ static inline void writeReg(int IndexPort, u_int8_t RegIndex, u_int8_t RegValue)
 
 static inline u_int8_t readCR(u_int8_t RegIndex)
 {
-    return ReadReg( 0x3D4, RegIndex );
+    return readReg( 0x3D4, RegIndex );
 }
 
 static inline void writeCR( u_int8_t RegIndex, u_int8_t RegValue )
@@ -101,20 +102,21 @@ static inline void writeCR( u_int8_t RegIndex, u_int8_t RegValue )
 
 static void setCursorColors( color_t bg, color_t fg )
 {
+    u_int8_t CR45;
+    
     writeCR( 0x39, 0xA0 ); // Unlock Sys Control regs
 
-    u_int8_t CR45 = readCR( 0x45 ); // reset RGB stack access counter
+    CR45 = readCR( 0x45 ); // reset RGB stack access counter
     writeCR( 0x4B, bg.r );
     writeCR( 0x4B, bg.g );
     writeCR( 0x4B, bg.b );
 
-    u_int8_t CR45 = readCR( 0x45 ); // reset RGB stack access counter
+    CR45 = readCR( 0x45 ); // reset RGB stack access counter
     writeCR( 0x4A, fg.r );
     writeCR( 0x4A, fg.g );
     writeCR( 0x4A, fg.b );
 
     writeCR( 0x45, CR45 | 0x1 ); // Enable cursor
-
 }
 
 
@@ -186,17 +188,73 @@ static void setCursorImage( drv_video_bitmap_t *cb )
     writeCR( 0x4C, (upper1k >> 8) & 0x0F );
     writeCR( 0x4D, upper1k & 0xFF );
 
-    if( video_driver_s3.screen == 0 )
+    //if( video_driver_s3.screen == 0 )
+    if( video_drv->screen == 0 )
     {
         LOG_ERROR0( 0 , "No video mem");
+        return;
     }
 
-    u_int8_t *cursorMem = video_driver_s3.screen + upper1k_shift;
+    //u_int8_t *cursorMem = video_driver_s3.screen + upper1k_shift;
+    int8_t *cursorMem = video_drv->screen + upper1k_shift;
 
     int i;
     for( i = 0; i < 1024; i ++ )
-        cursorMem[i] = 0xFF;
+        cursorMem[i] = 0xFF; // TODO 0
+
+    // Convert Phantom bitmap to 2-bit interleaved cursor image
+
+    // The AND and the XOR cursor image bitmaps are 512 bytes each. 
+    // These bitmaps are word interleaved in a contiguous area of 
+    // display memory, i.e., AND word 0, XOR word 0, AND word 1, XOR word 1 ...
+    // AND word 255, XOR word 255.
+
+#define CURSOR_XSIZE 64    
+#define CURSOR_YSIZE 64    
+
+    int x, y;
+    for( y = 0; (y < CURSOR_YSIZE) && (y < cb->ysize); y++ )
+    {
+        rgba_t *cbLine = cb->pixel + ( cb->ysize - y - 1 ) * cb->xsize; // Move back on Y axis
+
+        for( x = 0; (x < CURSOR_XSIZE) && (x < cb->xsize); x += 8 )
+        {
+            int and_byte = 0;
+            int xor_byte = 0;
+            
+            int bit = 0;
+            for( bit = 0; bit < 8; bit++ )
+            {
+                rgba_t pixel = *cbLine++;
+                u_int32_t color_sum = pixel.r + pixel.g + pixel.b;
+
+                and_byte <<= 1;
+                xor_byte <<= 1;
+
+                if( !pixel.a ) and_byte |= 0x1;
+                if( pixel.a && (color_sum > 6) ) xor_byte |= 1;
+            }
+
+            *cursorMem++ = and_byte;
+            *cursorMem++ = xor_byte;
+        }
+    }
+
 }
+
+
+static void s3_mouse_redraw_cursor(void)
+{
+    setCursorPosition( video_drv->mouse_x, video_drv->mouse_y );
+}
+
+
+
+
+
+
+
+
 
 typedef struct {
     int         dummy;
@@ -314,7 +372,9 @@ static void s3_map_video(int on_off)
 */
 static int s3_video_start()
 {
-    //s3_map_video( 1 );
+    setCursorColors( COLOR_BLACK, COLOR_WHITE ); // TODO extract from cursor image?
+
+    //s3_map_video( 1 ); // TODO do we need our own mapping?
     return 0;
 }
 
