@@ -398,8 +398,10 @@ keyboard_ps2_task (void)
         // todo -  data.key = ascii_to_UTF_cyrillic[data.key], if(!shifts) tolower_cyrillic: keyboard_cyrillic_tab.h
 
         u->national_keymap = u->modifiers & KEYMOD_NUM; // TEMP?
+        
+        int any_mod = data.modifiers & (KEYMOD_CTRL|KEYMOD_ALT|KEYMOD_META);
 
-        if( u->national_keymap )
+        if( u->national_keymap && !any_mod )
             data.key = ascii_to_UTF32_cyrillic_translate( data.key, ! (data.modifiers & (KEYMOD_SHIFT | KEYMOD_CAPS)) );
 
         keyboard_translate( &data );
