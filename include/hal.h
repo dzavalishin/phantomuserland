@@ -148,6 +148,8 @@ void                                    hal_free_vaddress(void *addr, int n_page
 
 //! Allocate physmem, address space for it, and map. Panics if out of anything.
 void                                    hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes );
+//! Allocate physmem for device IO - uses special page mapping mode
+void                                    hal_pv_alloc_io( physaddr_t *pa, void **va, int size_bytes );
 //! Allocate physmem, address space for it, and map using given mode (usually page_map_io). Panics if out of anything.
 void                                    hal_pv_alloc_ext( physaddr_t *pa, void **va, int size_bytes, page_mapped_t map_mode );
 //! Unmap, free addr space and physmem

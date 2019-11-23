@@ -368,6 +368,13 @@ void hal_pv_alloc( physaddr_t *pa, void **va, int size_bytes )
     hal_pv_alloc_ext( pa, va, size_bytes, page_map );
 }
 
+void hal_pv_alloc_io( physaddr_t *pa, void **va, int size_bytes )
+{
+    hal_pv_alloc_ext( pa, va, size_bytes, page_map_io );
+}
+
+
+
 void hal_pv_free( physaddr_t pa, void *va, int size_bytes )
 {
     int npages = ((size_bytes-1)/PAGE_SIZE) + 1;
