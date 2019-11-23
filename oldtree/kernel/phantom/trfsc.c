@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <threads.h>
 #include <kernel/init.h>
+#include <kernel/debug.h>
 
 
 #include "trfs.h"
