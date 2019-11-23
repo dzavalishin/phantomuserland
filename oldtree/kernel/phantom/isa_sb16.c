@@ -1,3 +1,4 @@
+#if 1
 /**
  *
  * Phantom OS
@@ -19,6 +20,7 @@
 //#include "driver_map.h"
 
 #include <ia32/pio.h>
+#include <dev/isa/sb16_regs.h>
 #include <sys/libkern.h>
 #include <phantom_libc.h>
 #include <time.h>
@@ -127,6 +129,9 @@ static void sb_interrupt( void *_dev );
 static errno_t sb_detect( phantom_device_t *dev );
 static void hw_codec_read_dma_setup(phantom_device_t* dev);
 static void hw_codec_read_irq_setup(phantom_device_t* dev);
+
+static int hw_codec_reg_read(phantom_device_t* dev, u_int8_t index);
+
 
 
 // TODO this is to be moved to driver_map.c and be kept in driver tables
@@ -599,7 +604,6 @@ static errno_t SB_ResetDSP(phantom_device_t *dev)
 #if 1
 
 
-#include <dev/isa/sb16_regs.h>
 
 
 static void
@@ -1268,3 +1272,4 @@ multi_audio_control(void* cookie, uint32 op, void* arg, size_t len)
 #endif
 
 
+#endif
