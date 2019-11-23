@@ -1,4 +1,4 @@
-#if HAVE_PCI
+#if HAVE_PCI || 1
 /**
  *
  * Phantom OS
@@ -11,7 +11,7 @@
 #define DEV_NAME "es1370"
 #define DEBUG_MSG_PREFIX "es1370"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -36,7 +36,7 @@
 #define u16 u_int16_t
 #define u8 u_int8_t
 //#define esSleep(__us) do { long us = __us; do { tenmicrosec(); us -= 100; } while( __us > 0); } while(0)
-#define esSleep(__us) do { long ms = ((__us)-1)/1000; ms++; hal_sleep_msec(ms);  } while(0)
+//#define esSleep(__us) do { long ms = ((__us)-1)/1000; ms++; hal_sleep_msec(ms);  } while(0)
 
 static errno_t check_es1370_sanity(int iobase);
 static errno_t init_es1370(phantom_device_t *dev);
@@ -203,10 +203,10 @@ static errno_t init_es1370(phantom_device_t *dev)
     int size_bytes = ES1370_BUFSIZE;
 
     // TODO free
-    hal_pv_alloc( &es->dac2BufferPa, &es->dac2Buffer, size_bytes );
+    hal_pv_alloc_io( &es->dac2BufferPa, &es->dac2Buffer, size_bytes );
     es->dac2BufferSize = size_bytes;
 
-    hal_pv_alloc( &es->adcBufferPa, &es->adcBuffer, size_bytes );
+    hal_pv_alloc_io( &es->adcBufferPa, &es->adcBuffer, size_bytes );
     es->adcBufferSize = size_bytes;
 
     reset_codec(dev);
@@ -880,14 +880,16 @@ static int _setCodec(phantom_device_t *dev, u8 codecControlRegister, u8 value)
     int ret;
     while ((ret = (inl(dev->iobase + ES1370_IRQ_STATUS) & StatusCstat)) && retry--)
     {
-        esSleep(10000); // 1msec
+        //esSleep(10000); // 1msec
+        hal_sleep_msec(1);
     }
 
     if (ret == 0)
     {
         outw(dev->iobase + CodecWriteRegister, ((u16) codecControlRegister << 8) | value); // This register must be accessed as a word.
         //codec[codecControlRegister] = value; // save
-        esSleep(1000); // 100usec
+        //esSleep(1000); // 100usec
+        hal_sleep_msec(1);
         return 0;
     }
 
@@ -903,7 +905,8 @@ static void reset_codec(phantom_device_t *dev)
 
     setCodec(CodecResPd, RespdNormalOperation);
     setCodec(CodecCsel, 0); // set the clocks for codec.
-    esSleep(200000); // 20msec
+    //esSleep(200000); // 20msec
+    hal_sleep_msec(20);
     setCodec(CodecAdsel, 0); // select input mixer as the input source to ADC.
 
     // volumes.
