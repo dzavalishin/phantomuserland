@@ -123,5 +123,6 @@
       "debug_graphical.h": "c",
       "vnc_server.h": "c",
       "png.h": "c"
-    }
+    },
+    "restructuredtext.confPath": "g:\\Projects\\phantomdox\\dox\\source"
   }
