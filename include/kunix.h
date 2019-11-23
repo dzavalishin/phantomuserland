@@ -21,7 +21,7 @@ void kernel_unix_init(void);
  *
  * When Phantom kernel code is running in user mode (pvm_test)
  * we are not sure if struct stat is the same in our headers and
- * in host's GCC lib. Hence k_sat can't be used. 
+ * in host's GCC lib. Hence k_stat can't be used. 
  *
  * Hence k_stat_size is a palliative solution.
  *
