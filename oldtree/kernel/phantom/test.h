@@ -36,6 +36,7 @@ int do_test_tftp(const char *test_parm);
 int do_test_tcp_connect(const char *test_parm);
 
 int do_test_video(const char *test_parm);
+int do_test_sound(const char *test_parm);
 
 // TODO test TCP? how?
 
