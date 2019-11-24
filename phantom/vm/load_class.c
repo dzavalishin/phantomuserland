@@ -286,7 +286,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
                         if(0 && debug_print) printf("map l %d -> ip %ld\n", sp->line, sp->ip );
                     }
 
-                    if(0 && debug_print)printf("! "); pvm_object_print( map ); printf(" !\n");
+                    if(0 && debug_print) { printf("! "); pvm_object_print( map ); printf(" !\n"); }
                 }
 
                 pvm_set_ofield( ip2line_maps, ordinal, map );

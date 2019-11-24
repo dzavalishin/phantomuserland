@@ -140,13 +140,6 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    // If we are here and arg_run_test != 0
-    if(arg_run_test)
-    {
-        printf("\nTest '%s' not found\n", arg_run_test );
-        exit(33);
-    }
-
     char *dir = getenv("PHANTOM_HOME");
     char *rest = "plib/bin/classes";
 
@@ -159,7 +152,7 @@ int main(int argc, char* argv[])
     char fn[1024];
     snprintf( fn, 1024, "%s/%s", dir, rest );
 
-    if( load_code( &bulk_code, &bulk_size, fn ) ) //"pcode/classes") )
+    if( load_code( &bulk_code, &bulk_size, fn ) ) 
     {
         printf("No bulk classes file '%s'\n", fn );
         exit(22);
@@ -174,6 +167,20 @@ int main(int argc, char* argv[])
     test_json();
     //return 0;
 #endif
+
+    if( 0 == strcmp( arg_run_test, "alloc" ) )
+    {
+        test_allocator();
+        exit(0);
+    }
+
+    // If we are here and arg_run_test != 0
+    if(arg_run_test)
+    {
+        printf("\nTest '%s' not found\n", arg_run_test );
+        exit(33);
+    }
+
 
     // Enable multithreading in user mode.
     // Does not work yet.
@@ -238,6 +245,8 @@ static void usage()
            "\troot.shell=.ru.dz.phantom.system.shell\n"
            "\troot.init=.ru.dz.phantom.system.init\n"
            "\troot.boot=.ru.dz.phantom.system.boot\n"
+           "\n"
+           "Tests: alloc, video\n"
 
            );
 }
@@ -295,7 +304,7 @@ static void args(int argc, char* argv[])
             break;
 
         case 'T':
-            arg_run_test = arg;
+            arg_run_test = arg+1;
             printf("Will run test '%s'\n", arg_run_test );
             break;
 

@@ -7,7 +7,8 @@ SRCDIRS += $(BUILD_ROOT)/vm
 #SRCDIRS += $(PHANTOM_HOME)/plib/resources/buttons
 SRCDIRS += $(BUILD_ROOT)/vm/resources
 SRCDIRS += $(BUILD_ROOT)/vm/sys
-SRCDIRS += $(BUILD_ROOT)/vm/video 
+SRCDIRS += $(BUILD_ROOT)/vm/video
+SRCDIRS += $(BUILD_ROOT)/vm/test
 
 INCDIRS += /usr/include/w32api/
 
