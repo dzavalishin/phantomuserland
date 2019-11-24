@@ -556,6 +556,7 @@ ssize_t udp_sendto(void *prot_data, const void *buf, ssize_t len, void *addr) { 
 // -----------------------------------------------------------------------
 // TODO - implement mutex/sema code for unix sim environment
 
+#if 0
 
 struct phantom_mutex_impl
 {
@@ -611,6 +612,7 @@ int gen_hal_mutex_is_locked(void *_m)
     struct phantom_mutex_impl *impl = _m;
     return impl->lock;
 }
+
 
 // -----------------------------------------------------------
 // Cond - pthread
@@ -698,4 +700,5 @@ void gen_hal_cond_destroy(void *c_impl)
 }
 
 
+#endif
 

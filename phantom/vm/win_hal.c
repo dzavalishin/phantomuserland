@@ -471,7 +471,7 @@ void phantom_check_threads_pass_bytecode_instr_boundary( void )
     const char *name;
 };*/
 
-
+#if 0
 int hal_mutex_init(hal_mutex_t *m, const char *name)
 {
     m->impl = gen_hal_mutex_init(name);
@@ -510,7 +510,6 @@ errno_t hal_mutex_destroy(hal_mutex_t *m)
 
     return 0;
 }
-
 
 
 
@@ -581,6 +580,7 @@ errno_t hal_cond_destroy(hal_cond_t *c)
 
 
 
+#endif
 
 
 

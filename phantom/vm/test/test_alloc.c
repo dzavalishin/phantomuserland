@@ -43,11 +43,13 @@ static void alloc_test_thread(void *a)
     for( i = 0; i < MAX_ALLOC; i++ )
     {
         size_t sz = (MIN_OBJ_SIZE+random()) % MAX_OBJ_SIZE;
-        SHOW_FLOW( 0, "Alloc %d", sz );
+        //LOG_FLOW( 0, "Alloc %d", sz );
+        printf( "Alloc %d\n", sz );
         allocated[i] = pvm_create_binary_object( sz , 0 );
         if( pvm_is_null(allocated[i]) )
         {
-            SHOW_ERROR( 0, "Unable to alloc %d", sz );
+            //SHOW_ERROR( 0, "Unable to alloc %d", sz );
+            printf( "ERROR: Unable to alloc %d\n", sz );
             exit(33);
         }
     }
@@ -57,11 +59,16 @@ static void alloc_test_thread(void *a)
     {
         for( i = 0; i < MAX_ALLOC; i++ )
         {
-            if( allocated[i]->_ah.refCount > 1 ) SHOW_ERROR( 0, "ref != 1 @ %d", i );
+            if( allocated[i]->_ah.refCount > 1 )
+            { 
+                //SHOW_ERROR( 0, "ref != 1 @ %d", i );
+                printf( "ERROR: ref != 1 @ %d\n", i );
+            }
             ref_dec_o( allocated[i] );
 
             size_t sz = (MIN_OBJ_SIZE+random()) % MAX_OBJ_SIZE;
-            SHOW_FLOW( 0, "ReAlloc %d", sz );
+            //LOG_FLOW( 0, "ReAlloc %d", sz );
+            printf( "ReAlloc %d\n", sz );
             allocated[i] = pvm_create_binary_object( sz , 0 );
 
             YIELD();
@@ -76,7 +83,11 @@ void test_allocator( void )
     int i;
 
     for( i = 0; i < N_THREADS; i++ )
+    {
+        //LOG_FLOW( 0, "Start thread %d", i );
+        printf( "Start thread %d\n", i );
         hal_start_thread( alloc_test_thread, 0, 0 );
+    }
 
     pvm_memcheck();
 }
