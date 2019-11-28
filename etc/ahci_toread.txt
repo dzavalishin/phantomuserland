@@ -1,0 +1,3 @@
+https://github.com/rajesh5310/SBUnix/blob/master/sys/ahci.c
+https://wiki.osdev.org/AHCI#Find_an_AHCI_controller
+http://osdev.ru/viewtopic.php?f=7&t=494

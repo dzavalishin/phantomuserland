@@ -44,7 +44,7 @@ static void alloc_test_thread(void *a)
     {
         size_t sz = (MIN_OBJ_SIZE+random()) % MAX_OBJ_SIZE;
         //LOG_FLOW( 0, "Alloc %d", sz );
-        printf( "Alloc %d\n", sz );
+        printf( "Alloc %d ", sz );
         allocated[i] = pvm_create_binary_object( sz , 0 );
         if( pvm_is_null(allocated[i]) )
         {

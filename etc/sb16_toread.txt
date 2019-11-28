@@ -1,0 +1,8 @@
+
+https://github.com/SerenityOS/serenity/blob/master/Kernel/Devices/SB16.cpp
+http://homepages.cae.wisc.edu/~brodskye/sb16doc/sb16doc.html
+http://archive.gamedev.net/archive/reference/articles/article443.html
+http://archive.gamedev.net/archive/reference/articles/article444.html
+https://pdos.csail.mit.edu/6.828/2014/readings/hardware/SoundBlaster.pdf
+https://pdos.csail.mit.edu/6.828/2018/readings/hardware/SoundBlaster.pdf
+https://www.phatcode.net/articles.php?id=243

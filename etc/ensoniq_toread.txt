@@ -1,0 +1,2 @@
+https://wiki.osdev.org/Ensoniq_AudioPCI
+http://manuals.opensound.com/sources/oss_audiopci.c.html

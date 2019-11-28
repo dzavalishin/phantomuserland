@@ -1,0 +1,7 @@
+http://osdev.ru/viewtopic.php?f=7&t=299
+https://en.wikipedia.org/wiki/S3_Graphics#Device_drivers
+https://en.wikipedia.org/wiki/Free_and_open-source_graphics_device_driver#S3_Graphics
+https://www.kernel.org/doc/html/latest/fb/s3fb.html
+
+http://bitsavers.trailing-edge.com/components/
+
