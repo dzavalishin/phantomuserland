@@ -10,7 +10,11 @@
 
 #define DEBUG_MSG_PREFIX "video"
 #include <debug_ext.h>
-static int debug_level_flow = 1;
+//static int debug_level_flow = 1;
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
+
 
 #include <phantom_libc.h>
 
@@ -40,9 +44,11 @@ extern struct drv_video_screen_t        video_driver_null;
 #endif // ARCH_mips
 
 
-
+#ifdef ARCH_ia32
 extern struct drv_video_screen_t        video_driver_vmware_svga;
 extern struct drv_video_screen_t        video_driver_parallels_svga;
+extern struct drv_video_screen_t        video_driver_i810;
+#endif // ARCH_ia32
 
 // TODO: panic must switch to text mode!
 
@@ -73,6 +79,7 @@ struct drv_video_screen_t *video_drivers[] =
 
     // General reg clone driver
 //    &video_driver_gen_clone,
+    &video_driver_i810,
 #if !VESA_ENFORCE
     &video_driver_bios_vesa,
 #endif

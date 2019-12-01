@@ -1,0 +1,5 @@
+https://01.org/linuxgraphics/documentation/driver-documentation-prms/intel%C2%AE-g45-express-chipset
+https://01.org/linuxgraphics/documentation/hardware-specification-prms
+https://01.org/linuxgraphics/downloads/community-source-code-repos
+https://01.org/linuxgraphics/documentation/
+

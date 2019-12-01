@@ -10,9 +10,9 @@
 
 #define DEBUG_MSG_PREFIX "vesa"
 #include "debug_ext.h"
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
-#define debug_level_info 0
+#define debug_level_info 10
 
 
 #include <phantom_libc.h>
@@ -26,6 +26,7 @@
 #include "../misc.h"
 
 #include <dev/edid.h>
+#include <kernel/debug.h>
 
 
 
@@ -142,8 +143,8 @@ static errno_t getVesaEdid()
 #define PREFER_32BPP 1
 
 
-//#define MAX_W 1024
-#define MAX_W 1280
+#define MAX_W 1024
+//#define MAX_W 1280
 
 
 #define farTo32(fp) ( (void *) (((fp & 0xFFFF0000u) >> 12) | (fp & 0xFFFFu) ) )

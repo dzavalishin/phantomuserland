@@ -5,3 +5,5 @@ https://www.kernel.org/doc/html/latest/fb/s3fb.html
 
 http://bitsavers.trailing-edge.com/components/
 
+https://pdos.csail.mit.edu/6.828/2008/readings/hardware/vgadoc/S3.TXT
+http://bitsavers.trailing-edge.com/components/s3/DB016-A_Vision_968_Multimedia_Accelerator_Apr1995.pdf

@@ -141,6 +141,12 @@ phantom_device_t * driver_isa_sb16_probe( int port, int irq, int stage )
 {
     (void) stage;
 
+    SHOW_INFO( 0, "check @0x%x, irq %d", port, irq );
+
+#if 1
+    SHOW_ERROR0( 0, "Driver is unstable and temp off" );
+    return 0;
+#endif
     physaddr_t physbuf;
     if( hal_alloc_phys_pages_low( &physbuf, BUFFER_PAGES ) )
     {

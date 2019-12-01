@@ -112,7 +112,9 @@ static pci_probe_t pci_drivers[] =
     { "es1370", 	driver_es1370_probe,		2, ENSONIQ_VENDORID, 0x5000, 0 },
     //{ "es1370", 	driver_es1370_probe,		2, 0x1274, 0x5000, 0 },
 
-//    { "i810 Video",     driver_intel_810_pci_probe,     1, INTEL_VENDORID, 0x2772, 0 },
+    { "i810 Video",     driver_intel_810_pci_probe,     1, INTEL_VENDORID, 0x2772, 0 },
+    { "i810 Video ",     driver_intel_810_pci_probe,     1, INTEL_VENDORID, 0x2E32, 0 }, // Not 810, but I hope
+
 
 //    { "Clone Regs Video", driver_video_gen_clone_pci_probe, 1, 0x15AD, 0x405, 0 },
 
