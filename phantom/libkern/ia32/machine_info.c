@@ -16,6 +16,7 @@
 
 
 #include <kernel/ia32/cpu.h>
+#include <ia32/proc_reg.h>
 #include <kernel/init.h>
 #include <kernel/boot.h>
 
@@ -145,7 +146,10 @@ int detect_cpu(int curr_cpu)
 	unsigned int data[4];
 	char vendor_str[17];
 	int i;
-	cpu_ent *cpu = &boot_cpu; //get_cpu_struct(curr_cpu);
+	cpu_ent *cpu = &boot_cpu; //get_cpu_struct(curr_cpu); // TODO multiple CPU?
+	unsigned max_basic_func = 1;
+
+	// SMP TODO all in cli to be on one CPU
 
 	// clear out the cpu info data
 	cpu->arch.vendor = VENDOR_UNKNOWN;
@@ -154,6 +158,7 @@ int detect_cpu(int curr_cpu)
 	cpu->arch.feature[FEATURE_EXT] = 0;
 	cpu->arch.feature[FEATURE_EXT_AMD] = 0;
 	cpu->arch.model_name[0] = 0;
+	cpu->frequency = 0;
 
 	// print some fun data
 	i386_cpuid(0, data);
@@ -170,27 +175,65 @@ int detect_cpu(int curr_cpu)
 	cpu->arch.model = (data[0] >> 4) & 0xf;
 	cpu->arch.stepping = data[0] & 0xf;
 
-        printf("CPU %d: family %d model %d stepping %d, string '%s'\n",
-		curr_cpu, cpu->arch.family, cpu->arch.model, cpu->arch.stepping, vendor_str);
+#define MSR_MISC_ENABLE 0x000001A0
+
+	int have_msr = data[3] & X86_MSR;
+	if( have_msr )
+	{
+		u_int64_t msr = rdmsr( MSR_MISC_ENABLE );
+		msr &= ~(1ULL << 22); // set bit 22 = enable higher CPUIDs
+		wrmsr( MSR_MISC_ENABLE, msr );
+		//printf("cpuid: updated MSR %d to 0x%llX\n", MSR_MISC_ENABLE, msr );
+	}
+
+	i386_cpuid(0, data);
+	max_basic_func = data[0]; // max CPUID basic func no
+
+    printf("CPU %d: family %d model %d stepping %d, string '%s', max CPUID %d\n",
+		curr_cpu, cpu->arch.family, cpu->arch.model, cpu->arch.stepping, vendor_str, max_basic_func);
 
 	// figure out what vendor we have here
 
-	for(i=0; i<VENDOR_NUM; i++) {
-            if(!strcmp(vendor_str, vendor_info[i].ident_string[0])) {
-                cpu->arch.vendor = i;
-                cpu->arch.vendor_name = vendor_info[i].vendor;
-                break;
-            }
-            if(!strcmp(vendor_str, vendor_info[i].ident_string[1])) {
-                cpu->arch.vendor = i;
-                cpu->arch.vendor_name = vendor_info[i].vendor;
-                break;
-            }
+	for(i=0; i<VENDOR_NUM; i++) 
+	{
+        if(!strcmp(vendor_str, vendor_info[i].ident_string[0])) {
+            cpu->arch.vendor = i;
+            cpu->arch.vendor_name = vendor_info[i].vendor;
+            break;
+        }
+        if(!strcmp(vendor_str, vendor_info[i].ident_string[1])) {
+            cpu->arch.vendor = i;
+            cpu->arch.vendor_name = vendor_info[i].vendor;
+            break;
+        }
+	}
+
+	// freq
+	if( max_basic_func >= 0x16 )
+	{
+		i386_cpuid(0x16, data);
+		printf("CPU %d: base %u MHz, max %u MHz, bus %u MHz",
+			curr_cpu, data[0], data[1], data[2]
+		);
+		cpu->frequency = data[0]; // Is it? Or max?
+	}
+
+	if( max_basic_func >= 0x15 )
+	{
+		i386_cpuid(0x15, data);
+		unsigned frequency = data[2] / (1024*1024); 
+		printf("CPU %d: clock %u MHz",
+			curr_cpu,  frequency
+		);
+		if( cpu->frequency == 0 )
+			cpu->frequency = frequency; // overflow?
 	}
 
 	// see if we can get the model name
 	i386_cpuid(0x80000000, data);
-	if(data[0] >= 0x80000004) {
+	unsigned max_ext_func = data[0];
+
+	if( max_ext_func >= 0x80000004) {
 		// build the model string
 		memset(cpu->arch.model_name, 0, sizeof(cpu->arch.model_name));
 		i386_cpuid(0x80000002, data);
@@ -228,11 +271,11 @@ int detect_cpu(int curr_cpu)
 	//dprintf("CPU %d: features: %s\n", curr_cpu, cpu->arch.feature_string);
 	printf("CPU %d: features: %s\n", curr_cpu, cpu->arch.feature_string);
 
-        if(boot_cpu.arch.feature[FEATURE_COMMON] & X86_APIC)
-            ARCH_SET_FLAG(ARCH_IA32_APIC);
+    if(boot_cpu.arch.feature[FEATURE_COMMON] & X86_APIC)
+        ARCH_SET_FLAG(ARCH_IA32_APIC);
 
 	if(cpu->arch.feature[FEATURE_COMMON] & X86_SSE2)
-            ARCH_SET_FLAG(ARCH_IA32_SSE2);
+        ARCH_SET_FLAG(ARCH_IA32_SSE2);
 
 	return 0;
 }
