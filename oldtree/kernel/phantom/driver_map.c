@@ -42,6 +42,7 @@ phantom_device_t * driver_bochs_svga_probe( pci_cfg_t *pci, int stage );
 phantom_device_t * driver_tulip_probe( pci_cfg_t *pci, int stage );
 
 phantom_device_t * driver_s3_virge_pci_probe( pci_cfg_t *pci, int stage );
+phantom_device_t * driver_ati_video_pci_probe( pci_cfg_t *pci, int stage );
 
 
 
@@ -63,6 +64,7 @@ typedef struct
 #define VIRTIO_VENDOR 0x1AF4
 #define S3_VENDORID 0x5333
 #define S3_VIRGE_DEV_ID 0x5631
+#define ATI_VENDORID 0x1002
 
 #if HAVE_PCI
 
@@ -115,6 +117,9 @@ static pci_probe_t pci_drivers[] =
     { "i810 Video",     driver_intel_810_pci_probe,     1, INTEL_VENDORID, 0x2772, 0 },
     { "i810 Video ",     driver_intel_810_pci_probe,     1, INTEL_VENDORID, 0x2E32, 0 }, // Not 810, but I hope
 
+    { "ATI Video ",     driver_ati_video_pci_probe,     1, ATI_VENDORID, 0x4750, 0 }, // TODO check me
+    { "ATI Video ",     driver_ati_video_pci_probe,     1, ATI_VENDORID, 0x4751, 0 }, // TODO check me
+    { "ATI Video ",     driver_ati_video_pci_probe,     1, ATI_VENDORID, 0x4C50, 0 }, // TODO check me
 
 //    { "Clone Regs Video", driver_video_gen_clone_pci_probe, 1, 0x15AD, 0x405, 0 },
 

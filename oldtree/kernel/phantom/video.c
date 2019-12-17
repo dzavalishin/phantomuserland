@@ -48,6 +48,7 @@ extern struct drv_video_screen_t        video_driver_null;
 extern struct drv_video_screen_t        video_driver_vmware_svga;
 extern struct drv_video_screen_t        video_driver_parallels_svga;
 extern struct drv_video_screen_t        video_driver_i810;
+extern struct drv_video_screen_t        video_driver_ati;
 #endif // ARCH_ia32
 
 // TODO: panic must switch to text mode!
@@ -80,6 +81,7 @@ struct drv_video_screen_t *video_drivers[] =
     // General reg clone driver
 //    &video_driver_gen_clone,
     &video_driver_i810,
+    &video_driver_ati,
 #if !VESA_ENFORCE
     &video_driver_bios_vesa,
 #endif

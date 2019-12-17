@@ -53,7 +53,7 @@ static int ati_video_probe();
 static int ati_video_start();
 static int ati_video_stop();
 
-static int ati_init();
+static int ati_init() {}
 
 
 struct drv_video_screen_t        video_driver_ati =
