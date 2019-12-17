@@ -109,21 +109,24 @@ static errno_t getVesaEdid()
 
     phantom_bios_int_10_args( &regs );
 
-    if( (regs.d.eax & 0xFF) != 0x4F )
+    //if( (regs.d.eax & 0xFF) != 0x4F )
+    if( regs.d.eax  != 0x004F )
     {
-        SHOW_ERROR0( 2, "No VESA EDID support" );
+        SHOW_ERROR( 2, "No VESA EDID support, eax = 0x%x", regs.d.eax );
         return ENXIO;
     }
 
     if( (regs.d.ebx & 3) == 0 )
     {
-        SHOW_ERROR( 2, "EDID ebx %d", regs.d.ebx );
+        SHOW_ERROR( 2, "No EDID support, ebx 0x%x", regs.d.ebx );
         return ENXIO;
     }
 
     bzero( &regs, sizeof(regs) );
     regs.d.eax = 0x4F15;
     regs.d.ebx = 1;
+    regs.d.ecx = 0; // display number
+    regs.d.edx = 0; // EDID block number
     regs.x.es = ((int)vm86_setup.data) >> 4;
     regs.d.edi = 0; // start of ds
     phantom_bios_int_10_args( &regs );
