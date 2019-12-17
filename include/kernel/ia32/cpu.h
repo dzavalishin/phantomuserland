@@ -128,6 +128,8 @@ typedef struct cpu_ent {
 
 	// arch-specific stuff
 	struct arch_cpu_info arch;
+
+	unsigned int frequency; //< MHz, used to calc APIC timer divider, 0 if unknown
 } cpu_ent ;// _ALIGNED(64);
 
 
