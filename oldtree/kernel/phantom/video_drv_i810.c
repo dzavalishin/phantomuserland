@@ -52,6 +52,8 @@ static int i810_init();
 static void prepareHardwareCursor( void );
 static void setCursorEnable( int on );
 
+void scr_convert_cursor_to_2bpp( void *dst, drv_video_bitmap_t *cursor, int dst_xsize, int dst_ysize );
+
 
 struct drv_video_screen_t        video_driver_i810 =
 {
@@ -219,12 +221,18 @@ static int i810_video_probe()
 
 
 
-
-
+static void i810_set_cursor_pos( void );
+static void i810_set_mouse_cursor( drv_video_bitmap_t *cursor );
 
 static int i810_video_start()
 {
     prepareHardwareCursor();
+    video_drv->mouse_redraw_cursor = i810_set_cursor_pos;
+    video_drv->mouse_set_cursor = i810_set_mouse_cursor;
+
+    // Turn off unused funcs
+    video_drv->mouse_disable = vid_null;
+    video_drv->mouse_enable = vid_null;
     SHOW_FLOW0( 1, "Started" );
     return 0;
 }
@@ -361,6 +369,82 @@ static int i810_init()
     return 0;
 }
 
+
+
+// Called from mouse code on pos update
+static void i810_set_cursor_pos( void )
+{
+    if( 0 == video_drv ) return;
+    setCursorPosition( video_drv->mouse_x, video_drv->ysize - video_drv->mouse_y - 1 );
+}
+
+static void i810_set_mouse_cursor( drv_video_bitmap_t *cursor )
+{
+    if( 0 == video_drv ) return;
+    if( 0 == vcard->cursor_va ) return;
+
+    //scr_convert_cursor_to_2bpp( vcard->cursor_va, cursor, 64, 64 );
+}
+
+
+
+void scr_convert_cursor_to_2bpp( void *dst, drv_video_bitmap_t *cursor, int dst_xsize, int dst_ysize )
+{
+    u_int32_t *p = dst;
+
+    int i, j;
+
+    const int shift_up = dst_ysize - cursor->ysize;
+    const int shift_left = dst_xsize - cursor->xsize;
+
+    rgba_t get_cp( int x, int y )
+    {
+        y = dst_ysize - y - 1;
+
+        y -= shift_up;
+        x -= shift_left;
+
+        if( x < 0 ) return (rgba_t) { 0, 0, 0, 0 };
+        if( y < 0 ) return (rgba_t) { 0, 0, 0, 0 };
+        if( x >= cursor->xsize ) return (rgba_t) { 0, 0, 0, 0 };
+        if( y >= cursor->ysize ) return (rgba_t) { 0, 0, 0, 0 };
+
+        return cursor->pixel[ (y*cursor->xsize) + x ];
+    }
+
+
+    for( i = 0; i < dst_ysize; i++ )
+    {
+        u_int64_t andMask = 0;
+        u_int64_t xorMask = 0;
+
+
+        for ( j = 0; j < dst_xsize; j++ )
+        {
+            rgba_t pixel = get_cp( dst_xsize - j - 1, i );
+            if( pixel.a )
+            {
+                if( pixel.r || pixel.g || pixel.b )
+                {
+                    // temp use inverted here, need better cursor
+                    //andMask|= 1 << j;  //foreground
+                    //xorMask|= 1 << j;
+
+                    andMask|= 1 << j;    //inverted
+                }
+                else
+                    xorMask|= 1 << j;    //background
+            }
+
+        }
+
+
+        p[0]  = andMask;
+        p[32] = xorMask;
+        p++;
+    }
+
+}
 
 
 #endif // ARCH_ia32
