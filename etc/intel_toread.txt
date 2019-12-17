@@ -3,3 +3,7 @@ https://01.org/linuxgraphics/documentation/hardware-specification-prms
 https://01.org/linuxgraphics/downloads/community-source-code-repos
 https://01.org/linuxgraphics/documentation/
 
+https://github.com/FreeOptimusProject/android_kernel_lge_p970/tree/f17131871e11d57955e7556ec1fcf3a01df3b080/drivers/gpu/drm/i915
+https://github.com/netzbasis/openbsd-xenocara/tree/4daabd016cd16a6983b08c281672df75da7cd34f/driver/xf86-video-intel/src/uxa
+
+http://itreant.narod.ru/SwitchDisplayModeIntel.htm
