@@ -139,3 +139,6 @@ run/VirtualBox.log
 run/Bochs.log
 run/bochs-log.txt
 run/remote/boot.log
+phantom/hosted/autom4te.cache/output.0
+phantom/hosted/autom4te.cache/requests
+phantom/hosted/autom4te.cache/traces.0
