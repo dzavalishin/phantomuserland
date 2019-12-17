@@ -125,7 +125,8 @@
       "png.h": "c",
       "vm_map.h": "c",
       "test.h": "c",
-      "main.h": "c"
+      "main.h": "c",
+      "acpi.h": "c"
     },
     "restructuredtext.confPath": "g:\\Projects\\phantomdox\\dox\\source"
   }
