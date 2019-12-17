@@ -100,7 +100,13 @@ static errno_t getVesaEdid()
 
     bzero( &regs, sizeof(regs) );
     regs.d.eax = 0x4F15;
-    regs.d.ebx = 0;
+    regs.d.ebx = 0; // get edid support 
+    regs.d.ecx = 0; // primary display
+    
+    // Docs say it must be 0
+    regs.d.edi = 0;
+    regs.x.es = 0;
+
     phantom_bios_int_10_args( &regs );
 
     if( (regs.d.eax & 0xFF) != 0x4F )
