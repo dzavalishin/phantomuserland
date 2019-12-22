@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import ru.dz.plc.compiler.binode.OpPlusNode;
 import ru.dz.plc.compiler.node.Node;
+import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -95,6 +96,36 @@ public class BicTree extends BicAny {
 			}
 			return;			
 		}
+
+		Class unOpClass = unaryOps.get(treeType);
+		if(unOpClass != null)
+		{
+			try {
+				Constructor<? extends Node> ctor = unOpClass.getConstructor(Node.class);
+				Node cnode = getOnlyChildAsTree().getNode();
+				node = ctor.newInstance(cnode);				
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InstantiationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return;			
+		}
+		
 		
 		System.err.println("expressionToNode(): UNKNOWN tree \""+treeType+"\"");
 	}
@@ -149,6 +180,16 @@ public class BicTree extends BicAny {
 	static {
 		binaryOps.put("T_ADD", OpPlusNode.class);
 	}
+
+	// -------------------------------------------------------------------
+	// Unary ops
+	// -------------------------------------------------------------------
+	
+	static private final HashMap<String,Class> unaryOps = new HashMap<>();
+	static {
+		unaryOps.put("T_RETURN", ReturnNode.class);
+	}
+	
 	
 }
 
