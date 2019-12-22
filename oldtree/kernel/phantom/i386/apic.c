@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "apic"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -32,10 +32,11 @@
 // scheduler_time_interrupt
 #include <threads.h>
 
+#define ENABLE_APIC_TIMER 0
 
 // NB! Spurious must have lower bits = 1111
 #define APIC_SPURIOUS_VECTOR    (APIC_INT_BASE+31)
-#define APIC_TIMER_VECTOR 	(APIC_INT_BASE+30)
+#define APIC_TIMER_VECTOR       (APIC_INT_BASE+30)
 #define APIC_ERROR_VECTOR       (APIC_INT_BASE+29)
 #define APIC_ICI_VECTOR         (APIC_INT_BASE+28)
 
@@ -97,11 +98,13 @@ void phantom_init_apic(void)
 // This one is called on all CPUs
 void phantom_setup_apic(void)
 {
-#if 0
-    phantom_turn_off_pic_scheduler_timer();
+#if ENABLE_APIC_TIMER
+    //phantom_turn_off_pic_scheduler_timer();
 
+    //apic_local_unit->divider_config.r = 0xA; // div 128
     apic_local_unit->divider_config.r = 0xA; // div 128
-    apic_local_unit->init_count.r = 1024*1024; // some khz range?
+    //apic_local_unit->init_count.r = 1024*1024; // some khz range?
+    apic_local_unit->init_count.r = 32*1024*1024; // some Hz range?
 
     //char timer_vect = 0x40;
     apic_local_unit->timer_vector.r =
@@ -146,13 +149,15 @@ void apic_eoi()
 
 static void apic_timer()
 {
-    phantom_scheduler_time_interrupt();
+    //phantom_scheduler_time_interrupt();
+    //LOG_FLOW0( 1, "APIC timer intr" );
+    lprintf( "APIC timer intr\n" );
 }
 
 
 static void apic_spur()
 {
-    SHOW_ERROR0( 0, "Spurious APIC interrupt" );
+    LOG_ERROR0( 0, "Spurious APIC interrupt" );
 }
 
 
@@ -160,7 +165,7 @@ static void apic_err()
 {
     apic_local_unit->error_status.r = 0; // request to update
     int err = apic_local_unit->error_status.r;
-    SHOW_ERROR( 0, "APIC error interrupt, err = %b",
+    LOG_ERROR( 0, "APIC error interrupt, err = %b",
                 err,
                 "\020\1SendCs\2RecvCs\3SendAccept\4RecvAccept\5Rsvd5\6SendIllVect\7RecvIllVect\10IllRegAddr"
               );
@@ -169,7 +174,7 @@ static void apic_err()
 
 static void apic_incoming_ici()
 {
-    SHOW_FLOW0( 10, "ICI interrupt" );
+    LOG_FLOW0( 10, "ICI interrupt" );
 }
 
 
@@ -209,7 +214,7 @@ void hal_APIC_interrupt_dispatcher(struct trap_state *ts, int vector)
         }
     }
 
-    printf("APIC int %d ", vector);
+    lprintf("APIC int %d ", vector);
     apic_eoi();
 
     if(irq_nest)
