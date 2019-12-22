@@ -1,0 +1,444 @@
+PIXEL_CLK - Pixel clock frequency
+INTERLACE - Interlace
+H_DISP - Horizontal timing parameters Resolution
+H_FPORCH - -//- Front porch
+H_SYNC - -//- Sync pulse
+H_BPORCH - -//- Back porch
+HSYNCPOL - -//- polarity
+V_DISP - Vertical timing parameters
+V_FPORCH - -//- Front porch
+V_SYNC - -//- Sync pulse
+V_BPORCH - -//- Back porch
+VSYNCPOL - -//- polarity
+Это базовый значения исходя из режима:
+Цитата
+if (mode == "640x480_60") {
+form.PIXEL_CLK.value="25.17";
+form.H_DISP.value="640";
+form.H_FPORCH.value="16";
+form.H_SYNC.value="96"
+form.H_BPORCH.value="48";
+form.V_DISP.value="480";
+form.V_FPORCH.value="11";
+form.V_SYNC.value="2"
+form.V_BPORCH.value="31";
+form.HSYNCPOL.value="0";
+form.VSYNCPOL.value="0";
+}
+if (mode == "640x480_72") {
+form.PIXEL_CLK.value="31.5";
+form.H_DISP.value="640";
+form.H_FPORCH.value="24";
+form.H_SYNC.value="40"
+form.H_BPORCH.value="128";
+form.V_DISP.value="480";
+form.V_FPORCH.value="9";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="28";
+form.HSYNCPOL.value="0";
+form.VSYNCPOL.value="0";
+}
+if (mode == "640x480_75") {
+form.PIXEL_CLK.value="31.5";
+form.H_DISP.value="640";
+form.H_FPORCH.value="16";
+form.H_SYNC.value="96"
+form.H_BPORCH.value="48";
+form.V_DISP.value="480";
+form.V_FPORCH.value="11";
+form.V_SYNC.value="2"
+form.V_BPORCH.value="32";
+form.HSYNCPOL.value="0";
+form.VSYNCPOL.value="0";
+}
+if (mode == "640x480_85") {
+form.PIXEL_CLK.value="36";
+form.H_DISP.value="640";
+form.H_FPORCH.value="32";
+form.H_SYNC.value="48"
+form.H_BPORCH.value="112";
+form.V_DISP.value="480";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="25";
+form.HSYNCPOL.value="0";
+form.VSYNCPOL.value="0";
+}
+if (mode == "800x600_56") {
+form.PIXEL_CLK.value="38.1";
+form.H_DISP.value="800";
+form.H_FPORCH.value="32";
+form.H_SYNC.value="128"
+form.H_BPORCH.value="128";
+form.V_DISP.value="600";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="4"
+form.V_BPORCH.value="14";
+form.HSYNCPOL.value="0";
+form.VSYNCPOL.value="0";
+}
+if (mode == "800x600_60") {
+form.PIXEL_CLK.value="40";
+form.H_DISP.value="800";
+form.H_FPORCH.value="40";
+form.H_SYNC.value="128"
+form.H_BPORCH.value="88";
+form.V_DISP.value="600";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="4"
+form.V_BPORCH.value="23";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "800x600_72") {
+form.PIXEL_CLK.value="50";
+form.H_DISP.value="800";
+form.H_FPORCH.value="56";
+form.H_SYNC.value="120"
+form.H_BPORCH.value="64";
+form.V_DISP.value="600";
+form.V_FPORCH.value="37";
+form.V_SYNC.value="6"
+form.V_BPORCH.value="23";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "800x600_75") {
+form.PIXEL_CLK.value="49.5";
+form.H_DISP.value="800";
+form.H_FPORCH.value="16";
+form.H_SYNC.value="80"
+form.H_BPORCH.value="160";
+form.V_DISP.value="600";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="2"
+form.V_BPORCH.value="21";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "800x600_85") {
+form.PIXEL_CLK.value="56.25";
+form.H_DISP.value="800";
+form.H_FPORCH.value="32";
+form.H_SYNC.value="64"
+form.H_BPORCH.value="152";
+form.V_DISP.value="600";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="27";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1024x768_60") {
+form.PIXEL_CLK.value="65";
+form.H_DISP.value="1024";
+form.H_FPORCH.value="24";
+form.H_SYNC.value="136"
+form.H_BPORCH.value="160";
+form.V_DISP.value="768";
+form.V_FPORCH.value="3";
+form.V_SYNC.value="6"
+form.V_BPORCH.value="29";
+form.HSYNCPOL.value="0";
+form.VSYNCPOL.value="0";
+}
+if (mode == "1024x768_70") {
+form.PIXEL_CLK.value="75";
+form.H_DISP.value="1024";
+form.H_FPORCH.value="24";
+form.H_SYNC.value="136"
+form.H_BPORCH.value="144";
+form.V_DISP.value="768";
+form.V_FPORCH.value="3";
+form.V_SYNC.value="6"
+form.V_BPORCH.value="29";
+form.HSYNCPOL.value="0";
+form.VSYNCPOL.value="0";
+}
+if (mode == "1024x768_75") {
+form.PIXEL_CLK.value="78.75";
+form.H_DISP.value="1024";
+form.H_FPORCH.value="16";
+form.H_SYNC.value="96"
+form.H_BPORCH.value="176";
+form.V_DISP.value="768";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="28";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1024x768_85") {
+form.PIXEL_CLK.value="94.5";
+form.H_DISP.value="1024";
+form.H_FPORCH.value="48";
+form.H_SYNC.value="96"
+form.H_BPORCH.value="208";
+form.V_DISP.value="768";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="36";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1152x864_75") {
+form.PIXEL_CLK.value="108";
+form.H_DISP.value="1152";
+form.H_FPORCH.value="64";
+form.H_SYNC.value="128"
+form.H_BPORCH.value="256";
+form.V_DISP.value="864";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="32";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1152x864_85") {
+form.PIXEL_CLK.value="128.94";
+form.H_DISP.value="1152";
+form.H_FPORCH.value="64";
+form.H_SYNC.value="224"
+form.H_BPORCH.value="224";
+form.V_DISP.value="864";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="43";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1152x882_70") {
+form.PIXEL_CLK.value="94.5";
+form.H_DISP.value="1152";
+form.H_FPORCH.value="32";
+form.H_SYNC.value="96"
+form.H_BPORCH.value="200";
+form.V_DISP.value="882";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="44";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1152x882_85") {
+form.PIXEL_CLK.value="121.5";
+form.H_DISP.value="1152";
+form.H_FPORCH.value="64";
+form.H_SYNC.value="128"
+form.H_BPORCH.value="232";
+form.V_DISP.value="882";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="39";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+
+if (mode == "1280x1024_60") {
+form.PIXEL_CLK.value="108";
+form.H_DISP.value="1280";
+form.H_FPORCH.value="48";
+form.H_SYNC.value="112"
+form.H_BPORCH.value="248";
+form.V_DISP.value="1024";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="38";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1280x1024_75") {
+form.PIXEL_CLK.value="135";
+form.H_DISP.value="1280";
+form.H_FPORCH.value="16";
+form.H_SYNC.value="144"
+form.H_BPORCH.value="248";
+form.V_DISP.value="1024";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="38";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1280x1024_85") {
+form.PIXEL_CLK.value="157.5";
+form.H_DISP.value="1280";
+form.H_FPORCH.value="48";
+form.H_SYNC.value="160"
+form.H_BPORCH.value="240";
+form.V_DISP.value="1024";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="44";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1600x1200_60") {
+form.PIXEL_CLK.value="162";
+form.H_DISP.value="1600";
+form.H_FPORCH.value="64";
+form.H_SYNC.value="192"
+form.H_BPORCH.value="304";
+form.V_DISP.value="1200";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="46";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1600x1200_70") {
+form.PIXEL_CLK.value="189";
+form.H_DISP.value="1600";
+form.H_FPORCH.value="64";
+form.H_SYNC.value="192"
+form.H_BPORCH.value="304";
+form.V_DISP.value="1200";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="46";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1600x1200_75") {
+form.PIXEL_CLK.value="202.5";
+form.H_DISP.value="1600";
+form.H_FPORCH.value="64";
+form.H_SYNC.value="192"
+form.H_BPORCH.value="304";
+form.V_DISP.value="1200";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="46";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1600x1200_80") {
+form.PIXEL_CLK.value="216";
+form.H_DISP.value="1600";
+form.H_FPORCH.value="64";
+form.H_SYNC.value="192"
+form.H_BPORCH.value="304";
+form.V_DISP.value="1200";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="46";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "1600x1200_85") {
+form.PIXEL_CLK.value="229.5";
+form.H_DISP.value="1600";
+form.H_FPORCH.value="64";
+form.H_SYNC.value="192"
+form.H_BPORCH.value="304";
+form.V_DISP.value="1200";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="46";
+form.HSYNCPOL.value="1";
+form.VSYNCPOL.value="1";
+}
+if (mode == "640x480_VGA2TV50") {
+form.PIXEL_CLK.value="25.175";
+form.H_DISP.value="640";
+form.H_FPORCH.value="16";
+form.H_SYNC.value="64"
+form.H_BPORCH.value="120";
+form.V_DISP.value="480";
+form.V_FPORCH.value="51";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="66";
+}
+if (mode == "640x480_VGA2TV60") {
+form.PIXEL_CLK.value="25.175";
+form.H_DISP.value="640";
+form.H_FPORCH.value="16";
+form.H_SYNC.value="64"
+form.H_BPORCH.value="120";
+form.V_DISP.value="480";
+form.V_FPORCH.value="1";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="16";
+}
+if (mode == "800x600_VGA2TV50") {
+form.PIXEL_CLK.value="34";
+form.H_DISP.value="800";
+form.H_FPORCH.value="40";
+form.H_SYNC.value="120"
+form.H_BPORCH.value="128";
+form.V_DISP.value="600";
+form.V_FPORCH.value="10";
+form.V_SYNC.value="3"
+form.V_BPORCH.value="12";
+}
+if (mode == "640x480_NTSC") {
+form.PIXEL_CLK.value="12.700";
+form.H_DISP.value="640";
+form.H_FPORCH.value="16";
+form.H_SYNC.value="88"
+form.H_BPORCH.value="64";
+form.V_DISP.value="480";
+form.V_FPORCH.value="6";
+form.V_SYNC.value="5"
+form.V_BPORCH.value="13";
+form.INTERLACE.value="1";
+}
+if (mode == "640x480_PAL") {
+form.PIXEL_CLK.value="15.319";
+form.H_DISP.value="640";
+form.H_FPORCH.value="80";
+form.H_SYNC.value="40"
+form.H_BPORCH.value="160";
+form.V_DISP.value="480";
+form.V_FPORCH.value="35";
+form.V_SYNC.value="5"
+form.V_BPORCH.value="30";
+form.INTERLACE.value="1";
+}
+if (mode == "800x600_PAL") {
+form.PIXEL_CLK.value="15.407";
+form.H_DISP.value="800";
+form.H_FPORCH.value="8";
+form.H_SYNC.value="128"
+form.H_BPORCH.value="50";
+form.V_DISP.value="600";
+form.V_FPORCH.value="2";
+form.V_SYNC.value="8"
+form.V_BPORCH.value="4";
+form.INTERLACE.value="1";
+}
+if (mode == "HDTV1920_60Hz") {
+form.PIXEL_CLK.value="74.150";
+form.H_DISP.value="1920";
+form.H_FPORCH.value="44";
+form.H_SYNC.value="88"
+form.H_BPORCH.value="148";
+form.V_DISP.value="517";
+form.V_FPORCH.value="5";
+form.V_SYNC.value="5"
+form.V_BPORCH.value="35";
+form.INTERLACE.value="1";
+}
+
+Ну и сами формулы:
+Цитата
+HTOTAL = H_DISP + H_FPORCH + H_SYNC + H_BPORCH;
+VTOTAL = V_DISP + V_FPORCH + V_SYNC + V_BPORCH;
+if (INTERLACE == "1") VTOTAL = V_DISP + 2*V_FPORCH + 2*V_SYNC + 2*V_BPORCH;
+HFREQ = (1000 * PIXEL_CLK) / HTOTAL;
+VFREQ = (1000000 * PIXEL_CLK) / (HTOTAL * VTOTAL);
+FIELDRATE = VFREQ;
+if (INTERLACE == "1") VFREQ = 2*VFREQ;
+HSYNCTIME = H_SYNC/PIXEL_CLK;
+VSYNCTIME = (V_SYNC * HTOTAL) / PIXEL_CLK;
+
+
+Добавлено в 3 марта 2004, 11:19:
+Результаты:
+HTOTAL - Horizontal total
+VTOTAL - vertical total
+HFREQ - Horizontal sync frequency
+VFREQ - vertical sync frequency
+FIELDRATE - Field rate
+HSYNCTIME - Horizontal sync pulse length
+VSYNCTIME - vertical sync pulse length

@@ -1,0 +1,4401 @@
+
+<chain
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "size_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__builtin_va_list">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UCHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__u_char">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_USHORT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__u_short">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UINT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__u_int">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__u_long">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_CHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__int8_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UCHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uint8_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_SHORT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__int16_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_USHORT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uint16_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__int32_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UINT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uint32_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__int64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uint64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__int8_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__int_least8_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__uint8_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uint_least8_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__int16_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__int_least16_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__uint16_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uint_least16_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__int32_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__int_least32_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__uint32_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uint_least32_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__int64_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__int_least64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__uint64_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uint_least64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__quad_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__u_quad_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__intmax_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uintmax_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__dev_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UINT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__uid_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UINT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__gid_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__ino_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__ino64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UINT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__mode_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__nlink_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__off_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__off64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__pid_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_DECL_COMPOUND tCOMP_DECL_TYPE: struct
+            tCOMP_DECL_EXPANDED: false
+            tCOMP_DECL_ID:         <null>
+
+            tCOMP_DECL_SZ: 0
+            tCOMP_DECL_DECLS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <chain
+              <tree T_ARRAY tARRAY_SZ: 
+                <tree T_INTEGER tINT_VAL: 2>
+                    tARRAY_ID: 
+                <tree T_IDENTIFIER tID_STR: "__val">
+              >
+            >
+          >
+        >
+      >
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__fsid_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__clock_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__rlim_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__rlim64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UINT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__id_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__time_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UINT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__useconds_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__suseconds_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__daddr_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__key_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__clockid_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_IDENTIFIER tID_STR: "__timer_t">
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__blksize_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__blkcnt_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__blkcnt64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__fsblkcnt_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__fsblkcnt64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__fsfilcnt_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__fsfilcnt64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__fsword_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__ssize_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__syscall_slong_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_ULONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__syscall_ulong_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__off64_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__loff_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_CHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_IDENTIFIER tID_STR: "__caddr_t">
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__intptr_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_UINT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__socklen_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__sig_atomic_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_DECL_COMPOUND tCOMP_DECL_TYPE: struct
+            tCOMP_DECL_EXPANDED: false
+            tCOMP_DECL_ID:         <null>
+
+            tCOMP_DECL_SZ: 0
+            tCOMP_DECL_DECLS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <chain
+              <tree T_IDENTIFIER tID_STR: "__count">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_DECL_COMPOUND tCOMP_DECL_TYPE: union
+                  tCOMP_DECL_EXPANDED: false
+                  tCOMP_DECL_ID:               <null>
+
+                  tCOMP_DECL_SZ: 0
+                  tCOMP_DECL_DECLS: 
+              <chain
+                <tree T_DECL tDECL_OFFSET: 0
+                      tDECL_TYPE: 
+                  <tree D_T_UINT>
+                      tDECL_DECLS: 
+                  <chain
+                    <tree T_IDENTIFIER tID_STR: "__wch">
+                  >
+                >
+                <tree T_DECL tDECL_OFFSET: 0
+                      tDECL_TYPE: 
+                  <tree D_T_CHAR>
+                      tDECL_DECLS: 
+                  <chain
+                    <tree T_ARRAY tARRAY_SZ: 
+                      <tree T_INTEGER tINT_VAL: 4>
+                          tARRAY_ID: 
+                      <tree T_IDENTIFIER tID_STR: "__wchb">
+                    >
+                  >
+                >
+              >
+            >
+                tDECL_DECLS: 
+            <chain
+              <tree T_IDENTIFIER tID_STR: "__value">
+            >
+          >
+        >
+      >
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__mbstate_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_DECL_COMPOUND tCOMP_DECL_TYPE: struct
+            tCOMP_DECL_EXPANDED: false
+            tCOMP_DECL_ID: 
+        <tree T_IDENTIFIER tID_STR: "struct _G_fpos_t">
+            tCOMP_DECL_SZ: 0
+            tCOMP_DECL_DECLS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__off_t">
+                tDECL_DECLS: 
+            <chain
+              <tree T_IDENTIFIER tID_STR: "__pos">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__mbstate_t">
+                tDECL_DECLS: 
+            <chain
+              <tree T_IDENTIFIER tID_STR: "__state">
+            >
+          >
+        >
+      >
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__fpos_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_DECL_COMPOUND tCOMP_DECL_TYPE: struct
+            tCOMP_DECL_EXPANDED: false
+            tCOMP_DECL_ID: 
+        <tree T_IDENTIFIER tID_STR: "struct _G_fpos64_t">
+            tCOMP_DECL_SZ: 0
+            tCOMP_DECL_DECLS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__off64_t">
+                tDECL_DECLS: 
+            <chain
+              <tree T_IDENTIFIER tID_STR: "__pos">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__mbstate_t">
+                tDECL_DECLS: 
+            <chain
+              <tree T_IDENTIFIER tID_STR: "__state">
+            >
+          >
+        >
+      >
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__fpos64_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_STRUCT tSTRUCT_EXP: 
+      <tree T_IDENTIFIER tID_STR: "struct _IO_FILE">
+    >
+        tDECL_DECLS:     <null>
+
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_STRUCT tSTRUCT_EXP: 
+        <tree T_IDENTIFIER tID_STR: "struct _IO_FILE">
+      >
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "__FILE">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_STRUCT tSTRUCT_EXP: 
+      <tree T_IDENTIFIER tID_STR: "struct _IO_FILE">
+    >
+        tDECL_DECLS:     <null>
+
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_STRUCT tSTRUCT_EXP: 
+        <tree T_IDENTIFIER tID_STR: "struct _IO_FILE">
+      >
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_STRUCT tSTRUCT_EXP: 
+      <tree T_IDENTIFIER tID_STR: "struct _IO_FILE">
+    >
+        tDECL_DECLS:     <null>
+
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_STRUCT tSTRUCT_EXP: 
+      <tree T_IDENTIFIER tID_STR: "struct _IO_marker">
+    >
+        tDECL_DECLS:     <null>
+
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_STRUCT tSTRUCT_EXP: 
+      <tree T_IDENTIFIER tID_STR: "struct _IO_codecvt">
+    >
+        tDECL_DECLS:     <null>
+
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_STRUCT tSTRUCT_EXP: 
+      <tree T_IDENTIFIER tID_STR: "struct _IO_wide_data">
+    >
+        tDECL_DECLS:     <null>
+
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "_IO_lock_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_DECL_COMPOUND tCOMP_DECL_TYPE: struct
+          tCOMP_DECL_EXPANDED: false
+          tCOMP_DECL_ID: 
+      <tree T_IDENTIFIER tID_STR: "struct _IO_FILE">
+          tCOMP_DECL_SZ: 0
+          tCOMP_DECL_DECLS: 
+      <chain
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_INT>
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "_flags">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_read_ptr">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_read_end">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_read_base">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_write_base">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_write_ptr">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_write_end">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_buf_base">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_buf_end">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_save_base">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_backup_base">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_IO_save_end">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_STRUCT tSTRUCT_EXP: 
+            <tree T_IDENTIFIER tID_STR: "struct _IO_marker">
+          >
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_markers">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_STRUCT tSTRUCT_EXP: 
+            <tree T_IDENTIFIER tID_STR: "struct _IO_FILE">
+          >
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_chain">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_INT>
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "_fileno">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_INT>
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "_flags2">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_IDENTIFIER tID_STR: "__off_t">
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "_old_offset">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_USHORT>
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "_cur_column">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "_vtable_offset">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_ARRAY tARRAY_SZ: 
+              <tree T_INTEGER tINT_VAL: 1>
+                  tARRAY_ID: 
+              <tree T_IDENTIFIER tID_STR: "_shortbuf">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_IDENTIFIER tID_STR: "_IO_lock_t">
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_lock">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_IDENTIFIER tID_STR: "__off64_t">
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "_offset">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_STRUCT tSTRUCT_EXP: 
+            <tree T_IDENTIFIER tID_STR: "struct _IO_codecvt">
+          >
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_codecvt">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_STRUCT tSTRUCT_EXP: 
+            <tree T_IDENTIFIER tID_STR: "struct _IO_wide_data">
+          >
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_wide_data">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_STRUCT tSTRUCT_EXP: 
+            <tree T_IDENTIFIER tID_STR: "struct _IO_FILE">
+          >
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_freeres_list">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_VOID>
+              tDECL_DECLS: 
+          <chain
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "_freeres_buf">
+            >
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree T_IDENTIFIER tID_STR: "size_t">
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "__pad5">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_INT>
+              tDECL_DECLS: 
+          <chain
+            <tree T_IDENTIFIER tID_STR: "_mode">
+          >
+        >
+        <tree T_DECL tDECL_OFFSET: 0
+              tDECL_TYPE: 
+          <tree D_T_CHAR>
+              tDECL_DECLS: 
+          <chain
+            <tree T_ARRAY tARRAY_SZ: 
+              <tree T_SUB tSUB_RHS: 
+                <tree T_SIZEOF tSZOF_EXP: 
+                  <tree T_IDENTIFIER tID_STR: "size_t">
+                >
+                    tSUB_LHS: 
+                <tree T_SUB tSUB_RHS: 
+                  <tree T_MUL tMUL_RHS: 
+                    <tree T_SIZEOF tSZOF_EXP: 
+                      <tree T_POINTER tPTR_EXP: 
+                        <tree D_T_VOID>
+                      >
+                    >
+                        tMUL_LHS: 
+                    <tree T_INTEGER tINT_VAL: 4>
+                  >
+                      tSUB_LHS: 
+                  <tree T_MUL tMUL_RHS: 
+                    <tree T_SIZEOF tSZOF_EXP: 
+                      <tree D_T_INT>
+                    >
+                        tMUL_LHS: 
+                    <tree T_INTEGER tINT_VAL: 15>
+                  >
+                >
+              >
+                  tARRAY_ID: 
+              <tree T_IDENTIFIER tID_STR: "_unused2">
+            >
+          >
+        >
+      >
+    >
+        tDECL_DECLS:     <null>
+
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "va_list">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__off_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "off_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__ssize_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "ssize_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_TYPEDEF tTYPEDEF_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__fpos_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "fpos_t">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_IDENTIFIER tID_STR: "stdin">
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_IDENTIFIER tID_STR: "stdout">
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_IDENTIFIER tID_STR: "stderr">
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__filename">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "remove">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__old">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__new">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "rename">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__oldfd">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__old">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__newfd">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__new">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "renameat">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_VOID>
+                  tDECL_DECLS:               <null>
+
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "tmpfile">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_CHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__s">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "tmpnam">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_CHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__s">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "tmpnam_r">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_CHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__dir">
+              >
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__pfx">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "tempnam">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fclose">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fflush">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fflush_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__filename">
+              >
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__modes">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "fopen">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__filename">
+              >
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__modes">
+              >
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree T_IDENTIFIER tID_STR: "FILE">
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__stream">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "freopen">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_INT>
+                  tDECL_DECLS: 
+              <tree T_IDENTIFIER tID_STR: "__fd">
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__modes">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "fdopen">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_VOID>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__s">
+              >
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree T_IDENTIFIER tID_STR: "size_t">
+                  tDECL_DECLS: 
+              <tree T_IDENTIFIER tID_STR: "__len">
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__modes">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "fmemopen">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_POINTER tPTR_EXP: 
+                  <tree T_IDENTIFIER tID_STR: "__bufloc">
+                >
+              >
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree T_IDENTIFIER tID_STR: "size_t">
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__sizeloc">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "open_memstream">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__buf">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "setbuf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__buf">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__modes">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__n">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "setvbuf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__buf">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__size">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "setbuffer">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "setlinebuf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "printf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "sprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vfprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vsprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__maxlen">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "snprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__maxlen">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vsnprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__fd">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__fmt">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vdprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__fd">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__fmt">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "dprintf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "scanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "sscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "scanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_VARIADIC>
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "sscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vfscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vsscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vfscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__format">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__gnuc_va_list">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__arg">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "vsscanf">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fgetc">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "getc">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_VOID>
+                tDECL_DECLS:             <null>
+
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "getchar">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "getc_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_VOID>
+                tDECL_DECLS:             <null>
+
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "getchar_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fgetc_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__c">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fputc">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__c">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "putc">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__c">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "putchar">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__c">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fputc_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__c">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "putc_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__c">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "putchar_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "getw">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__w">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "putw">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_CHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__s">
+              >
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_INT>
+                  tDECL_DECLS: 
+              <tree T_IDENTIFIER tID_STR: "__n">
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree T_IDENTIFIER tID_STR: "FILE">
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__stream">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "fgets">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__ssize_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__lineptr">
+              >
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__n">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__delimiter">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "__getdelim">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__ssize_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__lineptr">
+              >
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__n">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__delimiter">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "getdelim">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__ssize_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__lineptr">
+              >
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__n">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "getline">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fputs">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "puts">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__c">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "ungetc">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "size_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_VOID>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__ptr">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__size">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__n">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fread">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "size_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_VOID>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__ptr">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__size">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__n">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fwrite">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "size_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_VOID>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__ptr">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__size">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__n">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fread_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "size_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_VOID>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__ptr">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__size">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "size_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__n">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fwrite_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_LONG>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__off">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__whence">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fseek">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_LONG>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "ftell">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "rewind">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "__off_t">
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__off">
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS: 
+            <tree T_IDENTIFIER tID_STR: "__whence">
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fseeko">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "__off_t">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "ftello">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "fpos_t">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__pos">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fgetpos">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "fpos_t">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__pos">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fsetpos">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "clearerr">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "feof">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "ferror">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "clearerr_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "feof_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "ferror_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_CHAR>
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__s">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "perror">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_IDENTIFIER tID_STR: "sys_nerr">
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_CHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_POINTER tPTR_EXP: 
+          <tree T_IDENTIFIER tID_STR: "sys_errlist">
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fileno">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "fileno_unlocked">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree T_IDENTIFIER tID_STR: "FILE">
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__command">
+              >
+            >
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__modes">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "popen">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "pclose">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_CHAR>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_POINTER tPTR_EXP: 
+        <tree T_DECL_FN tFNDECL_STMTS:           <null>
+
+              tFNDECL_ARGS: 
+          <chain
+            <tree T_DECL tDECL_OFFSET: 0
+                  tDECL_TYPE: 
+              <tree D_T_CHAR>
+                  tDECL_DECLS: 
+              <tree T_POINTER tPTR_EXP: 
+                <tree T_IDENTIFIER tID_STR: "__s">
+              >
+            >
+          >
+              tFNDECL_NAME: 
+          <tree T_IDENTIFIER tID_STR: "ctermid">
+              tFNDECL_RET_TYPE:           <null>
+
+        >
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "flockfile">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "ftrylockfile">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_VOID>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_IDENTIFIER tID_STR: "FILE">
+                tDECL_DECLS: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "__stream">
+            >
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "funlockfile">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "FILE">
+            >
+                tDECL_DECLS:             <null>
+
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "__uflow">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_DECL tDECL_OFFSET: 0
+        tDECL_TYPE: 
+    <tree T_EXTERN tEXTERN_EXP: 
+      <tree D_T_INT>
+    >
+        tDECL_DECLS: 
+    <chain
+      <tree T_DECL_FN tFNDECL_STMTS:         <null>
+
+            tFNDECL_ARGS: 
+        <chain
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree T_POINTER tPTR_EXP: 
+              <tree T_IDENTIFIER tID_STR: "FILE">
+            >
+                tDECL_DECLS:             <null>
+
+          >
+          <tree T_DECL tDECL_OFFSET: 0
+                tDECL_TYPE: 
+            <tree D_T_INT>
+                tDECL_DECLS:             <null>
+
+          >
+        >
+            tFNDECL_NAME: 
+        <tree T_IDENTIFIER tID_STR: "__overflow">
+            tFNDECL_RET_TYPE:         <null>
+
+      >
+    >
+  >
+  <tree T_FN_DEF tFNDEF_STMTS: 
+    <chain
+      <tree T_DECL tDECL_OFFSET: 0
+            tDECL_TYPE: 
+        <tree D_T_INT>
+            tDECL_DECLS: 
+        <chain
+          <tree T_ASSIGN tASSIGN_RHS: 
+            <tree T_ADD tADD_RHS: 
+              <tree T_INTEGER tINT_VAL: 5>
+                  tADD_LHS: 
+              <tree T_INTEGER tINT_VAL: 10>
+            >
+                tASSIGN_LHS: 
+            <tree T_IDENTIFIER tID_STR: "i">
+          >
+        >
+      >
+      <tree T_FN_CALL tFNCALL_ARGS: 
+        <chain
+          <tree T_STRING tSTRING_VAL: "i = %d">
+          <tree T_IDENTIFIER tID_STR: "i">
+        >
+            tFNCALL_ID: 
+        <tree T_IDENTIFIER tID_STR: "printf">
+      >
+    >
+        tFNDEF_ARGS: 
+    <chain
+      <tree T_DECL tDECL_OFFSET: 0
+            tDECL_TYPE: 
+        <tree D_T_INT>
+            tDECL_DECLS: 
+        <tree T_IDENTIFIER tID_STR: "ac">
+      >
+      <tree T_DECL tDECL_OFFSET: 0
+            tDECL_TYPE: 
+        <tree D_T_CHAR>
+            tDECL_DECLS: 
+        <tree T_POINTER tPTR_EXP: 
+          <tree T_POINTER tPTR_EXP: 
+            <tree T_IDENTIFIER tID_STR: "av">
+          >
+        >
+      >
+    >
+        tFNDEF_NAME: 
+    <tree T_IDENTIFIER tID_STR: "main">
+        tFNDEF_RET_TYPE: 
+    <tree D_T_INT>
+  >
+>

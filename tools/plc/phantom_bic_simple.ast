@@ -1,0 +1,49 @@
+
+<chain
+  <tree T_FN_DEF tFNDEF_STMTS: 
+    <chain
+      <tree T_DECL tDECL_OFFSET: 0
+            tDECL_TYPE: 
+        <tree D_T_INT>
+            tDECL_DECLS: 
+        <chain
+          <tree T_ASSIGN tASSIGN_RHS: 
+            <tree T_ADD tADD_RHS: 
+              <tree T_INTEGER tINT_VAL: 5>
+                  tADD_LHS: 
+              <tree T_INTEGER tINT_VAL: 10>
+            >
+                tASSIGN_LHS: 
+            <tree T_IDENTIFIER tID_STR: "i">
+          >
+        >
+      >
+      <tree T_RETURN tRET_EXP: 
+        <tree T_INTEGER tINT_VAL: 0>
+      >
+    >
+        tFNDEF_ARGS: 
+    <chain
+      <tree T_DECL tDECL_OFFSET: 0
+            tDECL_TYPE: 
+        <tree D_T_INT>
+            tDECL_DECLS: 
+        <tree T_IDENTIFIER tID_STR: "ac">
+      >
+      <tree T_DECL tDECL_OFFSET: 0
+            tDECL_TYPE: 
+        <tree D_T_CHAR>
+            tDECL_DECLS: 
+        <tree T_POINTER tPTR_EXP: 
+          <tree T_POINTER tPTR_EXP: 
+            <tree T_IDENTIFIER tID_STR: "av">
+          >
+        >
+      >
+    >
+        tFNDEF_NAME: 
+    <tree T_IDENTIFIER tID_STR: "main">
+        tFNDEF_RET_TYPE: 
+    <tree D_T_INT>
+  >
+>
