@@ -324,6 +324,12 @@ static int ipv4_route_match(ipv4_addr ip_addr, if_id *interface_num, ipv4_addr *
             last_e = e;
     }
 
+    if( (last_e == 0) && (ip_addr == 0xFFFFFFFF) )
+    {
+        // [dz] hack - broadcast to first available interface
+        last_e = route_table;
+    }
+
     if(last_e) {
         *interface_num = last_e->interface_id;
         *if_addr = last_e->if_addr;
@@ -821,6 +827,12 @@ int ipv4_input(cbuf *buf, ifnet *i)
             goto ditch_packet;
         }
     }
+
+#if 0
+    dprintf("ipv4 packet for us: ");
+    dump_ipv4_addr(ntohl(header->dest));
+    dprintf("\n");
+#endif
 
     // do some sanity checks and buffer trimming
     {

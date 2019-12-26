@@ -38,11 +38,11 @@ struct bootp {
 	unsigned char	bp_chaddr[16];	/* client hardware address */
 	unsigned char	bp_sname[64];	/* server host name */
 	unsigned char	bp_file[128];	/* boot file name */
-#ifdef SUPPORT_DHCP
+//#ifdef SUPPORT_DHCP
 #define BOOTP_VENDSIZE 312
-#else
-#define BOOTP_VENDSIZE 64
-#endif
+//#else
+//#define BOOTP_VENDSIZE 64
+//#endif
 	unsigned char	bp_vend[BOOTP_VENDSIZE];	/* vendor-specific area */
 };
 
@@ -92,7 +92,7 @@ struct bootp {
 #define TAG_SWAPSERVER		((unsigned char)  16)
 #define TAG_ROOTPATH		((unsigned char)  17)
 
-#ifdef SUPPORT_DHCP
+//#ifdef SUPPORT_DHCP
 #define TAG_REQ_ADDR		((unsigned char)  50)
 #define TAG_LEASETIME		((unsigned char)  51)
 #define TAG_OVERLOAD		((unsigned char)  52)
@@ -105,11 +105,11 @@ struct bootp {
 #define TAG_T2			((unsigned char)  59)
 #define TAG_CLASSID		((unsigned char)  60)
 #define TAG_CLIENTID		((unsigned char)  61)
-#endif
+//#endif
 
 #define TAG_END			((unsigned char) 255)
 
-#ifdef SUPPORT_DHCP
+//#ifdef SUPPORT_DHCP
 #define DHCPDISCOVER 1
 #define DHCPOFFER 2
 #define DHCPREQUEST 3
@@ -117,7 +117,7 @@ struct bootp {
 #define DHCPACK 5
 #define DHCPNAK 6
 #define DHCPRELEASE 7
-#endif
+//#endif
 
 /*
  * bootp flags

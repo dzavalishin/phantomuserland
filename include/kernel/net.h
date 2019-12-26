@@ -82,28 +82,29 @@ enum {
 typedef int if_id;
 
 typedef struct ifnet {
-	struct ifnet *next;
-	if_id id;
-	//char path[SYS_MAX_PATH_LEN];
-	int type;
-        //int fd;
+    struct ifnet *next;
+    if_id id;
+    int type;
 
-        phantom_device_t *dev;
+    phantom_device_t *dev;
 
-	thread_id rx_thread;
-	thread_id tx_thread;
-	ifaddr *addr_list;
-        ifaddr *link_addr;
-	size_t mtu;
-	int (*link_input)(cbuf *buf, struct ifnet *i);
-	int (*link_output)(cbuf *buf, struct ifnet *i, netaddr *target, int protocol_type);
-	sem_id tx_queue_sem;
+    thread_id rx_thread;
+    thread_id tx_thread;
+
+    ifaddr *addr_list;
+    ifaddr *link_addr;
+
+    size_t mtu;
+    int (*link_input)(cbuf *buf, struct ifnet *i);
+    int (*link_output)(cbuf *buf, struct ifnet *i, netaddr *target, int protocol_type);
+	
+    sem_id tx_queue_sem;
     hal_mutex_t tx_queue_lock;
 
-        fixed_queue tx_queue;
+    fixed_queue tx_queue;
 
-        uint8 tx_buf[2048];
-	uint8 rx_buf[2048];
+    uint8 tx_buf[2048];
+    uint8 rx_buf[2048];
 } ifnet;
 
 

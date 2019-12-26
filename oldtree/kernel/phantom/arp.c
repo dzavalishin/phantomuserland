@@ -6,15 +6,17 @@
  *
  * ARP
  *
+ * Based on NewOS code:
+ *
+ ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
+ ** Distributed under the terms of the NewOS License.
+ *
 **/
 
 #include <kernel/config.h>
 
 #if HAVE_NET
-/*
- ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
- ** Distributed under the terms of the NewOS License.
- */
+
 #include <time.h>
 #include <string.h>
 #include <threads.h>
@@ -23,12 +25,13 @@
 #include <kernel/khash.h>
 #include <kernel/net.h>
 #include <kernel/net/ethernet.h>
+#include <arpa/inet.h>
 
 #include <kernel/atomic.h>
 #include <endian.h>
 #include <hal.h>
 
-//#include "newos.h"
+#include <kernel/debug.h>
 #include <compat/newos.h>
 
 #include "misc.h"
@@ -124,15 +127,15 @@ static unsigned int arp_cache_hash(void *_e, const void *_key, unsigned int rang
 static void dump_arp_packet(arp_packet *arp)
 {
 #if NET_CHATTY
-    dprintf("arp packet: src ");
+    lprintf("arp packet: src ");
     dump_ethernet_addr(arp->sender_ethernet);
-    dprintf(" ");
+    lprintf(" ");
     dump_ipv4_addr(ntohl(arp->sender_ipv4));
-    dprintf(" dest ");
+    lprintf(" dest ");
     dump_ethernet_addr(arp->target_ethernet);
-    dprintf(" ");
+    lprintf(" ");
     dump_ipv4_addr(ntohl(arp->target_ipv4));
-    dprintf(" op 0x%x\n", ntohs(arp->op));
+    lprintf(" op 0x%x\n", ntohs(arp->op));
 #else
     (void)arp;
 #endif
@@ -201,7 +204,7 @@ int arp_input(cbuf *buf, ifnet *i)
             arp->op = htons(ARP_OP_REPLY);
 
 #if NET_CHATTY
-            dprintf("arp_receive: arp was for us, responding...\n");
+            lprintf("arp_receive: arp was for us, responding...\n");
 #endif
 
             // send it out
@@ -215,11 +218,11 @@ int arp_input(cbuf *buf, ifnet *i)
             // the chain gets deleted in the output, so we can return here
             return 0;
         }
-        //break;
+        break;
     }
 #if NET_CHATTY
     default:
-        dprintf("arp_receive: unhandled arp request type 0x%x\n", ntohs(arp->op));
+        lprintf("arp_receive: unhandled arp request type 0x%x\n", ntohs(arp->op));
 #endif
     }
 
@@ -235,7 +238,8 @@ static int arp_send_request(ifnet *i, ipv4_addr sender_ipaddr, ipv4_addr ip_addr
     arp_packet *arp;
 
 #if NET_CHATTY
-    printf("ARP: send request\n");
+    //printf("ARP: send request for %s\n", inet_itoa(* ((u_int32_t *)&ip_addr) ));
+    printf("ARP: send request for %s\n", inet_itoa(ip_addr) );
 #endif
 
     buf = cbuf_get_chain(sizeof(arp_packet));
@@ -321,11 +325,11 @@ int arp_insert(ipv4_addr ip_addr, netaddr *link_addr)
     arp_wait_request *temp;
 
 #if NET_CHATTY
-    dprintf("arp_insert: ip addr ");
+    lprintf("arp_insert: ip addr ");
     dump_ipv4_addr(ip_addr);
-    dprintf(" link_addr: type %d len %d addr ", link_addr->type, link_addr->len);
+    lprintf(" link_addr: type %d len %d addr ", link_addr->type, link_addr->len);
     dump_ethernet_addr(*(ethernet_addr *)&link_addr->addr[0]);
-    dprintf("\n");
+    lprintf("\n");
 #endif
 
     // see if it's already there
@@ -515,9 +519,9 @@ static void arp_cleanup_thread(void)
         // free any entries that we pulled out of the cache
         while(free_list) {
 #if NET_CHATTY
-            dprintf("arp_cleanup_thread: pruning arp entry for ");
+            lprintf("arp_cleanup_thread: pruning arp entry for ");
             dump_ipv4_addr(e->ip_addr);
-            dprintf("\n");
+            lprintf("\n");
 #endif
             temp = free_list;
             free_list = free_list->all_next;
@@ -548,9 +552,6 @@ int arp_init(void)
     memset(&eth.addr[0], 0xFF, 6);
     arp_insert( 0xFFFFFFFF, &eth);
     }
-
-    //thread_resume_thread(thread_create_kernel_thread("arp cache cleaner", &arp_cleanup_thread, NULL));
-    //thread_resume_thread(thread_create_kernel_thread("arp retransmit thread", &arp_retransmit_thread, NULL));
 
     hal_start_kernel_thread(&arp_cleanup_thread);
     hal_start_kernel_thread(&arp_retransmit_thread);

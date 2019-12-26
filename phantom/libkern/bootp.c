@@ -63,19 +63,14 @@
  */
 
 #include <sys/cdefs.h>
-//__FBSDID("$FreeBSD: src/lib/libstand/bootp.c,v 1.6.6.1 2008/11/25 02:59:29 kensmith Exp $");
-
-//#include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-//#include <netinet/in_systm.h>
 
 #include <string.h>
 
 #define SUPPORT_DHCP
 
 #include <kernel/net.h>
-//#include "netif.h"
 #include <kernel/net/bootp.h>
 
 
@@ -122,9 +117,7 @@ static	char vm_cmu[4] = VM_CMU;
 #endif
 
 /* Local forwards */
-static	ssize_t bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t);
-//static	ssize_t bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t);
-
+static	ssize_t bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t, ipv4addr send_addr);
 static errno_t bootprecv(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t len, size_t *retlen);
 
 
@@ -139,7 +132,7 @@ static int xid = 0;
 
 
 /* Fetch required bootp infomation */
-static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
+static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag, ipv4addr send_addr)
 {
     struct bootp *bp;
 
@@ -177,7 +170,7 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
 
     //strncpy(bp->bp_file, bootfile, sizeof(bp->bp_file));
     bcopy(vm_rfc1048, bp->bp_vend, sizeof(vm_rfc1048));
-#ifdef SUPPORT_DHCP
+//#ifdef SUPPORT_DHCP
     bp->bp_vend[4] = TAG_DHCP_MSGTYPE;
     bp->bp_vend[5] = 1;
     bp->bp_vend[6] = DHCPDISCOVER;
@@ -194,19 +187,19 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
         bp->bp_vend[18] = TAG_END;
     } else
         bp->bp_vend[7] = TAG_END;
-#else
-    bp->bp_vend[4] = TAG_END;
-#endif
+//#else
+//    bp->bp_vend[4] = TAG_END;
+//#endif
 
     //d->myip.s_addr = INADDR_ANY;
     //d->myport = htons(IPPORT_BOOTPC);
     //d->destip.s_addr = INADDR_BROADCAST;
     //d->destport = htons(IPPORT_BOOTPS);
 
-#ifdef SUPPORT_DHCP
+//#ifdef SUPPORT_DHCP
     bstate->expected_dhcpmsgtype = DHCPOFFER;
     bstate->dhcp_ok = 0;
-#endif
+//#endif
 
 
     i4sockaddr src_addr;
@@ -223,26 +216,14 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
         return ENOTCONN;
     }
 
-    /*
-    sockaddr dest_addr;
-    dest_addr.port = IPPORT_BOOTPS; // dest port
-
-    dest_addr.addr.len = 4;
-    dest_addr.addr.type = ADDR_TYPE_IP;
-    // INADDR_BROADCAST
-    NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
-    */
-
     errno_t rc;
 
-    //if( 0 != udp_sendto(udp_sock, bp, sizeof(*bp), &dest_addr) )
-    if( 0 != bootpsend(bstate, udp_sock, bp, sizeof(*bp)) )
+    if( 0 != bootpsend(bstate, udp_sock, bp, sizeof(*bp), send_addr) )
     {
         SHOW_ERROR0( 0, "can't send UDP packet");
         return ECONNREFUSED;
     }
 
-    //if( 0 >= udp_recvfrom(udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), &dest_addr, SOCK_FLAG_TIMEOUT, 1000000l) )
     rc = bootprecv(bstate, udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), 0 );
     if(rc)
     {
@@ -251,20 +232,10 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
     }
 
 
-
-
-    /*
-    if(sendrecv(d,
-                bootpsend, bp, sizeof(*bp),
-                bootprecv, &rbuf.rbootp, sizeof(rbuf.rbootp))
-       == -1) {
-        SHOW_ERROR0( 0, "no reply");
-        return;
-    }*/
-
-#ifdef SUPPORT_DHCP
     if(bstate->dhcp_ok)
     {
+        SHOW_FLOW( 1, "DHCP ok, now will send request. xid = 0x%X", rbuf.rbootp.bp_xid );
+
         u_int32_t leasetime;
         bp->bp_vend[6] = DHCPREQUEST;
         bp->bp_vend[7] = TAG_REQ_ADDR;
@@ -287,31 +258,20 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
 
         bstate->expected_dhcpmsgtype = DHCPACK;
 
-
-        if( 0 != bootpsend(bstate, udp_sock, bp, sizeof(*bp)) )
+        if( 0 != bootpsend(bstate, udp_sock, bp, sizeof(*bp), send_addr) )
         {
             SHOW_ERROR0( 0, "can't send UDP 2");
             return ECONNREFUSED;
         }
 
-        //if( 0 >= udp_recvfrom(udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), &dest_addr, SOCK_FLAG_TIMEOUT, 1000000l) )
         if( bootprecv(bstate, udp_sock, &rbuf.rbootp, sizeof(rbuf.rbootp), 0) )
         {
             SHOW_ERROR0( 0, "no reply");
             return ETIMEDOUT;
         }
 
-
-        /*
-        if(sendrecv(d,
-                    bootpsend, bp, sizeof(*bp),
-                    bootprecv, &rbuf.rbootp, sizeof(rbuf.rbootp))
-           == -1) {
-            SHOW_ERROR0( 0, "DHCPREQUEST failed");
-            return;
-        }*/
     }
-#endif
+//#endif
 
     bstate->myip = rbuf.rbootp.bp_yiaddr;
     bstate->servip = rbuf.rbootp.bp_siaddr;
@@ -365,9 +325,14 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
     return 0;
 }
 
-/* Transmit a bootp request */
+/**
+ * @brief Transmit a bootp request 
+ * 
+ * @param[in] send_addr Address to send to. Must be full broadcast or interface broadcast.
+ * 
+**/
 static ssize_t
-bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t len)
+bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t len, ipv4addr send_addr)
 {
     bp->bp_secs = htons((u_short)(time(0) - bstate->bot));
 
@@ -379,7 +344,7 @@ bootpsend(struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t l
     dest_addr.addr.len = 4;
     dest_addr.addr.type = ADDR_TYPE_IP;
     // INADDR_BROADCAST
-    NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
+    NETADDR_TO_IPV4(dest_addr.addr) = send_addr;//IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
 
     int rc = udp_sendto(udp_sock, bp, len, &dest_addr);
     if( 0 != rc )
@@ -414,13 +379,15 @@ bootprecv( struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t 
         return ETIMEDOUT; // TODO errno
     }
 
+    SHOW_INFO( 9, "UDP msg from:      %s", inet_itoa(* ((u_int32_t *)&dest_addr.addr) ) );
+
     if (n == -1 || n < (int)(sizeof(struct bootp) - BOOTP_VENDSIZE))
         goto bad;
 
-    SHOW_FLOW( 3, "bootprecv: recv %d bytes", n);
+    SHOW_FLOW( 3, "recv %d bytes", n);
 
     if (bp->bp_xid != htonl(xid)) {
-        SHOW_ERROR( 1, "bootprecv: expected xid 0x%x, got 0x%x",
+        SHOW_ERROR( 1, "expected xid 0x%x, got 0x%x",
                    xid, ntohl(bp->bp_xid));
         goto bad;
     }
@@ -505,7 +472,7 @@ vend_rfc1048(struct bootp_state *bstate, u_char *cp, u_int len)
             strlcpy(bstate->hostname, (char *)cp, sizeof(bstate->hostname));
             //bstate->hostname[size] = '\0';
         }
-#ifdef SUPPORT_DHCP
+//#ifdef SUPPORT_DHCP
         if (tag == TAG_DHCP_MSGTYPE) {
             if(*cp != bstate->expected_dhcpmsgtype)
                 return(-1);
@@ -515,7 +482,7 @@ vend_rfc1048(struct bootp_state *bstate, u_char *cp, u_int len)
             bcopy(cp, &bstate->dhcp_serverip.s_addr,
                   sizeof(bstate->dhcp_serverip.s_addr));
         }
-#endif
+//#endif
         cp += size;
     }
     return(0);
@@ -549,9 +516,13 @@ vend_cmu(struct bootp_state *bstate, u_char *cp)
 errno_t bootp(ifnet *iface)
 {
     struct bootp_state          _bstate;
-    void *			udp_sock;
-
+    void *			             udp_sock;
     struct bootp_state          *bstate = &_bstate;
+
+    ipv4addr                     send_addr;
+
+    //send_addr = NETADDR_TO_IPV4(iface->addr_list->broadcast);
+    send_addr = 0xFFFFFFFF; // Just broadcast, we have hack in kernel to use 1st avail iface for it
 
     memset( &_bstate, 0, sizeof(struct bootp_state) );
 
@@ -578,7 +549,7 @@ errno_t bootp(ifnet *iface)
             return ENOTSOCK;
         }
 
-        e = do_bootp( bstate, udp_sock, 0);
+        e = do_bootp( bstate, udp_sock, 0, send_addr);
 
         udp_close(udp_sock);
 
@@ -589,7 +560,7 @@ errno_t bootp(ifnet *iface)
         SHOW_ERROR( 0, "error %d", e);
     else
     {
-        SHOW_INFO( 1, "DHCP netmask: 0x%08X", bstate->smask);
+        SHOW_INFO( 1, "DHCP netmask: 0x%08X", htonl(bstate->smask) );
 
         SHOW_INFO( 1, "DHCP ip:      %s", inet_ntoa(bstate->myip) );
         SHOW_INFO( 1, "gateway ip:   %s", inet_ntoa(bstate->gateip) );

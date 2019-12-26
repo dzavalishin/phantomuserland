@@ -29,7 +29,8 @@ Q_PORTS=" -serial file:serial0.log -soundhw es1370"
 # VIO="-drive file=vio.img,if=virtio,format=raw -net nic,model=virtio"
 
 #Q_NET=" -net nic,model=ne2k_pci -net user -tftp ./tftp"
-Q_NET=" -net nic,model=ne2k_pci -net user"
+#Q_NET=" -net nic,model=ne2k_pci -net user"
+Q_NET=" -net nic,model=ne2k_pci -net user,net=10.0.0.0/16"
 
 
 #../../qemu/2019-07-24/qemu-system-i386 $Q_KVM $Q_DEBUG $Q_EFI -m 256M $Q_PORTS $Q_BOOT $Q_CD $Q_DISK_A $Q_DISK_B $Q_NET $VIO $Q_VGA

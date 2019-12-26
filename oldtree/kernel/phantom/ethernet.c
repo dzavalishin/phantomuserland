@@ -6,16 +6,16 @@
  *
  * Ethernet frames handling.
  *
- **/
+ * Based on NewOS code:
+ * 
+ ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
+ ** Distributed under the terms of the NewOS License.
+ *
+**/
 
 #include <kernel/config.h>
 
 #if HAVE_NET
-
-/*
- ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
- ** Distributed under the terms of the NewOS License.
- */
 
 #include <kernel/net/arp.h>
 
@@ -53,7 +53,7 @@ void dump_mac_addr(char * addr)
 
 void dump_ethernet_addr(ethernet_addr addr)
 {
-    dump_mac_addr(addr);
+    dump_mac_addr((char *)addr);
 }
 
 static void dump_ethernet_header(ethernet2_header *head)
@@ -91,6 +91,7 @@ int ethernet_input(cbuf *buf, ifnet *i)
 
     switch(type) {
     case PROT_TYPE_IPV4:
+    case 6: // 802.3 IP type
         err = ipv4_input(buf, i);
         break;
     case PROT_TYPE_ARP:

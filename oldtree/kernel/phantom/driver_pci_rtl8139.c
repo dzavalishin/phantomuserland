@@ -26,6 +26,7 @@
 #include <hal.h>
 #include <phantom_libc.h>
 #include <kernel/vm.h>
+#include <kernel/debug.h>
 #include <ia32/pio.h>
 
 #include <device.h>
@@ -81,7 +82,6 @@ static void rtl8139_softint(void* data);
 #define DEF_ROUTE_ROUTER        IPV4_DOTADDR_TO_ADDR(10, 0, 2, 2)
 
 
-#if 1
 static int rtl8139_read( struct phantom_device *dev, void *buf, int len)
 {
     rtl8139 *nic = (rtl8139 *)dev->drv_private;
@@ -119,7 +119,7 @@ static int rtl8139_get_address( struct phantom_device *dev, void *buf, int len)
     return err;
 }
 
-#endif
+
 
 
 
@@ -275,7 +275,7 @@ int rtl8139_init(rtl8139 *rtl)
     hal_pages_control(
                       PREV_PAGE_ALIGN(rtl->phys_base), rtl->virt_base,
                       phys_size_pages,
-                      page_map, page_rw );
+                      page_map_io, page_rw );
 
     rtl->virt_base += offset;
     }
@@ -655,7 +655,10 @@ out:
     hal_mutex_unlock(&rtl->lock);
 
 #if IO_CHAT
-    printf("RX %x (%d)\ndumping packet:\n", buf, len);
+    printf("RX %x (%d)\n", buf, len );
+#endif
+#if IO_DUMP
+    printf("RX dumping packet:\n");
     hexdump( buf, len, 0, 0 );
 #endif
 
@@ -697,7 +700,8 @@ static int rtl8139_txint(rtl8139 *rtl, u_int16_t int_status)
     int rc = 0; //INT_NO_RESCHEDULE;
 
     // transmit ok
-    //printf("tx %d\n", int_status);
+    if(IO_CHAT) printf("tx int status=0x%x\n", int_status);
+
     if(int_status & RT_INT_TX_ERR) {
         printf("err tx int:\n");
         rtl8139_dumptxstate(rtl);

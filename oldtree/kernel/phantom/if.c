@@ -100,7 +100,6 @@ ifnet *if_path_to_ifnet(const char *path)
 int if_register_interface(int type, ifnet **_i, phantom_device_t *dev)
 {
     ifnet *i;
-    //int type;
     int err;
     ifaddr *address;
 
@@ -116,33 +115,15 @@ int if_register_interface(int type, ifnet **_i, phantom_device_t *dev)
     if(dev != 0 && (i->dev->dops.write == 0 || i->dev->dops.read == 0) )
         panic("dev has no read or write!");
 
-
-
-    /* open the device * /
-     if(!strcmp(path, "loopback")) {
-     // the 'loopback' device is special
-     type = IF_TYPE_LOOPBACK;
-     i->fd = -1;
-     } else {
-     i->fd = sys_open(path, 0);
-     if(i->fd < 0) {
-     err = i->fd;
-     goto err1;
-     }
-     // find the device's type
-      err = sys_ioctl(i->fd, IOCTL_NET_IF_GET_TYPE, &type, sizeof(type));
-      if(err < 0) {
-      goto err2;
-      }
-      } */
-
     // find the appropriate function calls to the link layer drivers
     switch(type) {
+
     case IF_TYPE_LOOPBACK:
         i->link_input = &loopback_input;
         i->link_output = &loopback_output;
         i->mtu = 65535;
         break;
+
     case IF_TYPE_ETHERNET:
 
         assert(dev);
@@ -169,12 +150,6 @@ int if_register_interface(int type, ifnet **_i, phantom_device_t *dev)
             kfree(address);
             goto err2;
         }
-
-        /*err = sys_ioctl(i->fd, IOCTL_NET_IF_GET_ADDR, &address->addr.addr[0], 6);
-        if(err < 0) {
-            kfree(address);
-            goto err2;
-        }*/
 
         address->broadcast.len = 6;
         address->broadcast.type = ADDR_TYPE_ETHERNET;
@@ -300,18 +275,16 @@ void if_simple_setup(ifnet *interface, int addr, int netmask, int bcast, int net
     if_bind_address(interface, address);
 
 #if 1
-    printf("if a ");
-    dump_ipv4_addr(addr);
-    printf(" mask ");
-    dump_ipv4_addr(netmask);
-    printf(" broad ");
-    dump_ipv4_addr(bcast);
+    printf("if a ");    dump_ipv4_addr(addr);
+    printf(" mask ");   dump_ipv4_addr(netmask);
+    printf(" broad ");  dump_ipv4_addr(bcast);
     printf("\n");
 #endif
 
     // set up an initial routing table
     int rc;
 
+#if 1
     if( (rc = ipv4_route_add( net, netmask, router, interface->id) ) )
     {
         SHOW_ERROR( 1, "Adding route - failed, rc = %d", rc);
@@ -320,8 +293,9 @@ void if_simple_setup(ifnet *interface, int addr, int netmask, int bcast, int net
     {
         SHOW_INFO0( 2, "Adding route - ok");
     }
+#endif 
 
-
+#if 0
     SHOW_INFO0( 2, "Adding default route...");
     if( (rc = ipv4_route_add_default( router, interface->id, def_router ) ) )
     {
@@ -331,7 +305,7 @@ void if_simple_setup(ifnet *interface, int addr, int netmask, int bcast, int net
     {
         SHOW_INFO0( 2, "Adding route - ok");
     }
-
+#endif
 #if 0
     hal_start_kernel_thread_arg( bootp_thread, interface );
 #else
@@ -510,14 +484,9 @@ int if_boot_interface(ifnet *i)
         goto err2;
     }
 
-    // start the threads
-    //thread_resume_thread(i->rx_thread);
-    //thread_resume_thread(i->tx_thread);
-
     return NO_ERROR;
 
 err2:
-    //thread_kill_thread_nowait(i->rx_thread);
     t_kill_thread(i->rx_thread);
 err1:
     return err;
