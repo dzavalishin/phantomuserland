@@ -12,8 +12,8 @@
 
 #define DEBUG_MSG_PREFIX "bootp"
 #include <debug_ext.h>
-#define debug_level_flow 0
-#define debug_level_info 1
+#define debug_level_flow 10
+#define debug_level_info 10
 #define debug_level_error 10
 
 #include <kernel/net/udp.h>
@@ -167,6 +167,10 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag)
     bp->bp_htype = 1;		/* 10Mb Ethernet (48 bits) */
     bp->bp_hlen = 6;
     bp->bp_xid = htonl(xid);
+
+    // [dz] attempt to fight 'ipv4 packet for someone else: 192.168.255.255'
+    bp->bp_flags = 0x8000; // ask him to broadcast reply
+    bp->bp_yiaddr.s_addr = 0xFFFFFFFF; // set my address to full broadcast
 
     //MACPY(d->myea, bp->bp_chaddr);
     memcpy( bp->bp_chaddr, bstate->mac_addr, 6 );
@@ -401,7 +405,8 @@ bootprecv( struct bootp_state *bstate, void *udp_sock, struct bootp *bp, size_t 
     //NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0xFF, 0xFF, 0xFF, 0xFF);
     NETADDR_TO_IPV4(dest_addr.addr) = IPV4_DOTADDR_TO_ADDR(0, 0, 0, 0);
 
-    int n = udp_recvfrom(udp_sock, bp, len, &dest_addr, SOCK_FLAG_TIMEOUT, 2000000l);
+    //int n = udp_recvfrom(udp_sock, bp, len, &dest_addr, SOCK_FLAG_TIMEOUT, 2000000l);
+    int n = udp_recvfrom(udp_sock, bp, len, &dest_addr, SOCK_FLAG_TIMEOUT, 6000000l);
 
     if( 0 >= n )
     {
@@ -632,7 +637,8 @@ errno_t bootp(ifnet *iface)
         errno_t e = ipv4_route_remove_iface(iface->id);
         if(e) SHOW_ERROR( 1, "Removilg routes to iface - failed, rc = %d", e );
 
-        u_int32_t net_mask = htonl(~(bstate->smask));
+        //u_int32_t net_mask = htonl(~(bstate->smask));
+        u_int32_t net_mask = htonl(bstate->smask);
 
         int rc;
         if( (rc = ipv4_route_add( htonl(net), net_mask, htonl(bstate->myip.s_addr), iface->id) ) )
