@@ -131,7 +131,16 @@ void run_test( const char *test_name, const char *test_parm )
 
     printf("Phantom ver %s svn %s test suite\n-----\n", PHANTOM_VERSION_STR, svn_version() );
 
-    TEST(sound);
+//    TEST(sound);
+
+    TEST(cbuf);
+    TEST(udp_send);
+    TEST(udp_syslog);
+    TEST(resolver);
+
+    TEST(tftp);
+
+    TEST(tcp_connect);
 
     TEST(hdir);
 
@@ -168,17 +177,6 @@ void run_test( const char *test_name, const char *test_parm )
     TEST(physalloc_gen);
     TEST(malloc);
     TEST(amap);
-
-    TEST(cbuf);
-    TEST(udp_send);
-    TEST(udp_syslog);
-    TEST(resolver);
-
-    TEST(tftp);
-
-
-    TEST(tcp_connect);
-
 
     // These are long
     TEST(dpc);

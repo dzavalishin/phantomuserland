@@ -22,6 +22,7 @@
  * $FreeBSD: src/lib/libstand/bootp.h,v 1.2.32.1 2008/11/25 02:59:29 kensmith Exp $
  */
 
+// TODO use sized ints
 
 struct bootp {
 	unsigned char	bp_op;		/* packet opcode type */
@@ -87,6 +88,7 @@ struct bootp {
 #define TAG_SWAPSERVER		((unsigned char)  16)
 #define TAG_ROOTPATH		((unsigned char)  17)
 
+#define TAG_NTP_SERVER      ((unsigned char)  42)
 
 #define TAG_REQ_ADDR		((unsigned char)  50)
 #define TAG_LEASETIME		((unsigned char)  51)
@@ -104,7 +106,6 @@ struct bootp {
 
 #define TAG_END			((unsigned char) 255)
 
-//#ifdef SUPPORT_DHCP
 #define DHCPDISCOVER 1
 #define DHCPOFFER 2
 #define DHCPREQUEST 3
@@ -112,11 +113,10 @@ struct bootp {
 #define DHCPACK 5
 #define DHCPNAK 6
 #define DHCPRELEASE 7
-//#endif
 
 /*
  * bootp flags
+#define	BOOTP_NONE		0x0000		// No flags 
+#define	BOOTP_PXE		0x0001		// Booting from PXE. 
  */
-#define	BOOTP_NONE		0x0000		/* No flags */
-#define	BOOTP_PXE		0x0001		/* Booting from PXE. */
 

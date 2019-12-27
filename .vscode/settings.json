@@ -127,7 +127,8 @@
       "test.h": "c",
       "main.h": "c",
       "acpi.h": "c",
-      "bootp.h": "c"
+      "bootp.h": "c",
+      "typeinfo": "c"
     },
     "restructuredtext.confPath": "g:\\Projects\\phantomdox\\dox\\source"
   }

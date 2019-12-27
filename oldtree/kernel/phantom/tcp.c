@@ -6,7 +6,8 @@
  *
  * TCP.
  *
- * Based on NeOS code:
+ * Based on NewOS code:
+ * 
  * Copyright 2001-2004, Travis Geiselbrecht. All rights reserved.
  * Distributed under the terms of the NewOS License.
  *

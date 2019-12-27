@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
- * Very basic resolver.
+ * Very basic DNS resolver.
  *
 **/
 
@@ -76,6 +76,13 @@ errno_t dns_request(const unsigned char *host, ipv4_addr server, ipv4_addr *resu
         SHOW_ERROR0( 0, "Can't get socket");
         return ENOTSOCK;
     }
+
+    // hack. UDP must choose port for us!
+    //i4sockaddr our_port;
+    //our_port.port = 53;
+    //int rc = udp_bind( s, &our_port );
+    //if(rc) LOG_ERROR( 0, "Can't bind, rc = %d", rc );
+
 #else
     int s = socket(AF_INET , SOCK_DGRAM , IPPROTO_UDP); //UDP packet for DNS queries
 #endif
@@ -366,7 +373,7 @@ static unsigned char* ReadName( unsigned char* reader, unsigned char* buffer, in
 }
 
 
-//this will convert www.google.com to 3www6google3com ;got it <img src="http://www.binarytides.com/blog/wp-includes/images/smilies/icon_smile.gif" alt=":)" class="wp-smiley">
+//this will convert www.google.com to 3www6google3com ;got it 
 static void ChangetoDnsNameFormat(unsigned char* dns, const unsigned char* _host)
 {
     unsigned char copy[128];
@@ -404,10 +411,10 @@ static void ChangetoDnsNameFormat(unsigned char* dns, const unsigned char* _host
 
 static ipv4_addr servers[MAX_DNS_SERVERS] =
 {
-    IPV4_DOTADDR_TO_ADDR(1, 1, 168, 192),
-    IPV4_DOTADDR_TO_ADDR(1, 0, 168, 192),
+    //IPV4_DOTADDR_TO_ADDR(1, 1, 168, 192),
+    //IPV4_DOTADDR_TO_ADDR(1, 0, 168, 192),
     IPV4_DOTADDR_TO_ADDR(8, 8, 8, 8),
-    IPV4_DOTADDR_TO_ADDR(4, 4, 8, 8),
+    //IPV4_DOTADDR_TO_ADDR(4, 4, 8, 8),
 };
 
 static int max_dns_servers = sizeof(servers) / sizeof(servers[0]);
@@ -417,6 +424,8 @@ static int max_dns_servers = sizeof(servers) / sizeof(servers[0]);
 errno_t dns_server_add( ipv4_addr a )
 {
     int i;
+
+    LOG_INFO_( 2, "Adding DNS server %08x", a );
 
     for( i = 0; i < max_dns_servers; i++ )
     {

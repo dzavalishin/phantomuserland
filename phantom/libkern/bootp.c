@@ -3,7 +3,7 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * Bootp/DHCP client.
  *
@@ -12,9 +12,15 @@
 
 #define DEBUG_MSG_PREFIX "bootp"
 #include <debug_ext.h>
-#define debug_level_flow 10
-#define debug_level_info 10
+#define debug_level_flow 0
+#define debug_level_info 0
 #define debug_level_error 10
+
+
+#define DUMP_ROUTES 9
+
+
+#include <kernel/debug.h>
 
 #include <kernel/net/udp.h>
 #include <kernel/libkern.h>
@@ -145,7 +151,7 @@ static void attach_dhcp_option( unsigned char**bufpp, u_int32_t *bufs, char tag,
 }
 
 /* Fetch required bootp infomation */
-static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag, ipv4_addr send_addr)
+static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, ipv4_addr send_addr)
 {
     struct bootp *bp;
 
@@ -175,7 +181,7 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag, ip
     bp->bp_xid = htonl(xid);
 
     // [dz] attempt to fight 'ipv4 packet for someone else: 192.168.255.255'
-    bp->bp_flags = htonl(0x8000); // ask him to broadcast reply
+    bp->bp_flags = htons(0x8000); // ask him to broadcast reply
     bp->bp_yiaddr.s_addr = 0xFFFFFFFF; // set my address to full broadcast
 
     //MACPY(d->myea, bp->bp_chaddr);
@@ -193,7 +199,8 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag, ip
 
     bufs--; // leave place for final TAG_END
 
-    char req[] = { TAG_SUBNET_MASK, };
+    //char req[] = { TAG_SUBNET_MASK, TAG_TIME_SERVER, TAG_DOMAIN_SERVER, TAG_LOG_SERVER, TAG_HOSTNAME, TAG_DOMAINNAME };
+    char req[] = { TAG_SUBNET_MASK, TAG_GATEWAY, TAG_NTP_SERVER, TAG_DOMAIN_SERVER, TAG_LOG_SERVER, TAG_HOSTNAME, TAG_DOMAINNAME };
 
     attach_dhcp_option( &bufp, &bufs, TAG_PARAM_REQ, sizeof(req), req );
 
@@ -225,11 +232,8 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag, ip
     //d->destip.s_addr = INADDR_BROADCAST;
     //d->destport = htons(IPPORT_BOOTPS);
 
-//#ifdef SUPPORT_DHCP
     bstate->expected_dhcpmsgtype = DHCPOFFER;
     bstate->dhcp_ok = 0;
-//#endif
-
 
     i4sockaddr src_addr;
     src_addr.port = IPPORT_BOOTPC; // local port
@@ -278,12 +282,14 @@ static errno_t do_bootp(struct bootp_state *bstate, void *udp_sock, int flag, ip
         bp->bp_vend[20] = 4;
         leasetime = htonl(30000);
         bcopy(&leasetime, &bp->bp_vend[21], 4);
+        /*        
         if (flag & BOOTP_PXE) {
             bp->bp_vend[25] = TAG_CLASSID;
             bp->bp_vend[26] = 9;
             bcopy("PXEClient", &bp->bp_vend[27], 9);
             bp->bp_vend[36] = TAG_END;
         } else
+        */
             bp->bp_vend[25] = TAG_END;
 
         bstate->expected_dhcpmsgtype = DHCPACK;
@@ -447,11 +453,28 @@ vend_rfc1048(struct bootp_state *bstate, u_char *cp, u_int len)
             bcopy(cp, &bstate->dns.s_addr, sizeof(bstate->dns.s_addr));
             break;
 
-            // TODO
-        case TAG_TIME_SERVER:
-            break;
+        //case TAG_TIME_SERVER:            break;
 
         case TAG_LOG_SERVER:
+            hexdump(cp, size, "Log", 0 );
+            break;
+
+        case TAG_NTP_SERVER:
+            {
+                //hexdump(cp, size, "NTP", 0 );
+                int left = size;
+                u_int32_t *ipp = (u_int32_t *)cp;
+                while( left > 4 )
+                {
+                    left -= 4;
+                    u_int32_t ntp_ip = htonl( *ipp++ );
+                    LOG_INFO_( 1, "NTP server %s", inet_itoa( ntp_ip ) );
+                // TODO SNTP is Posix app, how do we pass info? Environment?
+                // phantom_setenv( const char *name, const char *value )
+                // TODO object land may be not yet inited, can't call setenv, need some
+                // rendevouz gear to meet kernel and object land
+                }
+            }
             break;
 
         case TAG_LEASETIME:
@@ -549,7 +572,7 @@ errno_t bootp(ifnet *iface)
             return ENOTSOCK;
         }
 
-        e = do_bootp( bstate, udp_sock, 0, send_addr);
+        e = do_bootp( bstate, udp_sock, send_addr);
 
         udp_close(udp_sock);
 
@@ -575,6 +598,14 @@ errno_t bootp(ifnet *iface)
 
         // Now apply it to interface
         // TODO use if_simple_setup instead!
+        //u_int32_t net_mask = htonl(~(bstate->smask));
+        u_int32_t net_mask = htonl(bstate->smask);
+
+        //u_int32_t net = (bstate->myip.s_addr) & ~(bstate->smask);
+        u_int32_t net = htonl(bstate->myip.s_addr) & net_mask;
+        LOG_INFO_( 1, "Net ip:        %s", inet_itoa(htonl(net)) );
+        //LOG_INFO_( 1, "Net ip:        0x%X", net );
+
 
         ifaddr *address;
 
@@ -587,50 +618,53 @@ errno_t bootp(ifnet *iface)
 
         address->netmask.len = 4;
         address->netmask.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->netmask) = htonl(bstate->smask);
+        NETADDR_TO_IPV4(address->netmask) = net_mask; //htonl(bstate->smask);
 
-        u_int32_t bcast = (bstate->myip.s_addr) | bstate->smask;
+        u_int32_t bcast = htonl(bstate->myip.s_addr) | ~net_mask; //bstate->smask;
+        LOG_INFO_( 2, "Broadcast addr = %08x ", bcast );
 
         address->broadcast.len = 4;
         address->broadcast.type = ADDR_TYPE_IP;
-        NETADDR_TO_IPV4(address->broadcast) = htonl(bcast);
+        NETADDR_TO_IPV4(address->broadcast) = bcast;
 
-        //ipv4_route_dump();
-
+#if DUMP_ROUTES
+        ipv4_route_dump();
+#endif
 
         //if_bind_address(iface, address);
         if_replace_address(iface, address); // kill al prev addresses and use new one
-
-        u_int32_t net = (bstate->myip.s_addr) & ~(bstate->smask);
 
         // TODO why the hell htonl here? Must ne ntohl instead?
 
         errno_t e = ipv4_route_remove_iface(iface->id);
         if(e) LOG_ERROR( 1, "Removilg routes to iface - failed, rc = %d", e );
 
-        //u_int32_t net_mask = htonl(~(bstate->smask));
-        u_int32_t net_mask = htonl(bstate->smask);
-
         int rc;
-        if( (rc = ipv4_route_add( htonl(net), net_mask, htonl(bstate->myip.s_addr), iface->id) ) )
+        if( (rc = ipv4_route_add( net, net_mask, htonl(bstate->myip.s_addr), iface->id) ) )
         {
             LOG_ERROR( 1, "Adding route mask %08x - failed, rc = %d", net_mask, rc);
         }
         else
         {
-            LOG_INFO0( 2, "Adding route - ok");
+            LOG_INFO_( 2, "Adding route mask %08x - ok", net_mask );
         }
 
-        if( (rc = ipv4_route_add_default( htonl(bstate->myip.s_addr), iface->id, htonl(bstate->gateip.s_addr) ) ) )
+        u_int32_t gate = htonl(bstate->gateip.s_addr);
+
+        if( gate == 0 ) LOG_ERROR0( 1, "Can't add default route, no gate addr" );        
+        else if( (rc = ipv4_route_add_default( htonl(bstate->myip.s_addr), iface->id, gate ) ) )
         {
             LOG_ERROR( 1, "Adding default route - failed, rc = %d", rc);
         }
         else
         {
-            LOG_INFO0( 2, "Adding default route - ok");
+            LOG_INFO_( 2, "Adding default route 0x%X - ok", gate );
         }
 
-        //ipv4_route_dump();
+
+#if DUMP_ROUTES
+        ipv4_route_dump();
+#endif
 
         // At least one char!
         if(*bstate->hostname)
@@ -638,7 +672,9 @@ errno_t bootp(ifnet *iface)
 
         if( bstate->dns.s_addr )
         {
-            e = dns_server_add( htonl(bstate->dns.s_addr) );
+            LOG_FLOW( 2, "Add DNS server %s", inet_ntoa(bstate->dns) );
+            //e = dns_server_add( htonl(bstate->dns.s_addr) );
+            e = dns_server_add( bstate->dns.s_addr );
             if( e ) LOG_ERROR( 1, "Adding DNS server %s failed, rc = %d", inet_ntoa(bstate->dns), e );
         }
     }

@@ -2,20 +2,27 @@
  *
  * Phantom OS
  *
- * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
+ * Copyright (C) 2005-2019 Dmitry Zavalishin, dz@dz.ru
  *
  * ICMP.
  *
+ * Based on NewOS code: 
+ * 
+ * Copyright 2001, Travis Geiselbrecht. All rights reserved.
+ * Distributed under the terms of the NewOS License.
+ *
 **/
 
+#define DEBUG_MSG_PREFIX "icmp"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_info 10
+#define debug_level_error 10
+
+#include <kernel/debug.h>
 #include <kernel/config.h>
 
 #if HAVE_NET
-
-/*
- ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
- ** Distributed under the terms of the NewOS License.
- */
 
 #include <kernel/khash.h>
 #include <kernel/net.h>
@@ -25,7 +32,29 @@
 #include <endian.h>
 #include <hal.h>
 
-#define dprintf printf
+#include <arpa/inet.h>
+
+
+#define dprintf lprintf
+
+#define ICMP_ER		0	/* echo reply */
+#define ICMP_DUR	3	/* destination unreachable */
+#define ICMP_SQ		4	/* source quench */
+#define ICMP_RD		5	/* redirect */
+#define ICMP_ECHO	8	/* echo */
+#define ICMP_TE		11	/* time exceeded */
+#define ICMP_PP		12	/* parameter problem */
+#define ICMP_TS		13	/* timestamp */
+#define ICMP_TSR	14	/* timestamp reply */
+#define ICMP_IRQ	15	/* information request */
+#define ICMP_IR		16	/* information reply */
+
+#define	ICMP_DUR_NET    0	/* net unreachable */
+#define	ICMP_DUR_HOST   1	/* host unreachable */
+#define	ICMP_DUR_PROTO  2	/* protocol unreachable */
+#define	ICMP_DUR_PORT   3	/* port unreachable */
+#define	ICMP_DUR_FRAG   4	/* fragmentation needed and DF set */
+#define	ICMP_DUR_SR     5	/* source route failed */
 
 
 typedef struct icmp_header {
@@ -74,10 +103,11 @@ int icmp_input(cbuf *buf, ifnet *i, ipv4_addr source_ipaddr)
     }
 
     switch(header->type) {
-    case 0: { // echo reply
+    case ICMP_ER: { // echo reply
+        LOG_INFO_( 1, "got icmp reply from %s", inet_itoa( source_ipaddr ) );
         break;
     }
-    case 8: { // echo request
+    case ICMP_ECHO: { // echo request
         icmp_echo_header *eheader = (icmp_echo_header *)header;
 
         // bounce this message right back
@@ -86,10 +116,10 @@ int icmp_input(cbuf *buf, ifnet *i, ipv4_addr source_ipaddr)
         eheader->preheader.checksum = cbuf_ones_cksum16(buf, 0, 0xffff);
         return ipv4_output(buf, source_ipaddr, IP_PROT_ICMP);
     }
-#if NET_CHATTY
+
     default:
-        dprintf("unhandled icmp message\n");
-#endif
+        LOG_ERROR( 1, "unhandled icmp message type = %d", header->type );
+        break;
     }
 
     err = NO_ERROR;

@@ -5,8 +5,24 @@
  * Copyright (C) 2005-2010 Dmitry Zavalishin, dz@dz.ru
  *
  * UDP.
+ * 
+ * Based on NewOS code.
+ * 
+ * Copyright 2001, Travis Geiselbrecht. All rights reserved.
+ * Distributed under the terms of the NewOS License.
  *
 **/
+
+#define DEBUG_MSG_PREFIX "udp"
+#include <debug_ext.h>
+#define debug_level_flow 0
+#define debug_level_info 0
+#define debug_level_error 10
+
+#include <kernel/debug.h>
+
+
+//#define NET_CHATTY 1
 
 #include <kernel/config.h>
 #include <kernel/stats.h>
@@ -15,10 +31,6 @@
 #include <errno.h>
 
 #if HAVE_NET
-/*
- ** Copyright 2001, Travis Geiselbrecht. All rights reserved.
- ** Distributed under the terms of the NewOS License.
- */
 
 #include <kernel/khash.h>
 
@@ -30,6 +42,8 @@
 
 #include "misc.h"
 
+static int udp_is_used_port(u_int16_t port);
+static int udp_choose_unused_port(void);
 
 
 typedef struct udp_header {
@@ -147,6 +161,7 @@ static void udp_endpoint_release_ref(udp_endpoint *e)
                 cbuf_free_chain(qe->buf);
             kfree(qe);
         }
+        // TODO free e?
     }
 }
 
@@ -165,7 +180,7 @@ int udp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     header = cbuf_get_ptr(buf, 0);
 
 #if NET_CHATTY
-    dprintf("udp_input: src port %d, dest port %d, len %d, buf len %d, checksum 0x%x\n",
+    lprintf("udp_input: src port %d, dest port %d, len %d, buf len %d, checksum 0x%x\n",
             ntohs(header->source_port), ntohs(header->dest_port), ntohs(header->length), (int)cbuf_get_len(buf), ntohs(header->checksum));
 #endif
     if(ntohs(header->length) > (uint16)cbuf_get_len(buf)) {
@@ -188,7 +203,7 @@ int udp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
         checksum = cbuf_ones_cksum16_2(buf, 0, ntohs(header->length), &pheader, sizeof(pheader));
         if(checksum != 0) {
 #if NET_CHATTY
-            dprintf("udp_receive: packet failed checksum\n");
+            lprintf("udp_receive: packet failed checksum\n");
 #endif
             err = ERR_NET_BAD_PACKET;
             goto ditch_packet;
@@ -206,7 +221,7 @@ int udp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
     if(!e) {
         err = NO_ERROR;
 #if NET_CHATTY
-        dprintf("udp_receive: no endpoint found\n");
+        lprintf("udp_receive: no endpoint found\n");
 #endif
         goto ditch_packet;
     }
@@ -241,7 +256,7 @@ int udp_input(cbuf *buf, ifnet *i, ipv4_addr source_address, ipv4_addr target_ad
 
 ditch_packet:
 #if NET_CHATTY
-    dprintf("udp_receive: packet thrown away\n");
+    lprintf("udp_receive: packet thrown away\n");
 #endif
     cbuf_free_chain(buf);
 
@@ -255,13 +270,18 @@ int udp_open(void **prot_data)
         return ERR_NO_MEMORY;
 
     hal_mutex_init(&e->lock, "UDP endp");
-    //e->blocking_sem = sem_create(0, "udp endpoint sem");
     hal_sem_init(&(e->blocking_sem), "UDP blk");
-    e->port = 0;
     e->ref_count = 1;
     udp_init_queue(&e->q);
 
     mutex_lock(&endpoints_lock);
+    e->port = udp_choose_unused_port(); // find free port above 1024
+    if( e->port == 0 )
+    {
+        mutex_unlock(&endpoints_lock);
+        udp_endpoint_release_ref(e);
+        return ERR_NO_MEMORY; // TODO errno, use correct one
+    }
     hash_insert(endpoints, e);
     mutex_unlock(&endpoints_lock);
 
@@ -273,24 +293,28 @@ int udp_open(void **prot_data)
 int udp_bind(void *prot_data, i4sockaddr *addr)
 {
     udp_endpoint *e = prot_data;
-    int err;
+    int err = NO_ERROR;
+
+    LOG_FLOW( 2, "Bind port %d", addr->port );
 
     mutex_lock(&e->lock);
 
-    if(e->port == 0) {
+    //if(e->port == 0) {
         // BUG TODO XXX search to make sure this port isn't used already
         if(addr->port != e->port) {
-            // remove it from the hashtable
             mutex_lock(&endpoints_lock);
-            hash_remove(endpoints, e);
-            e->port = addr->port;
-            hash_insert(endpoints, e);
+            if( !udp_is_used_port(addr->port) )
+            {
+            // remove it from the hashtable
+                hash_remove(endpoints, e);
+                e->port = addr->port;
+                hash_insert(endpoints, e);
+            }
+            else
+                err = ERR_INVALID_ARGS;
             mutex_unlock(&endpoints_lock);
         }
-        err = NO_ERROR;
-    } else {
-        err = ERR_NET_SOCKET_ALREADY_BOUND;
-    }
+    //} else {        err = ERR_NET_SOCKET_ALREADY_BOUND;    }
 
     mutex_unlock(&e->lock);
 
@@ -363,7 +387,7 @@ retry:
     if(!qe)
     {
 #if 1||NET_CHATTY
-        printf("UDP read retry");
+        lprintf("UDP read retry");
 #endif
         goto retry;
     }
@@ -426,6 +450,7 @@ ssize_t udp_sendto(void *prot_data, const void *inbuf, ssize_t len, i4sockaddr *
     // set up the udp pseudo header
     if(ipv4_lookup_srcaddr_for_dest(NETADDR_TO_IPV4(toaddr->addr), &srcaddr) < 0) {
         cbuf_free_chain(buf);
+        lprintf("udp no src addr for dest 0x%X\n", NETADDR_TO_IPV4(toaddr->addr) );
         return ERR_NET_NO_ROUTE;
     }
     pheader.source_addr = htonl(srcaddr);
@@ -445,7 +470,7 @@ ssize_t udp_sendto(void *prot_data, const void *inbuf, ssize_t len, i4sockaddr *
         header->checksum = 0xffff;
 
 #if NET_CHATTY
-    printf("UDP SEND port %d to %d, len %d (%d)\n", e->port, toaddr->port, total_len, len );
+    lprintf("UDP SEND port %d to %d, len %d (%d)\n", e->port, toaddr->port, total_len, len );
 #endif
     // send it away
     err = ipv4_output(buf, NETADDR_TO_IPV4(toaddr->addr), IP_PROT_UDP);
@@ -473,6 +498,51 @@ errno_t udp_init(void)
         return ENOMEM;
 
     return 0;
+}
+
+
+static int next_ephemeral_port = 1024;
+
+/**
+ * @brief Find next unused port number.
+ * 
+ * @note Supposed to be called with endpoints_lock locked.
+ * 
+ * @returns Unused port number or 0 on failure.
+ * 
+**/
+
+static int udp_choose_unused_port(void)
+{
+    u_int16_t local_port;
+    u_int16_t attempts = -1; // max short
+
+    //mutex_lock(&endpoints_lock);
+    while(1) 
+    {
+        if( next_ephemeral_port < 1024 )
+            atomic_add( &next_ephemeral_port, 1024 );
+        local_port = atomic_add( &next_ephemeral_port, 1 );
+
+        if( !udp_is_used_port(local_port) )
+            break;
+
+        if( --attempts == 0 ) return 0;
+
+    }
+    //mutex_unlock(&endpoints_lock);
+    return local_port;
+}
+
+/**
+ * @brief Check if port is used.
+ * 
+ * @note Supposed to be called with endpoints_lock locked.
+ * 
+**/
+static int udp_is_used_port(u_int16_t port)
+{
+    return ((int) hash_lookup(endpoints, &port)) ? 1 : 0;
 }
 
 #endif
