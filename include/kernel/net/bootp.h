@@ -38,11 +38,11 @@ struct bootp {
 	unsigned char	bp_chaddr[16];	/* client hardware address */
 	unsigned char	bp_sname[64];	/* server host name */
 	unsigned char	bp_file[128];	/* boot file name */
-//#ifdef SUPPORT_DHCP
+
 #define BOOTP_VENDSIZE 312
-//#else
-//#define BOOTP_VENDSIZE 64
-//#endif
+// some servers reply a lot
+//#define BOOTP_VENDSIZE 1024
+
 	unsigned char	bp_vend[BOOTP_VENDSIZE];	/* vendor-specific area */
 };
 
@@ -55,11 +55,6 @@ struct bootp {
 #define BOOTREPLY		2
 #define BOOTREQUEST		1
 
-
-/*
- * Vendor magic cookie (v_magic) for CMU
- */
-#define VM_CMU		"CMU"
 
 /*
  * Vendor magic cookie (v_magic) for RFC1048
@@ -92,7 +87,7 @@ struct bootp {
 #define TAG_SWAPSERVER		((unsigned char)  16)
 #define TAG_ROOTPATH		((unsigned char)  17)
 
-//#ifdef SUPPORT_DHCP
+
 #define TAG_REQ_ADDR		((unsigned char)  50)
 #define TAG_LEASETIME		((unsigned char)  51)
 #define TAG_OVERLOAD		((unsigned char)  52)
@@ -105,7 +100,7 @@ struct bootp {
 #define TAG_T2			((unsigned char)  59)
 #define TAG_CLASSID		((unsigned char)  60)
 #define TAG_CLIENTID		((unsigned char)  61)
-//#endif
+
 
 #define TAG_END			((unsigned char) 255)
 
@@ -125,21 +120,3 @@ struct bootp {
 #define	BOOTP_NONE		0x0000		/* No flags */
 #define	BOOTP_PXE		0x0001		/* Booting from PXE. */
 
-/*
- * "vendor" data permitted for CMU bootp clients.
- */
-
-struct cmu_vend {
-	unsigned char	v_magic[4];	/* magic number */
-	unsigned int	v_flags;	/* flags/opcodes, etc. */
-	struct in_addr	v_smask;	/* Subnet mask */
-	struct in_addr	v_dgate;	/* Default gateway */
-	struct in_addr	v_dns1, v_dns2; /* Domain name servers */
-	struct in_addr	v_ins1, v_ins2; /* IEN-116 name servers */
-	struct in_addr	v_ts1, v_ts2;	/* Time servers */
-	unsigned char	v_unused[25];	/* currently unused */
-};
-
-
-/* v_flags values */
-#define VF_SMASK	1	/* Subnet mask field contains valid data */
