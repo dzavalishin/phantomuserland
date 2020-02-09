@@ -57,7 +57,7 @@ public class PpcMain {
 			return true;
 		}
 		
-		//pfx.print();
+		pfx.print();
 		
 		//PythonConvertor pc = new PythonConvertor();
 		
@@ -69,7 +69,13 @@ public class PpcMain {
 			return true;
 		}
 		
+		// TODO here is a copy of code from plc main, there must be method in classmap which does it
+		cm.set_ordinals(); // NO! we must do it after creating default constructors
+		cm.propagateVoid(); // Before preprocess!
+		cm.preprocess();
 		cm.codegen();
+		
+		cm.print();
 		
 		return false;
 	}

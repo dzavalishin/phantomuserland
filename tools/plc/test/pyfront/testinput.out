@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <PythonFrontend>
 <Label name="EOF" />   
 <PythonCode>   
@@ -8,7 +7,8 @@
 <Function name="?" />   
 <DICT out="0" inStart="0" inNum="0" />   
 <GSET gVarName="myclass" fromreg="0" />   
-<DefFunc outreg="1" len="26" />   
+<CLASS name="myclass" /> 
+<DefFunc outreg="1" len="25" />   
 <PythonCode>   
 <REGS num="4" />   
 <pos line="2" text="  def load(fname):" />   
@@ -20,8 +20,7 @@
 <Label name="1:1:0" />   
 <STRING reg="3" content="ok" len="2"  />
 <EQ out="2" left="1" right="3" />   
-<IF reg="2" />   
-<JUMP label="1:1:1" />   
+<IFJMP reg="2" jmp="1:1:1" />   
 <pos line="4" text="        r = 2 + fname" />   
 <NUMBER reg="3" val="2.0"  /> 
 <ADD out="3" left="3" right="1" />   

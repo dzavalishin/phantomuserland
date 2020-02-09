@@ -93,8 +93,13 @@ def emitget(toreg,cls,fld):
 def emiteq(to,a,b):
     xml('EQ','result',to,'left',a,'right',b)
 
-def emitif(reg):
-    xml('IF','reg',reg)
+#def emitif(reg):
+#    xml('IF','reg',reg)
+
+def emit_if_jump( reg, *t ):
+    t = D.snum+':'+':'.join([str(v) for v in t])
+    xml('IFJMP','reg',reg,'jmp',t)
+#    insert(('jump',t))
 
 
 def comment(text):
@@ -262,8 +267,11 @@ def ss_infix(ss,i,tb,tc,r=None):
     emiteq(r2,r,ss)
     #code('IF',r2)
     #xml('IF','reg',r2)
-    emitif(r2)
-    jump(t,'else')
+
+#    emitif(r2)
+#    jump(t,'else')
+    emit_if_jump( r2, t, 'else' )
+
     jump(t,'end')
     tag(t,'else')
     r = do(tc,r)
@@ -557,6 +565,8 @@ def do_class(t):
         parent = items[0].items[1].val
 
     kls = do(Token(t.pos,'dict',0,[]))
+
+    print 'gen code class '+name
     #ts = _do_string(name)
     #code('GSET',ts,kls)
     #free_tmp(ts) #REG
@@ -564,6 +574,8 @@ def do_class(t):
     #code('GSET','gVarName='+name,'reg='+str(kls))
     #code('GSET','gVarName',name,'reg',kls)
     emitgset(name,kls)
+
+    code('<CLASS', 'name="'+name+'"', '/>' )
 
     init,_new = False,[]
     if parent:
@@ -649,9 +661,12 @@ def do_while(t):
     tag(t,'continue')
     r = do(items[0])
     #code('IF',r)
-    emitif(r)
+
+    emit_if_jump( r, t, 'end' )
+#    emitif(r)
     free_tmp(r) #REG
-    jump(t,'end')
+#    jump(t,'end')
+
     free_tmp(do(items[1])) #REG
     jump(t,'begin')
     tag(t,'break')
@@ -694,9 +709,12 @@ def do_if(t):
         if tt.type == 'elif':
             a = do(tt.items[0]);
             #code('IF',a);
-            emitif(a);
+
+            emit_if_jump( a, t, n+1 )
+#            emitif(a);
             free_tmp(a);
-            jump(t,n+1)
+#            jump(t,n+1)
+
             free_tmp(do(tt.items[1])) #REG
         elif tt.type == 'else':
             free_tmp(do(tt.items[0])) #REG
@@ -781,6 +799,7 @@ rmap = {
 
 def do(t,r=None):
     if t.pos: setpos(t.pos)
+#    print t.type
     try:
         if t.type in rmap:
             return rmap[t.type](t,r)

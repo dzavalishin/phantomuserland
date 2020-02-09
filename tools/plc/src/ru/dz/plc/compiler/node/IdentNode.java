@@ -130,7 +130,6 @@ public class IdentNode extends Node {
 			return;
 		}
 
-		//PhantomField f = s.get_class().ft.get(ident);
 		PhantomField f = s.get_class().find_field(ident);
 
 		if( f != null )

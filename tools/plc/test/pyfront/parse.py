@@ -235,6 +235,7 @@ def class_nud(t):
     items = t.items = []
     items.append(expression(0))
     advance(':')
+    print 'class parsed'
     items.append(ilst('methods',block()))
     return t
 

@@ -10,7 +10,7 @@ import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
- * Jump Node. Generates jump to label.
+ * Jump on expr zero Node. Generates jump to label.
  */
 
 public class JzNode extends Node {
@@ -20,14 +20,14 @@ public class JzNode extends Node {
 	//public String get_name() { return ident; }
 
 
-	public JzNode( int labelNo ) {
-		super(null);
+	public JzNode( Node expr, int labelNo ) {
+		super(expr);
 		this.label = null;
 		this.labelNo = labelNo;
 	}
 	
-	public JzNode( String label ) {
-		super(null);
+	public JzNode( Node expr, String label ) {
+		super(expr);
 		this.label = label;
 		this.labelNo = -1;
 	}
