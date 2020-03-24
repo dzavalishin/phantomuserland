@@ -17,7 +17,7 @@
 #define debug_level_error 10
 
 
-#define DUMP_ROUTES 9
+#define DUMP_ROUTES 1
 
 
 #include <kernel/debug.h>
@@ -650,6 +650,8 @@ errno_t bootp(ifnet *iface)
         }
 
         u_int32_t gate = htonl(bstate->gateip.s_addr);
+        //LOG_INFO_( 1, "gate IP 0x%x", gate );
+        LOG_INFO_( 1, "gate IP: %s", inet_itoa(gate) );
 
         if( gate == 0 ) LOG_ERROR0( 1, "Can't add default route, no gate addr" );        
         else if( (rc = ipv4_route_add_default( htonl(bstate->myip.s_addr), iface->id, gate ) ) )
