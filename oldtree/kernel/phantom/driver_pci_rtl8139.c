@@ -15,7 +15,7 @@
 #include <debug_ext.h>
 #define debug_level_flow 0
 #define debug_level_error 10
-#define debug_level_info 10
+#define debug_level_info 0
 
 
 /*
@@ -72,14 +72,14 @@ static void rtl8139_softint(void* data);
 
 #define DEV_NAME "RTL8139 "
 
-#define WIRED_ADDRESS 	IPV4_DOTADDR_TO_ADDR(10, 0, 2, 124)
-#define WIRED_NETMASK 	0xffffff00
-#define WIRED_BROADCAST IPV4_DOTADDR_TO_ADDR(10, 0, 2, 0xFF)
+#define WIRED_ADDRESS     IPV4_DOTADDR_TO_ADDR(10, 0, 2, 124)
+#define WIRED_NETMASK     0xffffff00
+#define WIRED_BROADCAST   IPV4_DOTADDR_TO_ADDR(10, 0, 2, 0xFF)
 
-#define WIRED_NET 	IPV4_DOTADDR_TO_ADDR(10, 0, 2, 0)
-#define WIRED_ROUTER    IPV4_DOTADDR_TO_ADDR(10, 0, 2, 124)
+#define WIRED_NET         IPV4_DOTADDR_TO_ADDR(10, 0, 2, 0)
+#define WIRED_ROUTER      IPV4_DOTADDR_TO_ADDR(10, 0, 2, 124)
 
-#define DEF_ROUTE_ROUTER        IPV4_DOTADDR_TO_ADDR(10, 0, 2, 2)
+#define DEF_ROUTE_ROUTER  IPV4_DOTADDR_TO_ADDR(10, 0, 2, 2)
 
 
 static int rtl8139_read( struct phantom_device *dev, void *buf, int len)
@@ -137,17 +137,17 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
     (void) stage;
     rtl8139 * nic = NULL;
 
-    SHOW_FLOW0( 1, "probe" );
+    LOG_FLOW0( 1, "probe" );
 
     nic = calloc(1, sizeof(rtl8139));
     if (nic == NULL)
     {
-        SHOW_ERROR0( 0, "out of mem");
+        LOG_ERROR0( 0, "out of mem");
         return 0;
     }
 
     nic->irq = pci->interrupt;
-    SHOW_INFO( 1, "irq %d", nic->irq );
+    LOG_INFO_( 1, "irq %d", nic->irq );
 
     int i;
     for (i = 0; i < 6; i++)
@@ -156,18 +156,18 @@ phantom_device_t * driver_rtl_8139_probe( pci_cfg_t *pci, int stage )
         {
             nic->phys_base = pci->base[i];
             nic->phys_size = pci->size[i];
-            SHOW_INFO( 0,  "base 0x%lx, size 0x%lx", nic->phys_base, nic->phys_size );
+            LOG_INFO_( 1,  "base 0x%lx, size 0x%lx", nic->phys_base, nic->phys_size );
         } else if( pci->base[i] > 0) {
             nic->io_port = pci->base[i];
-            SHOW_INFO( 0,  "io_port 0x%x", nic->io_port );
+            LOG_INFO_( 1,  "io_port 0x%x", nic->io_port );
         }
     }
 
-    SHOW_FLOW0( 1, "stop" );
+    LOG_FLOW0( 1, "stop" );
     rtl8139_stop(nic);
     hal_sleep_msec(10);
 
-    SHOW_FLOW0( 1, "init");
+    LOG_FLOW0( 1, "init");
     if (rtl8139_init(nic) < 0)
     {
         SHOW_ERROR0( 0, "init failed");
@@ -245,7 +245,7 @@ int rtl8139_init(rtl8139 *rtl)
     int err = -1;
     //addr_t temp;
 
-    printf("rtl8139_init: rtl %p\n", rtl);
+    LOG_INFO_( 8, "rtl %p", rtl);
 
     //rtl->phys_base = kvtophys();
 
@@ -281,7 +281,7 @@ int rtl8139_init(rtl8139 *rtl)
     }
 
 
-    printf("rtl8139 mapped at address 0x%lx\n", rtl->virt_base);
+    LOG_INFO_( 8, "mapped at address 0x%lx", rtl->virt_base );
 
     // try to reset the device
     int reset_sleep_times = 100;
@@ -295,10 +295,10 @@ int rtl8139_init(rtl8139 *rtl)
     } while((RTL_READ_8(rtl, RT_CHIPCMD) & RT_CMD_RESET));
 
 
-    printf( DEV_NAME "allocating irq %d\n", rtl->irq );
+    LOG_INFO_( 1, DEV_NAME "allocating irq %d", rtl->irq );
     if(hal_irq_alloc( rtl->irq, &rtl8139_int, rtl, HAL_IRQ_SHAREABLE ))
     {
-        printf( DEV_NAME "unable to allocate irq %d\n", rtl->irq );
+        LOG_ERROR( 0, DEV_NAME "unable to allocate irq %d", rtl->irq );
         goto err1;
     }
 
@@ -370,7 +370,7 @@ int rtl8139_init(rtl8139 *rtl)
     rtl->mac_addr[4] = RTL_READ_8(rtl, RT_IDR0 + 4);
     rtl->mac_addr[5] = RTL_READ_8(rtl, RT_IDR0 + 5);
 
-    printf("rtl8139: mac addr %x:%x:%x:%x:%x:%x\n",
+    LOG_INFO_( 0, "mac addr %x:%x:%x:%x:%x:%x",
             rtl->mac_addr[0], rtl->mac_addr[1], rtl->mac_addr[2],
             rtl->mac_addr[3], rtl->mac_addr[4], rtl->mac_addr[5]);
 
@@ -402,11 +402,11 @@ int rtl8139_init(rtl8139 *rtl)
     *(int *)rtl->rxbuf = 0;
     //vm_get_page_mapping(vm_get_kernel_aspace_id(), rtl->rxbuf, &temp);
     //temp = kvtophys( rtl->rxbuf );
-    printf("rx buffer will be at 0x%lx\n", rpa);
+    LOG_INFO_( 8, "rx buffer will be at 0x%lx", rpa);
     RTL_WRITE_32(rtl, RT_RXBUF, rpa);
 
     // Setup TX buffers
-    printf("tx buffer (virtual) is at 0x%lx\n", rtl->txbuf);
+    LOG_INFO_( 8, "tx buffer (virtual) is at 0x%lx", rtl->txbuf);
     *(int *)rtl->txbuf = 0;
     //vm_get_page_mapping(vm_get_kernel_aspace_id(), rtl->txbuf, &temp);
 
@@ -414,14 +414,14 @@ int rtl8139_init(rtl8139 *rtl)
 
     RTL_WRITE_32(rtl, RT_TXADDR0, tpa);
     RTL_WRITE_32(rtl, RT_TXADDR1, tpa + 2*1024);
-    printf("first half of txbuf at 0x%lx\n", tpa);
+    LOG_INFO_( 8, "first half of txbuf at 0x%lx", tpa);
     *(int *)(rtl->txbuf + 4*1024) = 0;
     //vm_get_page_mapping(vm_get_kernel_aspace_id(), rtl->txbuf + 4*1024, &temp);
     //temp = kvtophys( rtl->txbuf + 4*1024 );
     tpa += 4*1024;
     RTL_WRITE_32(rtl, RT_TXADDR2, tpa);
     RTL_WRITE_32(rtl, RT_TXADDR3, tpa + 2*1024);
-    printf("second half of txbuf at 0x%lx\n", tpa);
+    LOG_INFO_( 8, "second half of txbuf at 0x%lx", tpa);
 
     /*
      RTL_WRITE_32(rtl, RT_TXSTATUS0, RTL_READ_32(rtl, RT_TXSTATUS0) | 0xfffff000);
@@ -491,12 +491,12 @@ static void rtl8139_resetrx(rtl8139 *rtl)
 
 static void rtl8139_dumptxstate(rtl8139 *rtl)
 {
-    printf("tx state:\n");
-    printf("\ttxbn %d\n", rtl->txbn);
-    printf("\ttxstatus 0 0x%x\n", RTL_READ_32(rtl, RT_TXSTATUS0));
-    printf("\ttxstatus 1 0x%x\n", RTL_READ_32(rtl, RT_TXSTATUS1));
-    printf("\ttxstatus 2 0x%x\n", RTL_READ_32(rtl, RT_TXSTATUS2));
-    printf("\ttxstatus 3 0x%x\n", RTL_READ_32(rtl, RT_TXSTATUS3));
+    lprintf("tx state:\n");
+    lprintf("\ttxbn %d\n", rtl->txbn);
+    lprintf("\ttxstatus 0 0x%x\n", RTL_READ_32(rtl, RT_TXSTATUS0));
+    lprintf("\ttxstatus 1 0x%x\n", RTL_READ_32(rtl, RT_TXSTATUS1));
+    lprintf("\ttxstatus 2 0x%x\n", RTL_READ_32(rtl, RT_TXSTATUS2));
+    lprintf("\ttxstatus 3 0x%x\n", RTL_READ_32(rtl, RT_TXSTATUS3));
 }
 
 void rtl8139_xmit(rtl8139 *rtl, const char *ptr, ssize_t len)
@@ -509,7 +509,7 @@ void rtl8139_xmit(rtl8139 *rtl, const char *ptr, ssize_t len)
     hal_mutex_lock(&rtl->lock);
 
 #if IO_CHAT
-    printf("XMIT %d %p (%d)\n",rtl->txbn, ptr, len );
+    lprintf("XMIT %d %p (%d)\n",rtl->txbn, ptr, len );
 #endif
 #if IO_DUMP
     printf("dumping packet (hex):\n" );
@@ -618,7 +618,7 @@ restart:
 
     // copy the buffer
     if(len > buf_len) {
-        printf("rtl8139_rx: packet too large for buffer (len %d, buf_len %ld)\n", len, (long)buf_len);
+        LOG_ERROR( 1, "rtl8139_rx: packet too large for buffer (len %d, buf_len %ld)", len, (long)buf_len);
         RTL_WRITE_16(rtl, RT_RXBUFTAIL, TAILREG_TO_TAIL(RTL_READ_16(rtl, RT_RXBUFHEAD)));
         rc = ERR_TOO_BIG;
         release_sem = true;
@@ -655,7 +655,7 @@ out:
     hal_mutex_unlock(&rtl->lock);
 
 #if IO_CHAT
-    printf("RX %x (%d)\n", buf, len );
+    lprintf("RX %x (%d)\n", buf, len );
 #endif
 #if IO_DUMP
     printf("RX dumping packet:\n");
@@ -700,10 +700,10 @@ static int rtl8139_txint(rtl8139 *rtl, u_int16_t int_status)
     int rc = 0; //INT_NO_RESCHEDULE;
 
     // transmit ok
-    if(IO_CHAT) printf("tx int status=0x%x\n", int_status);
+    if(IO_CHAT) lprintf("tx int status=0x%x\n", int_status);
 
     if(int_status & RT_INT_TX_ERR) {
-        printf("err tx int:\n");
+        lprintf("err tx int:\n");
         rtl8139_dumptxstate(rtl);
     }
 
@@ -784,17 +784,17 @@ static void rtl8139_int(void* data)
                 rc = INT_RESCHEDULE;
         }
         if(status & RT_INT_RXBUF_OVERFLOW) {
-            printf("RX buffer overflow!\n");
-            printf("buf 0x%x, head 0x%x, tail 0x%x\n",
+            lprintf("RX buffer overflow!\n");
+            lprintf("buf 0x%x, head 0x%x, tail 0x%x\n",
                     RTL_READ_32(rtl, RT_RXBUF), RTL_READ_16(rtl, RT_RXBUFHEAD), RTL_READ_16(rtl, RT_RXBUFTAIL));
             RTL_WRITE_32(rtl, RT_RXMISSED, 0);
             RTL_WRITE_16(rtl, RT_RXBUFTAIL, TAIL_TO_TAILREG(RTL_READ_16(rtl, RT_RXBUFHEAD)));
         }
         if(status & RT_INT_RXFIFO_OVERFLOW) {
-            printf("RX fifo overflow!\n");
+            lprintf("RX fifo overflow!\n");
         }
         if(status & RT_INT_RXFIFO_UNDERRUN) {
-            printf("RX fifo underrun\n");
+            lprintf("RX fifo underrun\n");
         }
     }
 

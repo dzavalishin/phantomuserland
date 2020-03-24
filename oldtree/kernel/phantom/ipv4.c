@@ -327,6 +327,13 @@ static int ipv4_route_match(ipv4_addr ip_addr, if_id *interface_num, ipv4_addr *
     if( (last_e == 0) && (ip_addr == 0xFFFFFFFF) )
     {
         // [dz] hack - broadcast to first available interface
+        // this hack is needed to send DHCP message when we 
+        // have no default route.
+        //
+        // Fix it:
+        //
+        // 1. Full broadcast must be sent to all interfaces, no routing needed.
+        // 2. Send DHCP requests with a special call which tells which interface to send to.
         last_e = route_table;
     }
 

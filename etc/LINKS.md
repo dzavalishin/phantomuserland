@@ -18,6 +18,8 @@
 
 <http://phantomos.org/>
 
+<https://mirror.as35701.net/video.fosdem.org/2020/K.4.601/uk_phantom.mp4>
+
 <https://groups.google.com/forum/?pli=1#!forum/phantom-os>
 
 ## Social

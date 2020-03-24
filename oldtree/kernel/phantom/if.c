@@ -259,22 +259,19 @@ void if_simple_setup(ifnet *interface, int addr, int netmask, int bcast, int net
     address = malloc(sizeof(ifaddr));
     address->addr.len = 4;
     address->addr.type = ADDR_TYPE_IP;
-    //NETADDR_TO_IPV4(address->addr) = htonl(addr);
     NETADDR_TO_IPV4(address->addr) = addr;
 
     address->netmask.len = 4;
     address->netmask.type = ADDR_TYPE_IP;
-    //NETADDR_TO_IPV4(address->netmask) = htonl(netmask);
     NETADDR_TO_IPV4(address->netmask) = netmask;
 
     address->broadcast.len = 4;
     address->broadcast.type = ADDR_TYPE_IP;
-    //NETADDR_TO_IPV4(address->broadcast) = htonl(bcast);
     NETADDR_TO_IPV4(address->broadcast) = bcast;
 
     if_bind_address(interface, address);
 
-#if 1
+#if 0
     printf("if a ");    dump_ipv4_addr(addr);
     printf(" mask ");   dump_ipv4_addr(netmask);
     printf(" broad ");  dump_ipv4_addr(bcast);

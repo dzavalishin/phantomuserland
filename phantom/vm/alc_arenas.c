@@ -116,7 +116,7 @@ void alloc_for_all_arenas( arena_iterator_t iter, void *arg1, void *arg2 )
 
 /**
  * 
- * @brief Main arenas engine init entry point. Create or restore arenas.
+ * @brief Main arenas engine init entry point. Create or restore arenas. Called from pvm_alloc_init() only.
  * 
  * If run in empty persistent RAM - creates arenas.
  * 
