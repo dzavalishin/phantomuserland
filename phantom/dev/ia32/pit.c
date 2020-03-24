@@ -8,6 +8,8 @@
  *
 **/
 
+#define PIT_OVERFLOW_HACK 0
+
 #define DEBUG_MSG_PREFIX "pit8254"
 #include "debug_ext.h"
 #define debug_level_flow 0
@@ -248,17 +250,30 @@ static int pit_arch_get_tick_rate(void)
 static bigtime_t pit_arch_get_time_delta(void)
 {
     int ei = hal_save_cli();
-    int d = pit_read(0);
+    unsigned int d = pit_read(0);
     if (ei) hal_sti();
     
     assert(d > 0);
     if (!--d)
         return 0;
 
-    bigtime_t r = (bigtime_t)(CLKNUM / hz - d) * 1000000 / CLKNUM;
+    //bigtime_t r = (bigtime_t)(CLKNUM / hz - d) * 1000000 / CLKNUM;
+    bigtime_t r = ( (CLKNUM / hz - ((bigtime_t)d) ) * 1000000 ) / CLKNUM;
 
+#if PIT_OVERFLOW_HACK
+    if( r > 1000000u / hz )
+    {
+        int once = 1;
+        //if(once)
+        {
+            once = 0;
+            LOG_ERROR( 0, "r %lld > 1000000u / hz %u (d = %d)", r, hz, d );
+            return 1000000u / hz; // TODO HACK HACK!
+        }
+    }
+#else
     assert(r < 1000000u / hz);
-
+#endif
     return r;
 }
 
