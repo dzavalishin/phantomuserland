@@ -13,7 +13,7 @@
 
 #define DEBUG_MSG_PREFIX "acpi"
 #include <debug_ext.h>
-#define debug_level_flow 0
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -34,7 +34,24 @@ ACPI_MODULE_NAME    ("examples")
 ACPI_STATUS InstallHandlers (void);
 
 
-#if 0
+static void printNameByHandle( ACPI_HANDLE handle )
+{
+    ACPI_STATUS Status;
+    ACPI_BUFFER Buffer;
+    char buf[128];
+    
+    Buffer.Length = sizeof(buf) - 1;
+    Buffer.Pointer = buf;
+    Status = AcpiGetName(handle, ACPI_FULL_PATHNAME, &Buffer);
+    if (Status != AE_OK)
+        printf("Error: AcpiGetName(%d) = %d\n", handle, Status );
+    else
+        printf("'%s'", buf );    
+}
+
+#define ACPI_WALK_ALL 1
+
+#if ACPI_WALK_ALL
 static ACPI_STATUS walkCallback ( ACPI_HANDLE Object, UINT32 NestingLevel, void *Context, void **ReturnValue)
 {
     (void) Context;
@@ -42,7 +59,7 @@ static ACPI_STATUS walkCallback ( ACPI_HANDLE Object, UINT32 NestingLevel, void 
 
     while(NestingLevel--)
         printf("  ");
-    printf("%d: ");
+    //printf("%d: ");
 
 
     ACPI_BUFFER OutName;
@@ -68,6 +85,7 @@ static ACPI_STATUS walkCallback ( ACPI_HANDLE Object, UINT32 NestingLevel, void 
         {
             printf (" HID: %.8X, ADR: %.8X, Status: %x",
                     Info->HardwareId, Info->Address, Info->CurrentStatus);
+            //printNameByHandle(                    
             free(Info);
         }
 
@@ -107,6 +125,7 @@ InitializeFullAcpi(void)
 {
     ACPI_STATUS             Status;
 
+    SHOW_FLOW0( 1, "Start");
 
     /* Initialize the ACPICA subsystem */
 
@@ -165,7 +184,7 @@ InitializeFullAcpi(void)
     }
 #endif
 
-#if 0
+#if ACPI_WALK_ALL
     AcpiWalkNamespace ( ACPI_TYPE_ANY, ACPI_ROOT_OBJECT, 16, walkCallback, 0, 0, 0 );
 #endif
 
