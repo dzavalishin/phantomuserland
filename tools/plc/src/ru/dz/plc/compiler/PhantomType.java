@@ -390,6 +390,13 @@ public class PhantomType
 		return t_double;
 	}
 
+	private static PhantomType t_unknown = null;
+	public static PhantomType getUnknown() {
+		if( t_unknown == null ) t_unknown = new PhTypeUnknown();
+		return t_unknown;
+	}
+
+	
 	// ---------------------------- LLVM code generation ----------------------------
 
 	public String toLlvmType() {
@@ -528,6 +535,8 @@ public class PhantomType
 	 * @return True if so.
 	 */
 	public boolean isSpecificContainerClass() {		return _container_class != null ;	}
+
+
 
 }
 
