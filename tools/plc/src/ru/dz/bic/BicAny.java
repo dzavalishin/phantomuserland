@@ -3,6 +3,8 @@ package ru.dz.bic;
 import java.util.LinkedList;
 import java.util.function.Consumer;
 
+import ru.dz.plc.compiler.ParseState;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -38,6 +40,15 @@ public abstract class BicAny
 
 	protected abstract void dumpChildren(int i);
 
+	/**
+	 * Before convertExpressions()
+	 * 
+	 * Recursion is provided by implementation. 
+	 * @throws PlcException 
+	 */
+	public void preprocess() throws PlcException {}
+	
+	
 	public final void convertExpressions() 
 	{
 		foreach( el -> { 
@@ -58,4 +69,12 @@ public abstract class BicAny
 	public boolean hasNode() { return node != null; }
 	
 	public Node getNode() { return node; }
+
+	private ParseState ps;
+	public void setParseState(ParseState ps) { this.ps = ps; }
+	protected ParseState getParseState() { return ps; }
+
+
+	
+	
 }

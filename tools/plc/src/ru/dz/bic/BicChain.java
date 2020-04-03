@@ -3,6 +3,9 @@ package ru.dz.bic;
 import java.util.LinkedList;
 import java.util.function.Consumer;
 
+import ru.dz.plc.PlcMain;
+import ru.dz.plc.util.PlcException;
+
 /**
  * 
  * Corresponds to AST file <chain ...>
@@ -19,6 +22,20 @@ public class BicChain extends BicAny {
 		children.add(parseTree);		
 	}
 
+	
+	@Override
+	public void preprocess() 
+	{
+		// Just for each
+		children.forEach( child -> { try {
+			child.preprocess();
+		} catch (PlcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.exit(22);
+		} } );
+	}
+	
 	@Override
 	void foreach(Consumer<? super BicAny> action) {
 		//children.forEach(action);
