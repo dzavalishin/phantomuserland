@@ -1,4 +1,4 @@
-Regress tests fro Phantom Language Compiler. 
+Regress tests for Phantom Language Compiler. 
 
 
 Compiles phantom sources and compares list files with reference copies in ./good.
