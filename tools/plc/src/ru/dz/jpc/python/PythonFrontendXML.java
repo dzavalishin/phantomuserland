@@ -36,6 +36,7 @@ import ru.dz.plc.compiler.node.IdentNode;
 import ru.dz.plc.compiler.node.JumpNode;
 import ru.dz.plc.compiler.node.JumpTargetNode;
 import ru.dz.plc.compiler.node.JzNode;
+import ru.dz.plc.compiler.node.MethodNode;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.ReturnNode;
 import ru.dz.plc.compiler.node.StatementsNode;
@@ -305,6 +306,8 @@ public class PythonFrontendXML {
 			currentLineText = text;
 			log.log(Level.INFO,"pos "+currentLineNo+" ("+currentLineText+")");
 			
+			// TODO set node contexts from here
+			
 			// TODO hack - we reparse python src, generate class name XML node instead!
 			/*
 			text = text.trim();
@@ -344,6 +347,12 @@ public class PythonFrontendXML {
 			} catch( Throwable e )
 			{ /* Ignore */ }
 		}			
+		else if("call".equals(nname))
+		{
+			int nFuncReg = getInt(cn, "func"); // this register contains func name
+			String ident = "unknown";
+			setRegister(getInt(cn,"ret"), new MethodNode(ident, ps) );
+		}
 		else if("function".equals(nname))
 		{
 			String name = cn.getAttributes().getNamedItem("name").getNodeValue();
