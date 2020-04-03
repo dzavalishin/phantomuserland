@@ -1,6 +1,6 @@
 MACRO(ADD_MODULE file)
     ADD_LIBRARY( ${file} MODULE ${file}.c ../utils.c ../panic.c )
-    TARGET_LINK_LIBRARIES( ${file} cunit kern phantom win )
+    TARGET_LINK_LIBRARIES( ${file} cunit kern phantom win phantom_vm hosted )
     SET_TARGET_PROPERTIES( ${file} PROPERTIES
             PREFIX ""
             LIBRARY_OUTPUT_DIRECTORY "."
