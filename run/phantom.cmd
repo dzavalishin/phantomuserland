@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 rem http://dietpc.org/windows/qemu/
 rem http://lassauge.free.fr/qemu/
 
@@ -25,7 +25,7 @@ set QEMU_AUDIO_DRV=dsound
 rem set QEMU_AUDIO_DRV=sdl
 rem set QEMU_AUDIO_DRV=fmod
 rem set SOUND=-soundhw sb16,es1370 -device intel-hda -device hda-duplex
-rem set SOUND=-soundhw sb16,es1370
+rem set SOUND=-soundhw sb16
 set SOUND=-soundhw es1370
 
 rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=ohci.0 -device usb-kbd,bus=ohci.0
@@ -56,10 +56,12 @@ rem SET Q_PORTS= -serial stdio
 rem SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 
 
 rem SET Q_NET= -net nic,model=ne2k_pci -net nic
-SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
+
+rem SET Q_NET= -net nic,model=ne2k_pci -net user -tftp ./tftp
+SET Q_NET= -net nic,model=rtl8139  -net user -tftp ./tftp
+rem SET Q_NET= -net nic,model=rtl8139  -net user,net=10.0.0.0/16 -tftp ./tftp
 
 rem SET Q_NET= -net nic,model=pcnet -net nic,model=rtl8139  -net user -tftp ./tftp
-rem SET Q_NET= -net nic,model=rtl8139  -net user,tftp=./tftp -tftp ./tftp
 rem SET Q_NET= -net nic,model=pcnet  -net user -tftp ./tftp
 
 
