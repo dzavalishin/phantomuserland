@@ -143,3 +143,4 @@ phantom/hosted/autom4te.cache/output.0
 phantom/hosted/autom4te.cache/requests
 phantom/hosted/autom4te.cache/traces.0
 phantom/hosted/Makefile
+test/unit/suites/suite_objalloc.dll
