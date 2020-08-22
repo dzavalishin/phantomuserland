@@ -34,7 +34,7 @@ public class SequenceNode extends BiNode {
     public void generate_C_code(C_codegen cgen, CodeGeneratorState s) throws PlcException
     {
     	if( _l != null ) {
-    		cgen.putln(";// l:"); // TODO Remove one?
+    		//cgen.putln(";// l:"); 
     		_l.generate_C_code(cgen, s);    		
     	}
     	if( _r != null ) {
@@ -42,7 +42,7 @@ public class SequenceNode extends BiNode {
     		_r.generate_C_code(cgen, s); 
     	}
     }
-    
+
 	protected void print_children(PrintStream ps, int level, int start_level) throws PlcException 
 	{
 		if( _l != null )     _l.print(ps, level+1, start_level+1 );

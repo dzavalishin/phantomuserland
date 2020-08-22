@@ -64,7 +64,7 @@ public class ClassMap {
 
 	/** Need this in unit tests - must clean class map after compiling root class stubs */
 	public void clear() { imported_classes.clear(); classes.clear(); }
-	
+
 	/**
 	 * 
 	 * @param cln Class name
@@ -79,11 +79,11 @@ public class ClassMap {
 			c = imported_classes.get(cln,justTry, ps);
 		return c;
 	}
-	
+
 	public void listMethods() {
 		classes.listMethods();		
 	}
-	
+
 
 
 }

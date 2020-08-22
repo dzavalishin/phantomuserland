@@ -25,10 +25,10 @@ protected static final byte opcode_os_save8 = (byte)0x15; // save (pop) stack to
 protected static final byte opcode_os_load32 = (byte)0x16;
 protected static final byte opcode_os_save32 = (byte)0x17;
 protected static final byte opcode_new = (byte)0x18; // create new object, class must be on stack
-protected static final byte opcode_copy = (byte)0x19; // create new object, copy of stack top (just copy of data area as is)
+protected static final byte opcode_copy = (byte)0x19; // create new object, copy of stack top (just copy of data area as is) TODO do we need it?
 protected static final byte opcode_os_compose32 = (byte)0x1A; // n objects from ostack combine into the object. topmost is a class
 protected static final byte opcode_os_decompose = (byte)0x1B; // decompose topmost object on stack
-// deprecated?
+// deprecated? no, we use it
 protected static final byte opcode_os_pull32 = (byte)0x1C; // copy opbject n steps down the ostack on top. pull 0 is dup;
 // deprecated and was not implemented
 //id(opcode_os_assign32,0x1D) // copy stack top opbject n steps down the ostack. pull 0 is nop;
@@ -45,6 +45,9 @@ protected static final byte opcode_iconst_64bit = (byte)0x25;
 protected static final byte opcode_is_get32 = (byte)0x26; // get value from stack absolute-addressed slot, push on top
 protected static final byte opcode_is_set32 = (byte)0x27; // pop stack top, set value in stack absolute-addressed slot
 protected static final byte opcode_const_pool = (byte)0x28; // int32 follows - get constant with corresponding index from object constant pool of this class
+protected static final byte opcode_stack_reserve = (byte)0x29; // int8 object stack size to reserve (push zeroes), int8 integer stack size to reserve
+// ? unclear how to init objects
+//id(opcode_stack_init,0x2A)  // int32 const pool id, int8 object stack size to init (push data from const pool??), int8 integer stack size to init (rest of constant data)
 protected static final byte opcode_cast = (byte)0x2B; // pop class, pop object, cast, push object
 protected static final byte opcode_push_catcher = (byte)0x2D; // jump address folows, top of o stack - class of objects to catch
 protected static final byte opcode_pop_catcher = (byte)0x2E;
@@ -100,12 +103,12 @@ protected static final byte opcode_prefix_double = (byte)0x5E; // next operation
 protected static final byte opcode_general_lock = (byte)0x62; // mutex is locked on stack top. 
 protected static final byte opcode_general_unlock = (byte)0x63; // mutex is unlocked on stack top. 
 // 64-6e
-protected static final byte opcode_static_invoke = (byte)0x6E; // arg int32 method ordinal. stack (from top): class ptr, this, n_args, args
+protected static final byte opcode_static_invoke = (byte)0x6E; // arg int32 method ordinal, int32 n_args. stack (from top): class ptr, this, args
 protected static final byte opcode_dynamic_invoke = (byte)0x6F; // no args. stack (from top): string method name, this (or null for static), n_args, args
 protected static final byte opcode_ishl = (byte)0x70; // shift left
 protected static final byte opcode_ishr = (byte)0x71; // shift right signed
 protected static final byte opcode_ushr = (byte)0x72; // shift right unsigned
-// no 73 yet
+protected static final byte opcode_arg_count = (byte)0x73; // byte with number of args this func waits for - compares with int on istack, throws if not eq
 protected static final byte opcode_fromi = (byte)0x74; // cast int from int stack to current (as defined by prefix) type on int stack
 protected static final byte opcode_froml = (byte)0x75; // cast from long
 protected static final byte opcode_fromf = (byte)0x76; // cast from float

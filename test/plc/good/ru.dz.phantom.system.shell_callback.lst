@@ -14,9 +14,7 @@ Class .ru.dz.phantom.system.shell_callback
             ident console : .internal.io.tty
             Method putws : unknown
             arg  : unknown
-              string const "
-
-Timer callback: " : string const
+              string pool const id="0" : string const
         void  : void
           . : void
             ident console : .internal.io.tty
@@ -30,7 +28,5 @@ Timer callback: " : string const
           ident console : .internal.io.tty
           Method putws : unknown
           arg  : unknown
-            string const " !!
-
-" : string const
+            string pool const id="1" : string const
 

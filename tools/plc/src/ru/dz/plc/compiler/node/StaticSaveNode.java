@@ -55,7 +55,7 @@ public class StaticSaveNode extends Node {
 		
 		// Parameter - value
 		_l.generate_code(c, s);
-		move_between_stacks(c, _l.is_on_int_stack()); 
+		move_between_stacks(c, _l.is_on_int_stack(), _l.getType()); 
 		
 		c.emitCall(10,2); // Method number 10, 2 parameters (static field ordinal, value) - write static field		
 	}

@@ -19,7 +19,7 @@ public class DupDestNode extends Node {
 	public DupDestNode(Node expr) {    super(expr);  }
 	public String toString()  {    return "dup dst";  }
 	public boolean is_on_int_stack() { return false; }
-
+	
 
 	@Override
 	public void preprocess_me(ParseState s) throws PlcException {
@@ -38,7 +38,7 @@ public class DupDestNode extends Node {
 			throw new PlcException("Codegen", "op - no int dup yet");
 		else
 			c.emitComment("dup result is used");
-}
+	}
 
 	// for llvm/c see comment in DupSourceNode
 	

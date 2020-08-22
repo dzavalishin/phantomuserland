@@ -4,11 +4,10 @@
  *
  * Copyright (C) 2005-2011 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
  *
  *
 **/
+
 
 #define DEBUG_MSG_PREFIX "vm.sysc"
 #include <debug_ext.h>
@@ -1051,6 +1050,74 @@ DECLARE_SIZE(page);
 // --------- bootstrap -------------------------------------------------------
 // ---------------------------------------------------------------------------
 
+// TODO move cache use to pvm_exec_lookup_class_by_name()? Or use it in both places?
+#define CACHED_CLASSES 1
+#define DEBUG_CACHED_CLASSES 0
+
+
+/**
+ *
+ * \brief Lookup class by name in persistent class cache.
+ *
+ * \param[in]  name       Name of class to lookup
+ * \param[in]  name_len   Length of name
+ * \param[out] new_class  Class found
+ * 
+ * \return 0 if found, ENOENT if not found
+ *
+ * Stores directory in pvm_root.class_dir
+ *
+**/
+
+
+errno_t pvm_class_cache_lookup(const char *name, int name_len, pvm_object_t *new_class)
+{
+#if !CACHED_CLASSES
+    return ENOENT;
+#else
+    if(DEBUG_CACHED_CLASSES) printf("---- pvm_class_cache_lookup %.*s\n", name_len, name );
+    //if( pvm_is_null(dir) )        dir = pvm_create_directory_object();
+
+    struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
+
+    errno_t rc = hdir_find( da, name, name_len, new_class, 0 );
+
+    if( DEBUG_CACHED_CLASSES && (rc == 0) )
+    {
+        printf("---- pvm_class_cache_lookup %.*s FOUND\n", name_len, name );
+        pvm_object_dump( *new_class );
+    }
+    return rc;
+#endif
+}
+
+/**
+ *
+ * \brief Add class to persistent class cache.
+ *
+ * \param[in]  name       Name of class
+ * \param[in]  name_len   Length of name
+ * \param[out] new_class  Class object
+ * 
+ * \return 0 if ok, nonzero (errno) on error.
+ *
+ * Stores directory in pvm_root.class_dir
+ *
+**/
+
+
+errno_t pvm_class_cache_insert(const char *name, int name_len, pvm_object_t new_class)
+{
+#if !CACHED_CLASSES
+    return 0;
+#else
+    if(DEBUG_CACHED_CLASSES) printf("---- pvm_class_cache_insert %.*s\n", name_len, name );
+    struct data_area_4_directory *da = pvm_object_da( pvm_root.class_dir, directory );
+    errno_t rc = hdir_add( da, name, name_len, new_class );
+#endif
+}
+
+
 static int si_bootstrap_5_tostring(struct pvm_object me, struct data_area_4_thread *tc )
 {
     (void)me;
@@ -1069,6 +1136,7 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
 
     const int bufs = 1024;
     char buf[bufs+1];
+    int len;
 
     {
     struct pvm_object name = POP_ARG;
@@ -1077,7 +1145,7 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     struct data_area_4_string *nameda = pvm_object_da( name, string );
 
 
-    int len = nameda->length > bufs ? bufs : nameda->length;
+    len = nameda->length > bufs ? bufs : nameda->length;
     memcpy( buf, nameda->data, len );
     buf[len] = '\0';
 
@@ -1087,6 +1155,13 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     // BUG! Need some diagnostics from loader here
 
     struct pvm_object new_class;
+
+    if( 0 == pvm_class_cache_lookup(buf, len, &new_class) )
+    {
+        printf("got from cache class '%.*s' @%p\n", len, buf, new_class.data );
+        ref_inc_o(new_class);
+    	SYSCALL_RETURN(new_class);
+    }
 
     if( pvm_load_class_from_module(buf, &new_class))
     {
@@ -1103,6 +1178,7 @@ static int si_bootstrap_8_load_class(struct pvm_object me, struct data_area_4_th
     }
     else
     {
+        pvm_class_cache_insert(buf, len, new_class);
     	SYSCALL_RETURN(new_class);
     }
 }
@@ -1198,7 +1274,7 @@ static int si_bootstrap_18_thread(struct pvm_object me, struct data_area_4_threa
     pvm_ostack_push( pvm_object_da(cfda->ostack, object_stack), me );
     pvm_istack_push( pvm_object_da(cfda->istack, integer_stack), 1); // pass him real number of parameters
 
-    struct pvm_object_storage *code = pvm_exec_find_method( object, 8 );
+    struct pvm_object_storage *code = pvm_exec_find_method( object, 8, tc );
     pvm_exec_set_cs( cfda, code );
     cfda->this_object = object;
 

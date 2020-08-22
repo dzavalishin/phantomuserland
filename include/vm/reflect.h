@@ -42,6 +42,7 @@ struct json_parse_context
 
 void pvm_backtrace_current_thread(void);
 void pvm_backtrace(struct data_area_4_thread *tda);
+void pvm_trace_here(struct data_area_4_thread *tda); // Print info about current program location
 
 
 

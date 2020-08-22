@@ -1,4 +1,4 @@
-Class version 20160114031914861
+Class version 20170915065325313
 
 method run ordinal 8
 --
@@ -8,12 +8,12 @@ method run ordinal 8
   const "arg count: run in .ru.dz.phantom.system.runnable"	//  @11
   throw				//  @64
 _label_0:	//  @65
-  summon null			//  @65
-  ; Line 29			//  @66
-  const "Abstract runnable started"	//  @66
-  ; Line 29			//  @96
-  throw				//  @96
-  ret				//  @97
+  stack_reserve obj=1 int=0	//  @65
+    ; Line 29			//  @68
+  const_pool <0>			//  @68
+    ; Line 29			//  @73
+  throw				//  @73
+  ret				//  @74
 --
 method end
 

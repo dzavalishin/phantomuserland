@@ -7,9 +7,9 @@ de-facto it contains kernel sources as well, though.
 
 ## What Phantom OS is ##
 
-* [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)
-* [Short article in English - TheRegister](http://www.theregister.co.uk/2009/02/03/phantom_russian_os/)
-* [Big article in Russian - Open Systems Magazine](http://www.osp.ru/os/2011/03/13008200/)
+*   [Phantom Architecture in English](https://github.com/dzavalishin/phantomuserland/wiki/PhantomArchitecture)
+*   [Short article in English - TheRegister](http://www.theregister.co.uk/2009/02/03/phantom_russian_os/)
+*   [Big article in Russian - Open Systems Magazine](http://www.osp.ru/os/2011/03/13008200/)
 
 Basically, most of code we (the original team) upload is very straighforward
 and, sometimes, dumb. That, to some extent, is on purpose. We want to have
@@ -29,7 +29,7 @@ second :), amd64 port is incomplete and does not compile at all.
   Set '''PHANTOM_HOME''' environment variable to the path to Phantom repository root directory,
   "make all" there.
 
-  In Windows you will need Cygwin to do that. http://www.cygwin.com
+  In Windows you will need Cygwin to do that. <http://www.cygwin.com>
   Select, at least: gcc4, subversion, binutils, make, gdb
   (see etc/cygwin_get.cmd)
   
@@ -60,12 +60,16 @@ trunk/tools/plc              - phantom language compiler / java bytecode transla
 
 ## Dox ##
 
-  https://github.com/dzavalishin/phantomuserland/wiki
+  <https://github.com/dzavalishin/phantomuserland/wiki>
   doc/*
 
 ## Screenshots ##
 
-  https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots
+  <https://github.com/dzavalishin/phantomuserland/wiki/ScreenShots>
+
+## Ready to take part? ##
+
+[Issues to start with](https://github.com/dzavalishin/phantomuserland/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
 
 ## Ready to take part? ##
 
@@ -73,21 +77,19 @@ trunk/tools/plc              - phantom language compiler / java bytecode transla
 
 ## O, my. Badges! ##
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8eec7d75d73b4a93b45a1befa3b70696)](https://www.codacy.com/manual/dzavalishin/phantomuserland?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=dzavalishin/phantomuserland&amp;utm_campaign=Badge_Grade)
+
 [![Code coverage][COVERAGE_BADGE]][COVERAGE_LINK]
 
-[COVERAGE_LINK]:
-https://scan.coverity.com/projects/dzavalishin-phantomuserland
+[COVERAGE_LINK]:https://scan.coverity.com/projects/dzavalishin-phantomuserland
 
-[COVERAGE_BADGE]:
-https://scan.coverity.com/projects/8024/badge.svg
-
+[COVERAGE_BADGE]:https://scan.coverity.com/projects/8024/badge.svg
 
 ## Communications ##
 
 Easiest way is to [Write e-mail to Dmitry Zavalishin](mailto:dz@dz.ru)
 
 Just for reference there was [Old Google forum](https://groups.google.com/forum/#!forum/phantom-os)
-
 
 <hr>
 

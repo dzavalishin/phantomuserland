@@ -1,5 +1,6 @@
 package ru.dz.phantom.code;
 
+import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -19,7 +20,7 @@ public class FieldFileInfo extends FileInfo {
 	//private final FileWriter lst;
 	private PhantomField f;
 
-	public FieldFileInfo(RandomAccessFile os, FileWriter lst, PhantomField f) {
+	public FieldFileInfo(RandomAccessFile os, BufferedWriter lstc, PhantomField f) {
 		super( os, (byte)'f' );
 		//this.lst = lst;
 		this.f = f;

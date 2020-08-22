@@ -60,6 +60,6 @@ public class JumpTargetNode extends Node {
 			cgen.putln(labelString+":");
 		else
 			cgen.putln(String.format("javaLabel%d:", labelNo));
-}
+	}
 	
 }

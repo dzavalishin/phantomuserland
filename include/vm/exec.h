@@ -20,7 +20,8 @@
 
 void pvm_exec(struct pvm_object current_thread);
 
-void pvm_exec_panic( const char *reason ) __dead2;
+void pvm_exec_panic0( const char *reason ) __dead2;
+void pvm_exec_panic( const char *reason, struct data_area_4_thread *da ) __dead2;
 
 //! Load current thread data to fast access copy fields in thread object data area
 void pvm_exec_load_fast_acc(struct data_area_4_thread *da);
@@ -29,7 +30,7 @@ void pvm_exec_load_fast_acc(struct data_area_4_thread *da);
 void pvm_exec_save_fast_acc(struct data_area_4_thread *da);
 
 
-struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned method_index );
+struct pvm_object_storage * pvm_exec_find_method( struct pvm_object o, unsigned method_index, struct data_area_4_thread *tda );
 void pvm_exec_set_cs( struct data_area_4_call_frame* cfda, struct pvm_object_storage * code );
 
 

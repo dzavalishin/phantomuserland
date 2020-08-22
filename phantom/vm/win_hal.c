@@ -4,17 +4,21 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: no
- * Preliminary: yes
- *
  * This source file implements Windows based wrapper for VM to
  * run in Windows-hosted environment.
  *
+ * NB! Used in Windows and Linux builds, TODO rename to non_kernel_hal.c
+ *
 **/
+
+#define DEBUG_MSG_PREFIX "vm.winhal"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <stdarg.h>
 #include <threads.h>
-
 
 #include "event.h"
 #include "gcc_replacements.h"
@@ -23,15 +27,9 @@
 #include "hal.h"
 #include "main.h"
 #include "vm/alloc.h"
-//#include "video/win_local.h"
-
-//#include <sys/types.h>
-//#include <sys/socket.h>
-//#include <netinet/in.h>
        
 #include "winhal.h"
 
-//#include <windows.h>
 
 
 struct hardware_abstraction_level    	hal;
@@ -124,16 +122,16 @@ errno_t t_current_set_priority(int p)
 
 void    hal_halt()
 {
-	//fflush(stderr);
-	printf("\n\nhal halt called, exiting.\n");
-	getchar();
-	exit(1);
+    //fflush(stderr);
+    printf("\n\nhal halt called, exiting.\n");
+    getchar();
+    exit(1);
 }
 
 extern int sleep(int);
-void        hal_sleep_msec( int miliseconds )
+void hal_sleep_msec( int miliseconds )
 {
-	//usleep(1000*miliseconds);
+    //usleep(1000*miliseconds);
     //sleep( ((miliseconds-1)/1000)+1 );
     //Sleep(miliseconds);
     win_hal_sleep_msec( miliseconds );
@@ -241,7 +239,7 @@ int phantom_dev_keyboard_getc(void)
 
 
 
-#if OLD_VM_SLEEP
+//#if OLD_VM_SLEEP
 void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 {
     /*if(phantom_virtual_machine_stop_request)
@@ -264,6 +262,7 @@ void phantom_thread_sleep_worker( struct data_area_4_thread *thda )
 
 }
 
+/* dz off
 
 void phantom_thread_put_asleep( struct data_area_4_thread *thda )
 {
@@ -279,7 +278,7 @@ void phantom_thread_wake_up( struct data_area_4_thread *thda )
     thda->sleep_flag--;
 }
 #endif
-
+*/
 
 void phantom_wakeup_after_msec(long msec)
 {
@@ -300,21 +299,21 @@ errno_t t_get_ctty( tid_t tid, struct wtty **ct ) { return ENOENT; }
 
 void panic(const char *fmt, ...)
 {
-	va_list vl;
+    va_list vl;
 
-	// CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-	printf("\nPanic: ");
-	va_start(vl, fmt);
-	vprintf(fmt, vl);
-	va_end(vl);
+    // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
+    printf("\nPanic: ");
+    va_start(vl, fmt);
+    vprintf(fmt, vl);
+    va_end(vl);
 
-        //save_mem(mem, size);
-	getchar();
-	// CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
-	printf("\nPress Enter from memcheck...");
-	pvm_memcheck();
-	//printf("\nPress Enter...");	getchar();
-	exit(1);
+    //save_mem(mem, size);
+    getchar();
+    // CI: this word is being watched by CI scripts. Do not change -- or change CI appropriately
+    printf("\nPress Enter from memcheck...");
+    pvm_memcheck();
+    //printf("\nPress Enter...");	getchar();
+    exit(1);
 }
 
 
@@ -436,7 +435,6 @@ errno_t phantom_connect_object_internal(struct data_area_4_connection *da, int c
 // debug_ext.h support
 // -----------------------------------------------------------------------
 
-// TODO replace with escapes
 void console_set_error_color() { printf("\x1b[31m"); }
 void console_set_normal_color() { printf("\x1b[37m"); }
 void console_set_message_color(void) { printf("\x1b[34m"); }
@@ -598,7 +596,7 @@ int hal_sem_init( hal_sem_t *s, const char *name )
 
 
 
-void    console_set_fg_color( struct rgba_t c )
+void console_set_fg_color( struct rgba_t c )
 {
 }
 
@@ -630,13 +628,23 @@ void phantom_dev_keyboard_get_key( struct _key_event *out )
     while(1) hal_sleep_msec(10000);
 }
 
-void 	phantom_set_console_getchar( int (*_getchar_impl)(void) )
+void phantom_set_console_getchar( int (*_getchar_impl)(void) )
 {
 }
 
+
+
+// -----------------------------------------------------------
+// output
+// -----------------------------------------------------------
+
+
+#if 0
+
 void debug_console_putc(int c)
 {
-    putchar(c);
+    if( kout_f ) fputc( c, kout_f );
+    else putchar(c);
 }
 
 
@@ -651,12 +659,24 @@ void lprintf(char const *fmt, ...)
     va_list ap;
 
     va_start(ap, fmt);
-    vprintf(fmt, ap);
+    if( klog_f )
+        vfprintf( klog_f, fmt, ap);
+    else
+        vprintf(fmt, ap);
     va_end(ap);
 }
 
 
-//int set_net_timer( void ) //&e, 10000, stat_update_persistent_storage, 0, 0 );
+#endif
+
+// -----------------------------------------------------------
+// -----------------------------------------------------------
+
+
+
+
+//known call: int set_net_timer( void ) //&e, 10000, stat_update_persistent_storage, 0, 0 );
+
 int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback callback, void *args, int flags)
 {
     (void) e;
@@ -666,7 +686,7 @@ int set_net_timer(net_timer_event *e, unsigned int delay_ms, net_timer_callback 
     (void) flags;
 
     //panic("set_net_timer");
-    lprintf("set_net_timer called, \"gdb bt\" me");
+    lprintf("set_net_timer called, backtrace (\"gdb bt\") me\n");
 
     return -1; // ERR_GENERAL - todo - errno_t
 }

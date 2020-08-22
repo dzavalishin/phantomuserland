@@ -2,65 +2,18 @@ package ru.dz.plc.compiler;
 
 import java.io.*;
 
-import ru.dz.plc.compiler.binode.BoolAndNode;
-import ru.dz.plc.compiler.binode.BoolOrNode;
-import ru.dz.plc.compiler.binode.CallArgNode;
-import ru.dz.plc.compiler.binode.CatchNode;
-import ru.dz.plc.compiler.binode.ConstructNode;
-import ru.dz.plc.compiler.binode.ForeachNode;
-import ru.dz.plc.compiler.binode.NewNode;
-import ru.dz.plc.compiler.binode.OpAndNode;
-import ru.dz.plc.compiler.binode.OpAssignNode;
-import ru.dz.plc.compiler.binode.OpDivideNode;
-import ru.dz.plc.compiler.binode.OpRemainderNode;
-import ru.dz.plc.compiler.binode.OpMinusNode;
-import ru.dz.plc.compiler.binode.OpMultiplyNode;
-import ru.dz.plc.compiler.binode.OpOrNode;
-import ru.dz.plc.compiler.binode.OpPlusNode;
-import ru.dz.plc.compiler.binode.OpSubscriptNode;
-import ru.dz.plc.compiler.binode.OpVassignNode;
-import ru.dz.plc.compiler.binode.RefEqNode;
-import ru.dz.plc.compiler.binode.RefNeqNode;
-import ru.dz.plc.compiler.binode.SequenceNode;
-import ru.dz.plc.compiler.binode.ValEqNode;
-import ru.dz.plc.compiler.binode.ValGeNode;
-import ru.dz.plc.compiler.binode.ValGtNode;
-import ru.dz.plc.compiler.binode.ValLeNode;
-import ru.dz.plc.compiler.binode.ValLtNode;
-import ru.dz.plc.compiler.binode.ValNeqNode;
-import ru.dz.plc.compiler.node.BinaryConstNode;
-import ru.dz.plc.compiler.node.BoolNotNode;
-import ru.dz.plc.compiler.node.BreakNode;
-import ru.dz.plc.compiler.node.ClassDefinitionNode;
-import ru.dz.plc.compiler.node.ContinueNode;
-import ru.dz.plc.compiler.node.EmptyNode;
-import ru.dz.plc.compiler.node.IdentNode;
-import ru.dz.plc.compiler.node.IntConstNode;
-import ru.dz.plc.compiler.node.MethodNode;
-import ru.dz.plc.compiler.node.Node;
-import ru.dz.plc.compiler.node.NullNode;
-import ru.dz.plc.compiler.node.OpNotNode;
-import ru.dz.plc.compiler.node.ReturnNode;
-import ru.dz.plc.compiler.node.StringConstNode;
-import ru.dz.plc.compiler.node.SwitchCaseNode;
-import ru.dz.plc.compiler.node.SwitchDefaultNode;
-import ru.dz.plc.compiler.node.SwitchNode;
-import ru.dz.plc.compiler.node.ThisNode;
-import ru.dz.plc.compiler.node.ThrowNode;
-import ru.dz.plc.compiler.node.VoidNode;
-import ru.dz.plc.compiler.trinode.DoWhileNode;
-import ru.dz.plc.compiler.trinode.IfNode;
-import ru.dz.plc.compiler.trinode.OpMethodCallNode;
+import ru.dz.plc.compiler.binode.*;
+import ru.dz.plc.compiler.node.*;
+import ru.dz.plc.compiler.trinode.*;
 import ru.dz.plc.parser.*;
 import ru.dz.plc.util.*;
 
 /**
- * <p>Title: Phantom language parser</p>
+ * <p>Phantom language parser</p>
  * 
- * <p>Description: Old and dirty recursive implementation.<br> Has to be 
- *    rewritten with some parser generator.</p>
+ * <p>Recursive descent implementation.<br></p>
  *    
- * <p>Copyright: Copyright (c) 2004-2016 Dmitry Zavalishin</p>
+ * <p>Copyright (c) 2004-2019 Dmitry Zavalishin</p>
  * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
  * 
@@ -80,44 +33,23 @@ extends GrammarHelper {
 	private final boolean    		parser_debug = false;
 	//private final boolean    parser_debug = true;
 
+	private final boolean    		debug = false;
 
 
-	private final int id_ident, id_string_const, id_int_const, id_this, id_null;
-
-	private final int id_point, id_comma, id_at, id_src_req, id_dst_req;
-	private final int id_colon, id_semicolon, id_assign, id_vassign;
-	private final int id_eq, id_neq, id_gt, id_lt, id_ge, id_le;
-
-	private final int id_ref_eq, id_ref_neq;
-	private final int id_plus, id_minus, id_slash, id_aster, id_percent;
-	private final int id_bar, id_caret, id_amper, id_tilde;
-	private final int id_2bar, id_2amper, id_exclam;
-	private final int id_lbracket, id_rbracket, id_lparen, id_rparen;
-
-	private final int id_if, id_else, id_while, id_do, id_foreach, id_in;
-	private final int id_return, id_try, id_catch, id_throw;
-	private final int id_switch, id_case, id_default, id_break, id_continue;
-	private final int id_block_open, id_block_close;
-
-	private final int id_class, id_var, id_void, id_attribute, id_public, id_new;
-	private final int id_extends, id_implements, id_interface;
-
-	//private final int id_const;
-	private final int id_summon, id_thread, id_package, id_import;
 
 
 	protected int getInt() throws PlcException { return super.getInt(id_int_const); }
 	protected String getString() throws PlcException { return super.getString(id_string_const); }
 	protected String getIdent() throws PlcException { return super.getIdent(id_ident); }
 
-	Node sequence( Node list, Node leaf )
+	Node sequence( Node list, Node leaf ) throws PlcException
 	{
 		if( list == null ) return leaf;
 		if( leaf == null ) return list;
 		return new SequenceNode( list, leaf ).setContext( l );
 	}
 
-	public Grammar(Lex l, String filename) throws PlcException {
+	public Grammar(ILex l, String filename) throws PlcException {
 		super(l,filename);
 
 		// It is a default base class so we need it in any case.
@@ -126,96 +58,6 @@ extends GrammarHelper {
 		try { classes.do_import(".internal.int"); } finally {}
 		try { classes.do_import(".internal.string"); } finally {}
 
-		id_at          = l.create_keyword("@");
-		id_src_req     = l.create_keyword("!->");
-		id_dst_req     = l.create_keyword("->!");
-		id_attribute   = l.create_keyword("attribute");
-
-		id_block_open  = l.create_keyword("{");
-		id_block_close = l.create_keyword("}");
-
-		id_plus        = l.create_keyword("+");
-		id_minus       = l.create_keyword("-");
-		id_slash       = l.create_keyword("/");
-		id_aster       = l.create_keyword("*");
-		id_percent     = l.create_keyword("%");
-
-		id_2bar        = l.create_keyword("||");
-		id_2amper      = l.create_keyword("&&");
-		id_exclam      = l.create_keyword("!");
-
-		id_bar         = l.create_keyword("|");
-		id_amper       = l.create_keyword("&");
-		id_caret       = l.create_keyword("^");
-		id_tilde       = l.create_keyword("~");
-
-		id_ref_eq      = l.create_keyword(":==");
-		id_ref_neq     = l.create_keyword(":!=");
-
-		id_eq          = l.create_keyword("==");
-		id_neq         = l.create_keyword("!=");
-		id_gt          = l.create_keyword(">");
-		id_lt          = l.create_keyword("<");
-		id_ge          = l.create_keyword(">=");
-		id_le          = l.create_keyword("<=");
-		id_assign      = l.create_keyword("=");
-		id_vassign     = l.create_keyword(".=");
-
-		id_colon       = l.create_keyword(":");
-		id_point       = l.create_keyword(".");
-		id_semicolon   = l.create_keyword(";");
-		id_comma       = l.create_keyword(",");
-
-		id_lbracket    = l.create_keyword("[");
-		id_rbracket    = l.create_keyword("]");
-
-		id_lparen      = l.create_keyword("(");
-		id_rparen      = l.create_keyword(")");
-
-		id_package     = l.create_keyword("package");
-		id_import      = l.create_keyword("import");
-		id_class       = l.create_keyword("class");
-		id_interface   = l.create_keyword("interface");
-		id_public      = l.create_keyword("public");
-		id_extends     = l.create_keyword("extends");
-		id_implements  = l.create_keyword("implements");
-
-		id_if          = l.create_keyword("if");
-		id_else        = l.create_keyword("else");
-		id_while       = l.create_keyword("while");
-		id_do          = l.create_keyword("do");
-		id_foreach     = l.create_keyword("foreach");
-		id_in          = l.create_keyword("in");
-		id_return      = l.create_keyword("return");
-
-		id_switch      = l.create_keyword("switch");
-		id_case        = l.create_keyword("case");
-		id_default     = l.create_keyword("default");
-		id_break       = l.create_keyword("break");
-		id_continue    = l.create_keyword("continue");
-
-		id_try         = l.create_keyword("try");
-		id_catch       = l.create_keyword("catch");
-		id_throw       = l.create_keyword("throw");
-
-		id_var         = l.create_keyword("var");
-		id_void        = l.create_keyword("void");
-		id_null        = l.create_keyword("null");
-		id_new         = l.create_keyword("new");
-		id_this        = l.create_keyword("this");
-
-		id_summon      = l.create_keyword("summon");
-		id_thread      = l.create_keyword("thread");
-
-		// parametric
-		id_ident = Lex.get_id();
-		l.create_token(new TokenIdent(id_ident));
-
-		id_string_const = Lex.get_id();
-		l.create_token(new TokenStringConst(id_string_const));
-
-		id_int_const = Lex.get_id();
-		l.create_token(new TokenIntConst(id_int_const));
 	}
 
 	public void print() throws PlcException { classes.print(); }
@@ -223,6 +65,7 @@ extends GrammarHelper {
 
 
 	public Node parse() throws PlcException, IOException {
+		/*
 		Node out = null;
 		while (true) {
 
@@ -232,6 +75,20 @@ extends GrammarHelper {
 			Node top = parseTop(t);
 			if( top != null ) out = sequence( out, top );
 			expect( id_semicolon, "semicolon after top level definition expected");
+		}
+		 */
+
+		StatementsNode out = new StatementsNode();
+
+		while (true) {
+
+			Token t = l.get();
+			if (t.is_eof())         break; // eof
+
+			Node top = parseTop(t);
+			if( top != null ) out.addNode(top);
+			expect( id_semicolon, "semicolon after top level definition expected");
+			l.commit(); // no unget after this point
 		}
 
 		out.preprocess(ps);
@@ -244,7 +101,7 @@ extends GrammarHelper {
 	// --------------------------------------------------------------------------
 
 	Node parseTop(Token t) throws IOException, PlcException {
-		if(parser_debug) System.out.println("Top level Token: " + t.toString());
+		if(parser_debug) System.err.println("Top level Token: " + t.toString());
 
 		Node out = null;
 		if (t.get_id() == id_class)                out = parseClass(false);
@@ -289,12 +146,12 @@ extends GrammarHelper {
 				sb.append(getString());
 			else
 				sb.append(getIdent());
-			
+
 			if( !testAndEat( id_point ) )
 				break;
 		}
 
-		if (parser_debug) System.out.println("import: " + sb.toString());
+		if (parser_debug) System.err.println("import: " + sb.toString());
 
 		if( !classes.do_import(sb.toString()) )
 			syntax_error("Can't import " + sb.toString());
@@ -327,8 +184,15 @@ extends GrammarHelper {
 				String class_to_extend = parseClassName(false);
 				if(interface_mode)
 					syntax_error("interface can not extend class");
-				if( !me.addParent(class_to_extend, ps) )
-					syntax_error("just one base class (yet?)");
+
+				if( me.hasParent() )
+					syntax_error("just one base class");
+				else
+				{
+					//if( !me.addParent(class_to_extend, ps) )
+					//	syntax_error("can't find parent "+class_to_extend+", no import statement?");
+					me.addParent(class_to_extend, ps);
+				}
 			}
 			else if( id == id_implements )
 			{
@@ -338,6 +202,7 @@ extends GrammarHelper {
 			}
 			else
 				break;
+			l.commit(); // no unget after this point
 		}
 
 		expect(id_block_open);
@@ -345,20 +210,23 @@ extends GrammarHelper {
 		expect(id_block_close);
 
 		me.setReferencedClasses(ps.getReferencedClasses());
-		
+
 		ps.set_class(null); // came out of class
 
 		return out;
 	}
 
 
-	private Node parseClassBody(PhantomClass me, boolean interface_mode) throws PlcException, IOException {
+	private Node parseClassBody(PhantomClass me, boolean interface_mode) throws PlcException, IOException 
+	{
 		Node out = null;
 
 		while(true)
 		{
+			l.commit(); // no long unget after this point
+
 			Token t = l.get();
-			//if (parser_debug) System.out.println("class body Token: " + t.toString());
+			//if (parser_debug) System.err.println("class body Token: " + t.toString());
 
 			if( t.get_id() == id_block_close )
 			{
@@ -389,64 +257,203 @@ extends GrammarHelper {
 			}
 			l.unget();
 
+			// PhantomType type = parseTypeSpeculative(true); // can be used only for existing types
+
 			// Method or field
 			if (possibleType()) {
 				//int required_method_index = -1;
 				PhantomType type = parseType();
-				parse_attributes( false );
-				String mname = getIdent();
 
-				// if not '(' - define a variable.
-				if( !peek(id_lparen) )
-				{
-					me.addField(mname, type);
-					expect( id_semicolon );
+				if( type != null ) {
+					parse_attributes( false );
+					String mname = getIdent();
+
+					// if not '(' - define a variable.
+					if( !peek(id_lparen) )
+					{
+						me.addField(mname, type);
+						expect( id_semicolon );
+						continue;
+					}
+
+					//System.err.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
+					boolean constructor = checkConstructorName(me, mname);
+
+					if( constructor && !type.is_void())
+						syntax_error("Non-void constructor");
+
+					//Method m = me.addMethod( mname, type );
+					Method m = new Method( mname, type, constructor );
+					int required_method_index = -1;
+
+					//Node args = 
+					parseDefinitionArglist(m);
+					if( testAndEat(id_lbracket) )
+					{
+						required_method_index = getInt();					
+						//me.setMethodOrdinal(m,required_method_index);
+						expect(id_rbracket);
+					}
+					parse_attributes( false );
+					//Node code =
+					if(interface_mode)
+					{
+						expect(id_semicolon);
+					}
+					else
+					{
+						ps.set_method(m);
+						m.code = parseBlock();
+						ps.set_method(null);
+						//out = sequence( out, code ); // temp!
+						//me.add_method( mname, type, args, code, required_method_index );
+					}
+
+					me.addMethod( m );
+					if( required_method_index >= 0 )					
+						me.setMethodOrdinal(m,required_method_index);
 					continue;
 				}
 
-				boolean constructor = mname.equals(me.getName());
-				
-				if( constructor && !type.is_void())
-					syntax_error("Non-void constructor");
-				
-				//Method m = me.addMethod( mname, type );
-				Method m = new Method( mname, type, constructor );
-				int required_method_index = -1;
-
-				//Node args = 
-				parseDefinitionArglist(m);
-				if( testAndEat(id_lbracket) )
-				{
-					required_method_index = getInt();					
-					//me.setMethodOrdinal(m,required_method_index);
-					expect(id_rbracket);
-				}
-				parse_attributes( false );
-				//Node code =
-				if(interface_mode)
-				{
-					expect(id_semicolon);
-				}
-				else
-				{
-					ps.set_method(m);
-					m.code = parseBlock();
-					ps.set_method(null);
-					//out = sequence( out, code ); // temp!
-					//me.add_method( mname, type, args, code, required_method_index );
-				}
-				
-				me.addMethod( m );
-				if( required_method_index >= 0 )					
-					me.setMethodOrdinal(m,required_method_index);
-				continue;
+				Token tt = l.get();
+				if( t.is_eof() ) return out;
+				// nothing good?
+				syntax_error("Bad class element definition: "+tt.toString());
 			}
-
-			Token tt = l.get();
-			if( t.is_eof() ) return out;
-			// nothing good?
-			syntax_error("Bad class element definition: "+tt.toString());
 		}
+	}
+	/**
+	 * Parse type name if code contains one. 
+	 * 
+	 * @param definition true if type is to be defined. Not a reference to existing type.
+	 * @return type if syntax looks like, null otherwise
+	 * @throws PlcException
+	 */
+	private PhantomType parseTypeSpeculative(boolean definition) throws PlcException {
+		l.mark();
+		PhantomType pt = doParseTypeSpeculative(definition);
+		if( pt == null )
+			l.rewind();
+		else
+			l.unmark();
+		return pt;
+	}
+
+	private PhantomType doParseTypeSpeculative(boolean definition) throws PlcException {
+		StringBuffer sb = new StringBuffer();
+		boolean absolute = false;
+
+		if( peek() == id_void )
+		{
+			l.get(); // consume
+			return PhantomType.getVoid();
+		}
+
+		if( testAndEat( id_point ) )  {
+			absolute = true;
+		}
+		else
+		{
+			if(package_name == null)
+				syntax_warning("relative type and no package");
+		}
+
+		boolean first = true;
+
+		while(true)
+		{
+			if(!first) sb.append('.');
+
+			String is;
+
+			int id = peek();
+			if( id == id_string_const)
+				is = getString();
+			if( id == id_ident)
+				is = getIdent();
+			else
+				return null;
+			sb.append(is);
+
+			first = false;
+
+			if( !testAndEat( id_point ) )
+				break;
+		}
+
+		// here we'll look for [] stuff
+		boolean is_container = false;
+
+		if( testAndEat( id_lbracket ) )
+		{
+			is_container = true;
+			expect( id_rbracket );
+			/*
+			if( testAndEat( id_rbracket ) )
+			{
+				main_type.set_is_container(true);
+			}
+			else
+			{
+				main_type.set_is_container(true);
+
+				if( testAndEat( id_aster ) )
+					main_type._container_class_expression = parseExpression(false);
+				else
+					main_type._container_class = new PhantomClass(parseClassName(false));
+
+				expect( id_rbracket );
+			}*/
+		}
+
+		// atrrs
+		parse_attributes( false );
+
+
+		//return checkAndConvertType( sb.toString(), absolute, is_container );
+
+		// TODO add support later? Or we don't need speculative parse of undef type?
+		if(!definition)
+			throw new PlcException("speculative type","must be defined type");
+
+		PhantomType t;
+
+		t = PhantomType.findAbbreviatedType(sb.toString(), is_container);
+		if( t != null ) return t;
+
+		if( (!absolute) && (package_name != null) )
+		{
+			sb.insert(0, ".");
+			sb.insert(0, package_name);
+		}
+
+		String cn = sb.toString();
+		//System.err.println("look up for class "+cn);
+
+		PhantomClass c;
+		c = classes.get( cn, true, null);
+		if( c == null ) return null;
+		t = new PhantomType(c);
+		t.set_is_container(is_container);
+		return t;
+	}
+
+
+	/*private PhantomType checkAndConvertType(String string) {
+		// TODO Auto-generated method stub
+		return null;
+	}*/
+
+	private boolean checkConstructorName(PhantomClass me, String mname) 
+	{
+		//System.err.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
+
+		String[] words = me.getName().split("\\.");
+		String last = words[words.length-1];
+
+		//System.err.println(String.format("!!! is ctor? nmame=%s, me.last = %s", mname, last));
+
+		return mname.equals(last);
 	}
 
 	private Node parseDefinitionArglist(Method m) throws PlcException, IOException {
@@ -482,12 +489,21 @@ extends GrammarHelper {
 		}
 	}
 
-	private PhantomType parseType() throws PlcException, IOException {
+	private PhantomType parseType() throws PlcException, IOException 
+	{
+		boolean iAmStatic = false;
+		
 		Token t = l.get();
-		if (parser_debug) System.out.println("type Token: " + t.toString());
+		if (parser_debug) System.err.println("type Token: " + t.toString());
 
 		PhantomType main_type = new PhTypeUnknown();
 
+		if( t.get_id() == id_static )
+		{
+			t = l.get();
+			iAmStatic = true;
+		}
+		
 		if(t.get_id() == id_void ) main_type = new PhTypeVoid();
 		else if(t.get_id() == id_aster )
 		{
@@ -534,17 +550,19 @@ extends GrammarHelper {
 		// atrrs
 		parse_attributes( false );
 
+		main_type.setStatic(iAmStatic);
+		
 		return main_type;
 	}
 
 
 	private boolean possibleType() throws PlcException, IOException {
 		int id = peek();
-		return ( id == id_aster || id == id_point || id == id_void || id == id_ident );
+		return ( id == id_aster || id == id_point || id == id_void || id == id_ident || id == id_static );
 	}
 
 
-	private String parseClassName(boolean definition)  throws PlcException, IOException {
+	private String parseClassName(boolean definition)  throws PlcException {
 		StringBuffer sb = new StringBuffer();
 		boolean absolute = false;
 
@@ -584,7 +602,7 @@ extends GrammarHelper {
 				pname = ".error.package";
 			}
 
-			if (parser_debug) System.out.println("def rel class name: " + pname+sb.toString());
+			if (parser_debug) System.err.println("def rel class name: " + pname+sb.toString());
 			return pname+sb.toString();
 		}
 
@@ -598,11 +616,11 @@ extends GrammarHelper {
 				pname = ".error.package";
 			}
 
-			if (parser_debug) System.out.println("ref rel class name: " + pname+sb.toString());
+			if (parser_debug) System.err.println("ref rel class name: " + pname+sb.toString());
 			return pname+sb.toString();
 		}
 
-		if (parser_debug) System.out.println("abs class name: " + sb.toString());
+		if (parser_debug) System.err.println("abs class name: " + sb.toString());
 		return sb.toString();
 	}
 
@@ -680,7 +698,7 @@ extends GrammarHelper {
 				syntax_error("syntax error in Method body");
 				l.get(); // eat some bad stuff...
 			}
-			
+
 			return new VoidNode( expr );
 		}
 	}
@@ -759,7 +777,7 @@ extends GrammarHelper {
 		}
 
 		code = sequence( code, new BreakNode().setContext( l ) );
-		
+
 		sw_node.add_code(code);
 		return sw_node;
 	}
@@ -857,7 +875,36 @@ extends GrammarHelper {
 	 * @param leftmost True if this is a good place to look for var definition.
 	 */
 	private Node parseExpression(boolean leftmost) throws PlcException, IOException {
-		return parseRvalue(leftmost);
+		if(debug) System.err.println("in expr");
+
+		//return parseRvalue(leftmost);
+
+		if( peek() == id_lparen )
+		{
+			Node out;
+			l.mark();
+			l.get(); // consume (
+
+			//cast?
+			PhantomType pt = parseTypeSpeculative(true);
+			if( pt == null ) // not type, continue as usual
+			{
+				l.rewind();
+				out = parseRvalue(leftmost);
+				//expect(id_rparen);
+				return out;
+			}
+			else
+			{
+				l.unmark();
+				expect(id_rparen);
+				out = parseRvalue(leftmost);
+
+				return new CastNode( out, pt );
+			}
+		}
+		else		
+			return parseRvalue(leftmost);
 	}
 
 	private Node parseRvalue(boolean leftmost) throws PlcException, IOException {
@@ -869,11 +916,11 @@ extends GrammarHelper {
 		Token t = l.get();
 		int id = t.get_id();
 
-		if( id == id_ident )      return new MethodNode(t.value()).setContext( l );
+		if( id == id_ident )      return new MethodNode(t.value(),ps).setContext( l );
 		else if( id == id_int_const )
 		{
 			l.unget();
-			return new MethodNode(getInt()).setContext( l );
+			return new MethodNode(getInt(),ps).setContext( l );
 		}
 		else
 		{
@@ -911,6 +958,7 @@ extends GrammarHelper {
 
 
 	private Node parseLogical(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in logical");
 
 		if( testAndEat(id_exclam) )
 			return new BoolNotNode( parseLogical(false) ).setContext( l );
@@ -931,6 +979,8 @@ extends GrammarHelper {
 
 
 	private Node parseCmp(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in cmp");
+
 		Node out = parseRefCmp(leftmost);
 		if( out == null ) return null;
 
@@ -965,6 +1015,8 @@ extends GrammarHelper {
 	}
 
 	private Node parseAdditive(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in additive");
+
 		Node out = parseMult(leftmost);
 		if( out == null ) return null;
 
@@ -980,6 +1032,8 @@ extends GrammarHelper {
 	}
 
 	private Node parseMult(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in mult");
+
 		Node out = parseBit(leftmost);
 		if( out == null ) return null;
 
@@ -988,13 +1042,15 @@ extends GrammarHelper {
 			int id = l.get().get_id();
 			if( id == id_slash )       out = new OpDivideNode( out, parseBit(false) ).setContext( l );
 			else if( id == id_aster )  out = new OpMultiplyNode( out, parseBit(false) ).setContext( l );
-            else if( id == id_percent )out = new OpRemainderNode( out, parseBit(false) ).setContext( l );
+			else if( id == id_percent )out = new OpRemainderNode( out, parseBit(false) ).setContext( l );
 			else                        { l.unget(); break; }
 		}
 		return out;
 	}
 
 	private Node parseBit(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in bit");
+
 		Node out = parseLower(leftmost);
 		if( out == null ) return null;
 
@@ -1011,12 +1067,15 @@ extends GrammarHelper {
 	}
 
 	private Node parseLower(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in lower");
+
 		Token t = l.get();
 		int id = t.get_id();
 
 		if(id == id_string_const )
 		{
-			return new StringConstNode(t.value()).setContext( l );
+			//return new StringConstNode(t.value()).setContext( l );
+			return new StringConstPoolNode(t.value(), ps.get_class() ).setContext( l );
 		}
 		else if (t.get_id() == id_import)          
 		{
@@ -1027,6 +1086,14 @@ extends GrammarHelper {
 		{
 			TokenIntConstVal ti = (TokenIntConstVal)t;
 			return new IntConstNode(ti.int_value()).setContext( l );
+		}
+		else if(id == id_minus )
+		{
+			t = l.get();
+			if(t.get_id() != id_int_const)
+				syntax_error("not a constant after minus");
+			TokenIntConstVal ti = (TokenIntConstVal)t;
+			return new IntConstNode( - ti.int_value() ).setContext( l );
 		}
 		else if(id == id_new )
 		{
@@ -1081,6 +1148,8 @@ extends GrammarHelper {
 	// var, Method call, array subscription, assignment
 	private Node parseLvalue(boolean leftmost) throws PlcException, IOException
 	{
+		if(debug) System.err.println("in lval");
+
 		Node atom = parseAtom(leftmost);
 		Node out = atom;
 		if( atom == null )
@@ -1099,7 +1168,7 @@ extends GrammarHelper {
 				MethodNode method = (MethodNode) parse_method_id();
 				//String methodIdent = parse_method_id();
 				Node args = parse_call_args();
-				
+
 				// No arg type info know, can't make sig here
 				//MethodSignature sig = new MethodSignature(method.getIdent(), args);
 				//method.setSignature(sig);
@@ -1108,15 +1177,18 @@ extends GrammarHelper {
 			}
 			else if (peek( id_lparen )) {
 				// TODO this is wrong and can't be in loop? What if we already have out?
-				
+
 				if(out != atom)
 					syntax_error("call of non-method?");
-				
+
 				Node object = new ThisNode(ps.get_class()).setContext( l );
 				Node args = parse_call_args();
 
 				IdentNode ident = (IdentNode)atom;
-				Node method = new MethodNode( ident.getName() ).setContext( l );
+				MethodNode method = new MethodNode( ident.getName(), ps );
+				method.setContext( l );
+				//method.setSignature(new MethodSignature(ident.getName(), args));
+
 				out = new OpMethodCallNode(object, method, args).setContext( l );
 				//out = new op_method_call_node(object, atom, args);
 			}
@@ -1144,13 +1216,27 @@ extends GrammarHelper {
 
 	// identifier or expression in ()s
 	private Node parseAtom(boolean leftmost) throws PlcException, IOException {
+		if(debug) System.err.println("in atom");
+
 		Token t = l.get();
 		int id = t.get_id();
 
 		if( id == id_ident )
 		{
+			// XXX this is bullshit, use parseTypeSpeculative to find ver defs.
 			// TODO check for var def with leading type
 			if( leftmost) {
+
+				PhantomType td = parseTypeSpeculative(true);
+
+				if( td != null ) // assume var def
+				{
+					String mname = getIdent();
+
+					ps.get_method().svars.add_stack_var(new PhantomVariable(mname, td));
+					return new EmptyNode();
+				}
+				/*
 				PhantomType type = null;
 
 				String typeName = t.value();
@@ -1176,9 +1262,10 @@ extends GrammarHelper {
 					ps.get_method().svars.add_stack_var(new PhantomVariable(mname, type));
 					return new EmptyNode();
 				}
+				 */
 			} 
 
-			return new IdentNode( t.value() ).setContext( l );
+			return new IdentNode( t.value(), ps ).setContext( l );
 		}
 		else if(id == id_null)
 			return new NullNode().setContext( l );
@@ -1209,24 +1296,27 @@ extends GrammarHelper {
 			expect(id_lparen);
 			type_expr = parseExpression(false);
 			expect(id_rparen);
+
+			if( testAndEat( id_colon ) )
+				type = parseType();
 		}
-		else                             type = parseType();
+		else                             
+			type = parseType();
 
 		Node args = parse_call_args();
+		//ConstructNode cn = new ConstructNode( args ); 
 
-		//Node newNode = new NewNode(type,type_expr,args).setContext( l );
-		Node newNode = new NewNode(type,type_expr, null).setContext( l );
-		
-		ConstructNode cn = new ConstructNode( newNode, args ); 
-		
-		return cn;
+		Node newNode = new NewNode(type,type_expr,args).setContext( l );
+		//Node newNode = new NewNode(type,type_expr, cn).setContext( l );
+
+		return newNode;
 	}
 
 	// --------------------------------------------------------------------------
 	// Helpers - attributes
 	// --------------------------------------------------------------------------
 
-	private Node parse_attributes( boolean definition ) throws PlcException, IOException {
+	private Node parse_attributes( boolean definition ) throws PlcException {
 		int id = peek();
 		if( id != id_at && id != id_attribute ) return null;
 		l.get(); // eat @/attribute
@@ -1235,7 +1325,7 @@ extends GrammarHelper {
 		return null;
 	}
 
-	private void parse_attribute(boolean definition) throws PlcException, IOException
+	private void parse_attribute(boolean definition) throws PlcException
 	{
 		boolean is_additive = false; 
 		boolean is_multiplicative = false;
@@ -1278,7 +1368,7 @@ extends GrammarHelper {
 
 		if( is_required )
 			syntax_warning("required attribute -- ignored?");
-		
+
 	}
 
 }

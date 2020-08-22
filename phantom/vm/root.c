@@ -4,11 +4,15 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
- *
+ * Virtual machine startup and root objects creation
  *
 **/
+
+#define DEBUG_MSG_PREFIX "vm.root"
+#include <debug_ext.h>
+#define debug_level_flow 10
+#define debug_level_error 10
+#define debug_level_info 10
 
 #include <assert.h>
 #include <phantom_libc.h>
@@ -121,8 +125,8 @@ void pvm_root_init(void)
     pvm_root.kernel_environment = pvm_get_field( root, PVM_ROOT_OBJECT_KERNEL_ENVIRONMENT );
     pvm_root.os_entry = pvm_get_field( root, PVM_ROOT_OBJECT_OS_ENTRY );
     pvm_root.root_dir = pvm_get_field( root, PVM_ROOT_OBJECT_ROOT_DIR );
-
     pvm_root.kernel_stats = pvm_get_field( root, PVM_ROOT_KERNEL_STATISTICS );
+    pvm_root.class_dir = pvm_get_field( root, PVM_ROOT_CLASS_DIR );
 
 
     process_specific_restarts();
@@ -233,6 +237,8 @@ static void pvm_save_root_objects()
     pvm_set_field( root, PVM_ROOT_OBJECT_ROOT_DIR, pvm_root.root_dir);
 
     pvm_set_field( root, PVM_ROOT_KERNEL_STATISTICS, pvm_root.kernel_stats );
+    pvm_set_field( root, PVM_ROOT_CLASS_DIR, pvm_root.class_dir );
+
 
 }
 
@@ -319,6 +325,8 @@ static void pvm_create_root_objects()
     pvm_root.root_dir      = pvm_create_directory_object();
 
     pvm_root.kernel_stats  = pvm_create_binary_object( STAT_CNT_PERSISTENT_DA_SIZE, 0 );
+    pvm_root.class_dir     = pvm_create_directory_object();
+
 
     ref_saturate_o(pvm_root.threads_list); //Need it?
     ref_saturate_o(pvm_root.kernel_environment); //Need it?
@@ -439,7 +447,7 @@ static void pvm_boot()
     if( pvm_load_class_from_module(boot_class, &user_boot_class))
     {
         printf("Unable to load boot class '%s'", boot_class );
-        pvm_exec_panic("Unable to load user boot class");
+        pvm_exec_panic0("Unable to load user boot class");
     }
 
     struct pvm_object user_boot = pvm_create_object( user_boot_class );
@@ -581,7 +589,7 @@ static void load_kernel_boot_env(void)
 static o_restart_func_t find_restart_f( struct pvm_object _class )
 {
     if(!(_class.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS))
-        pvm_exec_panic( "find_restart_f: not a class object" );
+        pvm_exec_panic0( "find_restart_f: not a class object" );
 
     struct data_area_4_class *da = (struct data_area_4_class *)&(_class.data->da);
 

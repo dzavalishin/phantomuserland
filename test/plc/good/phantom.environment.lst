@@ -1,15 +1,17 @@
 Class .phantom.environment
   Field env
-  Method void init(  ):
-    if : unknown
-      :== : unknown
-        ident env : .phantom.util.map
-        null : .internal.object const
+  Method .internal.object get( key: string ):
+    ,  : void
       void  : void
-        = : .phantom.util.map
+        . : void
+          this  : .phantom.environment
+          Method init : unknown
+      return : void
+        . : .internal.object
           ident env : .phantom.util.map
-          constructor() : .phantom.util.map
-            new .phantom.util.map : .phantom.util.map
+          Method get : unknown
+          arg  : unknown
+            ident key : string
 
   Method int set( key: string, val: .internal.object ):
     ,  : void
@@ -26,16 +28,13 @@ Class .phantom.environment
           arg  : unknown
             ident val : .internal.object
 
-  Method .internal.object get( key: string ):
-    ,  : void
+  Method void init(  ):
+    if : unknown
+      :== : unknown
+        ident env : .phantom.util.map
+        null : .internal.object const
       void  : void
-        . : void
-          this  : .phantom.environment
-          Method init : unknown
-      return : void
-        . : .internal.object
+        = : .phantom.util.map
           ident env : .phantom.util.map
-          Method get : unknown
-          arg  : unknown
-            ident key : string
+          new .phantom.util.map : .phantom.util.map
 

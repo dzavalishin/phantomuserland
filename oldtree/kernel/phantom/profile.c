@@ -138,7 +138,7 @@ void profiler_dump_map( void )
 
         if(total_percent > 200)
         {
-            printf("% > 200, drop\n");
+            printf("%% > 200, drop\n");
             break;
         }
 

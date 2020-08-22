@@ -86,11 +86,11 @@ public class StatementsNode extends Node {
 	protected void print_me(PrintStream ps ) throws PlcException {
 		ps.println(toString());
 	}
-	
+
 	
 	public void forEach(Consumer<? super Node> action) {
 		nodes.forEach(action);		
-}
+	}
 
 	public List<Node> getNodeList() {
 		return nodes;		

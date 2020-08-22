@@ -58,7 +58,7 @@ public class SwitchNode extends Node {
 		//if( !expr.getType().is_int() ) throw new PlcException("switch","not an integer expression");
 
 		expr.generate_code(c, s);
-		move_between_stacks(c, expr.is_on_int_stack());
+		move_between_stacks(c, expr);
 
 		generate_my_code(c,s);
 
@@ -80,7 +80,7 @@ public class SwitchNode extends Node {
 			SwitchCaseNode case_node = (SwitchCaseNode)i.next();
 			Node case_expr = case_node._l;
 			case_expr.generate_code(c,s);
-			move_between_stacks(c, case_expr.is_on_int_stack());
+			move_between_stacks(c, case_expr);
 			c.emitISubLU();
 			c.emitJz(case_node.get_label());
 		}

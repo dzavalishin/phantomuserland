@@ -2,7 +2,7 @@
 /*
 
 THE TFTP PROTOCOL (REVISION 2)
-http://spectral.mscs.mu.edu/RFC/rfc1350.html
+https://tools.ietf.org/html/rfc1350
 
   TFTP supports five types of packets, all of which have been mentioned
    above:

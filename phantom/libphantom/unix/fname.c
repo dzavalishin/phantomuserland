@@ -66,7 +66,7 @@ int uu_is_absname( const char *fn )
     if( *fn != '/' ) return 0;
     fn++;
     if( *fn != '/' ) return 0;
-    fn++;
+    //fn++;
 
     // TODO ask root FS if it has such path prefix?
 

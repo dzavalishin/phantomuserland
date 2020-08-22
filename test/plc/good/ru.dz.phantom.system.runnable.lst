@@ -1,5 +1,5 @@
 Class .ru.dz.phantom.system.runnable
   Method void run( parent_object: unknown ):
     throw  : void const
-      string const "Abstract runnable started" : string const
+      string pool const id="0" : string const
 

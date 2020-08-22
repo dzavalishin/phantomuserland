@@ -1,18 +1,20 @@
-Class version 20160114032155087
+Class version 20170915063444533
 
-method getTimeServer ordinal 16
+method setTimeServer ordinal 16
 --
-  const 0				//  @0
+  const 1				//  @0
   isublu				//  @5
   jz _label_0			//  @6
-  const "arg count: getTimeServer in .phantom.osimpl"	//  @11
+  const "arg count: setTimeServer in .phantom.osimpl"	//  @11
   throw				//  @59
 _label_0:	//  @60
-  ; Line 67			//  @60
-  load fld=1			//  @60
-  ; Line 67			//  @62
-  ret				//  @62
-  ret				//  @63
+  stack_reserve obj=1 int=0	//  @60
+    ; Line 66			//  @63
+  get o stk pos=0			//  @63
+  os dup				//  @68
+  save fld=1			//  @69
+  os drop				//  @71
+  ret				//  @72
 --
 method end
 
@@ -24,13 +26,13 @@ method init ordinal 17
   const "arg count: init in .phantom.osimpl"	//  @11
   throw				//  @50
 _label_0:	//  @51
-  summon null			//  @51
-  ; Line 29			//  @52
-  get o stk pos=0			//  @52
-  os dup				//  @57
-  save fld=0			//  @58
-  os drop				//  @60
-  ret				//  @61
+  stack_reserve obj=1 int=0	//  @51
+    ; Line 29			//  @54
+  get o stk pos=0			//  @54
+  os dup				//  @59
+  save fld=0			//  @60
+  os drop				//  @62
+  ret				//  @63
 --
 method end
 
@@ -42,170 +44,163 @@ method getKernelEnvironmentValue ordinal 18
   const "arg count: getKernelEnvironmentValue in .phantom.osimpl"	//  @11
   throw				//  @71
 _label_0:	//  @72
-  summon null			//  @72
-  summon null			//  @73
-  summon null			//  @74
-  summon null			//  @75
-  summon null			//  @76
-  cons 0				//  @77
-  cons 0				//  @78
-  cons 0				//  @79
-  ; Line 34			//  @80
-  load fld=0			//  @80
-  call m=23 nparm=0		//  @82
-  os dup				//  @84
-  set o stk pos=1			//  @85
-  os drop				//  @90
-  ; Line 39			//  @91
-  get o stk pos=1			//  @91
-  call m=12 nparm=0		//  @96
-  o2i				//  @98
-  is dup				//  @99
-  set i stk pos=0			//  @100
-  is drop				//  @105
-  ; Line 39			//  @106
-  ; Line 40			//  @106
-  get i stk pos=0			//  @106
-  is dup				//  @111
-  set i stk pos=1			//  @112
-  is drop				//  @117
-  ; Line 40			//  @118
-  ; Line 62			//  @118
-_label_1:	//  @118
-  ; Line 42			//  @118
-  get i stk pos=1			//  @118
-  ; Line 42			//  @123
-  const 0				//  @123
-  ; Line 42			//  @128
-  igt >				//  @128
-  jz _label_2			//  @129
-  ; Line 44			//  @134
-  get i stk pos=1			//  @134
-  ; Line 44			//  @139
-  const 1				//  @139
-  ; Line 44			//  @144
-  isublu				//  @144
-  is dup				//  @145
-  set i stk pos=1			//  @146
-  is drop				//  @151
-  ; Line 46			//  @152
-  get o stk pos=1			//  @152
-  ; Line 46			//  @157
-  get i stk pos=1			//  @157
-  i2o				//  @162
-  call m=10 nparm=1		//  @163
-  os dup				//  @165
-  set o stk pos=2			//  @166
-  os drop				//  @171
-  ; Line 46			//  @172
-  ; Line 49			//  @172
-  get o stk pos=2			//  @172
-  ; Line 49			//  @177
-  const "="			//  @177
-  ; Line 49			//  @183
-  call m=12 nparm=1		//  @183
-  o2i				//  @185
-  is dup				//  @186
-  set i stk pos=2			//  @187
-  is drop				//  @192
-  ; Line 49			//  @193
-  ; Line 54			//  @193
-  ; Line 51			//  @193
-  get i stk pos=2			//  @193
-  ; Line 51			//  @198
-  const 0				//  @198
-  ; Line 51			//  @203
-  ilt <				//  @203
-  jz _label_3			//  @204
-  ; Line 52			//  @209
-  jmp _label_1			//  @209
-_label_3:	//  @214
-  ; Line 54			//  @214
-  ; Line 57			//  @214
-  get o stk pos=2			//  @214
-  ; Line 57			//  @219
-  const 0				//  @219
-  i2o				//  @224
-  ; Line 57			//  @225
-  get i stk pos=2			//  @225
-  i2o				//  @230
-  ; Line 57			//  @231
-  ; Line 57			//  @231
-  call m=8 nparm=2		//  @231
-  os dup				//  @233
-  set o stk pos=3			//  @234
-  os drop				//  @239
-  ; Line 57			//  @240
-  ; Line 58			//  @240
-  get o stk pos=2			//  @240
-  ; Line 58			//  @245
-  get i stk pos=2			//  @245
-  ; Line 58			//  @250
-  const 1				//  @250
-  ; Line 58			//  @255
-  isum				//  @255
-  i2o				//  @256
-  ; Line 58			//  @257
-  get o stk pos=2			//  @257
-  call m=11 nparm=0		//  @262
-  o2i				//  @264
-  ; Line 58			//  @265
-  get i stk pos=2			//  @265
-  ; Line 58			//  @270
-  isublu				//  @270
-  ; Line 58			//  @271
-  const 1				//  @271
-  ; Line 58			//  @276
-  isublu				//  @276
-  i2o				//  @277
-  ; Line 58			//  @278
-  ; Line 58			//  @278
-  call m=8 nparm=2		//  @278
-  os dup				//  @280
-  set o stk pos=4			//  @281
-  os drop				//  @286
-  ; Line 58			//  @287
-  ; Line 62			//  @287
-  ; Line 60			//  @287
-  get o stk pos=3			//  @287
-  ; Line 60			//  @292
-  get o stk pos=0			//  @292
-  call m=4 nparm=1		//  @297
-  o2i				//  @299
-  jz _label_5			//  @300
-  ; Line 60			//  @305
-  get o stk pos=4			//  @305
-  ; Line 60			//  @310
-  ret				//  @310
-_label_5:	//  @311
-  ; Line 62			//  @311
-  jmp _label_1			//  @311
-_label_2:	//  @316
-  ; Line 62			//  @316
-  ; Line 63			//  @316
-  summon null			//  @316
-  ; Line 63			//  @317
-  ret				//  @317
-  ; Line 63			//  @318
-  ret				//  @318
+  stack_reserve obj=5 int=3	//  @72
+    ; Line 34			//  @75
+  load fld=0			//  @75
+  call m=23 nparm=0		//  @77
+  summon class internal.container.array	//  @79
+  cast obj class			//  @80
+  os dup				//  @81
+  set o stk pos=1			//  @82
+  os drop				//  @87
+    ; Line 39			//  @88
+  get o stk pos=1			//  @88
+  call m=12 nparm=0		//  @93
+  summon class internal.int	//  @95
+  cast obj class			//  @96
+  o2i				//  @97
+  is dup				//  @98
+  set i stk pos=0			//  @99
+  is drop				//  @104
+    ; Line 39			//  @105
+    ; Line 40			//  @105
+  get i stk pos=0			//  @105
+  is dup				//  @110
+  set i stk pos=1			//  @111
+  is drop				//  @116
+    ; Line 40			//  @117
+    ; Line 62			//  @117
+_label_1:	//  @117
+    ; Line 42			//  @117
+  get i stk pos=1			//  @117
+    ; Line 42			//  @122
+  const 0				//  @122
+  igt >				//  @127
+  jz _label_2			//  @128
+    ; Line 44			//  @133
+  get i stk pos=1			//  @133
+    ; Line 44			//  @138
+  const 1				//  @138
+    ; Line 44			//  @143
+  isublu				//  @143
+  is dup				//  @144
+  set i stk pos=1			//  @145
+  is drop				//  @150
+    ; Line 46			//  @151
+  get o stk pos=1			//  @151
+    ; Line 46			//  @156
+  get i stk pos=1			//  @156
+  i2o				//  @161
+  call m=10 nparm=1		//  @162
+  os dup				//  @164
+  set o stk pos=2			//  @165
+  os drop				//  @170
+    ; Line 46			//  @171
+    ; Line 49			//  @171
+  get o stk pos=2			//  @171
+    ; Line 49			//  @176
+  const_pool <0>			//  @176
+    ; Line 49			//  @181
+  call m=12 nparm=1		//  @181
+  o2i				//  @183
+  is dup				//  @184
+  set i stk pos=2			//  @185
+  is drop				//  @190
+    ; Line 49			//  @191
+    ; Line 52			//  @191
+    ; Line 51			//  @191
+  get i stk pos=2			//  @191
+    ; Line 51			//  @196
+  const 0				//  @196
+  ilt <				//  @201
+  jz _label_3			//  @202
+    ; Line 52			//  @207
+  jmp _label_1			//  @207
+_label_3:	//  @212
+    ; Line 52			//  @212
+    ; Line 57			//  @212
+  get o stk pos=2			//  @212
+    ; Line 57			//  @217
+  const 0				//  @217
+  i2o				//  @222
+    ; Line 57			//  @223
+  get i stk pos=2			//  @223
+  i2o				//  @228
+    ; Line 57			//  @229
+    ; Line 57			//  @229
+  call m=8 nparm=2		//  @229
+  os dup				//  @231
+  set o stk pos=3			//  @232
+  os drop				//  @237
+    ; Line 57			//  @238
+    ; Line 58			//  @238
+  get o stk pos=2			//  @238
+    ; Line 58			//  @243
+  get i stk pos=2			//  @243
+    ; Line 58			//  @248
+  const 1				//  @248
+    ; Line 58			//  @253
+  isum				//  @253
+  i2o				//  @254
+    ; Line 58			//  @255
+  get o stk pos=2			//  @255
+  call m=11 nparm=0		//  @260
+  o2i				//  @262
+    ; Line 58			//  @263
+  get i stk pos=2			//  @263
+    ; Line 58			//  @268
+  isublu				//  @268
+    ; Line 58			//  @269
+  const 1				//  @269
+    ; Line 58			//  @274
+  isublu				//  @274
+  i2o				//  @275
+    ; Line 58			//  @276
+    ; Line 58			//  @276
+  call m=8 nparm=2		//  @276
+  os dup				//  @278
+  set o stk pos=4			//  @279
+  os drop				//  @284
+    ; Line 58			//  @285
+    ; Line 60			//  @285
+    ; Line 60			//  @285
+  get o stk pos=3			//  @285
+    ; Line 60			//  @290
+  get o stk pos=0			//  @290
+  call m=4 nparm=1		//  @295
+  o2i				//  @297
+  jz _label_5			//  @298
+    ; Line 60			//  @303
+  get o stk pos=4			//  @303
+    ; Line 60			//  @308
+  ret				//  @308
+_label_5:	//  @309
+    ; Line 60			//  @309
+  jmp _label_1			//  @309
+_label_2:	//  @314
+    ; Line 62			//  @314
+    ; Line 63			//  @314
+  summon null			//  @314
+    ; Line 63			//  @315
+  ret				//  @315
+    ; Line 63			//  @316
+  ret				//  @316
 --
 method end
 
-method setTimeServer ordinal 19
+method getTimeServer ordinal 19
 --
-  const 1				//  @0
+  const 0				//  @0
   isublu				//  @5
   jz _label_0			//  @6
-  const "arg count: setTimeServer in .phantom.osimpl"	//  @11
+  const "arg count: getTimeServer in .phantom.osimpl"	//  @11
   throw				//  @59
 _label_0:	//  @60
-  summon null			//  @60
-  ; Line 66			//  @61
-  get o stk pos=0			//  @61
-  os dup				//  @66
-  save fld=1			//  @67
-  os drop				//  @69
-  ret				//  @70
+    ; Line 67			//  @60
+  load fld=1			//  @60
+    ; Line 67			//  @62
+  ret				//  @62
+  ret				//  @63
 --
 method end
 

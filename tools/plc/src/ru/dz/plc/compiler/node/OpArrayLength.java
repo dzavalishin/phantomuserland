@@ -7,9 +7,7 @@ import ru.dz.plc.compiler.C_codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
-import ru.dz.plc.compiler.PhTypeUnknown;
 import ru.dz.plc.compiler.PhantomType;
-import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -47,7 +45,8 @@ public class OpArrayLength extends Node {
 
 		// put array object to load from
 		atom.generate_code(c,s);
-		move_between_stacks(c, atom.is_on_int_stack());
+		//move_between_stacks(c, atom.is_on_int_stack(), _l.getType());
+		assert(!atom.is_on_int_stack());
 
 
 		c.emitCall(12,0); // Method number 12, 0 parameters - size

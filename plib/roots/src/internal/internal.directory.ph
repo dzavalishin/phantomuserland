@@ -4,8 +4,7 @@
  *
  * Copyright (C) 2005-2016 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: yes
- * Preliminary: yes
+ * Simple map class inplemented in C.
  *
  *
 **/

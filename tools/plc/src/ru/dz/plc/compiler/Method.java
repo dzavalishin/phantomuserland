@@ -1,19 +1,18 @@
 package ru.dz.plc.compiler;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
-import ru.dz.phantom.code.*;
+import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.binode.OpStaticMethodCallNode;
 import ru.dz.plc.compiler.binode.SequenceNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.StatementsNode;
 import ru.dz.plc.compiler.node.ThisNode;
 import ru.dz.plc.util.PlcException;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 
 /**
  * <p>Represents a method.</p>
@@ -27,14 +26,16 @@ import java.io.IOException;
 
 public class Method
 {
+	public final static String CONSTRUCTOR_M_NAME = "<init>";
+	
 	private boolean		    constructor;
-	private int			ordinal;
-	public Node         code;
-	private String      name;
-	private PhantomType type;
+	private int			    ordinal;
+	public Node             code;
+	private String          name;
+	private PhantomType     type;
 	private LinkedList<ArgDefinition>   args_def = new LinkedList<ArgDefinition>();
 
-	private boolean requestDebug= false;
+	private boolean         requestDebug = false;
 
 	// Main ones - on object stack
 	public PhantomStack     svars = new PhantomStack();
@@ -48,7 +49,8 @@ public class Method
 
 	public Method( String name, PhantomType type, boolean isConstructor )
 	{
-		this.name = name;
+		//this.name = isConstructor ? "<init>" : name; 
+		this.name = isConstructor ? CONSTRUCTOR_M_NAME : name; 
 		this.type = type;
 		this.ordinal = -1;
 		this.code = null;
@@ -110,6 +112,10 @@ public class Method
 
 		if(requestDebug) c.emitDebug((byte)0x1,"Enabled debug");
 
+		if( (n_int_auto_vars > 0) || (n_auto_vars > 0) )
+			c.emitStackReserve(n_auto_vars, n_int_auto_vars);
+		
+		/*{
 		// push nulls to reserve stack space for autovars
 		// BUG! We can execute vars initialization code here, can we?
 		// We can if code does not depend on auto vars itself, or depends only on
@@ -122,7 +128,10 @@ public class Method
 		// Reserve integer stack place for int vars
 		for( int i = n_int_auto_vars; i > 0; i-- )
 			c.emitIConst_0();
-
+		}*/
+		// TODO we can provide const pool binary blob with init data and load it with one 
+		// big instruction
+		
 		// ------------------------------------------
 
 
@@ -177,7 +186,7 @@ public class Method
 			argdef.append("i64 %"+a.getName());
 		}
 
-		String llvmMethodName = name.replaceAll("<init>", "_\\$_Constructor");
+		String llvmMethodName = name.replaceAll(Method.CONSTRUCTOR_M_NAME, "_\\$_Constructor");
 
 		llc.putln(String.format("define %s @%s(%s) {", LlvmCodegen.getObjectType(), llvmMethodName, argdef )); // function 
 
@@ -300,7 +309,7 @@ public class Method
 			argdef.append("jit_object_t "+C_codegen.getLocalVarNamePrefix()+a.getName());
 		}
 
-		//String C_MethodName = name.replaceAll("<init>", "_Phantom_Constructor");
+		//String C_MethodName = name.replaceAll(Method.CONSTRUCTOR_M_NAME, "_Phantom_Constructor");
 		PhantomClass my_class = s.get_class();
 		String C_MethodName = cgen.getMethodName(my_class, ordinal);
 
@@ -311,7 +320,7 @@ public class Method
 		if(code != null)
 		{
 
-	// ------------------------------------------
+			// ------------------------------------------
 			// traverse tree to allocate automatic vars?
 			// ------------------------------------------
 			//int n_auto_vars = svars.getUsedSlots();
@@ -414,7 +423,7 @@ public class Method
 	// Dump/print
 	// ------------------------------------------
 
-	
+
 	public String toString()
 	{
 		StringBuffer sb = new StringBuffer();
@@ -434,7 +443,7 @@ public class Method
 
 		return sb.toString();
 	}
-	
+
 	public String dumpArgs() 
 	{
 		StringBuilder s = new StringBuilder();
@@ -456,12 +465,15 @@ public class Method
 	{
 		// TODO If I am c'tor make sure we have call to parent class c'tor or add one
 
+		if(isConstructor())
+			preprocessParentConstructor( myClass );
+
 		preprocessed = true;
 	}
 
 	private void preprocessParentConstructor(PhantomClass myClass) throws PlcException 
 	{
-		// don't call constructor for all classes parent
+		// don't call constructor for parent of all classes
 		if( myClass.getParent().equals(".internal.object") )
 			return;
 
@@ -482,20 +494,21 @@ public class Method
 		PhantomClass parentClass = ClassMap.get_map().get(parentClassName, true, null);
 		
 		if( parentClass == null )
-				throw new PlcException("preprocessParentConstructor", "parent class not found: "+parentClassName);
+				throw new PlcException("preprocessParentConstructor", "parent class not found: "+parentClassName, myClass.getName());
 		
 		Method defCtor = parentClass.getDefaultConstructor();
 
 		if( defCtor == null )
-			throw new PlcException("preprocessParentConstructor", "parent class has no default constructor: "+parentClassName);
+			throw new PlcException("preprocessParentConstructor", "parent class ("+parentClassName+") has no default constructor", myClass.getName());
 		
 		Node ctorCall = new OpStaticMethodCallNode(
 				new ThisNode(myClass),
 				defCtor.getOrdinal(),
 				null, // no args
-				myClass
+				// myClass // No!!
+				parentClass
 				);
-		
+		ctorCall.setType(PhantomType.getVoid());
 		Node newRoot = new SequenceNode(ctorCall, code);
 		
 		code = newRoot;
@@ -503,21 +516,21 @@ public class Method
 
 	static private enum SearchResult {
 		Continue, Ok, Fail
-};
-
+	};
+	
 	private SearchResult checkConstructorCall(Node n, final PhantomClass myClass) throws PlcException {
 		// Find first meaningful node, check if it is static call of parent's c'tor
 
 		if( n == null ) return SearchResult.Continue;
-
+		
 		if (n instanceof SequenceNode) {
 			SequenceNode sn = (SequenceNode) n;
-
+			
 			SearchResult r;
-
+			
 			r = checkConstructorCall( sn.getLeft(), myClass );
 			if( r != SearchResult.Continue ) return r;
-
+			
 			return checkConstructorCall( sn.getRight(), myClass );				
 		}
 
@@ -526,18 +539,18 @@ public class Method
 			StatementsNode sn = (StatementsNode) n;
 
 			List<Node> nodes = sn.getNodeList();
-
+			
 			for( Node t : nodes )
 			{			
 				SearchResult r = checkConstructorCall( t, myClass );
 				if( r != SearchResult.Continue ) return r;
 			}
-
+			
 			return SearchResult.Continue;
 		}
 
 		// not sequence - now check it
-
+		
 		if (n instanceof OpStaticMethodCallNode) {
 			OpStaticMethodCallNode mc = (OpStaticMethodCallNode) n;
 			
@@ -551,8 +564,9 @@ public class Method
 			
 			PhantomClass cc = mc.getCallClass();
 			
-			if( !cc.getName().equals(myClass.getName()) )
-				throw new PlcException("checkConstructorCall", "our base is "+myClass.getName()+", but c'tor call is for "+cc.getName());
+			if( !cc.getName().equals(myClass.getParent()) )
+				throw new PlcException("checkConstructorCall", "our parent is "+myClass.getParent()+", but c'tor call is for "+cc.getName());
+				//throw new PlcException("checkConstructorCall", "our base is "+myClass.getName()+", but c'tor call is for "+cc.getName());
 
 			int ord = mc.getOrdinal();
 			
@@ -563,8 +577,8 @@ public class Method
 			if( !ctor.isConstructor() )
 				throw new PlcException("checkConstructorCall", "base c'tor is not really c'tor" );
 
-			if( !ctor.getName().equals("<init>") )
-				throw new PlcException("checkConstructorCall", "base c'tor method name is not <init>" );
+			if( !ctor.getName().equals(Method.CONSTRUCTOR_M_NAME) )
+				throw new PlcException("checkConstructorCall", "base c'tor method name is not "+Method.CONSTRUCTOR_M_NAME );
 
 			// Seems we checked it all
 			

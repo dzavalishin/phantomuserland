@@ -35,6 +35,9 @@ public final class Program
 		
 		FsChecker form = new FsChecker(map);
 		form.Check();
+
+		fc.close();
+
 		System.out.println("Finished, "+errors+" errors");
 		
 		System.exit( errors == 0 ? 0 : 1);

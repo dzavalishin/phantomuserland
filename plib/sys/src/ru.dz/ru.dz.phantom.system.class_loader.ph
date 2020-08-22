@@ -41,7 +41,7 @@ attribute const * ->!;
 
 class class_loader
 {
-    var classes : void [];
+    var classes : .internal.object [];
     var index : int;
     var boot_object;
 
@@ -54,7 +54,7 @@ class class_loader
         boot_object = _boot_object;
         index = 0;
 
-        classes = new void[]();
+        classes = new .internal.object[]();
     }
 
     void print( var input : string )

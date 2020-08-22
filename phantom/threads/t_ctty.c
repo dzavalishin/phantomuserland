@@ -50,10 +50,15 @@ static void * 	do_ctty_create(void *arg)
     assert(arg == 0);
 
     ctty_t *ret = calloc( 1, sizeof(ctty_t) );
+    if( ret == 0 )
+        return 0;
 
     ret->wtty = wtty_init( WTTY_SMALL_BUF ); // DEFAULT_CTTY_QUEUE_SIZE
     if( ret->wtty == 0 )
+    {
+        free( ret );
         return 0;
+    }
 
     return ret;
 }

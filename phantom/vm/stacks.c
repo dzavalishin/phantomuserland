@@ -4,12 +4,10 @@
  *
  * Copyright (C) 2005-2008 Dmitry Zavalishin, dz@dz.ru
  *
- * Kernel ready: yes
- * Preliminary: no
+ * Virtual machine stacks implementation.
  *
  *
 **/
-
 
 
 #include "vm/internal.h"
@@ -40,7 +38,7 @@
     do {                      \
         if( page_is_empty() ) \
         {                     \
-            if( no_prev() ) pvm_exec_panic( "stack underflow" ); \
+            if( no_prev() ) pvm_exec_panic0( "stack underflow" ); \
             set_me( s->common.prev ); \
         }                             \
     } while(0);
@@ -78,6 +76,22 @@ void pvm_ostack_push( struct data_area_4_object_stack* rootda, struct pvm_object
     page_push(o);
 }
 
+// push nulls to reserve stack space
+void pvm_ostack_reserve( struct data_area_4_object_stack* rootda, int n_slots ) 
+{
+    struct data_area_4_object_stack* s = rootda->curr_da;
+
+    pvm_object_t zero = {0,0};
+
+    while( n_slots-- > 0 )
+    {
+        check_overflow();
+        if( page_is_full() ) panic("opush page full after mkpage");
+
+        s->stack[s->common.free_cell_ptr++] = zero;
+    }
+}
+
 struct pvm_object pvm_ostack_pop( struct data_area_4_object_stack* rootda )
 {
     struct data_area_4_object_stack* s = rootda->curr_da;
@@ -109,7 +123,7 @@ void pvm_ostack_abs_set( struct data_area_4_object_stack* rootda, int abs_pos, s
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,object_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_panic( "o abs_set: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "o abs_set: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -127,7 +141,7 @@ struct pvm_object pvm_ostack_abs_get( struct data_area_4_object_stack* rootda, i
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,object_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_panic( "o abs_get: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "o abs_get: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -136,7 +150,7 @@ struct pvm_object pvm_ostack_abs_get( struct data_area_4_object_stack* rootda, i
 
 struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int depth )
 {
-    if( depth < 0 ) pvm_exec_panic( "stack pull: overflow" );
+    if( depth < 0 ) pvm_exec_panic0( "stack pull: overflow" );
 
     struct data_area_4_object_stack* s = rootda->curr_da;
     // steps up to needed slot from the bottom of the current page
@@ -147,13 +161,32 @@ struct pvm_object  pvm_ostack_pull( struct data_area_4_object_stack* rootda, int
     while( displ < 0 )
     {
         c = pvm_object_da(c,object_stack)->common.prev;
-        if( pvm_is_null(c) ) pvm_exec_panic( "stack pull: underflow" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "stack pull: underflow" );
         displ += s->common.__sSize;
     }
 
     return pvm_object_da(c,object_stack)->stack[displ];
 }
 
+// Return number of elements in stack
+int pvm_ostack_count( struct data_area_4_object_stack* rootda )
+{
+    struct data_area_4_object_stack* s = rootda->curr_da;
+    
+    int count = s->common.free_cell_ptr;
+
+    struct pvm_object c = s->common.curr;
+
+    while( 1 )
+    {
+        c = pvm_object_da(c,object_stack)->common.prev;
+        if( pvm_is_null(c) ) 
+        break;
+        count += s->common.__sSize;
+    }
+
+    return count;    
+}
 
 /**
  *
@@ -196,6 +229,19 @@ int pvm_istack_empty( struct data_area_4_integer_stack* rootda )
 }
 
 
+// push 0 to reserve stack space
+void pvm_istack_reserve( struct data_area_4_integer_stack* rootda, int n_slots ) 
+{
+    struct data_area_4_integer_stack* s = rootda->curr_da;
+
+    while( n_slots-- > 0 )
+    {
+        check_overflow();
+        if( page_is_full() ) panic("ipush page full after mkpage");
+
+        s->stack[s->common.free_cell_ptr++] = 0;
+    }
+}
 
 
 
@@ -208,7 +254,7 @@ void pvm_istack_abs_set( struct data_area_4_integer_stack* rootda, int abs_pos, 
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,integer_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_panic( "i abs_set: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "i abs_set: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -223,7 +269,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
     while( abs_pos >= pagesize )
     {
         c = pvm_object_da(c,integer_stack)->common.next;
-        if( pvm_is_null(c) ) pvm_exec_panic( "i abs_get: out of stack" );
+        if( pvm_is_null(c) ) pvm_exec_panic0( "i abs_get: out of stack" );
         abs_pos -= pagesize;
     }
 
@@ -238,6 +284,37 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
  * Long stack goes - it's integer stack, but 64 bit access
  *
 **/
+
+
+#if 1
+void pvm_lstack_push( struct data_area_4_integer_stack* rootda, int64_t o )
+{
+    //printf("lpush %lld; \n", o);
+    pvm_istack_push( rootda, (int)(o >> 32));
+    pvm_istack_push( rootda, (int)o);
+}
+
+int64_t pvm_lstack_pop( struct data_area_4_integer_stack* rootda )
+{
+    int64_t o;
+    o = pvm_istack_pop( rootda );
+    o |= ((int64_t)pvm_istack_pop( rootda )) << 32;
+    return o;
+}
+
+int64_t  pvm_lstack_top( struct data_area_4_integer_stack* rootda )
+{
+    int64_t o;
+
+    int low = pvm_istack_pop( rootda );
+    int hi = pvm_istack_top( rootda );
+    pvm_istack_push( rootda, low );    
+
+    o = low; o |= ((int64_t)hi) << 32;
+    return o;
+}
+
+#else
 
 // NB! We don't redefine - re-use int stack defs above!
 
@@ -259,7 +336,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
     do {                      \
         if( lpage_is_empty() ) \
         {                     \
-            if( no_prev() ) pvm_exec_panic( "stack underflow" ); \
+            if( no_prev() ) pvm_exec_panic0( "stack underflow" ); \
             set_me( s->common.prev ); \
         }                             \
     } while(0);
@@ -292,7 +369,7 @@ int64_t pvm_lstack_pop( struct data_area_4_integer_stack* rootda )
     return lpage_pop();
 }
 
-int pvm_lstack_top( struct data_area_4_integer_stack* rootda )
+int64_t pvm_lstack_top( struct data_area_4_integer_stack* rootda )
 {
     struct data_area_4_integer_stack* s = rootda->curr_da;
     lcheck_underflow();
@@ -340,7 +417,7 @@ int pvm_istack_abs_get( struct data_area_4_integer_stack* rootda, int abs_pos )
 */
 
 
-
+#endif
 
 
 

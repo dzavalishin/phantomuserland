@@ -50,3 +50,14 @@ done::
 	@echo	
 	@echo All tests passed
 	@echo
+
+GOOD_FILES := $(wildcard ./*.good)
+MV_FILES := $(patsubst %.good,bin/%,$(notdir $(GOOD_FILES)))
+
+
+# Accept current different binaries as correct ones, copy 'em to ./good dir
+# and run tests again
+accept::
+	echo accept $(MV_FILES)
+	mv -t good $(MV_FILES)
+	@$(MAKE) test

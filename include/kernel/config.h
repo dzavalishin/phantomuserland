@@ -29,7 +29,7 @@
 #define CONF_NEW_PORTS 1
 
 // syscall count in VM sys - must be 1, cleanup ifdefs and delete
-#define CONF_USE_VM_SYS_SIZE 1
+//#define CONF_USE_VM_SYS_SIZE 1
 
 // use new (handle based) controlling ttys for threads
 #define CONF_NEW_CTTY 1

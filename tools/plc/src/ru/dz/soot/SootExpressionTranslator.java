@@ -2,6 +2,7 @@ package ru.dz.soot;
 
 import ru.dz.plc.compiler.ClassMap;
 import ru.dz.plc.compiler.Method;
+import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhantomClass;
 import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.BiNode;
@@ -32,7 +33,7 @@ import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.compiler.node.NullNode;
 import ru.dz.plc.compiler.node.OpArrayLength;
 import ru.dz.plc.compiler.node.StaticLoadNode;
-import ru.dz.plc.compiler.node.StringConstNode;
+import ru.dz.plc.compiler.node.StringConstPoolNode;
 import ru.dz.plc.compiler.node.SummonClassNode;
 import ru.dz.plc.util.PlcException;
 import soot.Local;
@@ -93,8 +94,9 @@ public class SootExpressionTranslator {
 	private Value root;
 	private Method m;
 	private PhantomClass phantomClass;
+	private ParseState ps;
 
-	public SootExpressionTranslator(Value v, Method m, PhantomClass c) {
+	public SootExpressionTranslator(Value v, Method m, PhantomClass c, ParseState ps) {
 		this.root = v;
 		this.m = m;
 		phantomClass = c;
@@ -273,7 +275,7 @@ public class SootExpressionTranslator {
 			@Override
 			public void caseDynamicInvokeExpr(DynamicInvokeExpr v) {
 				try {
-					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass, ps );
 				} catch (PlcException e) {
 					SootMain.error(e);
 				}
@@ -306,7 +308,7 @@ public class SootExpressionTranslator {
 			public void caseInstanceOfExpr(InstanceOfExpr v) {
 				try {
 					PhantomType phantomType = convertType(v.getCheckType());
-					Node expr = PhantomCodeWrapper.getExpression(v.getOp(), m, phantomClass).getNode();
+					Node expr = PhantomCodeWrapper.getExpression(v.getOp(), m, phantomClass, ps).getNode();
 					InstanceOfNode node = new InstanceOfNode(expr,phantomType);
 					ret.w = new PhantomCodeWrapper(node);
 				} catch (PlcException e) {
@@ -319,7 +321,7 @@ public class SootExpressionTranslator {
 			public void caseInterfaceInvokeExpr(InterfaceInvokeExpr v) {
 				try {
 					// TODO right?
-					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass, ps );
 				} catch (PlcException e) {
 					SootMain.error(e);
 				}
@@ -439,7 +441,7 @@ public class SootExpressionTranslator {
 			@Override
 			public void caseSpecialInvokeExpr(SpecialInvokeExpr v) {
 				try {
-					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass, ps );
 				} catch (PlcException e) {
 					SootMain.error(e);
 				}
@@ -448,7 +450,7 @@ public class SootExpressionTranslator {
 			@Override
 			public void caseStaticInvokeExpr(StaticInvokeExpr v) {
 				try {
-					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass, ps );
 				} catch (PlcException e) {
 					SootMain.error(e);
 				}
@@ -471,7 +473,7 @@ public class SootExpressionTranslator {
 			@Override
 			public void caseVirtualInvokeExpr(VirtualInvokeExpr v) {
 				try {
-					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass );
+					ret.w = PhantomCodeWrapper.getInvoke(v, m, phantomClass, ps );
 				} catch (PlcException e) {
 					SootMain.error(e);
 				}
@@ -508,7 +510,7 @@ public class SootExpressionTranslator {
 					e.printStackTrace();
 					b = null;
 				}				
-				IdentNode node = new IdentNode( b.getNode(), varName ); // IdentNode automatically looks for for field or stack var by name
+				IdentNode node = new IdentNode( b.getNode(), varName, ps ); // IdentNode automatically looks for for field or stack var by name
 				
 				//IdentNode node = new IdentNode( varName ); // IdentNode automatically looks for for field or stack var by name
 				ret.w = new PhantomCodeWrapper( node );				
@@ -607,13 +609,14 @@ public class SootExpressionTranslator {
 	
 
 	private PhantomCodeWrapper doStringConst(StringConstant v) {
-		return new PhantomCodeWrapper(new StringConstNode(v.value));
+		//return new PhantomCodeWrapper(new StringConstNode(v.value));
+		return new PhantomCodeWrapper(new StringConstPoolNode(v.value,phantomClass));
 	}
 
 	private PhantomCodeWrapper doLength(LengthExpr v) throws PlcException {
 		Value array = v.getOp();
 		
-		return new PhantomCodeWrapper(new OpArrayLength(PhantomCodeWrapper.getExpression(array, m, phantomClass).getNode()));
+		return new PhantomCodeWrapper(new OpArrayLength(PhantomCodeWrapper.getExpression(array, m, phantomClass, ps).getNode()));
 	}
 
 	/*
@@ -696,7 +699,7 @@ public class SootExpressionTranslator {
 	private PhantomCodeWrapper doReadLocal(Local v) {
 		String varName = v.getName();
 		//SootMain.say("read local '"+varName+"'");
-		IdentNode node = new IdentNode( varName );
+		IdentNode node = new IdentNode( varName, ps );
 		return new PhantomCodeWrapper( node );
 	}
 

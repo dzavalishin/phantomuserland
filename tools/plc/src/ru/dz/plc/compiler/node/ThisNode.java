@@ -16,16 +16,16 @@ import ru.dz.plc.util.PlcException;
  */
 
 public class ThisNode extends Node {
-	PhantomClass my_class;
+	private PhantomClass myClass;
 
 	public ThisNode( PhantomClass c ) {
 		super(null);
-		my_class = c;
+		myClass = c;
 	}
 	
 	
 	public String toString()  {    return "this ";  }
-	public void find_out_my_type() throws PlcException { if( type == null ) type = new PhantomType(my_class); }
+	public void find_out_my_type() throws PlcException { if( type == null ) type = new PhantomType(myClass); }
 	public boolean is_const() { return false; }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 
@@ -39,12 +39,12 @@ public class ThisNode extends Node {
 
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
-		llc.putln( getLlvmTempName()+" = call "+llc.getObjectType()+" @PhantomVm_getThis();" );
+		llc.putln( getLlvmTempName()+" = call "+LlvmCodegen.getObjectType()+" @PhantomVm_getThis();" );
 	}
 	
 	@Override
 	protected void generateMy_C_Code(C_codegen cgen) throws PlcException {
 		cgen.put(" "+C_codegen.getThisVarName()+" ");
-}
+	}
 	
 }

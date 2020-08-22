@@ -16,7 +16,7 @@
 #include "vm/object_flags.h"
 #include "vm/exception.h"
 
-#define hal_printf printf
+//#define hal_printf printf
 
 #define int_size() 4
 #define long_size() 8
@@ -58,7 +58,7 @@ throw_bounds( int ip, int max_IP, char *where )
 {
     char errtext[200];
     snprintf(errtext, sizeof(errtext)-1, "%s: IP out of bounds (IP=%d, max=%d)", where, ip, max_IP );
-    pvm_exec_panic( errtext );
+    pvm_exec_panic0( errtext );
 }
 
 
@@ -134,7 +134,7 @@ struct pvm_object pvm_code_get_string(struct pvm_code_handler *code)
 void pvm_call_frame_init_code(struct data_area_4_call_frame *cf, struct pvm_object code)
 {
     if( !(code.data->_flags & PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE) )
-        pvm_exec_panic("exec: not a code object");
+        pvm_exec_panic0("exec: not a code object");
 
     struct data_area_4_code *da = (struct data_area_4_code *)&(code.data->da);
 

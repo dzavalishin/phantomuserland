@@ -1,2 +1,2 @@
 #!/bin/bash
-${PHANTOM_HOME}/phantom/vm/pvm_test $@
+${PHANTOM_HOME}/phantom/vm/pvm_test $@ 

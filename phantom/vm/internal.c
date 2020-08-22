@@ -9,7 +9,6 @@
  *
 **/
 
-
 #include <vm/internal.h>
 #include <vm/object_flags.h>
 

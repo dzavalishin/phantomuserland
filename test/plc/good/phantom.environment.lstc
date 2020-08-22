@@ -1,31 +1,28 @@
-Class version 20160114032155498
+Class version 20170915052919176
 
-method init ordinal 16
+method get ordinal 16
 --
-  const 0				//  @0
+  const 1				//  @0
   isublu				//  @5
   jz _label_0			//  @6
-  const "arg count: init in .phantom.environment"	//  @11
-  throw				//  @55
-_label_0:	//  @56
-  ; Line 34			//  @56
-  ; Line 32			//  @56
-  load fld=0			//  @56
-  ; Line 32			//  @58
-  summon null			//  @58
-  ; Line 32			//  @59
-  ptr eq				//  @59
-  jz _label_1			//  @60
-  summon class phantom.util.map	//  @65
-  new				//  @87
-  os dup				//  @88
-  call m=0 nparm=0		//  @89
-  os drop				//  @90
-  os dup				//  @91
-  save fld=0			//  @92
-  os drop				//  @94
-_label_1:	//  @95
-  ret				//  @95
+  const "arg count: get in .phantom.environment"	//  @11
+  throw				//  @54
+_label_0:	//  @55
+  stack_reserve obj=1 int=0	//  @55
+    ; Line 44			//  @58
+  summon this			//  @58
+  call m=18 nparm=0		//  @59
+  os drop				//  @61
+    ; Line 45			//  @62
+  load fld=0			//  @62
+    ; Line 45			//  @64
+  get o stk pos=0			//  @64
+    ; Line 45			//  @69
+  call m=18 nparm=1		//  @69
+    ; Line 45			//  @71
+  ret				//  @71
+    ; Line 45			//  @72
+  ret				//  @72
 --
 method end
 
@@ -37,51 +34,54 @@ method set ordinal 17
   const "arg count: set in .phantom.environment"	//  @11
   throw				//  @54
 _label_0:	//  @55
-  summon null			//  @55
-  summon null			//  @56
-  ; Line 38			//  @57
-  summon this			//  @57
-  call m=16 nparm=0		//  @58
-  os drop				//  @60
-  ; Line 39			//  @61
-  load fld=0			//  @61
-  ; Line 39			//  @63
-  get o stk pos=0			//  @63
-  ; Line 39			//  @68
-  get o stk pos=1			//  @68
-  ; Line 39			//  @73
-  ; Line 39			//  @73
-  call m=18 nparm=2		//  @73
-  ; Line 39			//  @75
-  ret				//  @75
-  ; Line 39			//  @76
+  stack_reserve obj=2 int=0	//  @55
+    ; Line 38			//  @58
+  summon this			//  @58
+  call m=18 nparm=0		//  @59
+  os drop				//  @61
+    ; Line 39			//  @62
+  load fld=0			//  @62
+    ; Line 39			//  @64
+  get o stk pos=0			//  @64
+    ; Line 39			//  @69
+  get o stk pos=1			//  @69
+    ; Line 39			//  @74
+    ; Line 39			//  @74
+  call m=17 nparm=2		//  @74
+    ; Line 39			//  @76
   ret				//  @76
+    ; Line 39			//  @77
+  ret				//  @77
 --
 method end
 
-method get ordinal 18
+method init ordinal 18
 --
-  const 1				//  @0
+  const 0				//  @0
   isublu				//  @5
   jz _label_0			//  @6
-  const "arg count: get in .phantom.environment"	//  @11
-  throw				//  @54
-_label_0:	//  @55
-  summon null			//  @55
-  ; Line 44			//  @56
-  summon this			//  @56
-  call m=16 nparm=0		//  @57
-  os drop				//  @59
-  ; Line 45			//  @60
-  load fld=0			//  @60
-  ; Line 45			//  @62
-  get o stk pos=0			//  @62
-  ; Line 45			//  @67
-  call m=17 nparm=1		//  @67
-  ; Line 45			//  @69
-  ret				//  @69
-  ; Line 45			//  @70
-  ret				//  @70
+  const "arg count: init in .phantom.environment"	//  @11
+  throw				//  @55
+_label_0:	//  @56
+    ; Line 33			//  @56
+    ; Line 32			//  @56
+  load fld=0			//  @56
+    ; Line 32			//  @58
+  summon null			//  @58
+    ; Line 32			//  @59
+  ptr eq				//  @59
+  jz _label_1			//  @60
+  summon class phantom.util.map	//  @65
+  new				//  @87
+  pull depth=0			//  @88
+  summon class phantom.util.map	//  @93
+  static invoke ord=16 n_param=0	//  @115
+  os drop				//  @124
+  os dup				//  @125
+  save fld=0			//  @126
+  os drop				//  @128
+_label_1:	//  @129
+  ret				//  @129
 --
 method end
 

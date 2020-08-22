@@ -61,7 +61,8 @@ public class IfNode extends TriNode {
 			//c.emit_o2i();
 		}
 
-		String label_no = c.getLabel(), label_after = c.getLabel();
+		String label_no = c.getLabel();
+		String label_after = c.getLabel();
 
 		c.emitJz(label_no);
 		if( _m != null ) _m.generate_code(c,s); // 'yes' case
@@ -93,7 +94,7 @@ public class IfNode extends TriNode {
 			cgen.putln("else {");					
 			_r.generate_C_code(cgen,s); // 'no' case
 			cgen.putln("}");					
-}
+		}
 	}
 	
 	

@@ -1,9 +1,11 @@
 Class .phantom.osimpl
   Field bootObject
   Field timeServer
-  Method .phantom.os.time getTimeServer(  ):
-    return : void
-      ident timeServer : .phantom.os.time
+  Method void setTimeServer( ts: .phantom.os.time ):
+    void  : void
+      = : .phantom.os.time
+        ident timeServer : .phantom.os.time
+        ident ts : .phantom.os.time
 
   Method void init( _bootObject: .internal.object ):
     void  : void
@@ -19,15 +21,17 @@ Class .phantom.osimpl
             void  : void
               = : string[]
                 ident env : string[]
-                . : unknown
-                  ident bootObject : .internal.object
-                  Method (no. 23) : unknown
+                (cast) : string[]
+                  . : unknown
+                    ident bootObject : .internal.object
+                    Method (no. 23) : unknown
             void  : void
               = : int
                 ident size : int
-                . : unknown
-                  ident env : string[]
-                  Method (no. 12) : unknown
+                (cast) : int
+                  . : unknown
+                    ident env : string[]
+                    Method (no. 12) : unknown
           void  : void
             = : int
               ident i : int
@@ -61,7 +65,7 @@ Class .phantom.osimpl
                           ident el : string
                           Method strstr : unknown
                           arg  : unknown
-                            string const "=" : string const
+                            string pool const id="0" : string const
                   if : unknown
                     < : int
                       ident pos : int
@@ -96,7 +100,7 @@ Class .phantom.osimpl
                           ident pos : int
                         int const "1" : int const
             if : unknown
-              == : string
+              == : int
                 ident key : string
                 ident inkey : string
               return : void
@@ -104,9 +108,7 @@ Class .phantom.osimpl
       return : void const
         null : .internal.object const
 
-  Method void setTimeServer( ts: .phantom.os.time ):
-    void  : void
-      = : .phantom.os.time
-        ident timeServer : .phantom.os.time
-        ident ts : .phantom.os.time
+  Method .phantom.os.time getTimeServer(  ):
+    return : void
+      ident timeServer : .phantom.os.time
 
