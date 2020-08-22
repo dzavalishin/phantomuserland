@@ -1,0 +1,43 @@
+<mxfile host="www.draw.io" modified="2019-11-05T20:31:35.757Z" agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 YaBrowser/19.10.1.238 Yowser/2.5 Safari/537.36" etag="_gdzOsMizzJEeKOZ46lC" version="12.2.0" type="github" pages="1">
+  <diagram id="fEnlNv-y0nlxmsHVzWNJ" name="Page-1">
+    <mxGraphModel dx="1550" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="413" pageHeight="583" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="kNthJKHDpslrf6uQujXy-2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="40" y="430" width="200" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-3" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="200" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-4" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="200" height="240" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-5" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;flipH=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="40" width="20" height="390" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-6" value="" style="shape=curlyBracket;whiteSpace=wrap;html=1;rounded=1;flipH=1;" vertex="1" parent="1">
+          <mxGeometry x="270" y="430" width="20" height="90" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-7" value="Kernel Heap" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="430" width="120" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-8" value="Kernel Image" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="40" y="460" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-9" value="Persistent Memory" style="text;html=1;resizable=0;autosize=1;align=center;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="70" y="60" width="120" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-10" value="Allocatable &lt;br&gt;address space" style="text;html=1;resizable=0;autosize=1;align=left;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="50" y="291" width="130" height="50" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-11" value="Paged" style="text;html=1;resizable=0;autosize=1;align=center;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="290" y="220" width="70" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="kNthJKHDpslrf6uQujXy-12" value="Identical" style="text;html=1;resizable=0;autosize=1;align=center;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="290" y="460" width="80" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

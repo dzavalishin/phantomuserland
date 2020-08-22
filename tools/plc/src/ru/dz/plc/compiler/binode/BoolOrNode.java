@@ -15,12 +15,24 @@ import ru.dz.plc.util.PlcException;
  */
 
 
-public class BoolOrNode extends BiNode {
-	  public BoolOrNode( Node l, Node r) {    super(l,r);  }
-	  public String toString()  {    return "bool or";  }
-	  public boolean is_on_int_stack() { return true; }
-	  protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
-	    if(getType().is_int()) c.emitLogOr();
+public class BoolOrNode extends BinaryOpNode 
+{
+	public BoolOrNode( Node l, Node r) {    super(l,r);  }
+	public String toString()  {    return "bool or";  }
+	public boolean is_on_int_stack() { return true; }
+
+	@Override
+	String getLlvmOpName() { return "bool_and"; }
+
+	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
+		generateIntegerStackOp(c, () -> c.emitLogOr() );
+		/*
+	    if(getType().is_on_int_stack())
+	    {
+	    	c.emitNumericPrefix(getType());
+	    	c.emitLogOr();
+	    }
 	    else throw new PlcException("Codegen", "op || does not exist for this type");
-	  }
+		 */
 	}
+}

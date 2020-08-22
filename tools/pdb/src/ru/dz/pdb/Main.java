@@ -1,6 +1,5 @@
 package ru.dz.pdb;
 
-import java.beans.DefaultPersistenceDelegate;
 import java.beans.Encoder;
 import java.beans.ExceptionListener;
 import java.beans.Expression;
@@ -14,9 +13,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,8 +26,6 @@ import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import com.sun.security.auth.UserPrincipal;
-
 import phantom.data.ObjectRef;
 import ru.dz.pdb.debugger.ClassMap;
 import ru.dz.pdb.phantom.ClassObject;
@@ -36,6 +33,7 @@ import ru.dz.pdb.phantom.ObjectHeader;
 import ru.dz.pdb.ui.InspectorFrame;
 import ru.dz.pdb.ui.MainFrame;
 import ru.dz.pdb.ui.config.ConfigFrame;
+import ru.dz.plc.util.PlcException;
 //import de.javasoft.plaf.synthetica.SyntheticaBlackEyeLookAndFeel;
 //import de.javasoft.plaf.synthetica.SyntheticaStandardLookAndFeel;
 
@@ -50,14 +48,14 @@ public class Main {
 	private static final Logger log = Logger.getLogger(Main.class.getName()); 
 
 	public static final String PREF_KEY_PROJECT_FILE = "ru.dz.phantom.pdb.ProjectFile";	
-	
+
 	private static HostConnector hc;
 	private static ClassMap cmap;
 	private static MainFrame mainFrame;
 	private static long objectSpaceStart;
 
 	private static Preferences userPref = Preferences.userRoot();
-	
+
 	public static HostConnector getHc() {
 		return hc;
 	}
@@ -93,7 +91,7 @@ public class Main {
 
 		cmap = new ClassMap();
 
-		
+
 		project.setProjectFileName(new File(userPref.get(PREF_KEY_PROJECT_FILE, "Phantom.pd")));
 		loadProject();
 		
@@ -105,6 +103,7 @@ public class Main {
 		objectSpaceStart = hc.cmdGetPoolAddress();
 		inspectRootObject();
 
+		}
 		/*{
 		List<Integer> tl = getThreadList();
 		System.out.println("getThreadList() = "+tl);
@@ -185,11 +184,15 @@ public class Main {
 	{
 		List<Integer> ret = new ArrayList<Integer>();
 
-		if( !hc.fThreadInfo(ret) )
-			return ret;
+		if( (hc != null) && hc.isConnected() )
+		{
 
-		while( hc.sThreadInfo(ret) )
-			;
+			if( !hc.fThreadInfo(ret) )
+				return ret;
+
+			while( hc.sThreadInfo(ret) )
+				;
+		}
 
 		return ret;
 	}
@@ -239,7 +242,8 @@ public class Main {
 		} catch (FileNotFoundException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
-			JOptionPane.showMessageDialog(null,"Load error "+e1); //$NON-NLS-1$
+			// Hangs on start
+			//JOptionPane.showMessageDialog(null,"Load error "+e1); //$NON-NLS-1$
 			return;
 		}
 
@@ -463,6 +467,48 @@ public class Main {
 
 	public static void disconnect() {
 		hc.disconnect();
+	}
+	
+	public static void disassemble() {
+		File pcFileName;
+		String startDir; 
+		
+		String homeDir = System.getenv("PHANTOM_HOME");
+		if( (homeDir != null) && (!homeDir.isEmpty()) )
+			startDir = homeDir + "plib/bin";
+			//startDir = homeDir + "plib/bin/*.pc";
+		else
+			startDir = ".";
+		
+		JFileChooser chooser = new JFileChooser(startDir);
+		//chooser.setFile("*.jpg;*.jpeg");
+		int returnVal = chooser.showSaveDialog(mainFrame);
+		if (returnVal != JFileChooser.APPROVE_OPTION)
+			return;
+
+		pcFileName = chooser.getSelectedFile();
+		
+		RandomAccessFile is;
+		
+		try {
+
+			is = new RandomAccessFile(pcFileName, "r");
+			PdbClassInfoLoader cl = new PdbClassInfoLoader(is);
+			
+			cl.setDebugMode(true);
+			cl.load_class_file();
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PlcException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 

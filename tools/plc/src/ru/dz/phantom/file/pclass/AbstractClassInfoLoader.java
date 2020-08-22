@@ -8,7 +8,7 @@ import ru.dz.plc.compiler.Method;
 import ru.dz.plc.util.PlcException;
 
 public abstract class AbstractClassInfoLoader {
-	protected boolean debug_print = false;
+	private boolean debugMode = false;
 
 	protected RandomAccessFile is;
 	protected String class_name, class_parent_name;
@@ -36,7 +36,7 @@ public abstract class AbstractClassInfoLoader {
 
 		for( long rec_start = 0; rec_start < fsize; rec_start = rec_start+record_size )
 		{
-			if(debug_print) System.out.print("\n");
+			if(isDebugMode()) System.out.print("\n");
 
 			is.seek(rec_start);
 			long ptr = rec_start;
@@ -68,7 +68,7 @@ public abstract class AbstractClassInfoLoader {
 
 			record_size = is.readInt();
 
-			if(debug_print)
+			if(isDebugMode())
 			{
 				System.out.print("type '" + record_type + "', size ");
 				System.out.print(record_size);
@@ -90,7 +90,7 @@ public abstract class AbstractClassInfoLoader {
 
 				GenericLoaderHandler h = new GenericLoaderHandler( is, (int)(record_size - (ptr-rec_start)), this );
 				class_name = Fileops.get_string(is);
-				if(debug_print) System.out.println( "Class is: "+class_name+"\n" );
+				if(isDebugMode()) System.out.println( "Class is: "+class_name+"\n" );
 
 				int n_object_slots = Fileops.get_int32(is);
 				//if(debug_print) System.out.println(", %d fileds", n_object_slots );
@@ -105,8 +105,7 @@ public abstract class AbstractClassInfoLoader {
 			break;
 
 			case 'M': // Method
-				MethodLoaderHandler mh = new MethodLoaderHandler( is, (int)(record_size - (ptr-rec_start)), this );
-				// Ignore, we load method in signature record
+				loadMethod(record_size, rec_start, ptr);
 			break;
 
 			case 'S': // Method signature
@@ -173,6 +172,12 @@ public abstract class AbstractClassInfoLoader {
 
 		return true;
 	}
+
+
+	protected void loadMethod(long record_size, long rec_start, long ptr) throws IOException {
+		MethodLoaderHandler mh = new MethodLoaderHandler( is, (int)(record_size - (ptr-rec_start)), this );
+		// Ignore, we load method in signature record
+	}
 	
 
 	protected abstract GenericMethodSignatureLoaderHandler getMethodSignatureLoaderHandler(RandomAccessFile is2, int i) throws IOException;
@@ -190,6 +195,10 @@ public abstract class AbstractClassInfoLoader {
 		// TODO Auto-generated method stub
 		
 	}
+
+
+	public boolean isDebugMode() { return debugMode;	}
+	public void setDebugMode(boolean debugMode) {		this.debugMode = debugMode;	}
 
 	
 }

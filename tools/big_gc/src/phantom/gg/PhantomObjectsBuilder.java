@@ -3,8 +3,6 @@ package phantom.gg;
 import phantom.data.AllocHeader;
 import phantom.data.ObjectFlags;
 import phantom.data.ObjectHeader;
-import phantom.data.ObjectRef;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.nio.ByteBuffer;
 
@@ -139,7 +137,7 @@ public class PhantomObjectsBuilder {
                 objectHeader.setDataArea(ByteBuffer.allocate(type.getSize()));
                 break;
             default:
-                throw new NotImplementedException();
+                throw new RuntimeException("default");
         }
 
         objectHeader.setExactSize(

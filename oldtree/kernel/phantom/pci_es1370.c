@@ -36,7 +36,7 @@
 #define u16 u_int16_t
 #define u8 u_int8_t
 //#define esSleep(__us) do { long us = __us; do { tenmicrosec(); us -= 100; } while( __us > 0); } while(0)
-#define esSleep(__us) do { long ms = __us/1000; if(ms == 0) ms = 1; hal_sleep_msec(ms);  } while(0)
+#define esSleep(__us) do { long ms = ((__us)-1)/1000; ms++; hal_sleep_msec(ms);  } while(0)
 
 static errno_t check_es1370_sanity(int iobase);
 static errno_t init_es1370(phantom_device_t *dev);
@@ -318,6 +318,8 @@ static void play(phantom_device_t *dev)
     assert(es->dac_active);
     //u8 bits = lineDac2->getBitsPerSample();
     u8 bits = es->nbits;
+
+    SHOW_FLOW( 1, "dev %p", dev );
 
     u32 control = inl(dev->iobase + ES1370_SERIAL_CONTROL);
     control &= ~(SerialP2endinc | SerialP2stinc | SerialP2loopsel | SerialP2pause | SerialP2dacsen);
@@ -701,6 +703,10 @@ static void writeSamplesToPlaybackBuffer(phantom_device_t *dev)
         ptr += es->dac2BufferSize / 2;
 
     unsigned int count = read_play_stream(dev, ptr, es->dac2BufferSize / 2);
+
+    SHOW_FLOW( 7, "dev %p oddDac2 %d count %d bufsz %d", dev, es->oddDac2, count, es->dac2BufferSize / 2 );
+
+
 #if 0
     if (count == 0)
     {
@@ -752,6 +758,8 @@ static void w_dpc_func(void *arg)
 {
     phantom_device_t *dev = arg;
 
+    SHOW_FLOW( 8, "DPC dev %p", dev );
+
     writeSamplesToPlaybackBuffer(dev);
     u_int32_t control = inl(dev->iobase + ES1370_SERIAL_CONTROL);
     control |= SerialP2inten;
@@ -764,19 +772,8 @@ static void es1370_interrupt(void *arg)
     phantom_device_t *dev = arg;
     es1370_t *es = dev->drv_private;
 
-    /*
-    switch (irq)
-    {
-    case 0:        start(&inputLine);        return 0;
-    case 1:        start(&outputLine);        return 0;
-    default:        break;
-    }
-    */
-//start_dac(dev);
-//start_adc(dev);
-
     u_int32_t status = inl(dev->iobase + ES1370_IRQ_STATUS);
-    SHOW_FLOW( 10, "%s %b VC %d", (status&0x8000)?"IRQ":"   ",status, "\020\1ADC\2DAC2\3DAC1\4UART\5MCCB\11Cwrip\12Cbusy\13Cstat", (status &StatusVc)>>StatusVcShift );
+    SHOW_FLOW( 10, "%s %b VC %d", (status&0x8000)?"IRQ":"   ",status, "\020\1ADC\2DAC2\3DAC1\4UART\5MCCB\11Cwrip\12Cbusy\13Cstat", (status & StatusVc)>>StatusVcShift );
     if ((status & StatusIntr) == 0)
         return;
 
@@ -1017,6 +1014,7 @@ static int es1370_read(phantom_device_t *dev, void *buf, int len)
 
 static int es1370_write(phantom_device_t *dev, const void *buf, int len)
 {
+    SHOW_FLOW( 1, "dev %p buf %p len %d", dev, buf, len );
 #if ES1370_CBUF || ES1370_WTTY
     int ret = 0;
 
@@ -1032,7 +1030,6 @@ static int es1370_write(phantom_device_t *dev, const void *buf, int len)
 
     es1370_t *es = dev->drv_private;
 
-    //SHOW_FLOW( 1, "dev %p buf %p len %d", dev, buf, len );
     // TODO mutex!
 
     // Eats all positive sema value

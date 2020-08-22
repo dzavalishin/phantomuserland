@@ -20,7 +20,10 @@
 #include <kernel/stats.h>
 #include <kernel/page.h>
 #include <kernel/vm.h>
+#include <kernel/debug_graphical.h>
 
+
+static int object_allocator_inited = 0;
 
 #define debug_memory_leaks 0
 #define debug_allocation 0
@@ -156,6 +159,8 @@ void pvm_alloc_init( void * _pvm_object_space_start, unsigned int size )
 
 
     //init_gc();  // here, if needed
+
+    object_allocator_inited = 1;
 }
 
 
@@ -354,7 +359,7 @@ void pvm_object_is_allocated_assert(pvm_object_storage_t *o)
 
 
 // Find a piece of mem of given or bigger size. Linear allocation.
-static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
+static pvm_object_t pvm_find(unsigned int size, int arena)
 {
 
 #define CURR_POS  curr_a[arena]
@@ -370,13 +375,13 @@ static struct pvm_object_storage *pvm_find(unsigned int size, int arena)
 
 
 
-    struct pvm_object_storage *result = 0;
+    pvm_object_t result = 0;
 
-    struct pvm_object_storage *start = start_a[arena];
-    struct pvm_object_storage *end = end_a[arena];
+    pvm_object_t start = start_a[arena];
+    pvm_object_t end = end_a[arena];
 
     int wrap = 0;
-    struct pvm_object_storage *curr = CURR_POS;
+    pvm_object_t curr = CURR_POS;
 
     while(result == 0)
     {
@@ -490,10 +495,21 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 
     if( data == 0 )
     {
+        int i;
+        // Try any pool now
+        for( i = ARENAS-1; i>= 0; i-- )
+        {
+            data = pool_alloc(size, i);
+            if( data != 0 )
+                goto found;
+        }
+
+        pvm_memcheck();
         // TODO VM throw
-        panic("out of persistent mem looking for %d bytes", size);
+        panic("out of persistent mem looking for %d bytes, arena %d", size, arena );
     }
 
+found:
     data->_da_size = data_area_size;
     data->_flags = flags;
     if (saturated)
@@ -525,13 +541,13 @@ pvm_object_storage_t * pvm_object_alloc( unsigned int data_area_size, unsigned i
 // -----------------------------------------------------------------------
 
 
-static inline struct pvm_object_storage *pvm_next_object(struct pvm_object_storage *op)
+static inline pvm_object_t pvm_next_object(pvm_object_t op)
 {
     //assert(op->_ah.object_start_marker == PVM_OBJECT_START_MARKER);
 
     void *o = (void *)op;
     o += op->_ah.exact_size;
-    return (struct pvm_object_storage *)o;
+    return (pvm_object_t )o;
 }
 
 
@@ -586,7 +602,7 @@ static int memcheck_one(unsigned int i, void * start, void * end)
 
     unsigned long used = 0, free = 0, objects = 0, largest = 0;
 
-    struct pvm_object_storage *curr = start;
+    pvm_object_t curr = start;
 
     printf("Memcheck: checking object memory allocation consistency (at %p, %ld bytes)\n", start, (long)(end - start) );
 
@@ -626,7 +642,7 @@ static int memcheck_one(unsigned int i, void * start, void * end)
 
 
         //curr = pvm_next_object(curr);
-        curr = (struct pvm_object_storage *)( ((void *)curr) + curr->_ah.exact_size );
+        curr = (pvm_object_t)( ((void *)curr) + curr->_ah.exact_size );
     }
 
     //printf("Memcheck: %ld objects, memory: %ld used, %ld free\n", objects, used, free );
@@ -665,6 +681,182 @@ static void memcheck_print_histogram(unsigned int arena)
     }
 }
 
+
+
+
+//---------------------------------------------------------------------------
+// Debug window - mem map
+//---------------------------------------------------------------------------
+
+#include <video/window.h>
+
+//static rgba_t calc_object_pixel_color( int elem, int units_per_pixel );
+static void paint_arena_memory_map(window_handle_t w, rect_t *r, int a );
+
+
+/**
+ * 
+ * \brief Generic painter for any allocator using us.
+ * 
+ * Used in debug window.
+ * 
+ * \param[in] w Window to draw to
+ * \param[in] r Rectangle to paint inside
+ * 
+**/
+
+static int vertical_start_for_arena[ARENAS];
+static int vertical_pixels_per_arena[ARENAS];
+
+void paint_object_memory_map(window_handle_t w, rect_t *r )
+{
+    int i;
+
+    if(!object_allocator_inited) return;
+    
+    //pvm_memcheck();
+
+    if(vertical_pixels_per_arena[0] == 0)
+    {
+        int y = 0;
+
+        size_t omem_bytes = pvm_object_space_end - pvm_object_space_start;
+
+        for( i = 0; i < ARENAS; i++) 
+        {
+            size_t arena_bytes = end_a[i] - start_a[i];
+            size_t percentage = arena_bytes * 100 / omem_bytes;
+
+            int vpixels = (r->ysize * percentage) / 100;
+            LOG_FLOW( 0, "omem=%uK, arena mem=%uK, mem %%=%u, ysize %d, ysize part = %d",
+                omem_bytes/1024, arena_bytes/1024, percentage, r->ysize, vpixels
+                );
+
+            vertical_start_for_arena[i] = y;
+            vertical_pixels_per_arena[i] = vpixels;
+            y += vpixels;
+        }
+    }
+
+    // now paint
+    for( i = 0; i < ARENAS; i++) 
+    {
+        rect_t ar = *r;
+        ar.y = vertical_start_for_arena[i];
+        ar.ysize = vertical_pixels_per_arena[i];
+
+        hal_mutex_lock( vm_alloc_mutex );  // TODO avoid Giant lock - must be per arena
+        paint_arena_memory_map( w, &ar, i );
+        hal_mutex_unlock( vm_alloc_mutex );
+    }
+
+}
+
+void paint_arena_memory_map(window_handle_t w, rect_t *r, int a )
+{
+    void * mem_start = start_a[a];
+    void * mem_end = end_a[a];
+    size_t mem_size = mem_end - mem_start;
+
+    int pixels = r->xsize * r->ysize;
+    int units_per_pixel =  1 + ((mem_size-1) / pixels);
+
+    //int prev_object_crosses_pixel_and_not_free = 0;
+    pvm_object_t curr = mem_start;
+
+    void *this_pixel_start = mem_start;
+    void *this_pixel_end = mem_start+units_per_pixel;
+
+    LOG_FLOW( 0, "arena %d, start=%p, end=%p", a, mem_start, mem_end );
+
+    int x, y;
+    for( y = 0; y < r->ysize; y++ )
+    {
+        for( x = 0; x < r->xsize; x++ )
+        {
+            int cnt_used = 0;
+            int cnt_free = 0;
+
+            pvm_object_t next = ((void *)curr) + curr->_ah.exact_size;
+
+            LOG_FLOW( 11, "pixel %d/%d, start=%p, end=%p", x, y, this_pixel_start, this_pixel_end );
+
+            while( ((void *)next) < this_pixel_end )
+            {
+                assert( ((void *)curr) < this_pixel_end );
+
+                if( curr->_ah.object_start_marker != PVM_OBJECT_START_MARKER ) 
+                {
+                    LOG_FLOW( 0, "object %p BROKEN", curr );
+                    return;
+                }
+
+                assert( curr->_ah.exact_size != 0 );
+
+                if( curr->_ah.alloc_flags & PVM_OBJECT_AH_ALLOCATOR_FLAG_ALLOCATED ) 
+                    cnt_used++;
+                else 
+                    cnt_free++;
+
+                curr = next;
+                next = ((void *)curr) + curr->_ah.exact_size; 
+            }
+
+            w_draw_pixel( w, x + r->x, y + r->y, 
+                (cnt_used == 0) ? COLOR_BLUE : ( (cnt_free == 0) ? COLOR_RED : COLOR_GREEN )
+                );
+
+            this_pixel_start += units_per_pixel;
+            this_pixel_end   += units_per_pixel;
+
+        }
+    }
+
+}
+/*
+static rgba_t calc_object_pixel_color( int elem, int units_per_pixel )
+{
+    vm_page *ep = vm_map_map + elem;
+
+    int state = 0; // 0 = empty, 1 = partial, 2 = used
+    int bits = 0;
+    int do_io = 0;
+
+    int i;
+    for( i = 0; i < units_per_pixel; i++, ep++ )
+    {
+        if( 0 == ep->flag_phys_mem ) continue; // empty, no change
+        state = 2; // full
+        bits += 1;
+
+        if( ep->flag_pager_io_busy ) 
+        {
+            do_io = 1;
+            //lprintf("io %d ", elem+i);
+        }
+    }
+
+    if(do_io) return COLOR_YELLOW;
+
+    switch(state)
+    {
+        case 0: return COLOR_BLUE;
+        
+        case 1: 
+        {
+            //return COLOR_LIGHTGREEN;
+            rgba_t c = COLOR_LIGHTGREEN;
+            // lighter = less used
+            c.g = 0xFF - (bits * 0xFF / (units_per_pixel * sizeof(map_elem_t) * 8));
+            return c;
+        }
+
+        case 2: return COLOR_LIGHTRED;
+
+        default: return COLOR_BLACK;
+    }
+}
+*/
 
 
 

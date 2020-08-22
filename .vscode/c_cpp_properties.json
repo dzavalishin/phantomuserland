@@ -61,7 +61,7 @@
                 "_DEBUG",
                 "UNICODE"
             ],
-            "intelliSenseMode": "clang-x64",
+            "intelliSenseMode": "gcc-x86",
             "browse": {
                 "path": [
                     "${workspaceRoot}",

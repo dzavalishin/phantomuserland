@@ -195,12 +195,16 @@ int c_el_compare_func(void *a, const void *key)
 unsigned int c_el_hash_func(void *a, const void *key, unsigned int range)
 {
     cache_el_t *el = a;
-    const long blk = *(const long *)key;
 
     if(el)
+    {
         return el->blk % range;
+    }
     else
+    {
+        const long blk = *(const long *)key;
         return blk % range;
+    }
 }
 
 

@@ -127,3 +127,8 @@ test/unit/cmake_install.cmake
 test/unit/Makefile
 test/unit/suites/cmake_install.cmake
 test/unit/suites/Makefile
+*.stackdump
+*.sh~
+*.py~
+run/qemu/0.15.1/stdout.txt
+phantom/doxygen/

@@ -7,6 +7,7 @@ import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.LlvmCodegen;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -44,6 +45,6 @@ public class ReturnNode extends Node {
 		llc.putln("ret "+LlvmCodegen.getObjectType()+" "+_l.getLlvmTempName()+" ;");
 	}
 	
-	public void find_out_my_type()  {    type = new PhTypeVoid();  }
+	public PhantomType find_out_my_type()  {    return PhantomType.getVoid();  }
 
 }

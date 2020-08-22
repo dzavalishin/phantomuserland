@@ -41,6 +41,14 @@
 #define PCI_VENDOR_ID_VMWARE            0x15AD
 #define PCI_DEVICE_ID_VMWARE_SVGA2      0x0405
 
+typedef enum {
+   SVGA_REG_ENABLE_DISABLE = 0,
+   SVGA_REG_ENABLE_ENABLE = (1 << 0),
+   SVGA_REG_ENABLE_HIDE = (1 << 1),
+} SvgaRegEnable;
+
+typedef uint32 SVGAMobId;
+
 /*
  * Legal values for the SVGA_REG_CURSOR_ON register in old-fashioned
  * cursor bypass mode. This is still supported, but no new guest
@@ -101,6 +109,8 @@
 #define SVGA_IRQFLAG_ANY_FENCE            0x1    /* Any fence was passed */
 #define SVGA_IRQFLAG_FIFO_PROGRESS        0x2    /* Made forward progress in the FIFO */
 #define SVGA_IRQFLAG_FENCE_GOAL           0x4    /* SVGA_FIFO_FENCE_GOAL reached */
+#define SVGA_IRQFLAG_COMMAND_BUFFER       0x8    /* Command buffer completed */
+#define SVGA_IRQFLAG_ERROR                0x10   /* Error while processing commands */
 
 /*
  * Registers
@@ -126,6 +136,7 @@ enum {
    SVGA_REG_FB_SIZE = 16,
 
    /* ID 0 implementation only had the above registers, then the palette */
+   SVGA_REG_ID_0_TOP = 17,
 
    SVGA_REG_CAPABILITIES = 17,
    SVGA_REG_MEM_START = 18,           /* (Deprecated) */
@@ -161,7 +172,21 @@ enum {
    SVGA_REG_GMR_MAX_DESCRIPTOR_LENGTH = 44,
 
    SVGA_REG_TRACES = 45,            /* Enable trace-based updates even when FIFO is on */
-   SVGA_REG_TOP = 46,               /* Must be 1 more than the last register */
+   SVGA_REG_GMRS_MAX_PAGES = 46,    /* Maximum number of 4KB pages for all GMRs */
+   SVGA_REG_MEMORY_SIZE = 47,       /* Total dedicated device memory excluding FIFO */
+   SVGA_REG_COMMAND_LOW = 48,       /* Lower 32 bits and submits commands */
+   SVGA_REG_COMMAND_HIGH = 49,      /* Upper 32 bits of command buffer PA */
+   SVGA_REG_MAX_PRIMARY_BOUNDING_BOX_MEM = 50,   /* Max primary memory */
+   SVGA_REG_SUGGESTED_GBOBJECT_MEM_SIZE_KB = 51, /* Suggested limit on mob mem */
+   SVGA_REG_DEV_CAP = 52,           /* Write dev cap index, read value */
+   SVGA_REG_CMD_PREPEND_LOW = 53,
+   SVGA_REG_iCMD_PREPEND_HIGH = 54,
+   SVGA_REG_SCREENTARGET_MAX_WIDTH = 55,
+   SVGA_REG_SCREENTARGET_MAX_HEIGHT = 56,
+   SVGA_REG_MOB_MAX_SIZE = 57,
+   SVGA_REG_BLANK_SCREEN_TARGETS = 58,
+   SVGA_REG_CAP2 = 59,
+   SVGA_REG_TOP = 60,               /* Must be 1 more than the last register */
 
    SVGA_PALETTE_BASE = 1024,        /* Base of SVGA color map */
    /* Next 768 (== 256*3) registers exist for colormap */
@@ -284,6 +309,164 @@ struct SVGAGuestPtr {
 } __packed
 SVGAGuestPtr;
 
+/*
+ * Register based command buffers --
+ *
+ * Provide an SVGA device interface that allows the guest to submit
+ * command buffers to the SVGA device through an SVGA device register.
+ * The metadata for each command buffer is contained in the
+ * SVGACBHeader structure along with the return status codes.
+ *
+ * The SVGA device supports command buffers if
+ * SVGA_CAP_COMMAND_BUFFERS is set in the device caps register.  The
+ * fifo must be enabled for command buffers to be submitted.
+ *
+ * Command buffers are submitted when the guest writing the 64 byte
+ * aligned physical address into the SVGA_REG_COMMAND_LOW and
+ * SVGA_REG_COMMAND_HIGH.  SVGA_REG_COMMAND_HIGH contains the upper 32
+ * bits of the physical address.  SVGA_REG_COMMAND_LOW contains the
+ * lower 32 bits of the physical address, since the command buffer
+ * headers are required to be 64 byte aligned the lower 6 bits are
+ * used for the SVGACBContext value.  Writing to SVGA_REG_COMMAND_LOW
+ * submits the command buffer to the device and queues it for
+ * execution.  The SVGA device supports at least
+ * SVGA_CB_MAX_QUEUED_PER_CONTEXT command buffers that can be queued
+ * per context and if that limit is reached the device will write the
+ * status SVGA_CB_STATUS_QUEUE_FULL to the status value of the command
+ * buffer header synchronously and not raise any IRQs.
+ *
+ * It is invalid to submit a command buffer without a valid physical
+ * address and results are undefined.
+ *
+ * The device guarantees that command buffers of size SVGA_CB_MAX_SIZE
+ * will be supported.  If a larger command buffer is submitted results
+ * are unspecified and the device will either complete the command
+ * buffer or return an error.
+ *
+ * The device guarantees that any individual command in a command
+ * buffer can be up to SVGA_CB_MAX_COMMAND_SIZE in size which is
+ * enough to fit a 64x64 color-cursor definition.  If the command is
+ * too large the device is allowed to process the command or return an
+ * error.
+ *
+ * The device context is a special SVGACBContext that allows for
+ * synchronous register like accesses with the flexibility of
+ * commands.  There is a different command set defined by
+ * SVGADeviceContextCmdId.  The commands in each command buffer is not
+ * allowed to straddle physical pages.
+ */
+
+#define SVGA_CB_MAX_SIZE (512 * 1024)  // 512 KB
+#define SVGA_CB_MAX_QUEUED_PER_CONTEXT 32
+#define SVGA_CB_MAX_COMMAND_SIZE (32 * 1024) // 32 KB
+
+#define SVGA_CB_CONTEXT_MASK 0x3f
+typedef enum {
+   SVGA_CB_CONTEXT_DEVICE = 0x3f,
+   SVGA_CB_CONTEXT_0      = 0x0,
+   SVGA_CB_CONTEXT_MAX    = 0x1,
+} SVGACBContext;
+
+
+typedef enum {
+/*
+    * The guest is supposed to write SVGA_CB_STATUS_NONE to the status
+    * field before submitting the command buffer header, the host will
+    * change the value when it is done with the command buffer.
+    */
+   SVGA_CB_STATUS_NONE             = 0,
+
+   /*
+    * Written by the host when a command buffer completes successfully.
+    * The device raises an IRQ with SVGA_IRQFLAG_COMMAND_BUFFER unless
+    * the SVGA_CB_FLAG_NO_IRQ flag is set.
+    */
+   SVGA_CB_STATUS_COMPLETED        = 1,
+
+   /*
+    * Written by the host synchronously with the command buffer
+    * submission to indicate the command buffer was not submitted.  No
+    * IRQ is raised.
+    */
+   SVGA_CB_STATUS_QUEUE_FULL       = 2,
+
+   /*
+    * Written by the host when an error was detected parsing a command
+    * in the command buffer, errorOffset is written to contain the
+    * offset to the first byte of the failing command.  The device
+    * raises the IRQ with both SVGA_IRQFLAG_ERROR and
+    * SVGA_IRQFLAG_COMMAND_BUFFER.  Some of the commands may have been
+    * processed.
+    */
+   SVGA_CB_STATUS_COMMAND_ERROR    = 3,
+
+   /*
+    * Written by the host if there is an error parsing the command
+    * buffer header.  The device raises the IRQ with both
+    * SVGA_IRQFLAG_ERROR and SVGA_IRQFLAG_COMMAND_BUFFER.  The device
+    * did not processes any of the command buffer.
+    */
+   SVGA_CB_STATUS_CB_HEADER_ERROR  = 4,
+
+   /*
+    * Written by the host if the guest requested the host to preempt
+    * the command buffer.  The device will not raise any IRQs and the
+    * command buffer was not processed.
+    */
+   SVGA_CB_STATUS_PREEMPTED        = 5,
+} SVGACBStatus;
+
+typedef enum {
+   SVGA_CB_FLAG_NONE     = 0,
+   SVGA_CB_FLAG_NO_IRQ   = 1 << 0,
+} SVGACBFlags;
+
+typedef
+struct {
+   volatile SVGACBStatus status;
+   volatile uint32 errorOffset;
+   uint64 id;
+   SVGACBFlags flags;
+   uint32 length;
+   union {
+      //PA pa;
+      physaddr_t pa;
+   } ptr;
+   uint32 mustBeZero[8];
+} SVGACBHeader;
+
+typedef enum {
+   SVGA_DC_CMD_NOP                   = 0,
+   SVGA_DC_CMD_START_STOP_CONTEXT    = 1,
+   SVGA_DC_CMD_PREEMPT               = 2,
+   SVGA_DC_CMD_MAX                   = 3,
+   SVGA_DC_CMD_FORCE_UINT            = 0xFFFFFFFF, // MAX_UINT32,
+} SVGADeviceContextCmdId;
+
+typedef struct {
+   uint32 enable;
+   SVGACBContext context;
+} SVGADCCmdStartStop;
+
+/*
+ * SVGADCCmdPreempt --
+ *
+ * This command allows the guest to request that all command buffers
+ * on the specified context be preempted that can be.  After execution
+ * of this command all command buffers that were preempted will
+ * already have SVGA_CB_STATUS_PREEMPTED written into the status
+ * field.  The device might still be processing a command buffer,
+ * assuming execution of it started before the preemption request was
+ * received.  Specifying the ignoreIDZero flag to TRUE will cause the
+ * device to not preempt command buffers with the id field in the
+ * command buffer header set to zero.
+ */
+
+typedef struct {
+   SVGACBContext context;
+   uint32 ignoreIDZero;
+} SVGADCCmdPreempt;
+
 
 /*
  * SVGAGMRImageFormat --
@@ -318,6 +501,28 @@ struct SVGAGMRImageFormat {
    };
 } __packed
 SVGAGMRImageFormat;
+
+typedef
+struct SVGAGuestImage {
+   SVGAGuestPtr         ptr;
+
+/*
+    * A note on interpretation of pitch: This value of pitch is the
+    * number of bytes between vertically adjacent image
+    * blocks. Normally this is the number of bytes between the first
+    * pixel of two adjacent scanlines. With compressed textures,
+    * however, this may represent the number of bytes between
+    * compression blocks rather than between rows of pixels.
+    *
+    * XXX: Compressed textures currently must be tightly packed in guest memory.
+    *
+    * If the image is 1-dimensional, pitch is ignored.
+    *
+    * If 'pitch' is zero, the SVGA3D device calculates a pitch value
+    * assuming each row of blocks is tightly packed.
+    */
+   uint32 pitch;
+} SVGAGuestImage;
 
 /*
  * SVGAColorBGRX --
@@ -374,11 +579,55 @@ SVGASignedPoint;
 
 
 /*
- *  Capabilities
+ * SVGA Device Capabilities
  *
  *  Note the holes in the bitfield. Missing bits have been deprecated,
  *  and must not be reused. Those capabilities will never be reported
  *  by new versions of the SVGA device.
+ *
+ * XXX: Add longer descriptions for each capability, including a list
+ *      of the new features that each capability provides.
+ *
+ * SVGA_CAP_IRQMASK --
+ *    Provides device interrupts.  Adds device register SVGA_REG_IRQMASK
+ *    to set interrupt mask and direct I/O port SVGA_IRQSTATUS_PORT to
+ *    set/clear pending interrupts.
+ *
+ * SVGA_CAP_GMR --
+ *    Provides synchronous mapping of guest memory regions (GMR).
+ *    Adds device registers SVGA_REG_GMR_ID, SVGA_REG_GMR_DESCRIPTOR,
+ *    SVGA_REG_GMR_MAX_IDS, and SVGA_REG_GMR_MAX_DESCRIPTOR_LENGTH.
+ *
+ * SVGA_CAP_TRACES --
+ *    Allows framebuffer trace-based updates even when FIFO is enabled.
+ *    Adds device register SVGA_REG_TRACES.
+ *
+ * SVGA_CAP_GMR2 --
+ *    Provides asynchronous commands to define and remap guest memory
+ *    regions.  Adds device registers SVGA_REG_GMRS_MAX_PAGES and
+ *    SVGA_REG_MEMORY_SIZE.
+ *
+ * SVGA_CAP_SCREEN_OBJECT_2 --
+ *    Allow screen object support, and require backing stores from the
+ *    guest for each screen object.
+ *
+ * SVGA_CAP_COMMAND_BUFFERS --
+ *    Enable register based command buffer submission.
+ *
+ * SVGA_CAP_DEAD1 --
+ *    This cap was incorrectly used by old drivers and should not be
+ *    reused.
+ *
+ * SVGA_CAP_CMD_BUFFERS_2 --
+ *    Enable support for the prepend command buffer submision
+ *    registers.  SVGA_REG_CMD_PREPEND_LOW and
+ *    SVGA_REG_CMD_PREPEND_HIGH.
+ *
+ * SVGA_CAP_GBOBJECTS --
+ *    Enable guest-backed objects and surfaces.
+ *
+ * SVGA_CAP_CMD_BUFFERS_3 --
+ *    Enable support for command buffers in a mob.
  */
 
 #define SVGA_CAP_NONE               0x00000000
@@ -408,6 +657,56 @@ SVGASignedPoint;
 #define SVGA_CAP_DISPLAY_TOPOLOGY   0x00080000   // Legacy multi-monitor support
 #define SVGA_CAP_GMR                0x00100000
 #define SVGA_CAP_TRACES             0x00200000
+#define SVGA_CAP_GMR2               0x00400000
+#define SVGA_CAP_SCREEN_OBJECT_2    0x00800000
+#define SVGA_CAP_COMMAND_BUFFERS    0x01000000
+#define SVGA_CAP_DEAD1              0x02000000
+#define SVGA_CAP_CMD_BUFFERS_2      0x04000000
+#define SVGA_CAP_GBOBJECTS          0x08000000
+#define SVGA_CAP_CMD_BUFFERS_3      0x10000000
+
+#define SVGA_CAP_CAP2_REGISTER      0x80000000
+
+
+/*
+ * The SVGA_REG_CAP2 register is an additional set of SVGA capability bits.
+ *
+ * SVGA_CAP2_GROW_OTABLE --
+ *      Allow the GrowOTable/DXGrowCOTable commands.
+ *
+ * SVGA_CAP2_INTRA_SURFACE_COPY --
+ *      Allow the IntraSurfaceCopy command.
+ *
+ * SVGA_CAP2_RESERVED --
+ *      Reserve the last bit for extending the SVGA capabilities to some
+ *      future mechanisms.
+ */
+#define SVGA_CAP2_NONE               0x00000000
+#define SVGA_CAP2_GROW_OTABLE        0x00000001
+#define SVGA_CAP2_INTRA_SURFACE_COPY 0x00000002
+#define SVGA_CAP2_RESERVED           0x80000000
+
+/*
+ * The Guest can optionally read some SVGA device capabilities through
+ * the backdoor with command BDOOR_CMD_GET_SVGA_CAPABILITIES before
+ * the SVGA device is initialized.  The type of capability the guest
+ * is requesting from the SVGABackdoorCapType enum should be placed in
+ * the upper 16 bits of the backdoor command id (ECX).  On success the
+ * the value of EBX will be set to BDOOR_MAGIC and EAX will be set to
+ * the requested capability.  If the command is not supported then EBX
+ * will be left unchanged and EAX will be set to -1.  Because it is
+ * possible that -1 is the value of the requested cap the correct way
+ * to check if the command was successful is to check if EBX was changed
+ * to BDOOR_MAGIC making sure to initialize the register to something
+ * else first.
+ */
+
+typedef enum {
+   SVGABackdoorCapDeviceCaps = 0,
+   SVGABackdoorCapFifoCaps = 1,
+   SVGABackdoorCap3dHWVersion = 2,
+   SVGABackdoorCapMax = 3,
+} SVGABackdoorCapType;
 
 
 /*
@@ -481,7 +780,7 @@ enum {
    SVGA_FIFO_RESERVED,           /* Bytes past NEXT_CMD with real contents */
 
    /*
-    * Valid with SVGA_FIFO_CAP_SCREEN_OBJECT:
+    * Valid with SVGA_FIFO_CAP_SCREEN_OBJECT or SVGA_FIFO_CAP_SCREEN_OBJECT_2:
     *
     * By default this is SVGA_ID_INVALID, to indicate that the cursor
     * coordinates are specified relative to the virtual root. If this
@@ -490,6 +789,21 @@ enum {
     * only way to place the cursor on a non-rooted screen.
     */
    SVGA_FIFO_CURSOR_SCREEN_ID,
+
+   /*
+    * Valid with SVGA_FIFO_CAP_DEAD
+    *
+    * An arbitrary value written by the host, drivers should not use it.
+    */
+   SVGA_FIFO_DEAD,
+
+   /*
+    * Valid with SVGA_FIFO_CAP_3D_HWVERSION_REVISED:
+    *
+    * Contains 3D HWVERSION (see SVGA3dHardwareVersion in svga3d_reg.h)
+    * on platforms that can enforce graphics resource limits.
+    */
+   SVGA_FIFO_3D_HWVERSION_REVISED,
 
    /*
     * XXX: The gap here, up until SVGA_FIFO_3D_CAPS, can be used for new
@@ -730,6 +1044,37 @@ enum {
  *
  *       - When a screen is resized, either using Screen Object commands or
  *         legacy multimon registers, its contents are preserved.
+ *
+ * SVGA_FIFO_CAP_GMR2 --
+ *
+ *    Provides new commands to define and remap guest memory regions (GMR).
+ *
+ *    New 2D commands:
+ *       DEFINE_GMR2, REMAP_GMR2.
+ *
+ * SVGA_FIFO_CAP_3D_HWVERSION_REVISED --
+ *
+ *    Indicates new register SVGA_FIFO_3D_HWVERSION_REVISED exists.
+ *    This register may replace SVGA_FIFO_3D_HWVERSION on platforms
+ *    that enforce graphics resource limits.  This allows the platform
+ *    to clear SVGA_FIFO_3D_HWVERSION and disable 3D in legacy guest
+ *    drivers that do not limit their resources.
+ *
+ *    Note this is an alias to SVGA_FIFO_CAP_GMR2 because these indicators
+ *    are codependent (and thus we use a single capability bit).
+ *
+ * SVGA_FIFO_CAP_SCREEN_OBJECT_2 --
+ *
+ *    Modifies the DEFINE_SCREEN command to include a guest provided
+ *    backing store in GMR memory and the bytesPerLine for the backing
+ *    store.  This capability requires the use of a backing store when
+ *    creating screen objects.  However if SVGA_FIFO_CAP_SCREEN_OBJECT
+ *    is present then backing stores are optional.
+ *
+ * SVGA_FIFO_CAP_DEAD --
+ *
+ *    Drivers should not use this cap bit.  This cap bit can not be
+ *    reused since some hosts already expose it.
  */
 
 #define SVGA_FIFO_CAP_NONE                  0
@@ -741,6 +1086,10 @@ enum {
 #define SVGA_FIFO_CAP_ESCAPE            (1<<5)
 #define SVGA_FIFO_CAP_RESERVE           (1<<6)
 #define SVGA_FIFO_CAP_SCREEN_OBJECT     (1<<7)
+#define SVGA_FIFO_CAP_GMR2              (1<<8)
+#define SVGA_FIFO_CAP_3D_HWVERSION_REVISED  SVGA_FIFO_CAP_GMR2
+#define SVGA_FIFO_CAP_SCREEN_OBJECT_2   (1<<9)
+#define SVGA_FIFO_CAP_DEAD              (1<<10)
 
 
 /*
@@ -850,11 +1199,46 @@ typedef struct SVGAOverlayUnit {
  *    compatibility. New flags can be added, and the struct may grow,
  *    but existing fields must retain their meaning.
  *
+ *    Added with SVGA_FIFO_CAP_SCREEN_OBJECT_2 are required fields of
+ *    a SVGAGuestPtr that is used to back the screen contents.  This
+ *    memory must come from the GFB.  The guest is not allowed to
+ *    access the memory and doing so will have undefined results.  The
+ *    backing store is required to be page aligned and the size is
+ *    padded to the next page boundry.  The number of pages is:
+ *       (bytesPerLine * size.width * 4 + PAGE_SIZE - 1) / PAGE_SIZE
+ *
+ *    The pitch in the backingStore is required to be at least large
+ *    enough to hold a 32bbp scanline.  It is recommended that the
+ *    driver pad bytesPerLine for a potential performance win.
+ *
+ *    The cloneCount field is treated as a hint from the guest that
+ *    the user wants this display to be cloned, countCount times.  A
+ *    value of zero means no cloning should happen.
  */
 
 #define SVGA_SCREEN_HAS_ROOT    (1 << 0)  // Screen is present in the virtual coord space
 #define SVGA_SCREEN_IS_PRIMARY  (1 << 1)  // Guest considers this screen to be 'primary'
 #define SVGA_SCREEN_FULLSCREEN_HINT (1 << 2)   // Guest is running a fullscreen app here
+
+/*
+ * Added with SVGA_FIFO_CAP_SCREEN_OBJECT_2.  When the screen is
+ * deactivated the base layer is defined to lose all contents and
+ * become black.  When a screen is deactivated the backing store is
+ * optional.  When set backingPtr and bytesPerLine will be ignored.
+ */
+#define SVGA_SCREEN_DEACTIVATE  (1 << 3)
+
+/*
+ * Added with SVGA_FIFO_CAP_SCREEN_OBJECT_2.  When this flag is set
+ * the screen contents will be outputted as all black to the user
+ * though the base layer contents is preserved.  The screen base layer
+ * can still be read and written to like normal though the no visible
+ * effect will be seen by the user.  When the flag is changed the
+ * screen will be blanked or redrawn to the current contents as needed
+ * without any extra commands from the driver.  This flag only has an
+ * effect when the screen is not deactivated.
+ */
+#define SVGA_SCREEN_BLANKING (1 << 4)
 
 typedef
 struct SVGAScreenObject {
@@ -872,6 +1256,23 @@ struct SVGAScreenObject {
 } __packed
 SVGAScreenObject;
 
+#if 0 // ??
+   /*
+    * Added and required by SVGA_FIFO_CAP_SCREEN_OBJECT_2, optional
+    * with SVGA_FIFO_CAP_SCREEN_OBJECT.
+    */
+   SVGAGuestImage backingStore;
+
+/*
+    * The cloneCount field is treated as a hint from the guest that
+    * the user wants this display to be cloned, cloneCount times.
+    *
+    * A value of zero means no cloning should happen.
+    */
+   uint32 cloneCount;
+} SVGAScreenObject;
+
+#endif
 
 /*
  *  Commands in the command FIFO:
@@ -883,7 +1284,7 @@ SVGAScreenObject;
  *  Note the holes in the command ID numbers: These commands have been
  *  deprecated, and the old IDs must not be reused.
  *
- *  Command IDs from 1000 to 1999 are reserved for use by the SVGA3D
+ *  Command IDs from 1000 to 2999 are reserved for use by the SVGA3D
  *  protocol.
  *
  *  Each command's parameters are described by the comments and
@@ -894,6 +1295,7 @@ typedef enum {
    SVGA_CMD_INVALID_CMD           = 0,
    SVGA_CMD_UPDATE                = 1,
    SVGA_CMD_RECT_COPY             = 3,
+   SVGA_CMD_RECT_ROP_COPY         = 14,
    SVGA_CMD_DEFINE_CURSOR         = 19,
    SVGA_CMD_DEFINE_ALPHA_CURSOR   = 22,
    SVGA_CMD_UPDATE_VERBOSE        = 25,
@@ -907,10 +1309,18 @@ typedef enum {
    SVGA_CMD_BLIT_SCREEN_TO_GMRFB  = 38,
    SVGA_CMD_ANNOTATION_FILL       = 39,
    SVGA_CMD_ANNOTATION_COPY       = 40,
+   SVGA_CMD_DEFINE_GMR2           = 41,
+   SVGA_CMD_REMAP_GMR2            = 42,
+   SVGA_CMD_DEAD                  = 43,
+   SVGA_CMD_DEAD_2                = 44,
+   SVGA_CMD_NOP                   = 45,
+   SVGA_CMD_NOP_ERROR             = 46,
    SVGA_CMD_MAX
 } SVGAFifoCmdId;
 
+#define SVGA_CMD_MAX_DATASIZE       (256 * 1024)
 #define SVGA_CMD_MAX_ARGS           64
+#define SVGA_CB_MAX_COMMAND_SIZE (32 * 1024) // 32 KB
 
 
 /*
@@ -971,6 +1381,30 @@ struct {
    uint32 height;
 } __packed
 SVGAFifoCmdRectCopy;
+
+
+/*
+ * SVGA_CMD_RECT_ROP_COPY --
+ *
+ *    Perform a rectangular DMA transfer from one area of the GFB to
+ *    another, and copy the result to any screens which intersect it.
+ *    The value of ROP may only be SVGA_ROP_COPY, and this command is
+ *    only supported for backwards compatibility reasons.
+ *
+ * Availability:
+ *    SVGA_CAP_RECT_COPY
+ */
+
+typedef
+struct {
+   uint32 srcX;
+   uint32 srcY;
+   uint32 destX;
+   uint32 destY;
+   uint32 width;
+   uint32 height;
+   uint32 rop;
+} SVGAFifoCmdRectRopCopy;
 
 
 /*
@@ -1143,7 +1577,7 @@ SVGAFifoCmdEscape;
  *    registers (SVGA_REG_NUM_GUEST_DISPLAYS, SVGA_REG_DISPLAY_*).
  *
  * Availability:
- *    SVGA_FIFO_CAP_SCREEN_OBJECT
+ *    SVGA_FIFO_CAP_SCREEN_OBJECT or SVGA_FIFO_CAP_SCREEN_OBJECT_2
  */
 
 typedef
@@ -1160,7 +1594,7 @@ SVGAFifoCmdDefineScreen;
  *    re-use.
  *
  * Availability:
- *    SVGA_FIFO_CAP_SCREEN_OBJECT
+ *    SVGA_FIFO_CAP_SCREEN_OBJECT or SVGA_FIFO_CAP_SCREEN_OBJECT_2
  */
 
 typedef
@@ -1214,7 +1648,7 @@ SVGAFifoCmdDestroyScreen;
  *    GMRFB.
  *
  * Availability:
- *    SVGA_FIFO_CAP_SCREEN_OBJECT
+ *    SVGA_FIFO_CAP_SCREEN_OBJECT or SVGA_FIFO_CAP_SCREEN_OBJECT_2
  */
 
 typedef
@@ -1252,7 +1686,7 @@ SVGAFifoCmdDefineGMRFB;
  *    SVGA_CMD_ANNOTATION_* commands for details.
  *
  * Availability:
- *    SVGA_FIFO_CAP_SCREEN_OBJECT
+ *    SVGA_FIFO_CAP_SCREEN_OBJECT or SVGA_FIFO_CAP_SCREEN_OBJECT_2
  */
 
 typedef
@@ -1301,7 +1735,7 @@ SVGAFifoCmdBlitGMRFBToScreen;
  *    the time any subsequent FENCE commands are reached.
  *
  * Availability:
- *    SVGA_FIFO_CAP_SCREEN_OBJECT
+ *    SVGA_FIFO_CAP_SCREEN_OBJECT or SVGA_FIFO_CAP_SCREEN_OBJECT_2
  */
 
 typedef
@@ -1379,5 +1813,114 @@ struct {
    uint32           srcScreenId;
 } __packed
 SVGAFifoCmdAnnotationCopy;
+
+
+/*
+ * SVGA_CMD_DEFINE_GMR2 --
+ *
+ *    Define guest memory region v2.  See the description of GMRs above.
+ *
+ * Availability:
+ *    SVGA_CAP_GMR2
+ */
+
+typedef
+struct {
+   uint32 gmrId;
+   uint32 numPages;
+} SVGAFifoCmdDefineGMR2;
+
+
+/*
+ * SVGA_CMD_REMAP_GMR2 --
+ *
+ *    Remap guest memory region v2.  See the description of GMRs above.
+ *
+ *    This command allows guest to modify a portion of an existing GMR by
+ *    invalidating it or reassigning it to different guest physical pages.
+ *    The pages are identified by physical page number (PPN).  The pages
+ *    are assumed to be pinned and valid for DMA operations.
+ *
+ *    Description of command flags:
+ *
+ *    SVGA_REMAP_GMR2_VIA_GMR: If enabled, references a PPN list in a GMR.
+ *       The PPN list must not overlap with the remap region (this can be
+ *       handled trivially by referencing a separate GMR).  If flag is
+ *       disabled, PPN list is appended to SVGARemapGMR command.
+ *
+ *    SVGA_REMAP_GMR2_PPN64: If set, PPN list is in PPN64 format, otherwise
+ *       it is in PPN32 format.
+ *
+ *    SVGA_REMAP_GMR2_SINGLE_PPN: If set, PPN list contains a single entry.
+ *       A single PPN can be used to invalidate a portion of a GMR or
+ *       map it to to a single guest scratch page.
+ *
+ * Availability:
+ *    SVGA_CAP_GMR2
+ */
+
+typedef enum {
+   SVGA_REMAP_GMR2_PPN32         = 0,
+   SVGA_REMAP_GMR2_VIA_GMR       = (1 << 0),
+   SVGA_REMAP_GMR2_PPN64         = (1 << 1),
+   SVGA_REMAP_GMR2_SINGLE_PPN    = (1 << 2),
+} SVGARemapGMR2Flags;
+
+typedef
+struct {
+   uint32 gmrId;
+   SVGARemapGMR2Flags flags;
+   uint32 offsetPages; /* offset in pages to begin remap */
+   uint32 numPages; /* number of pages to remap */
+   /*
+    * Followed by additional data depending on SVGARemapGMR2Flags.
+    *
+    * If flag SVGA_REMAP_GMR2_VIA_GMR is set, single SVGAGuestPtr follows.
+    * Otherwise an array of page descriptors in PPN32 or PPN64 format
+    * (according to flag SVGA_REMAP_GMR2_PPN64) follows.  If flag
+    * SVGA_REMAP_GMR2_SINGLE_PPN is set, array contains a single entry.
+    */
+} SVGAFifoCmdRemapGMR2;
+
+
+/*
+ * Size of SVGA device memory such as frame buffer and FIFO.
+ */
+#define SVGA_VRAM_MIN_SIZE             (4 * 640 * 480) /* bytes */
+#define SVGA_VRAM_MIN_SIZE_3D       (16 * 1024 * 1024)
+#define SVGA_VRAM_MAX_SIZE         (128 * 1024 * 1024)
+#define SVGA_MEMORY_SIZE_MAX      (1024 * 1024 * 1024)
+#define SVGA_FIFO_SIZE_MAX           (2 * 1024 * 1024)
+#define SVGA_GRAPHICS_MEMORY_KB_MIN       (32 * 1024)
+#define SVGA_GRAPHICS_MEMORY_KB_MAX       (2 * 1024 * 1024)
+#define SVGA_GRAPHICS_MEMORY_KB_DEFAULT   (256 * 1024)
+
+#define SVGA_VRAM_SIZE_W2K          (64 * 1024 * 1024) /* 64 MB */
+
+/*
+ * To simplify autoDetect display configuration, support a minimum of
+ * two 1920x1200 monitors, 32bpp, side-by-side, optionally rotated:
+ *   numDisplays = 2
+ *   maxWidth = numDisplay * 1920 = 3840
+ *   maxHeight = rotated width of single monitor = 1920
+ *   vramSize = maxWidth * maxHeight * 4 = 29491200
+ */
+#define SVGA_VRAM_SIZE_AUTODETECT   (32 * 1024 * 1024)
+
+#if defined(VMX86_SERVER)
+#define SVGA_VRAM_SIZE               (4 * 1024 * 1024)
+#define SVGA_VRAM_SIZE_3D           (64 * 1024 * 1024)
+#define SVGA_FIFO_SIZE                    (256 * 1024)
+#define SVGA_FIFO_SIZE_3D                 (516 * 1024)
+#define SVGA_MEMORY_SIZE_DEFAULT   (160 * 1024 * 1024)
+#define SVGA_AUTODETECT_DEFAULT                  FALSE
+#else
+#define SVGA_VRAM_SIZE              (16 * 1024 * 1024)
+#define SVGA_VRAM_SIZE_3D           SVGA_VRAM_MAX_SIZE
+#define SVGA_FIFO_SIZE               (2 * 1024 * 1024)
+#define SVGA_FIFO_SIZE_3D               SVGA_FIFO_SIZE
+#define SVGA_MEMORY_SIZE_DEFAULT   (768 * 1024 * 1024)
+#define SVGA_AUTODETECT_DEFAULT                   TRUE
+#endif
 
 #endif

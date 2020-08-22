@@ -25,22 +25,28 @@
 
 
 // push on object stack
-#define SYSCALL_RETURN(obj) do { pvm_ostack_push( tc->_ostack, obj ); return 1; } while(0)
+#define SYSCALL_RETURN(obj)             do { *ret = (obj); return 1; } while(0)
+#define SYSCALL_RETURN_STRING(str)       SYSCALL_RETURN(pvm_create_string_object( str ))
+
 //#define SYSCALL_THROW(obj) do { pvm_ostack_push( tc->_ostack, obj ); return 0; } while(0)
-#define SYSCALL_THROW(obj) ({ pvm_ostack_push( tc->_ostack, obj ); return 0; })
-#define SYSCALL_RETURN_NOTHING SYSCALL_RETURN( pvm_create_null_object() )
+#define SYSCALL_THROW(obj)              ({ *ret = (obj); return 0; })
 
-#define SYSCALL_THROW_STRING(str) SYSCALL_THROW(pvm_create_string_object( str ));
+#define SYSCALL_RETURN_NOTHING          SYSCALL_RETURN( pvm_create_null_object() )
 
-#define POP_ARG ( pvm_ostack_pop( tc->_ostack ))
-#define POP_ISTACK ( pvm_istack_pop( tc->_istack ))
+#define SYSCALL_THROW_STRING(str)       SYSCALL_THROW(pvm_create_string_object( str ))
+
+//#define POP_ARG ( pvm_ostack_pop( tc->_ostack ))
+//#define POP_ISTACK ( pvm_istack_pop( tc->_istack ))
+
+#define POP_ARG    #error fix me
+#define POP_ISTACK #error fix me
 
 //#define DECLARE_SIZE(class) int n_syscall_table_4_##class =	(sizeof syscall_table_4_##class) / sizeof(syscall_func_t)
 //#define DECLARE_SIZE(class)
 
-#define CHECK_PARAM_COUNT(n_param, must_have) \
+#define CHECK_PARAM_COUNT(must_have) \
     do { \
-    if( n_param < must_have ) \
+    if( n_args < must_have ) \
     	SYSCALL_THROW(pvm_create_string_object( "sys: need more parameters" )); \
     } while(0)
 
@@ -60,7 +66,7 @@
     } while(0)
 
 #define DEBUG_INFO \
-if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __func__, __FILE__, __LINE__ )
+    if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __func__, __FILE__, __LINE__ )
 
 // --------------------------------------------------------------------------
 // Int/string parameters shortcuts
@@ -70,24 +76,32 @@ if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __fu
 
 
 // Depends on GCC {} value extension
-
+/*
 #define POP_INT() \
     ({ \
-    struct pvm_object __ival = POP_ARG; \
+    pvm_object_t __ival = POP_ARG; \
     ASSERT_INT(__ival); \
     int v = pvm_get_int(__ival); \
     SYS_FREE_O(__ival); \
     v; \
     })
-
+*/
 /* can't be used since string has to be SYS_FREE_'ed
 #define POP_STRING() \
     ({ \
-    struct pvm_object __sval = POP_ARG; \
+    pvm_object_t __sval = POP_ARG; \
     ASSERT_STRING(__sval); \
     pvm_object_da( __sval, string ); \
     })
 */
+
+#define AS_INT(__ival) \
+    ({ \
+    ASSERT_INT(__ival); \
+    int v = pvm_get_int(__ival); \
+    SYS_FREE_O(__ival); \
+    v; \
+    })
 
 
 // --------------------------------------------------------------------------
@@ -104,10 +118,9 @@ if( debug_print) printf("\n\n --- syscall %s at %s line %d called ---\n\n", __fu
 // Types and syscall table declaration macro
 // --------------------------------------------------------------------------
 
-struct pvm_object;
 struct data_area_4_thread;
 
-typedef int (*syscall_func_t)(struct pvm_object o, struct data_area_4_thread *tc );
+typedef int (*syscall_func_t)( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
 /*
 #define DECLARE_SYSTABLE(type,tab_id) \
     extern syscall_func_t syscall_table_4_##type[]; extern int n_syscall_table_4_##type; \
@@ -118,18 +131,18 @@ typedef int (*syscall_func_t)(struct pvm_object o, struct data_area_4_thread *tc
 // Default syscall implementations for lower methods
 // --------------------------------------------------------------------------
 
-int invalid_syscall(struct pvm_object o, struct data_area_4_thread *tc );
-int si_void_0_construct(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_1_destruct(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_2_class(struct pvm_object this_obj, struct data_area_4_thread *tc );
-int si_void_3_clone(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_4_equals(struct pvm_object me, struct data_area_4_thread *tc );
-int si_void_5_tostring(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_6_toXML(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_7_fromXML(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_8_def_op_1(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_9_def_op_2(struct pvm_object , struct data_area_4_thread *tc );
-int si_void_15_hashcode(struct pvm_object me, struct data_area_4_thread *tc );
+int invalid_syscall( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_0_construct( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_1_destruct( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_2_class( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_3_clone( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_4_equals( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_5_tostring( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_6_toXML( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_7_fromXML( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_8_def_op_1( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_9_def_op_2( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
+int si_void_15_hashcode( pvm_object_t o, pvm_object_t *ret, struct data_area_4_thread *tc, int n_args, pvm_object_t *args );
 
 
 #endif // SYSCALL_TOOLS_H

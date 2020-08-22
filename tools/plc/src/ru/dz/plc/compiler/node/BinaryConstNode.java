@@ -6,6 +6,7 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeString;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -24,7 +25,8 @@ public class BinaryConstNode extends Node {
 	//public String toString()  {    return "binary const \""+val+"\"";  }
 	public String toString()  {    return "binary const, \""+val.length+"\" bytes";  }
 	
-	public void find_out_my_type() { type = new PhTypeString(); }
+	public PhantomType find_out_my_type() { return PhantomType.getString(); }
+	
 	public boolean is_const() { return true; }
 	public void preprocess_me( ParseState s ) throws PlcException  {  }
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException {

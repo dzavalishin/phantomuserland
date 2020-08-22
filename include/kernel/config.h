@@ -15,12 +15,17 @@
 // Dynamic wtty_t size
 //#define CONF_WTTY_SIZE 1
 
+#define NEW_TASK_BAR 1
+
 
 #define UHCI_INTERRUPT 0
 #define OHCI_INTERRUPT 1
 
 #define COMPILE_UHCI 1
 #define COMPILE_OHCI 1
+
+// Keep two different pagetables to swich access to persistent memory on and off
+#define CONF_DUAL_PAGEMAP 1
 
 // Use spinlocks for pool, not mutexes - does not work yet
 #define CONF_POOL_SPIN 0
@@ -45,16 +50,21 @@
 #define VM_INSTOF_RECURSIVE 1
 #define VM_DEFERRED_REFDEC 0
 
-#define OLD_VM_SLEEP 0
-#define NEW_SNAP_SYNC 0
+#define OLD_VM_SLEEP #error do not use me
+#define NEW_VM_SLEEP 1
+#define NEW_SNAP_SYNC 0 // UNUSED?
 
 // Interlock access to paged persistent address space with snapshot process
-#define SNAP_MEMORY_LOCK 1
+#define SNAP_MEMORY_LOCK 1 // UNUSED? TODO KILL
 
 #define COMPILE_PERSISTENT_STATS 1
 
 // TODO killme
 #define NEW_WINDOWS 0
+
+
+#define CONF_TRUETYPE 1
+
 
 #define VM_UNMAP_UNUSED_OBJECTS 0
 
@@ -113,7 +123,7 @@
 #define COMPILE_EXPERIMENTAL 0
 #endif  // COMPILE_EXPERIMENTAL
 
-#  define PAGING_PARTITION 1
+#  define PAGING_PARTITION 1 // TODO killme? long time in use
 
 #if COMPILE_EXPERIMENTAL
 #  define PAGING_PARTITION 1

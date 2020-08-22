@@ -367,7 +367,7 @@ static errno_t angelAsyncIo( struct phantom_disk_partition *p, pager_io_request 
     int ret = driver_angel_disk_rq( dev, rq );
 
     rq->rc = ret ? EIO : 0;
-    rq->flag_ioerror = ret;
+    //rq->flag_ioerror = ret;
 
     // callback - is it ok to do it here?
     pager_io_request_done( rq );

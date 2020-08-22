@@ -19,7 +19,9 @@
 #include <video/internal.h>
 #include <video/screen.h>
 
+// If mouse_intersects is used we loose mouse sooner or later. Usually sooner.
 
+/*
 static int mouse_intersects(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize )
 {
     rect_t r;
@@ -41,19 +43,19 @@ static int mouse_intersects(struct drv_video_screen_t *video_drv, int xpos, int 
     return rect_mul( &o, &r, &m );
 }
 
-
+*/
 
 
 void scr_mouse_disable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize )
 {
-    if( mouse_intersects(video_drv, xpos, ypos, xsize, ysize ) )
+//    if( mouse_intersects(video_drv, xpos, ypos, xsize, ysize ) )
         video_drv->mouse_disable();
 }
 
 
 void scr_mouse_enable_p(struct drv_video_screen_t *video_drv, int xpos, int ypos, int xsize, int ysize )
 {
-    if( mouse_intersects(video_drv, xpos, ypos, xsize, ysize ) )
+//    if( mouse_intersects(video_drv, xpos, ypos, xsize, ysize ) )
         video_drv->mouse_enable();
 }
 

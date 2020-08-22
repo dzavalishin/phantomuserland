@@ -78,7 +78,7 @@ void scr_zbuf_reset()
 /* wrong! not byte but zbuf_t!
 void scr_zbuf_reset_z(zbuf_t z)
 {
-    //SHOW_FLOW( 1, "%d", z );
+    //LOG_FLOW( 1, "%d", z );
     memset( zbuf, z, zbsize );
 }
 */
@@ -95,7 +95,7 @@ void scr_zbuf_reset_win( window_handle_t w )
 #if 1
     // TODO XXX HACK alert - hardcoded decorations size
     const int bw = 3;
-    scr_zbuf_reset_square( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 21 );
+    scr_zbuf_reset_square( w->x - bw, w->y - bw, w->xsize + bw*2, w->ysize + bw*2 + 31 );
 #else
     scr_zbuf_reset_square( w->x, w->y, w->xsize, w->ysize );
 #endif
@@ -133,7 +133,7 @@ void scr_zbuf_turn_upside(int v) { zb_upside = v; }
 #if !USE_ZBUF_SHADOW
 void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
 {
-    //SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
+    //LOG_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
     //lprintf( "zb reset @ %d/%d, sz %d x %d, z %d\n", x, y, xsize, ysize, zpos );
 
     rect_t out;
@@ -171,7 +171,7 @@ void scr_zbuf_reset_square_z(int x, int y, int xsize, int ysize, zbuf_t zpos )
 
 static void do_scr_zbuf_reset_square_z(zbuf_t *target, int x, int y, int xsize, int ysize, zbuf_t zpos )
 {
-    //SHOW_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
+    //LOG_FLOW( 2, "@ %d/%d, sz %d x %d, z %d", x, y, xsize, ysize, zpos );
     //lprintf( "zb reset @ %d/%d, sz %d x %d, z %d\n", x, y, xsize, ysize, zpos );
 
     rect_t out;
@@ -299,7 +299,7 @@ void scr_zbuf_paint()
 {
     int np = scr_get_xsize() * scr_get_ysize();
 
-#if 0
+#if 1
     if(scr_get_bpp() == 24)
     {
         zbuf_t *zbp = zbuf;

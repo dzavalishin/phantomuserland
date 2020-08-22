@@ -44,7 +44,7 @@ struct port_info {
 
 
 
-int             port_init(void);
+errno_t         phantom_port_init(void);
 
 // -----------------------------------------------------------------------
 //
@@ -53,43 +53,45 @@ int             port_init(void);
 // -----------------------------------------------------------------------
 
 //! Deletes ports owned by 'owner', 'count' can be 0
-errno_t 	port_delete_owned_ports(tid_t owner, int *count);
+errno_t 		phantom_port_delete_owned_ports(tid_t owner, int *count);
 
 
-port_id         port_create(int32 queue_length, const char *name);
-int             port_close(port_id id);
-int             port_delete(port_id id);
-port_id	        port_find(const char *port_name);
-int             port_get_info(port_id id, struct port_info *info);
-int             port_get_next_port_info(proc_id proc,
-				uint32 *cookie,
-				struct port_info *info);
-ssize_t		port_buffer_size(port_id port);
-ssize_t		port_buffer_size_etc(port_id port,
-				uint32 flags,
-				bigtime_t timeout);
-int32		port_count(port_id port);
-ssize_t		port_read(port_id port,
-				int32 *msg_code,
-				void *msg_buffer,
-				size_t buffer_size);
-ssize_t		port_read_etc(port_id port,
-				int32 *msg_code,
-				void *msg_buffer,
-				size_t buffer_size,
-				uint32 flags,
-				bigtime_t timeout);
-int			port_set_owner(port_id port, proc_id proc);
-int			port_write(port_id port,
-				int32 msg_code,
-				void *msg_buffer,
-				size_t buffer_size);
-int		 	port_write_etc(port_id port,
-				int32 msg_code,
-				void *msg_buffer,
-				size_t buffer_size,
-				uint32 flags,
-				bigtime_t timeout);
+errno_t         phantom_port_create(port_id *ret, int32 queue_length, const char *name);
+errno_t         phantom_port_close(port_id id);
+errno_t         phantom_port_delete(port_id id);
+errno_t	        phantom_port_find(port_id *ret, const char *port_name);
+errno_t         phantom_port_get_info(port_id id, struct port_info *info);
+errno_t         phantom_port_get_next_port_info(proc_id proc,
+					uint32 *cookie,
+					struct port_info *info);
+errno_t			phantom_port_buffer_size(ssize_t *sizep, port_id port);
+errno_t			phantom_port_buffer_size_etc(ssize_t *sizep, port_id port,
+					uint32 flags,
+					bigtime_t timeout);
+errno_t			phantom_port_count(int32 *countp, port_id port);
+errno_t			phantom_port_read(ssize_t *len, 
+					port_id port,
+					int32 *msg_code,
+					void *msg_buffer,
+					size_t buffer_size);
+errno_t			phantom_port_read_etc(ssize_t *len, 
+					port_id port,
+					int32 *msg_code,
+					void *msg_buffer,
+					size_t buffer_size,
+					uint32 flags,
+					bigtime_t timeout);
+int				phantom_port_set_owner(port_id port, proc_id proc);
+errno_t			phantom_port_write(port_id port,
+					int32 msg_code,
+					void *msg_buffer,
+					size_t buffer_size);
+errno_t	 		phantom_port_write_etc(port_id port,
+					int32 msg_code,
+					void *msg_buffer,
+					size_t buffer_size,
+					uint32 flags,
+					bigtime_t timeout);
 
 
 

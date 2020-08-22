@@ -24,8 +24,8 @@ public class DupSourceNode extends Node {
 	}
 	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
-		if(getType().is_int()) 
-			throw new PlcException("Codegen", "op - no int dup yet");
+		if(getType().is_on_int_stack()) 
+			throw new PlcException("Codegen", "op - no int stack dup yet");
 		else
 			c.emitOsDup();
 	}

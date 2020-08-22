@@ -138,11 +138,11 @@ void arm_bcm2835_interrupt_enable(int irq)
     }
     else if( irq < 64 )
     {
-        W32(BCM2835_INTR_IRQ_ENABLE_2,1<<irq);
+        W32(BCM2835_INTR_IRQ_ENABLE_2,1<<(irq-32));
     }
     else if( irq < (32+64) )
     {
-        W32(BCM2835_INTR_IRQ_ENABLE_BASIC,1<<irq);
+        W32(BCM2835_INTR_IRQ_ENABLE_BASIC,1<<(irq-(32+64)));
     }
     else
         panic("int no out of range");
@@ -156,11 +156,11 @@ void arm_bcm2835_interrupt_disable(int irq)
     }
     else if( irq < 64 )
     {
-        W32(BCM2835_INTR_IRQ_DISABLE_2,1<<irq);
+        W32(BCM2835_INTR_IRQ_DISABLE_2,1<<(irq-32));
     }
     else if( irq < (32+64) )
     {
-        W32(BCM2835_INTR_IRQ_DISABLE_BASIC,1<<irq);
+        W32(BCM2835_INTR_IRQ_DISABLE_BASIC,1<<(irq-(32+64)) );
     }
     else
         panic("int no out of range");

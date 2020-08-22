@@ -32,4 +32,4 @@
 #	cp classes $(BOOT_PATH)
 
 clean: 
-	-rm *.pc *.lst *.lstc classes *.d
+	-rm *.pc *.lst *.lstc classes *.d *.java *.c *.ll

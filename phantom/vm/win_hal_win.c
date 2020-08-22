@@ -10,6 +10,7 @@
 **/
 
 #include <windows.h>
+#include <unistd.h>
 
 
 
@@ -100,10 +101,11 @@ int win_hal_mutex_unlock(void *_m)
 int win_hal_mutex_is_locked(void *_m)
 {
     struct phantom_mutex_impl *impl = _m;
-    return impl->lock;
+    //return impl->lock;
+    return 1;
 }
 
-
+/*
 //extern int errno;
 #include <errno.h>
 //errno_t k_write( int *nwritten, int fd, const void *addr, int count )
@@ -114,7 +116,7 @@ int k_write( int *nwritten, int fd, const void *addr, int count )
 	*nwritten = rc;
 	return 0;
 }
-
+*/
 
 
 

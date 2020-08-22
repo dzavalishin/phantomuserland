@@ -1,7 +1,7 @@
 #ifdef ARCH_ia32
 
 #include <ia32/asm.h>
-
+#if 1
 // void rgba2rgba_zbmove( struct rgba_t *dest, const struct rgba_t *src, zbuf_t *zb, int nelem, zbuf_t zpos )
 
 //.globl _rgba2rgba_zbmove
@@ -56,4 +56,5 @@ more_pixels:
 	ret
 
 
+#endif
 #endif

@@ -128,6 +128,20 @@ errno_t k_stat( const char *path, struct stat *data, int statlink )
 }
 
 
+errno_t k_stat_size( const char *path, unsigned int *size ) // just get file size
+{
+    struct stat sb;
+
+    int err = 0;
+    usys_stat( &err, &k_u, path, &sb, 0 ); // TODO last param (statlink) = 0?
+
+    if( err ) return err;
+
+    *size = sb.st_size;
+
+    return 0;
+}
+
 
 
 

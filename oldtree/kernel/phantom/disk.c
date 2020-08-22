@@ -10,7 +10,7 @@
 
 #define DEBUG_MSG_PREFIX "DiskIO"
 #include <debug_ext.h>
-#define debug_level_flow 1
+#define debug_level_flow 0
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -397,7 +397,7 @@ static void lookup_old_pc_partitions(phantom_disk_partition_t *p)
         char pn[4] = "PC0";
         //pn[2] += pno++;
         pn[2] += pno;
-        strncpy(newp->name, pn, PARTITION_NAME_LEN-1);
+        strlcpy(newp->name, pn, PARTITION_NAME_LEN);
 
         register_partition( newp );
     }

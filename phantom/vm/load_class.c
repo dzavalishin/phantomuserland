@@ -5,7 +5,8 @@
  * Copyright (C) 2005-2017 Dmitry Zavalishin, dz@dz.ru
  *
  * Load class from binary storage, such as filesystem file or blob from network.
- *
+ * 
+ * See <https://github.com/dzavalishin/phantomuserland/wiki/VmLinker>
  *
 **/
 
@@ -41,8 +42,8 @@ struct method_loader_handler
 {
     struct pvm_code_handler     ch;
 
-    struct pvm_object           my_name;
-    struct pvm_object           my_code;
+    pvm_object_t           my_name;
+    pvm_object_t           my_code;
     int                         my_ordinal;
 };
 
@@ -51,8 +52,8 @@ struct type_loader_handler
 {
     struct pvm_code_handler     ch;
 
-    struct pvm_object           class_name;
-    struct pvm_object           contained_class_name;
+    pvm_object_t           class_name;
+    pvm_object_t           contained_class_name;
     int                         is_container;
 };
 
@@ -121,24 +122,24 @@ pvm_load_method( struct method_loader_handler *mh, const unsigned char *data, in
 //---------------------------------------------------------------------------
 
 
-int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *out )
+int pvm_load_class_from_memory( const void *data, int fsize, pvm_object_t *out )
 {
     const unsigned char *rec_start = (const unsigned char *)data;
     int record_size = 0;
 
-    struct pvm_object class_name;
-    //struct pvm_object base_class = pvm_get_null_class();
+    pvm_object_t class_name;
+    //pvm_object_t base_class = pvm_get_null_class();
 
     int n_object_slots = 0; // for a new class
     int n_method_slots = 0;
 
 
-    struct pvm_object base_class = pvm_get_null_class();
-    struct pvm_object iface        = { 0, 0 };
-    struct pvm_object ip2line_maps = { 0, 0 };
-    struct pvm_object method_names = { 0, 0 };
-    struct pvm_object field_names  = { 0, 0 };
-    pvm_object_t const_pool  = { 0, 0 };
+    pvm_object_t base_class = pvm_get_null_class();
+    pvm_object_t iface        = 0;
+    pvm_object_t ip2line_maps = 0;
+    pvm_object_t method_names = 0;
+    pvm_object_t field_names  = 0;
+    pvm_object_t const_pool   = 0;
 
     int got_class_header = 0;
 
@@ -193,10 +194,10 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
 
                 if(0||debug_print) printf("\n");	// terminate string
 
-                struct pvm_object base_name = pvm_code_get_string(&h);
+                pvm_object_t base_name = pvm_code_get_string(&h);
 
                 // TODO turn on later, when we're sure all class collections have it
-                //struct pvm_object version_string = pvm_code_get_string(&h);
+                //pvm_object_t version_string = pvm_code_get_string(&h);
 
                 got_class_header = 1;
 #if 0
@@ -223,7 +224,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                     pvm_object_print( class_name );
                     printf(" based on: " );
                     pvm_object_print( base_name );
-                    printf(" @%p\n", base_class.data);
+                    printf(" @%p\n", base_class);
                 }
 
                 ref_dec_o(base_name);
@@ -244,6 +245,11 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 pvm_load_method( &mh, ptr, record_data_size );
                 pvm_set_ofield( iface, mh.my_ordinal, mh.my_code );
                 pvm_set_ofield( method_names, mh.my_ordinal, mh.my_name );
+#if 0                
+                lprintf("add to method_names[%d] = ", mh.my_ordinal );
+                pvm_puts(mh.my_name);
+                lprintf("\n");
+#endif
             }
             break;
 
@@ -289,6 +295,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 int m_ordinal = pvm_code_get_int32(&h);
                 int m_n_args = pvm_code_get_int32(&h);
                 int is_ctor = pvm_code_get_int32(&h); // 1 = method is constructor
+                (void) is_ctor;
 
                 struct type_loader_handler mth;
                 pvm_load_type( &h , &mth );
@@ -334,7 +341,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 struct type_loader_handler th;
                 pvm_load_type( &h , &th );
 
-                pvm_object_t c_value = { 0, 0 };
+                pvm_object_t c_value = 0;
 
                 // No const containers (yet?)
                 if( th.is_container ) goto unk_const;
@@ -345,7 +352,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
                 }
 
             unk_const:
-                if( c_value.data )
+                if( c_value )
                 {
                     // had bug in pool read - no ref inc, fixed, turned daturate off
                     //ref_saturate_o(c_value);
@@ -404,7 +411,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
         return 1;
 
 
-    struct pvm_object new_class = pvm_create_class_object(class_name, iface, sizeof(struct pvm_object) * n_object_slots);
+    pvm_object_t new_class = pvm_create_class_object(class_name, iface, sizeof(pvm_object_t) * n_object_slots);
 
     struct data_area_4_class *cda= pvm_object_da( new_class, class );
     cda->ip2line_maps = ip2line_maps;
@@ -417,7 +424,7 @@ int pvm_load_class_from_memory( const void *data, int fsize, struct pvm_object *
     {
         printf("\nDone loading "); 
         pvm_object_print( class_name );
-        printf(" @%p\n", new_class.data); 
+        printf(" @%p\n", new_class); 
     }
 
     *out = new_class;

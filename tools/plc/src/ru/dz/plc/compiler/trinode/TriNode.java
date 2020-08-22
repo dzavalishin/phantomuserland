@@ -7,6 +7,7 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeVoid;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.binode.BiNode;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
@@ -55,6 +56,28 @@ abstract public class TriNode extends BiNode {
 
 	public void preprocess_me( ParseState s ) throws PlcException {}
 
+	public void propagateVoidParents()
+	{
+		if( _l != null )
+		{
+			//_l.setParentIsVoid();
+			_l.propagateVoidParents();
+		}
+		
+		if( _m != null )
+		{
+			//_m.setParentIsVoid();
+			_m.propagateVoidParents();
+		}
+		
+		if( _r != null )
+		{
+			//_r.setParentIsVoid();
+			_r.propagateVoidParents();
+		}
+	}
+	
+	
 	// NB! Move between stacks is not done automatically for tri-nodes, do it manually!
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
@@ -78,9 +101,9 @@ class assert_node extends TriNode {
 		super(a, b, to_throw );
 	}
 	public String toString()  {    return "assert";  }
-	public void find_out_my_type()
+	public PhantomType find_out_my_type()
 	{
-		type = new PhTypeVoid();
+		return PhantomType.getVoid();
 	}
 }
 

@@ -16,15 +16,9 @@ import ru.dz.plc.util.PlcException;
  */
 public class ValEqNode extends EqNeqNode {
 
-	public ValEqNode( Node l, Node r) {    
+	public ValEqNode( Node l, Node r) throws PlcException {    
 		super(l,r);  
-		//opName = "Eq";
-		try {
-			// we're allways int
-			setType(PhantomType.getInt());
-		} catch (PlcException e) {
-			throw new RuntimeException(e);
-		}
+		presetType(PhantomType.getInt());
 	}
 
 	public String toString()  {    return "==";  }
@@ -48,6 +42,10 @@ public class ValEqNode extends EqNeqNode {
 
 			c.emitNumericPrefix(common_type);			
 			c.emitISubLU();
+			
+			if(!common_type.is_int())
+				c.emitNumericCast(common_type, PhantomType.getInt());
+
 			c.emitLogNot();
 		}
 		else

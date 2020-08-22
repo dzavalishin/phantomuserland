@@ -4,19 +4,13 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
+ * Some compiler/VM regression tests.
  *
  *
  **/
 
 package .ru.dz.phantom.system;
 
-/**
- *
- * Some compiler/VM regression tests.
- *
- **/
 
 
 attribute const * ->!;
@@ -26,6 +20,26 @@ import .internal.double;
 import .internal.float;
 import .internal.long;
 import .phantom.util.map;
+import .ru.dz.phantom.system.regression_tests_ctor;
+
+
+/*
+class regression_tests_ctor
+{
+	var saved : .internal.int;
+
+	void regression_tests_ctor( var a : .internal.int )
+	{
+		saved = a;
+	}
+
+	void check( var b : .internal.int )
+	{
+        if( b != saved ) 		throw "constructor with parameters failed";
+	}
+};
+*/
+
 
 class regression_tests
 {
@@ -39,6 +53,11 @@ class regression_tests
 
 	var called_string_one : int;
 	var called_int_one : int;
+
+    // -------------------------------------------------------------------
+    // Test calling methods with different args and same name
+    // -------------------------------------------------------------------
+
 
 	void sig_func( var a : .internal.string )
 	{
@@ -68,12 +87,33 @@ class regression_tests
         if( called_int_one == 0 ) 			throw "signature err 4";
     }
 
+    // -------------------------------------------------------------------
+    // Test default constructor
+    // -------------------------------------------------------------------
 
 	void regression_tests()
 	{
 		ctor_called = 3456;
 	}
 
+    // -------------------------------------------------------------------
+    // Test constructor with parameters
+    // -------------------------------------------------------------------
+
+	void ctor_param_test()
+	{
+
+		var t : regression_tests_ctor;
+		t = new regression_tests_ctor( 33 );
+		t.check(33);
+        print("constructor parameters test passed\n");
+
+	}
+
+
+    // -------------------------------------------------------------------
+    // Entry point
+    // -------------------------------------------------------------------
 
     void run (var _boot_object @const )
     {
@@ -96,6 +136,7 @@ class regression_tests
         double_test();
 
 		signature_test();
+		ctor_param_test();
 
 	// test c'tor call
 
@@ -130,12 +171,12 @@ class regression_tests
         str_array[2] = "two";
         str_array[1] = "one";
 
-        print("Beeping: ");
+        print("Loop start: ");
         i = 3;
         while( i )
         {
             i = i - 1;
-            print("beep "); print(str_array[i]); print("! ");
+            print("loop "); print(str_array[i]); print("! ");
         }
         print("\n");
 
@@ -379,6 +420,9 @@ class regression_tests
 
 
 };
+
+
+
 
 
 

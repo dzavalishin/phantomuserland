@@ -23,4 +23,7 @@ void *calloc(size_t n_elem, size_t elem_size);
 void *calloc_aligned(size_t n_elem, size_t elem_size, size_t align);
 
 
+//! FIXME TODO rewrite it asap! Shit!
+void *realloc(void *ptr, size_t size);
+
 #endif // MALLOC_H

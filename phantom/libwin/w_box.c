@@ -53,12 +53,15 @@ void w_fill_rect( window_handle_t w, rgba_t color, rect_t r )
 
 
 void
-w_fill( window_handle_t win, rgba_t color )
+w_fill_bitmap( rgba_t *dest, rgba_t color, int npixels )
 {
-    int i = (win->xsize * win->ysize) - 1;
+    assert(npixels > 0);
+    int i = npixels - 1;
+
+    //if( ((void *)dest) > 0x80000000 )        lprintf("w_fill_bitmap dest %p sz %d\n", dest, npixels );
 
 #if defined(ARCH_ia32) && 1
-    rgba_t *dest = win->w_pixel;
+    //rgba_t *dest = win->w_pixel;
     asm volatile(
                  "\
                  cld ; \
@@ -75,12 +78,20 @@ w_fill( window_handle_t win, rgba_t color )
 #else
     for( ; i >= 4;  )
     {
-        win->w_pixel[i--] = color;
-        win->w_pixel[i--] = color;
-        win->w_pixel[i--] = color;
-        win->w_pixel[i--] = color;
+        dest[i] = color;
+        dest[i-1] = color;
+        dest[i-2] = color;
+        dest[i-3] = color;
+        i -= 4;
     }
     for( ; i >= 0; i-- )
-        win->w_pixel[i] = color;
+        dest[i] = color;
 #endif
 }
+
+
+void w_fill( window_handle_t win, rgba_t color )
+{
+    w_fill_bitmap( win->w_pixel, color, win->xsize * win->ysize );
+}
+

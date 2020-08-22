@@ -11,22 +11,21 @@ import ru.dz.plc.util.PlcException;
 
 /**
  * <p>Value != node.</p>
+ * 
  * <p>Copyright: Copyright (c) 2004-2009 Dmitry Zavalishin</p>
+ * 
  * <p>Company: <a href="http://dz.ru/en">Digital Zone</a></p>
+ * 
  * @author dz
  */
 
 
 public class ValNeqNode extends EqNeqNode {
-	public ValNeqNode( Node l, Node r) {    
+	
+	public ValNeqNode( Node l, Node r) 
+	{    
 		super(l,r);
-		//opName = "Neq";
-		try {
-			// we're allways int
-			setType(PhantomType.getInt());
-		} catch (PlcException e) {
-			throw new RuntimeException(e);
-		}
+		presetType(PhantomType.getInt());
 	}
 
 	public boolean is_on_int_stack() { return true; }
@@ -47,6 +46,9 @@ public class ValNeqNode extends EqNeqNode {
 
 			c.emitNumericPrefix(common_type);			
 			c.emitISubLU();
+			
+			if(!common_type.is_int())
+				c.emitNumericCast(common_type, PhantomType.getInt());
 		}
 		else
 		{

@@ -16,9 +16,12 @@
 #include <video/bitmap.h>
 #include <video/window.h>
 #include <video/zbuf.h>
+#include <video/font.h>
 
 void init_new_windows(void);
 
+void init_truetype(void);
+void init_task_bar(void);
 
 // -----------------------------------------------------------------------
 // windows lock - must be taken when manipulate all win q or on update
@@ -96,11 +99,21 @@ extern int      bit_mover_byte_step;
 
 
 // -----------------------------------------------------------------------
-// etc?
+// Creation
 // -----------------------------------------------------------------------
 
 drv_video_window_t *private_drv_video_window_create(int xsize, int ysize);
 
+// -----------------------------------------------------------------------
+// Internals
+// -----------------------------------------------------------------------
 
+/// UNLOCKED: call from lock only
+/// Is one of topmost - i.e. covered only by WFLAG_WIN_ONTOP ones
+int iw_is_top(drv_video_window_t *w);
 
+void w_fill_bitmap( rgba_t *dest, rgba_t color, int npixels );
+
+void iw_setup_buffers(drv_video_window_t *w); //< setup r_ and w_pointers
+void iw_switch_buffers(drv_video_window_t *w); //< for double buffered mode
 

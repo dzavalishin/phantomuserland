@@ -29,9 +29,9 @@ public class OpArrayLength extends Node {
 		//super.preprocess_me(s);
 	}
 
-	public void find_out_my_type() throws PlcException
+	public PhantomType find_out_my_type() throws PlcException
 	{
-		type = PhantomType.getInt();
+		return PhantomType.getInt();
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException

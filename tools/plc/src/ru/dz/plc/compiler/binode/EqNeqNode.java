@@ -12,6 +12,10 @@ public abstract class EqNeqNode extends BiBistackNode {
 		super(l, r);
 	}
 
+	public PhantomType find_out_my_type() throws PlcException
+	{
+		return PhantomType.getInt();
+	}	
 	
 	@Override
 	public void preprocess_me(ParseState s) throws PlcException {

@@ -4,9 +4,7 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
+ * Runnable. Place to hardcode run method ordinal.
  *
 **/
 
@@ -15,19 +13,13 @@ package .ru.dz.phantom.system;
 
 attribute const * ->!;
 
-/**
- *
- * Runnable. Place to hardcode run method ordinal.
- *
-**/
-
 class runnable
 {
-	// They call us here
-	void run(var parent_object @const ) [8]
-	{ 
-		throw "Abstract runnable started";
-	}
+    // They call us here
+    void run(var parent_object @const ) [8]
+    {
+        throw "Abstract runnable started";
+    }
 
 };
 

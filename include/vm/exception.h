@@ -18,8 +18,8 @@
 
 struct pvm_exception_handler
 {
-    struct pvm_object  		object;
-    unsigned int    		jump;
+    pvm_object_t   object;
+    unsigned int   jump;
 };
 
 

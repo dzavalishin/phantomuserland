@@ -65,6 +65,11 @@ struct phantom_thread
     /** NB! Exactly first! Accessed from asm. */
     cpu_state_save_t            cpu;
 
+#if CONF_DUAL_PAGEMAP
+    int32_t                     cr3; // TODO ARCH DEP!
+    int32_t                     object_land_access_nest_level;
+#endif
+
     //! on which CPU this thread is dispatched now
     int                         cpu_id; 
 
@@ -129,7 +134,8 @@ struct phantom_thread
     //* Used to wake with timer, see hal_sleep_msec
     timedcall_t                 sleep_event; 
 
-    int                         snap_lock; // nonzero = can't begin a snapshot
+    //int                         snap_lock; // nonzero = can't begin a snapshot
+    int                         sub_from_pers_mem_lock_count; // Times we incremented vm_persistent_memory_lock_count
 
     int                         preemption_disabled;
 
@@ -140,7 +146,7 @@ struct phantom_thread
     void *                      death_handler; // func to call if thread is killed
 
     //! Func to call on trap (a la unix signals), returns nonzero if can't handle
-    int 			(*trap_handler)( int sig_no, struct trap_state *ts );
+    int                         (*trap_handler)( int sig_no, struct trap_state *ts );
     // --------------------------------------------------------------
     // Scheduler part
     // --------------------------------------------------------------

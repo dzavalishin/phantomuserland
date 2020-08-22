@@ -19,13 +19,29 @@
 #define FIQ_MASK  0x00000040
 #define INTs_MASK (IRQ_MASK | FIQ_MASK)
 
-
+/*
+IF ({ARCHITECTURE} = "6"):LOR:({ARCHITECTURE} = "6K"):LOR:({ARCHITECTURE} = "6T2"):LOR:({ARCHITECTURE} = "6Z")
+MOV R0, #0
+MCR p15, 0, r0, c7, c0, 4
+ELIF ({ARCHITECTURE} = "5T"):LOR:({ARCHITECTURE} = "5TE"):LOR:({ARCHITECTURE} = "5TEJ")
+MOV R0, #0
+MCR p15, 0, r0, c7, c0, 4
+ELIF ({ARCHITECTURE} = "7"):LOR:({ARCHITECTURE} = "7-A"):LOR:({ARCHITECTURE} = "7-R"):LOR:({ARCHITECTURE} = "7-M")
+WFI
+ELSE
+NOP
+ENDIF
+*/
 
 void hal_wait_for_interrupt(void)
 {
     hal_sti();
     // TODO ARM9 has "MCR p15,0,Rd,c7,c0,4" wait for interrupt
-    __asm __volatile("wfi" : : );
+    //__asm __volatile("wfi" : : );
+	__asm __volatile("\
+		MOV R0, #0; \
+		MCR p15, 0, r0, c7, c0, 4; \
+	    " : : );
 }
 
 

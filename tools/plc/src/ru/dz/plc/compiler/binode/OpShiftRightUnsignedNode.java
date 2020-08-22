@@ -21,7 +21,8 @@ class OpShiftRightUnsignedNode extends BinaryOpNode
 	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException 
 	{
-		if(getType().is_int()) c.emitUShiftRight();
-		else throw new PlcException("Codegen", "op >> (unsigned) does not exist for this type");
+		//if(getType().is_int()) c.emitUShiftRight();
+		//else throw new PlcException("Codegen", "op >> (unsigned) does not exist for this type");
+		generateIntegerStackOp(c, () -> c.emitUShiftRight() );
 	}
 }

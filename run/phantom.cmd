@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 rem http://dietpc.org/windows/qemu/
 rem http://lassauge.free.fr/qemu/
 
@@ -26,6 +26,7 @@ rem set QEMU_AUDIO_DRV=sdl
 rem set QEMU_AUDIO_DRV=fmod
 rem set SOUND=-soundhw sb16,es1370 -device intel-hda -device hda-duplex
 rem set SOUND=-soundhw sb16,es1370
+set SOUND=-soundhw es1370
 
 rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=ohci.0 -device usb-kbd,bus=ohci.0
 rem SET USB=-device pci-ohci,id=ohci -device usb-mouse,bus=/i440FX-pcihost/pci.0/ohci/ohci.0
@@ -50,6 +51,7 @@ rem SET Q_REDIR=-redir udp:123::123
 SET Q_REDIR=-redir udp:8023::23 -redir udp:8007::7 -redir tcp:8007::7 -redir udp:161::161 -redir udp:162::162 -redir tcp:1256::1256
 
 SET Q_PORTS= -serial file:serial0.log
+rem SET Q_PORTS= -serial stdio
 
 rem SET Q_AHCI=-drive id=disk,file=ahci.img,if=none -device ahci,id=ahci -device ide-drive,drive=disk,bus=ahci.0 
 
@@ -86,7 +88,7 @@ rem SET Q_KQ=-enable-kqemu
 rem SET Q_KQ=-enable-kqemu -kernel-kqemu
 
 rem SET Q_VGA=-vga std
-rem SET Q_VGA=-vga cirrus
+SET Q_VGA=-vga cirrus
 SET Q_VGA=-vga vmware
 rem SET Q_VGA=-device cirrus-vga
 rem -virtioconsole 1

@@ -27,7 +27,7 @@ void w_bg_win_init(void)
 {
     if(back_win)
     {
-        SHOW_ERROR0( 0, "BG win inited twice" );
+        LOG_ERROR0( 0, "BG win inited twice" );
         return;
     }
 

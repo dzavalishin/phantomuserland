@@ -20,7 +20,6 @@
 #include <vm/p2c.h>
 #include <vm/syscall.h>
 
-
 #include <kernel/net/udp.h>
 
 
@@ -41,36 +40,54 @@ static pvm_object_t cn_url_blocking_syscall_worker( pvm_object_t conn, struct da
     (void) tc;
     (void) arg;
 
+    errno_t e = 0;
+    char buf[4096];
+
+    vm_lock_persistent_memory();
+
     struct data_area_4_connection *c = pvm_object_da( conn, connection );
 
     //struct cn_url_volatile   *vp = c->v_kernel_state;
     struct cn_url_persistent *pp = c->p_kernel_state;
 
-    char buf[4096];
+    char *url = strdup( pp->url ); // todo move to volatile state
 
-    errno_t e = 0;
-
-
-    switch( nmethod )
+    if( 0 == url )
     {
-    default:
-    case CONN_OP_READ:
-        e = net_curl( pp->url, buf, sizeof(buf) );
-        break;
-
-    case CONN_OP_WRITE:
-    case CONN_OP_BIND:
-        e = ENOSYS;
-        break;
+        //SHOW_ERROR( 1, "out of mem for url %s", pp->url );
+        e = ENOMEM;
     }
 
+    vm_unlock_persistent_memory();
+
+    if( e == 0 )
+    {
+        switch( nmethod )
+        {
+        default:
+        case CONN_OP_READ:
+            e = net_curl( url, buf, sizeof(buf), 0 );
+            break;
+
+        case CONN_OP_WRITE:
+        case CONN_OP_BIND:
+            e = ENOSYS;
+            break;
+        }
+    }
+
+    free(url);
 
 //ret:
     if( e )
     {
         SHOW_ERROR( 1, "err %d", e );
-        // err_ret:
-        return pvm_create_string_object("");
+
+        vm_lock_persistent_memory();
+        pvm_object_t ret = pvm_create_string_object("");
+        vm_unlock_persistent_memory();
+
+        return ret;
     }
 
     char *bp = buf;
@@ -96,7 +113,12 @@ static pvm_object_t cn_url_blocking_syscall_worker( pvm_object_t conn, struct da
     // goto err_ret;
 
 done:
-    return pvm_create_string_object(bp);
+
+    vm_lock_persistent_memory();
+    pvm_object_t ret = pvm_create_string_object(bp);
+    vm_unlock_persistent_memory();
+
+    return ret;
 }
 
 

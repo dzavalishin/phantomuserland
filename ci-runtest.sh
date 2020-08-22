@@ -20,7 +20,7 @@ dd if=/dev/zero of=snapcopy.img bs=4096 skip=1 count=1024 2> /dev/null
 dd if=/dev/zero of=vio.img bs=4096 skip=1 count=1024 2> /dev/null
 
 # take working copy of the Phantom disk
-cp ../../oldtree/run_test/$DISK_IMG .
+cp ../../run/test/img/$DISK_IMG .
 
 launch_phantom
 #echo 'info pci' >&3

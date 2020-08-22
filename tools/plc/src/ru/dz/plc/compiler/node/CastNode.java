@@ -16,7 +16,7 @@ public class CastNode extends Node {
 	public CastNode(Node l, PhantomType pt) throws PlcException {    
 		super(l);
 		this.pt = pt;
-		setType(pt);
+		presetType(pt);
 	}
 
 	public String toString()  {    return "(cast)";  }

@@ -79,6 +79,34 @@ static void moveImage( rgba_t *to, unsigned char *from, int height, int width, i
 
 }
 
+static void moveImage1( rgba_t *to, unsigned char *from, int height, int width )
+{
+    int row;
+    //int *toi = (void*)to;
+    for( row = height - 1; row >= 0; row-- )
+    {
+        unsigned char *rowScan = from + (row * width * 3);
+        int pixelsLeft;
+        for(pixelsLeft = width;pixelsLeft > 0;pixelsLeft--)
+        {
+#if 0
+            int bgra = 0xFF << 24; // a
+            bgra |= (*rowScan++) << 16;
+            bgra |= (*rowScan++) << 8;
+            bgra |= (*rowScan++) << 0;
+            *toi++ = bgra;
+#else            
+            to->a = 255;
+            to->r = *rowScan++;
+            to->g = *rowScan++;
+            to->b = *rowScan++;
+            to++;
+#endif            
+        }
+    }
+
+}
+
 
 static errno_t parseHeader( unsigned char **pfrom, int *width, int *height, int *maxcolorval)
 {
@@ -135,7 +163,10 @@ errno_t bmp_ppm_load( drv_video_bitmap_t **to, void *_from )
     int twobytes = maxcolorval > 255;
 
     //rgba_t *pixel = bmp->pixel;
-    moveImage( bmp->pixel, from, height, width, twobytes );
+    if( twobytes )
+        moveImage( bmp->pixel, from, height, width, twobytes );
+    else
+        moveImage1( bmp->pixel, from, height, width );
     return 0;
 }
 
@@ -161,3 +192,17 @@ int drv_video_string2bmp( struct data_area_4_bitmap *bmp, void *_from )
     return 0;
 }
 
+
+
+// Returns nonzero on failure
+errno_t w_duplicate_bitmap( drv_video_bitmap_t **to, drv_video_bitmap_t *from )
+{
+    size_t bytes = drv_video_bitmap_bytes( from->xsize, from->ysize );
+
+    *to = malloc(bytes);
+    if( *to == NULL ) return ENOMEM;
+
+    memcpy( *to, from, bytes );
+    
+    return 0;
+}

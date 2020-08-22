@@ -41,13 +41,12 @@ struct drv_video_screen_t        drv_video_headless =
 
 probe: (void *)vid_null,
 start: (void *)vid_null,
+accel: (void *)0,
 stop:  (void *)vid_null,
 
-    vid_null,
-    (void*)vid_null,
-    (void*)vid_null,
-
-    vid_null,
+.update = vid_null,
+.bitblt = (void*)vid_null,
+.readblt = (void*)vid_null,
 
 mouse:    		vid_null,
 
@@ -144,7 +143,7 @@ int pvm_video_init()
 
     drv_video_headless.screen = screen_image;
 
-    printf("Starting headless graphics 'driver'\n" );
+    //printf("Starting headless graphics 'driver'\n" );
 
     scr_zbuf_init();
     scr_zbuf_turn_upside(1);

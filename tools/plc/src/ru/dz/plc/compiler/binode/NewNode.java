@@ -46,15 +46,12 @@ public class NewNode extends Node
 
 	@Override
 	public
-	void find_out_my_type() throws PlcException {
+	PhantomType find_out_my_type() throws PlcException {
 
 		if(static_type != null)
-		{
-			type = static_type;
-			return;
-		}
+			return static_type;
 
-		super.find_out_my_type();
+		return super.find_out_my_type(); // TODO right?
 	}
 
 	public String toString()  
@@ -80,7 +77,7 @@ public class NewNode extends Node
 
 		//c.emitDebug((byte)0, "before new");
 		
-		//boolean dynamicClass = _l != null;
+		int n_param = countParameters();
 
 		if( dynamic )
 		{
@@ -91,12 +88,18 @@ public class NewNode extends Node
 		}
 		else
 		{
+			if(static_type.get_class().isInternal())
+			{
+				if( n_param > 0 )
+					throw new PlcException( "new Node", "attempt to construct internal class object with parameters" );
+				//return;
+			}
+			
 			static_type.emit_get_class_object(c,s);
 		}
 		
 		//dynamicClass = true; // disable ctor call temp FIXME
 		
-		int n_param = countParameters();
 /* can't drop it! will regenerate class ptr below
 		if( !dynamicClass ) // no c'tor call for dyn class - TODO FIXME
 			c.emitOsDup(); // copy of pointer to class - MUST POP BELOW, pull copies me, not moves
@@ -117,14 +120,14 @@ public class NewNode extends Node
 		{
 			print_warning("No constructor call for dynamic new!");
 		}
-		else
+		else if(!static_type.get_class().isInternal()) // No c'tor for internal obj
 		{
 
 			// args - TODO are we sure they're on obj stack?
 			if( args != null ) {
 
 				if( dynamic )
-					throw new PlcException(context.get_context(), "No constructor for dynamic class new" );
+					throw new PlcException(context.get_context(), "No constructor with args for dynamic class new" );
 
 				args.generate_code(c, s);
 				//move_between_stacks(c, _l.is_on_int_stack());
@@ -140,7 +143,7 @@ public class NewNode extends Node
 			
 			
 
-			if( n_param > 0 )				throw new PlcException(context.get_context(), "can generate just argless c'tors, sorry" );
+			//if( n_param > 0 )				throw new PlcException(context.get_context(), "can generate just argless c'tors, sorry" );
 
 
 			int method_ordinal = findConstructorOrdinal(n_param);
@@ -165,6 +168,8 @@ public class NewNode extends Node
 		return n_param;
 	}
 
+
+	/*
 	private int findConstructorOrdinal(int n_param) throws PlcException 
 	{
 		int method_ordinal = 0; // .internal.object constructor
@@ -178,7 +183,7 @@ public class NewNode extends Node
 				if( n_param > 0 )
 					throw new PlcException(context.get_position(), "No constructor found" );
 
-				print_warning("No constructor found, will call Object constructor");
+				//print_warning("No constructor found, will call Object constructor");
 			}
 			else
 				method_ordinal = cm.getOrdinal();
@@ -187,8 +192,38 @@ public class NewNode extends Node
 			print_warning("Can't call c'tor for "+static_type);
 		
 		return method_ordinal;
-	}
+	}*/
 
+	
+	private int findConstructorOrdinal(int n_param) throws PlcException 
+	{
+		PhantomClass pclass;
+		if( static_type.is_container() )
+		{
+			if( !static_type.isSpecificContainerClass() )
+				return 0; // Default container constructor ordinal
+			
+			String ccn = static_type.get_main_class_name();
+			throw new PlcException("findConstructorOrdinal", "Specific container class support is not implemented", ccn);
+		}
+		pclass = static_type.get_class();
+		
+		if( pclass == null )
+			throw new PlcException("NewNode","Can't call c'tor for "+static_type);
+			
+		Method cm = pclass.findMethod(new MethodSignature(Method.CONSTRUCTOR_M_NAME, args));
+		if( cm == null )
+		{					
+			//if( n_param > 0 )
+			throw new PlcException(context.get_position(), "No constructor found" );
+			
+			//print_warning("No constructor found, will call Object constructor");
+		}
+		
+		return cm.getOrdinal();
+	}
+	
+	
 	@Override
 	protected void generateMyLlvmCode(LlvmCodegen llc) throws PlcException {
 

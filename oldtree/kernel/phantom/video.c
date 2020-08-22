@@ -58,10 +58,10 @@ struct drv_video_screen_t *video_drivers[] =
     &video_driver_basic_vga,
 #if !JUST_VGA
 
-    // Incomplete, and suspected to break VESA driver
+    // Works as accelerator - hw mouse cursor
     &video_driver_cirrus,
 
-    // &video_driver_bochs_vesa_emulator,
+    &video_driver_bochs_vesa_emulator,
 
     &video_driver_vmware_svga,
 
@@ -168,7 +168,7 @@ static void select_accel_driver(void)
         }
 
         SHOW_FLOW( 2, "Probing %s video driver: ", drv->name);
-        if( !drv->probe() )
+        if( drv->probe() != VIDEO_PROBE_ACCEL )
         {
             SHOW_FLOW( 2, "Video driver %s : No", drv->name);
             continue;
@@ -182,7 +182,7 @@ static void select_accel_driver(void)
 
     if( selected_drv == NULL )
     {
-        SHOW_FLOW0( 1, "No video driver found!");
+        SHOW_FLOW0( 1, "No video accelerator found!");
     }
     else
     {
@@ -204,8 +204,8 @@ static void video_post_start()
     drv_video_init_windows();
 
     // Have VESA driver, add companion accelerator if possible
-    if( was_enforced )
-        select_accel_driver();
+    //if( was_enforced )
+    select_accel_driver();
 
     SHOW_FLOW0( 3, "Video console init" );
     phantom_init_console_window();

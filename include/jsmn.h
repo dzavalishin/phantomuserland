@@ -1,3 +1,5 @@
+#error DEPRECATED
+#if 0
 // See https://github.com/zserge/jsmn
 
 #ifndef __JSMN_H_
@@ -78,3 +80,5 @@ int jsmn_parse(jsmn_parser *parser, const char *js, size_t len,
 #endif
 
 #endif /* __JSMN_H_ */
+
+#endif

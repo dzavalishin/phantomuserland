@@ -521,10 +521,20 @@ public class SootMethodTranslator {
 			String localName = jLocal.getName();
 			Type type = jLocal.getType();
 
+			// TODO parameter positions can't be so easily calculated if we have mix of 32 and 64 bit vars,
+			// but in Phantom parameters are allways on object stack, so there is no problem. But check!
+			PhantomType phType = SootExpressionTranslator.convertType(type);
+
+			if(phType.isNumeric())
+			{
+				System.err.println("numeric on object stack, check me");
+				// TODO do we need to convert type to corresponding object (boxed) type?
+			}
+			
 			// TODO make sure that parameter position is correct, or else we need here (numPar - parameterPosition - 1)
 			int parameterPosition = parmRef.getIndex();
 			
-			phantomMethod.svars.setParameter(parameterPosition, localName, SootExpressionTranslator.convertType(type));
+			phantomMethod.svars.setParameter(parameterPosition, localName, phType);
 			return new PhantomCodeWrapper(new NullNode());
 		}
 
@@ -546,7 +556,7 @@ public class SootMethodTranslator {
 			Type type = jLocal.getType();
 
 			PhantomVariable v = new PhantomVariable(localName, SootExpressionTranslator.convertType(type));			
-			phantomMethod.svars.add_stack_var(v);
+			phantomMethod.svars.addStackVar(v);
 			
 			OpAssignNode node = new OpAssignNode(new IdentNode(localName, ps) , new ThisNode(pc));
 			

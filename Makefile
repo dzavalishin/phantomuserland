@@ -1,5 +1,5 @@
 include config.mk
-MAKEFLAGS += --print-directory
+MAKEFLAGS += --no-print-directory
 
 
 default::

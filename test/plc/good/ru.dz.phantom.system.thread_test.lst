@@ -2,6 +2,9 @@ Class .ru.dz.phantom.system.thread_test
   Field console
   Field incr
   Field o
+  C'tor  void <init>(  ):
+    empty : void
+
   Method void run( parent_object: unknown ):
     ,  : void
       ,  : void
@@ -9,16 +12,16 @@ Class .ru.dz.phantom.system.thread_test
           void  : void
             . : void
               ident o : .phantom.os
-              Method init : unknown
+              Method init : void
           void  : void
-            = : .internal.io.tty
+            = : void
               ident console : .internal.io.tty
               new .internal.io.tty : .internal.io.tty
         void  : void
-          = : int
+          = : void
             ident incr : int
             int const "1" : int const
-      do-while : unknown
+      do-while : void
         int const "1" : int const
         ,  : void
           ,  : void
@@ -27,17 +30,17 @@ Class .ru.dz.phantom.system.thread_test
                 void  : void
                   . : void
                     ident console : .internal.io.tty
-                    Method putws : unknown
+                    Method putws : void
                     arg  : unknown
                       string pool const id="0" : string const
                 void  : void
                   . : void
                     ident console : .internal.io.tty
-                    Method putws : unknown
+                    Method putws : void
                     arg  : unknown
                       string pool const id="1" : string const
               void  : void
-                = : int
+                = : void
                   ident incr : int
                   + : int
                     ident incr : int
@@ -45,15 +48,15 @@ Class .ru.dz.phantom.system.thread_test
             void  : void
               . : void
                 ident console : .internal.io.tty
-                Method putws : unknown
+                Method putws : void
                 arg  : unknown
                   . : string
                     ident incr : int
-                    Method toString : unknown
+                    Method toString : void
           void  : void
             . : void
               ident console : .internal.io.tty
-              Method putws : unknown
+              Method putws : void
               arg  : unknown
                 string pool const id="2" : string const
 

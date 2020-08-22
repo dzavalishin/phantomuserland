@@ -16,6 +16,13 @@
 #include <errno.h>
 #include <sys/types.h>
 
+
+// NB! Copy from kernel/snap_sync.h
+void vm_lock_persistent_memory( void );		// request access to persistent memory address space, prevent snapshots
+void vm_unlock_persistent_memory( void );	// release access to persistent memory address space, enable snapshots
+
+
+
 //! Call connection's callback with binary payload
 errno_t phantom_connection_callback_binary( struct data_area_4_connection *da, void *data, size_t size );
 

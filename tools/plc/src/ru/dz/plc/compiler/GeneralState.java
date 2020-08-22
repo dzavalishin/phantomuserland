@@ -4,16 +4,24 @@ import ru.dz.plc.util.*;
 
 public class GeneralState {
 	
-	public GeneralState() {
-	}
-	
 	protected PhantomClass my_class;
 	private Method       my_method;
 
+	public GeneralState() {
+		my_class = null;
+		my_method = null;
+	}
+	
 	public GeneralState(PhantomClass c)
 	{
 		my_class = c;
 		my_method = null;
+	}
+
+	public GeneralState(ParseState ps) 
+	{
+		my_class = ps.my_class;
+		my_method = ps.get_method();
 	}
 
 	public void set_method ( Method m ) { my_method = m; }

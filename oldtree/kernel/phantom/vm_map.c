@@ -17,6 +17,7 @@
 
 #include <kernel/config.h>
 #include <sys/syslog.h>
+#include <kernel/debug_graphical.h>
 
 #include <assert.h>
 
@@ -129,7 +130,7 @@ static size_t           dirty_q_size;
 // keep it in a pagefile.
 
 static void *              vm_map_start_of_virtual_address_space;
-static unsigned long       vm_map_vm_page_count;             // how many pages VM has
+static unsigned long       vm_map_vm_page_count = 0;         // how many pages VM has, if 0 = we are not running yet
 
 static vm_page *           vm_map_map;                       // array of pages
 static vm_page *           vm_map_map_end;                   // a byte after map
@@ -224,6 +225,15 @@ static void
 vm_map_page_fault_handler( void *address, int  write, int ip, struct trap_state *ts )
 {
     (void) ip;
+
+#if CONF_DUAL_PAGEMAP
+	int ola = arch_is_object_land_access_enabled(); //< check if current thread attempts to access object space having access disabled
+	if( !ola )
+	{
+		lprintf("\nObject land access disabled\n");
+		trap_panic(ts);
+	}
+#endif
 
 #if 1
     vm_page *vmp = addr_to_vm_page((addr_t) address, ts);
@@ -386,6 +396,12 @@ vm_map_init(unsigned long page_count)
 
     vm_map_map = (vm_page *)malloc( mapsize );
     memset( vm_map_map, 0, mapsize );
+    /*
+    unsigned int i;
+    for( i = 0; i < page_count; i++ )
+    {
+        memset( vm_map_map+i, 0, sizeof(vm_page) );
+    }*/
 
     vm_map_map_end = vm_map_map + page_count;
 
@@ -405,7 +421,22 @@ vm_map_init(unsigned long page_count)
     for( np = 0; np < page_count; np++ )
         vm_page_init( &vm_map_map[np], ((char *)vm_map_start_of_virtual_address_space) + (__MEM_PAGE * np) );
 
-    if(pager_superblock_ptr()->last_snap == 0 )
+
+    disk_page_no_t snap_start = 0;
+
+    if(pager_superblock_ptr()->last_snap != 0 )
+    {
+        hal_printf("-- Use last snap\n");
+        snap_start = pager_superblock_ptr()->last_snap;
+    }
+    else if(pager_superblock_ptr()->prev_snap != 0 )
+    {
+        hal_printf("-- Missing last snap, use previous snap\n");
+        snap_start = pager_superblock_ptr()->prev_snap;
+    }
+
+
+    if( snap_start == 0 )
     {
         hal_printf("\n!!! No pagelist to load !!!\n");
         //panic("vmem load: no pagelist!");
@@ -413,10 +444,10 @@ vm_map_init(unsigned long page_count)
     else
     {
 
-        hal_printf("Loading pagelist from %d...\n", pager_superblock_ptr()->last_snap);
+        hal_printf("Loading pagelist from %d...\n", snap_start);
 
         pagelist loader;
-        pagelist_init( &loader, pager_superblock_ptr()->last_snap, 0, DISK_STRUCT_MAGIC_SNAP_LIST );
+        pagelist_init( &loader, snap_start, 0, DISK_STRUCT_MAGIC_SNAP_LIST );
 
         pagelist_seek(&loader);
 
@@ -1638,6 +1669,7 @@ static void vm_map_lazy_pageout_thread(void)
     }
 }
 static int request_snap_flag = 0;
+static int seconds_between_snaps = 100;
 
 static void vm_map_snapshot_thread(void)
 {
@@ -1657,9 +1689,14 @@ static void vm_map_snapshot_thread(void)
             hal_exit_kernel_thread();
         }
 
-        //hal_sleep_msec( 100000 );
-        int i = 100; // secs between snaps
-        while( (!request_snap_flag) && (i-- > 0) )
+        if(!vm_regular_snaps_enabled)
+        {
+            hal_sleep_msec( 100 );
+            continue;
+        }
+
+        int i = 0;
+        while( (!request_snap_flag) && (i++ < seconds_between_snaps) )
         {
             hal_sleep_msec( 1000 );
         }
@@ -1677,6 +1714,10 @@ void request_snap(void)
     request_snap_flag++;
 }
 
+void set_snap_interval( int interval_sec )
+{
+    seconds_between_snaps = interval_sec;
+}
 
 static void vm_map_deferred_disk_alloc_thread(void)
 {
@@ -2098,5 +2139,84 @@ static void signal_snap_done_passed( void )
 }
 
 #endif
+
+
+
+
+
+//---------------------------------------------------------------------------
+// Debug window - mem map
+//---------------------------------------------------------------------------
+
+static rgba_t calc_persistent_pixel_color( int elem, int units_per_pixel );
+
+/**
+ * 
+ * \brief Generic painter for any allocator using us.
+ * 
+ * Used in debug window.
+ * 
+ * \param[in] w Window to draw to
+ * \param[in] r Rectangle to paint inside
+ * 
+**/
+void paint_persistent_memory_map(window_handle_t w, rect_t *r )
+{
+    if(!vm_map_vm_page_count) return;
+
+    int pixels = r->xsize * r->ysize;
+    int units_per_pixel =  1 + ((vm_map_vm_page_count-1) / pixels);
+
+    int x, y;
+    for( y = 0; y < r->ysize; y++ )
+    {
+        for( x = 0; x < r->xsize; x++ )
+            w_draw_pixel( w, x + r->x, y + r->y, calc_persistent_pixel_color( x + y * r->xsize, units_per_pixel ));
+    }
+
+}
+
+static rgba_t calc_persistent_pixel_color( int elem, int units_per_pixel )
+{
+    vm_page *ep = vm_map_map + elem;
+
+    int state = 0; // 0 = empty, 1 = partial, 2 = used
+    int bits = 0;
+    int do_io = 0;
+
+    int i;
+    for( i = 0; i < units_per_pixel; i++, ep++ )
+    {
+        if( 0 == ep->flag_phys_mem ) continue; // empty, no change
+        state = 2; // full
+        bits += 1;
+
+        if( ep->flag_pager_io_busy ) 
+        {
+            do_io = 1;
+            //lprintf("io %d ", elem+i);
+        }
+    }
+
+    if(do_io) return COLOR_YELLOW;
+
+    switch(state)
+    {
+        case 0: return COLOR_BLUE;
+        
+        case 1: 
+        {
+            //return COLOR_LIGHTGREEN;
+            rgba_t c = COLOR_LIGHTGREEN;
+            // lighter = less used
+            c.g = 0xFF - (bits * 0xFF / (units_per_pixel * sizeof(map_elem_t) * 8));
+            return c;
+        }
+
+        case 2: return COLOR_LIGHTRED;
+
+        default: return COLOR_BLACK;
+    }
+}
 
 

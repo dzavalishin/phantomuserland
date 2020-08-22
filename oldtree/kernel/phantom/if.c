@@ -30,7 +30,7 @@
 
 
 
-#define IF_PRIO 0
+#define IF_PRIO 1
 
 #define TX_QUEUE_SIZE 64
 
@@ -394,7 +394,8 @@ static void if_tx_thread(void *args)
     t_current_set_name("IF Xmit");
 
 #if IF_PRIO
-    thread_set_priority(i->tx_thread, THREAD_MAX_RT_PRIORITY - 2);
+    //thread_set_priority(i->tx_thread, THREAD_MAX_RT_PRIORITY - 2);
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
 #endif
     //if(i->fd < 0)        return -1;
 
@@ -441,7 +442,8 @@ static void if_rx_thread(void *args)
 
     t_current_set_name("IF Recv");
 #if IF_PRIO
-    thread_set_priority(i->rx_thread, THREAD_MAX_RT_PRIORITY - 2);
+    //thread_set_priority(i->rx_thread, THREAD_MAX_RT_PRIORITY - 2);
+    t_current_set_priority(PHANTOM_SYS_THREAD_PRIO);
 #endif
     //if(i->fd < 0)        return -1;
 

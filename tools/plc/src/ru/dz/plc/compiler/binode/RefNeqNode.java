@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.compiler.node.Node;
 import ru.dz.plc.util.PlcException;
 
@@ -21,6 +22,13 @@ public class RefNeqNode extends BiNode
 	public String toString()  {    return ":!=";  }
 	public boolean is_on_int_stack() { return true; }
 	public boolean args_on_int_stack() { return false; }
+
+	@Override
+	public PhantomType find_out_my_type() throws PlcException
+	{
+		return PhantomType.getInt();
+	}	
+	
 	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
 		c.emit_ptr_neq();
 	}

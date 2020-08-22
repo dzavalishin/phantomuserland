@@ -3,19 +3,19 @@
 # this script makes pre-requisites for ci-runtest.sh and ci-snaptest.sh
 #
 #set -x			# debug mode until everything works fine
-cd `dirname $0`
-export PHANTOM_HOME=`pwd`
+cd $(dirname $0)
+export PHANTOM_HOME=$(pwd)
 export LANG=C
 
 PASSES=2
 GDB_PORT=1235		# get rid of stalled instance by incrementing port no.
-GDB_PORT_LIMIT=1250	# avoid spawning too many stalled instances
+#GDB_PORT_LIMIT=1250	# avoid spawning too many stalled instances
 GDB_OPTS="-gdb tcp::$GDB_PORT"
 #GDB_OPTS="-s"
 TEST_DIR=run/test	# relative to PHANTOM_HOME
 TFTP_PATH=../fat/boot	# relative to TEST_DIR
 DISK_IMG=phantom.img
-DISK_IMG_ORIG=../../oldtree/run_test/$DISK_IMG
+#DISK_IMG_ORIG=../../oldtree/run_test/$DISK_IMG
 LOGFILE=make.log	# start with build log
 GRUB_MENU=tftp/tftp/menu.lst
 EXIT_CODE=0
@@ -27,7 +27,7 @@ then
 	QEMU=/usr/libexec/qemu-kvm
 	QEMU_SHARE=/usr/share/qemu-kvm
 else
-	QEMU=`which qemu || which kvm`
+	QEMU=$(which qemu || which kvm)
 	QEMU_SHARE=/usr/share/qemu
 fi
 
@@ -49,18 +49,18 @@ die ( ) {
 
 [ "$QEMU" ] || {
 	# try to find custom qemu
-	PKG_MGR=`which rpm || which dpkg`
+	PKG_MGR=$(which rpm || which dpkg)
 	case $PKG_MGR in
-	*rpm)	QEMU_PKG=`rpm -q -l qemu-kvm` ;;
-	*dpkg)	QEMU_PKG=`dpkg -L qemu-kvm`	;;
-	*)	die "Couldn't locate package manager at `uname -a`"	;;
+	*rpm)	QEMU_PKG=$(rpm -q -l qemu-kvm)  ;;
+	*dpkg)	QEMU_PKG=$(dpkg -L qemu-kvm)	;;
+	*)	die "Couldn't locate package manager at $(uname -a)"	;;
 	esac
 
-	QEMU=`echo "$QEMU_PKG" | grep 'bin/\(qemu\|kvm\|qemu-kvm\)$'`
+	QEMU=$(echo "$QEMU_PKG" | grep 'bin/\(qemu\|kvm\|qemu-kvm\)$')
 
 	[ "$QEMU" ] || die "$QEMU_PKG - cannot find qemu/kvm executable"
 
-	QEMU_SHARE=`echo "$QEMU" | sed 's#bin/.*#share#'`
+	QEMU_SHARE=$(echo "$QEMU" | sed 's#bin/.*#share#')
 }
 
 
@@ -144,10 +144,10 @@ launch_phantom ( ) {
 	rm -f qemu.log gdb.log
 
 	# now prepare control pipes for pseudo-interactive run of qemu and gdb
-	QEMUCTL=`mktemp`
+	QEMUCTL=$(mktemp)
 	exec 3>> $QEMUCTL
 
-	GDBCTL=`mktemp`
+	GDBCTL=$(mktemp)
 	exec 4>> $GDBCTL
 
 	tail -f $QEMUCTL --pid=$$ | $QEMU $QEMU_OPTS > qemu.log &
@@ -165,7 +165,7 @@ launch_phantom ( ) {
 
 		sleep 2
 		kill -0 $QEMU_PID || break
-		ELAPSED=`expr $ELAPSED + 2`
+		ELAPSED=$(expr $ELAPSED + 2)
 	done
 
 	if [ -s $LOGFILE ]
@@ -174,7 +174,7 @@ launch_phantom ( ) {
 		echo GDB control pipe is $GDBCTL
 	else
 		ELAPSED=$PANIC_AFTER
-		LOG_MESSAGE="$LOGFILE is empty"
+#		LOG_MESSAGE="$LOGFILE is empty"
 	fi
 }
 

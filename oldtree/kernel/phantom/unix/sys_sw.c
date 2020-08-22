@@ -778,56 +778,64 @@ static void do_syscall_sw( uuprocess_t *u, struct trap_state *st)
         {
             // TODO check string length and final addr to be valid
             AARG(const char *, name, 1, 0);
-            ret = port_create( uarg[0], name );
+            err = phantom_port_create( &ret, uarg[0], name );
             break;
         }
     case SYS_close_port:
-        ret = port_close( uarg[0] );
+        err = phantom_port_close( uarg[0] );
+        ret = err ? -1 : 0;
         break;
     case SYS_delete_port:
-        ret = port_delete( uarg[0] );
+        err = phantom_port_delete( uarg[0] );
+        ret = err ? -1 : 0;
         break;
     case SYS_find_port:
         {
             // TODO check string length and final addr to be valid
             AARG(const char *, name, 0, 0);
-            ret = port_find(name);
+            err = phantom_port_find(&ret, name);
+            if( err ) ret = -1;
             break;
         }
     case SYS_get_port_info:
         {
             AARG(struct port_info *, info, 1, sizeof(struct port_info));
-            ret = port_get_info( uarg[0], info );
+            ret = err = phantom_port_get_info( uarg[0], info );
             break;
         }
     case SYS_get_port_bufsize:
-        ret = port_buffer_size( uarg[0] );
+        err = phantom_port_buffer_size( &ret, uarg[0] );
+        if( err ) ret = -1;
         break;
     case SYS_get_port_bufsize_etc:
-        ret = port_buffer_size_etc( uarg[0], uarg[1], uarg[2] );
-        break;
+        err = phantom_port_buffer_size_etc( &ret, uarg[0], uarg[1], uarg[2] );
+        if( err ) ret = -1;
+        break;  
     case SYS_get_port_count:
-        ret = port_count( uarg[0] );
+        err = phantom_port_count( &ret, uarg[0] );
+        if( err ) ret = -1;
         break;
     case SYS_read_port:
         {
             AARG(int32_t *, msg_code, 1, sizeof(int32_t));
-            AARG(void  *, msg_buffer, 2, uarg[3]);
-            ret = port_read( uarg[0],
+            AARG(void  *, msg_buffer, 2, uarg[2]);
+            err = phantom_port_read( &ret, uarg[0],
                              msg_code,
                              msg_buffer,
                              uarg[3]);
+            if( err ) ret = -1;
             break;
         }
     case SYS_write_port:
         {
             //AARG(int32_t *, msg_code, 1, sizeof(int32_t));
             //AARG(int32_t, msg_code, 1, sizeof(int32_t));
-            AARG(void  *, msg_buffer, 2, uarg[3]);
-            ret = port_write( uarg[0],
+            AARG(void  *, msg_buffer, 2, uarg[2]);
+            ret = err = phantom_port_write( uarg[0],
                              uarg[1],
                              msg_buffer,
                              uarg[3]);
+            //if( err ) ret = -1;
             break;
         }
     case SYS_read_port_etc:

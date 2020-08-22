@@ -44,7 +44,7 @@ public class MethodSignature {
 			Node curr = n.getLeft();
 			n = (CallArgNode) n.getRight();
 			
-			curr.find_out_my_type();
+			//curr.find_out_my_type();
 			PhantomType type = curr.getType();
 			
 			args.add(type);

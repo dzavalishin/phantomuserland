@@ -47,6 +47,8 @@ int decodeMPEG( void ) {
     struct AUDIO_HEADER header;
     int cnt, g, snd_eof;
 
+    cnt = 0;
+
     initialise_globals();
 
     if ( A_FORMAT_WAVE ) {

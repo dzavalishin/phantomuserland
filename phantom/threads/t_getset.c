@@ -103,15 +103,25 @@ errno_t t_get_ctty( tid_t tid, struct wtty **ct )
     *ct = t->ctty_w;
     POST()
 }
-
-//! Detach from existing ctty, make new one
+/**
+ * 
+ * Detach from existing ctty, make new one.
+ * 
+ * NB! This function works with unlocked thread,
+ * don't call in races context.
+ * 
+**/
 errno_t t_new_ctty( tid_t tid )
 {
-    PRE_ANY()
+    assert(threads_inited);
+    int ret = 0;     
+    GETT();
+
     ret = t_kill_ctty( t );
     if( !ret )
         ret = t_make_ctty( t );
-    POST()
+err:
+    return ret;
 }
 
 #else
@@ -288,6 +298,46 @@ errno_t t_set_snapper_flag()
     TA_UNLOCK();
     */
 }
+
+
+#if CONF_DUAL_PAGEMAP
+
+/**
+ * Set paged (object land) memory access enabled or disabled for current thread.
+ * 
+ * \param[in]  enable         True to enable access.
+ * 
+ * Supposed to be called ONLY from snap_sync.c vm_{lock,unlock}_persistent_memory()
+ * 
+**/
+// NB! Can't be used in thread creation for current thread is not thread we create
+void            
+t_set_paged_mem(bool enable) //< Enable or disable access to paged memory - calls arch pagemap func.
+{
+    TA_LOCK();
+
+    phantom_thread_t * t = GET_CURRENT_THREAD();
+    assert(t != 0);
+
+    if(enable)  t->object_land_access_nest_level++;
+    else        t->object_land_access_nest_level--;
+
+    if( (!enable) && (t->object_land_access_nest_level > 0) )
+    {
+        // Do not revoke object land access if it was nested
+        TA_UNLOCK();
+        return;
+    }
+
+    // TODO skip nested enable too
+
+    int32_t cr3 = arch_switch_pdir( enable );
+    t->cr3 = cr3;
+
+    TA_UNLOCK();
+    //if(t->cr3 == 0) printf(" tid %d set cr3=0x%x ", t->tid, t->cr3);
+}
+#endif
 
 
 // -----------------------------------------------------------

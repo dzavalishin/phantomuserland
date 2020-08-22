@@ -39,6 +39,7 @@ int load_code(void **out_code, unsigned int *out_size, const char *fn)
     unsigned char *code = (unsigned char *)malloc(fsize);
     if( code == NULL )
     {
+        fclose( f );
         printf("Can't alloc mem\n" );
         return 1;
     }

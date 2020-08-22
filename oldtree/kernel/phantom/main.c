@@ -61,6 +61,8 @@
 // phys addr
 #include <kernel/vm.h>
 
+// keyb hook
+#include <event.h>
 
 
 
@@ -268,7 +270,7 @@ int main(int argc, char **argv, char **envp)
     // Used to refill list used to allocate physmem in interrupts
     hal_init_physmem_alloc_thread();
 
-    port_init();
+    phantom_port_init();
     //pressEnter("will start net");
     net_stack_init();
 
@@ -298,6 +300,12 @@ int main(int argc, char **argv, char **envp)
 
     //SHOW_FLOW0( 0, "Will sleep" );
     //hal_sleep_msec( 120000 );
+
+    // vm86 and VESA die without page 0 mapped
+#if 1
+	// unmap page 0, catch zero ptr access
+	hal_page_control( 0, 0, page_unmap, page_noaccess );
+#endif
 
     init_main_event_q();
 
@@ -407,11 +415,12 @@ int main(int argc, char **argv, char **envp)
     printf("\n\x1b[33m\x1b[44mPhantom " PHANTOM_VERSION_STR " (SVN rev %s) @ %s started\x1b[0m\n\n", svn_version(), phantom_uname.machine );
 
 #if 1
-    /*
-    printf("PRESS Q TO STOP PHANTOM");
-    while(getchar() != 'Q')
-    ;
-    */
+    {
+        hal_sleep_msec(60000*13);
+        printf("\nWILL CRASH ON PURPOSE\n\n" );
+        hal_sleep_msec(20000);
+        hal_cpu_reset_real();
+    }
 
     while(1)
         hal_sleep_msec(20000);
@@ -494,11 +503,12 @@ void phantom_shutdown(int flags)
             hal_sleep_msec(1000);
     }
 
-    SHOW_FLOW0( 0, "shutdown now" );
+    SHOW_FLOW0( 0, "shutdown in 5 seconds" );
+    hal_sleep_msec(5000);
 
     t_migrate_to_boot_CPU(); // Make sure other CPUs are stopped
 
-    phantom_finish_all_threads();
+    phantom_finish_all_threads(); // TODO all VM threads?
 
     run_stop_functions( STOP_LEVEL_EARLY );
 
@@ -541,3 +551,47 @@ void phantom_shutdown(int flags)
 }
 
 
+
+// -----------------------------------------------------------------------
+// Do strange things
+// -----------------------------------------------------------------------
+
+int kernel_keyboard_hook( unsigned key, unsigned shifts)
+{
+    if( shifts ) return 0;
+
+    switch(key)
+    {
+
+    case KEY_F9:
+        request_snap();
+        return 1;
+
+    case KEY_F10:
+    //case KEY_PRINT:
+        scr_zbuf_paint();
+        return 1;
+
+    case KEY_F11:
+        phantom_shutdown(0);
+        return 1;
+
+    case KEY_F12:
+    case KEY_KP_MINUS:
+        hal_cpu_reset_real();
+        return 1; // not really
+
+    /*case KEY_KP_MINUS:
+        panic("Keyboard panic request - KEYPAD MINUS key");
+        break;*/
+
+    /*case KEY_SCRLOCK:
+        if(event.modifiers & KEY_MODIFIER_DOWN)
+        {
+            ;
+            //dbg_set_serial_debug(dbg_get_serial_debug()?0:1);
+        }
+        break;*/
+    }
+    return 0;
+}

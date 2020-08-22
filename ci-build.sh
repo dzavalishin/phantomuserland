@@ -5,8 +5,8 @@
 WARN=1
 LOGFILE=make.log
 
-cd `dirname $0`
-export PHANTOM_HOME=`pwd`
+cd $(dirname $0)
+export PHANTOM_HOME=$(pwd)
 export LANG=C
 
 die ( ) {
@@ -37,8 +37,8 @@ then
 		shift
 	done
 else
-	CRONMODE=1
-	UNATTENDED=-unattended
+#	CRONMODE=1
+#	UNATTENDED=-unattended
 	exec 1>$0.log 2>&1
 fi
 

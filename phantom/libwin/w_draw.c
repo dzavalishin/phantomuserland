@@ -48,7 +48,7 @@ w_clear( window_handle_t win )
 
 
 void
-w_pixel( window_handle_t w, int x, int y, rgba_t color )
+w_draw_pixel( window_handle_t w, int x, int y, rgba_t color )
 {
     _PLOT(w, x, y, color);
 }

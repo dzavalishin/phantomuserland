@@ -21,20 +21,22 @@ public abstract class ValCmpNode extends BiBistackNode {
 
 	protected String opName = "__undefined_in_subclass!!__";
 	
-	public ValCmpNode(Node l, Node r) {
+	public ValCmpNode(Node l, Node r) 
+	{
 		super(l, r);
-		try {
-			// we're allways int
-			setType(PhantomType.getInt());
-		} catch (PlcException e) {
-			throw new RuntimeException(e);
-		}
+		// we're always int
+		presetType(PhantomType.getInt());
 	}
 
 	@Override
 	public boolean args_on_int_stack() {
 		return true; // we allways need em on int stack
 	}
+
+	public PhantomType find_out_my_type() throws PlcException
+	{
+		return PhantomType.getInt();
+	}	
 	 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{

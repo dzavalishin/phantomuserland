@@ -16,7 +16,9 @@ import java.util.*;
  * @author dz
  */
 
-public class PhantomClass {
+public class PhantomClass 
+{
+	static final String INTERNAL_CLASS_PREFIX = ".internal.";
 
 	private String name;
 
@@ -163,9 +165,19 @@ public class PhantomClass {
 
 	public Method getDefaultConstructor() 
 	{		
+		// TODO hack?
+		if(isInternal())
+			return mt.get(0);
+		
 		List<PhantomType> args = new LinkedList<PhantomType>(); // no args
 		MethodSignature signature = new MethodSignature(Method.CONSTRUCTOR_M_NAME, args);
-		return mt.get(signature);
+		Method m = mt.get(signature);
+		
+		// TODO hack
+		//if( (m == null) && ".internal.object".equals(getName()) )
+		//	m = mt.get(0); // Method 0 is object defalut constructor
+		
+		return m;
 	}
 
 
@@ -444,6 +456,13 @@ public class PhantomClass {
 		cw.javaFile.write("}; // end class "+getName().substring(1)+"\n");
 	}
 
+	public void createDefaultConstructor(ParseState ps) throws PlcException
+	{
+		ps.set_class(this);
+		mt.checkDefaultConstructor(ps);
+		ps.set_class(null);		
+	}
+
 	public void preprocess(ParseState ps) throws PlcException
 	{
 		//ft.generateGettersSetters(this);
@@ -470,9 +489,9 @@ public class PhantomClass {
 		return false;
 	}
 
-	public void set_ordinals() throws PlcException {
-		mt.set_ordinals();		
-	}
+	public void set_ordinals() throws PlcException {		mt.set_ordinals();	}
+	public void propagateVoid() throws PlcException  { mt.propagateVoid();	}
+
 
 	public int getFieldSlotsNeeded() {
 		return ft.slots_needed();
@@ -533,6 +552,17 @@ public class PhantomClass {
 	public void setPoolConstant(int cOrdinal, PhantomType pt, byte[] buf) throws PlcException, IOException {
 		constantPool.setConstant(cOrdinal, pt, buf);		
 	}
+
+
+	/**
+	 * Is this class internal (native).
+	 * @return True if is.
+	 */
+	public boolean isInternal() 
+	{		
+		return INTERNAL_CLASS_PREFIX.equals(name.substring(0, INTERNAL_CLASS_PREFIX.length()));
+	}
+
 
 
 

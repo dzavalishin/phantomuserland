@@ -49,7 +49,7 @@ struct internal_class pvm_internal_classes[] =
         0,
         PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL, // must be internal for sycall func lookup goes up the class hierarchy to find some internal one
-        {0,0}
+        0
     },
     {
         ".internal.class",
@@ -59,7 +59,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_class),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CLASS,
-        {0,0}
+        0
     },
     {
         ".internal.interface",
@@ -69,7 +69,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         0, // Dynamic
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERFACE, // no internal flag! TODO Immutable?
-        {0,0}
+        0
     },
     {
         ".internal.code",
@@ -82,7 +82,7 @@ struct internal_class pvm_internal_classes[] =
         0, // Dynamic
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CODE|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
-        {0,0}
+        0
     },
     {
         ".internal.int",
@@ -95,7 +95,7 @@ struct internal_class pvm_internal_classes[] =
         sizeof(struct data_area_4_int),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE,
-        {0,0}
+        0
     },
     {
         ".internal.long",
@@ -108,7 +108,7 @@ struct internal_class pvm_internal_classes[] =
         sizeof(struct data_area_4_long),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE, // removed PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
-        {0,0}
+        0
     },
     {
         ".internal.string",
@@ -121,7 +121,7 @@ struct internal_class pvm_internal_classes[] =
         sizeof(struct data_area_4_string), // Dynamic!
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STRING|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE,
-        {0,0}
+        0
     },
     {
         ".internal.container.array",
@@ -132,7 +132,7 @@ struct internal_class pvm_internal_classes[] =
         sizeof(struct data_area_4_array),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_DECOMPOSEABLE|PHANTOM_OBJECT_STORAGE_FLAG_IS_RESIZEABLE,
-        {0,0}
+        0
     },
     {
         ".internal.container.page",
@@ -142,7 +142,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         0, // Dynamic
         0, // PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL
-        {0,0}
+        0
     },
     {
         ".internal.thread",
@@ -152,7 +152,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_thread),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_THREAD,
-        {0,0}
+        0
     },
     {
         ".internal.call_frame",
@@ -162,7 +162,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_call_frame),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CALL_FRAME,
-        {0,0}
+        0
     },
     {
         ".internal.istack",
@@ -172,7 +172,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_integer_stack),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME,
-        {0,0}
+        0
     },
     {
         ".internal.ostack",
@@ -182,7 +182,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_object_stack),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME,
-        {0,0}
+        0
     },
     {
         ".internal.estack",
@@ -192,7 +192,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_exception_stack),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_STACK_FRAME,
-        {0,0}
+        0
     },
     {
         ".internal.boot",
@@ -204,7 +204,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_boot),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
-        {0,0}
+        0
     },
     {
         ".internal.io.tty",
@@ -216,7 +216,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_restart_tty,
         sizeof(struct data_area_4_tty),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
-        {0,0}
+        0
     },
 /*    {
         ".internal.io.driver",
@@ -228,7 +228,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_driver),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
-        {0,0}
+        0
     },
 */
     {
@@ -241,7 +241,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_mutex),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
-        {0,0}
+        0
     },
 
     {
@@ -254,7 +254,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_cond),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
-        {0,0}
+        0
     },
 
     {
@@ -267,7 +267,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_sema),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
-        {0,0}
+        0
     },
 
     {
@@ -280,7 +280,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_binary), // TODO problem - dynamically sized!
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
-        {0,0}
+        0
     },
 
     {
@@ -291,7 +291,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_bitmap),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
-        {0,0}
+        0
     },
 
     {
@@ -302,7 +302,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_closure),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
-        {0,0}
+        0
     },
 
 #if COMPILE_WEAKREF
@@ -314,7 +314,7 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_weakref),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
-        {0,0}
+        0
     },
 #endif
     {
@@ -327,25 +327,36 @@ struct internal_class pvm_internal_classes[] =
         0, // no restart func
         sizeof(struct data_area_4_world),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
-        {0,0}
+        0
     },
 
-#if 0
+
     {
         ".internal.udp",
         PVM_ROOT_OBJECT_UDP_CLASS,
-        syscall_table_4_udp, // &n_syscall_table_4_udp,
-        pvm_internal_init_udp,
-        0 /*pvm_gc_iter_udp*/,
-        pvm_..._udp,
+        IINIT(tcp),
+        pvm_gc_finalizer_udp,
         0, // no restart func
         sizeof(struct data_area_4_udp),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
-        {0,0}
+        0
     },
-#endif
+
+
+    {
+        ".internal.tcp",
+        PVM_ROOT_OBJECT_TCP_CLASS,
+        IINIT(tcp),
+        pvm_gc_finalizer_tcp,
+        pvm_restart_tcp,
+        sizeof(struct data_area_4_tcp),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
 
 
     {
@@ -356,7 +367,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_restart_window, // no restart func
         sizeof(struct data_area_4_window),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,
-        {0,0}
+        0
     },
 
     {
@@ -367,7 +378,7 @@ struct internal_class pvm_internal_classes[] =
         pvm_restart_directory, // no restart func
         sizeof(struct data_area_4_directory),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL,// TODO add DIR flag?
-        {0,0}
+        0
     },
 
     {
@@ -379,7 +390,7 @@ struct internal_class pvm_internal_classes[] =
         sizeof(struct data_area_4_connection),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
-        {0,0}
+        0
     },
 
     {
@@ -393,7 +404,7 @@ struct internal_class pvm_internal_classes[] =
         sizeof(struct data_area_4_float),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE, // removed PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
-        {0,0}
+        0
     },
 
     {
@@ -407,8 +418,111 @@ struct internal_class pvm_internal_classes[] =
         sizeof(struct data_area_4_double),
         PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
         PHANTOM_OBJECT_STORAGE_FLAG_IS_IMMUTABLE, // removed PHANTOM_OBJECT_STORAGE_FLAG_IS_INT|
-        {0,0}
+        0
     },
+
+    {
+        ".internal.net",
+        PVM_ROOT_OBJECT_NET_CLASS,
+        IINIT(net),
+        pvm_gc_finalizer_net,
+        pvm_restart_net,
+        sizeof(struct data_area_4_net),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.http",
+        PVM_ROOT_OBJECT_HTTP_CLASS,
+        IINIT(http),
+        pvm_gc_finalizer_http,
+        pvm_restart_http,
+        sizeof(struct data_area_4_http),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.time",
+        PVM_ROOT_OBJECT_TIME_CLASS,
+        IINIT(time),
+        0, //pvm_gc_finalizer_time,
+        pvm_restart_time, // sounds Asimovesque
+        sizeof(struct data_area_4_time),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
+        0
+    },
+
+    {
+        ".internal.stat",
+        PVM_ROOT_OBJECT_STAT_CLASS,
+        IINIT(stat),
+        0, //pvm_gc_finalizer_stat,
+        pvm_restart_stat,
+        sizeof(struct data_area_4_stat),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE,
+        0
+    },
+
+    {
+        ".internal.io",
+        PVM_ROOT_OBJECT_IO_CLASS,
+        IINIT(io),
+        pvm_gc_finalizer_io,
+        pvm_restart_io,
+        sizeof(struct data_area_4_io),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.port",
+        PVM_ROOT_OBJECT_PORT_CLASS,
+        IINIT(port),
+        pvm_gc_finalizer_port,
+        pvm_restart_port,
+        sizeof(struct data_area_4_port),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.ui.control",
+        PVM_ROOT_OBJECT_UI_CONTROL_CLASS,
+        IINIT(ui_control),
+        pvm_gc_finalizer_ui_control,
+        pvm_restart_ui_control,
+        sizeof(struct data_area_4_ui_control),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
+    {
+        ".internal.ui.font",
+        PVM_ROOT_OBJECT_UI_FONT_CLASS,
+        IINIT(ui_font),
+        pvm_gc_finalizer_ui_font,
+        pvm_restart_ui_font,
+        sizeof(struct data_area_4_ui_font),
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_INTERNAL|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_CHILDFREE|
+        PHANTOM_OBJECT_STORAGE_FLAG_IS_FINALIZER,
+        0
+    },
+
 
 };
 
@@ -426,12 +540,12 @@ int     pvm_iclass_by_root_index( int index )
     /*NORETURN*/
 }
 
-int     pvm_iclass_by_class( struct pvm_object_storage *cs )
+int     pvm_iclass_by_class( pvm_object_t cs )
 {
     int i;
     for( i = 0; i < pvm_n_internal_classes; i++ )
     {
-        if( pvm_internal_classes[i].class_object.data == cs )
+        if( pvm_internal_classes[i].class_object == cs )
             return i;
     }
     panic("no iclass for 0x%x", cs);
@@ -454,8 +568,8 @@ int     pvm_iclass_by_name( const char *name )
 #if 0
 #define CHECK_NAME(data, len, name) ( (len == (sizeof(name)-1)) && (0 == strncmp(data, name, len)) )
 
-static struct pvm_object
-pvm_hardcoded_lookup_class( struct pvm_object class_name )
+static pvm_object_t 
+pvm_hardcoded_lookup_class( pvm_object_t class_name )
 {
     if(!IS_PHANTOM_STRING(class_name))
         return pvm_object(); // just return null
@@ -498,7 +612,7 @@ pvm_hardcoded_lookup_class( struct pvm_object class_name )
 }
 #endif
 
-struct pvm_object pvm_lookup_internal_class(struct pvm_object name)
+pvm_object_t pvm_lookup_internal_class(pvm_object_t name)
 {
     if( EQ_STRING_P2C(name, ".internal.object" ) )
         return pvm_internal_classes[PVM_ROOT_OBJECT_NULL_CLASS].class_object;
@@ -510,8 +624,8 @@ struct pvm_object pvm_lookup_internal_class(struct pvm_object name)
             return pvm_internal_classes[i].class_object;
     }
 
-    struct pvm_object retNull = { 0, 0 };
-    //retNull.data = 0;
-    return retNull;
+    //pvm_object_t retNull = { 0, 0 };
+    //retNull = 0;
+    return 0;
 }
 

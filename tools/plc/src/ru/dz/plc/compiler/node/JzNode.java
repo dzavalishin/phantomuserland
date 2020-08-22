@@ -6,6 +6,7 @@ import ru.dz.phantom.code.Codegen;
 import ru.dz.plc.compiler.CodeGeneratorState;
 import ru.dz.plc.compiler.ParseState;
 import ru.dz.plc.compiler.PhTypeUnknown;
+import ru.dz.plc.compiler.PhantomType;
 import ru.dz.plc.util.PlcException;
 
 /**
@@ -18,11 +19,13 @@ public class JzNode extends Node {
 
 	//public String get_name() { return ident; }
 
+
 	public JzNode( int labelNo ) {
 		super(null);
 		this.label = null;
 		this.labelNo = labelNo;
 	}
+	
 	public JzNode( String label ) {
 		super(null);
 		this.label = label;
@@ -32,7 +35,7 @@ public class JzNode extends Node {
 	//public String toString()  {    return "jz "+labelNo;  }
 	public String toString()  {    return "jz "+ ((labelNo < 0) ? label : ""+labelNo );  }
 	
-	public void find_out_my_type() throws PlcException { if(type == null) type = new PhTypeUnknown(); }
+	public PhantomType find_out_my_type() throws PlcException { return PhantomType.getVoid(); }
 	public boolean is_const() { return true; }
 
 	public void preprocess_me( ParseState s ) throws PlcException {

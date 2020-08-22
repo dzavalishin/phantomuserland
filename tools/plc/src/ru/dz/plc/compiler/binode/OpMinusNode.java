@@ -15,18 +15,20 @@ import ru.dz.plc.util.PlcException;
  */
 
 public class OpMinusNode extends BinaryOpNode {
-  public OpMinusNode(Node l, Node r) {    super(l,r);  }
-  public String toString()  {    return "-";  }
-  public boolean is_on_int_stack() { return true; }
-  
-  @Override
-  String getLlvmOpName() { return isFloat() ? "fsub" : "sub"; }  
-  
-  protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
-    //if(getType().is_int()) c.emitISubLU();
-    //else throw new PlcException("Codegen", "op - does not exist for this type");
-    
-	generateIntegerStackOp(c, () -> c.emitISubLU() );
+	public OpMinusNode(Node l, Node r) {    super(l,r);  }
+	public String toString()  {    return "-";  }
+	public boolean is_on_int_stack() { return true; }
 
-  }
+	@Override
+	String getLlvmOpName() { return isFloat() ? "fsub" : "sub"; }  
+
+	protected void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException {
+		//if(getType().is_int()) c.emitISubLU();
+		//else throw new PlcException("Codegen", "op - does not exist for this type");
+
+		//print_warning("op '-' type = "+type);
+
+		generateIntegerStackOp(c, () -> c.emitISubLU() );
+
+	}
 }

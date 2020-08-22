@@ -1,95 +1,83 @@
-Class version 20170915065104496
+Class version 20190820114455782
+
+method <init> ordinal 19
+--
+  arg_count 0						//  @0
+  ret							//  @2
+--
+method end
 
 method getTimeServer ordinal 16
 --
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: getTimeServer in .phantom.os"	//  @11
-  throw				//  @55
-_label_0:	//  @56
-    ; Line 45			//  @56
-  summon this			//  @56
-  call m=18 nparm=0		//  @57
-  os drop				//  @59
-    ; Line 45			//  @60
-  load fld=0			//  @60
-  call m=19 nparm=0		//  @62
-    ; Line 45			//  @64
-  ret				//  @64
-    ; Line 45			//  @65
-  ret				//  @65
+  arg_count 0						//  @0
+; Line 45
+  summon this						//  @2
+  call m=18 nparm=0					//  @3
+  os drop							//  @5
+; Line 45
+  load fld=0						//  @6
+  call m=19 nparm=0					//  @8
+; Line 45
+  ret							//  @10
+; Line 45
+  ret							//  @11
 --
 method end
 
 method getKernelEnvironmentValue ordinal 17
 --
-  const 1				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: getKernelEnvironmentValue in .phantom.os"	//  @11
-  throw				//  @67
-_label_0:	//  @68
-  stack_reserve obj=1 int=0	//  @68
-    ; Line 49			//  @71
-  summon this			//  @71
-  call m=18 nparm=0		//  @72
-  os drop				//  @74
-    ; Line 50			//  @75
-  load fld=0			//  @75
-    ; Line 50			//  @77
-  get o stk pos=0			//  @77
-    ; Line 50			//  @82
-  call m=18 nparm=1		//  @82
-    ; Line 50			//  @84
-  ret				//  @84
-    ; Line 50			//  @85
-  ret				//  @85
+  arg_count 1						//  @0
+  stack_reserve obj=1 int=0				//  @2
+; Line 49
+  summon this						//  @5
+  call m=18 nparm=0					//  @6
+  os drop							//  @8
+; Line 50
+  load fld=0						//  @9
+; Line 50
+; inkey
+  get o stk pos=0						//  @11
+; Line 50
+  call m=18 nparm=1					//  @16
+; Line 50
+  ret							//  @18
+; Line 50
+  ret							//  @19
 --
 method end
 
 method init ordinal 18
 --
-  const 0				//  @0
-  isublu				//  @5
-  jz _label_0			//  @6
-  const "arg count: init in .phantom.os"	//  @11
-  throw				//  @46
-_label_0:	//  @47
-  stack_reserve obj=2 int=0	//  @47
-    ; Line 42			//  @50
-    ; Line 33			//  @50
-  load fld=0			//  @50
-    ; Line 33			//  @52
-  summon null			//  @52
-    ; Line 33			//  @53
-  ptr neq				//  @53
-  jz _label_1			//  @54
-  summon class internal.world	//  @59
-  new				//  @79
-  pull depth=0			//  @80
-  summon class internal.world	//  @85
-  static invoke ord=0 n_param=0	//  @105
-  os drop				//  @114
-  os dup				//  @115
-  set o stk pos=0			//  @116
-  os drop				//  @121
-    ; Line 39			//  @122
-  get o stk pos=0			//  @122
-  call m=8 nparm=0		//  @127
-  os dup				//  @129
-  set o stk pos=1			//  @130
-  os drop				//  @135
-    ; Line 39			//  @136
-    ; Line 41			//  @136
-  get o stk pos=1			//  @136
-  call m=14 nparm=0		//  @141
-  os dup				//  @143
-  save fld=0			//  @144
-  os drop				//  @146
-    ; Line 41			//  @147
-_label_1:	//  @147
-  ret				//  @147
+  arg_count 0						//  @0
+  stack_reserve obj=2 int=0				//  @2
+; Line 42
+; Line 33
+  load fld=0						//  @5
+; Line 33
+  summon null						//  @7
+; Line 33
+  ptr neq							//  @8
+  jz _label_0						//  @9
+  summon class internal.world				//  @14
+  new							//  @34
+; set w
+  set o stk pos=0						//  @35
+; Line 39
+; w
+  get o stk pos=0						//  @40
+  call m=8 nparm=0					//  @45
+; set th
+  set o stk pos=1						//  @47
+; Line 39
+; Line 41
+; th
+  get o stk pos=1						//  @52
+  call m=14 nparm=0					//  @57
+; set impl
+  save fld=0						//  @59
+; Line 41
+_label_0:	//  @61
+  ret							//  @61
 --
 method end
 

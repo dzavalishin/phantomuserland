@@ -98,5 +98,15 @@ class bootstrap
 
     .internal.string [] getKernelEnvironment() [23] {}
 
+
+    /**
+     *
+     * Reboot (reset) computer.
+     * Add arg to change reboot / shutdown mode?
+     *
+    **/
+
+    void reboot() [24] {}
+
 };
 

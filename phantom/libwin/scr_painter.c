@@ -28,6 +28,8 @@
 #include <queue.h>
 #include <phantom_libc.h>
 
+#include <kernel/snap_sync.h>
+
 
 static tid_t            painter_tid = -1;
 static hal_sem_t        painter_sem;
@@ -43,7 +45,8 @@ pqel_t;
 
 
 // keep list of screen areas to be repainted
-static hal_mutex_t  rect_list_lock;
+//static
+hal_mutex_t  rect_list_lock;
 static queue_head_t rect_list;
 
 static void paint_q_init(void)
@@ -138,7 +141,8 @@ again:
             queue_remove( &rect_list, pqel, pqel_t *, chain );
             goto again;
         }
-
+#if 0
+#warning intersection can give up to 4 rectangles
         // r intersects w qe - divide in two
         if( rect_intersects( r, &pqel->r ) )
         {
@@ -161,6 +165,7 @@ again:
             queue_remove( &rect_list, pqel, pqel_t *, chain );
             goto again;
         }
+#endif
     }
 
 }
@@ -203,7 +208,10 @@ static void paint_square_updown(rect_t *r)
 
         if( !rect_intersects( r, &wr ) )
             continue;
-
+#if 0
+        rect_mul( &wr, &wr, r );
+        w_repaint_screen_part( w, &wr );
+#else
         // if win is transparent
         if(WIN_HAS_FLAG(w,WFLAG_WIN_NOTOPAQUE))
         {
@@ -214,6 +222,7 @@ static void paint_square_updown(rect_t *r)
         rect_mul( &wr, &wr, r );
 
         w_repaint_screen_part( w, &wr );
+#endif
     }
 }
 
@@ -266,7 +275,9 @@ static void painter_thread(void *arg)
     {
         hal_sem_acquire( &painter_sem );
         hal_sleep_msec(2); // give 'em some chance to put more to queue
+        vm_lock_persistent_memory(); // We access persistent memory now and then
         repaint_q();
+        vm_unlock_persistent_memory(); // We access persistent memory now and then
     }
 
 }
@@ -319,5 +330,34 @@ void scr_repaint_win( window_handle_t w )
 
 #endif
 
+
+
+
+
+// ------------------------------------------------------------------
+// 2D accelerator use
+//
+// Take same mutex as painter - vmware driver crashes if we access it from different threads
+//
+// ? No - it is mouse repaint conflict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #endif // VIDEO_NEW_PAINTER
+
 

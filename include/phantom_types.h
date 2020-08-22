@@ -17,6 +17,8 @@
 #include <arch/arch-types.h>
 
 
+typedef u_int32_t       wchar_t;
+
 // FreeBSD code wants these
 typedef u_int64_t       uintmax_t;
 typedef int64_t         intmax_t;

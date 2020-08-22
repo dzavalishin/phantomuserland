@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
  */
 public class ObjectRef {
 	private long dataAddr;
-	private long interfaceAddr;
+	//private long interfaceAddr;
 
 	/**
 	 * 
@@ -28,7 +28,7 @@ public class ObjectRef {
 		bb.position(pos);
 		
 		dataAddr = bb.getInt();
-		interfaceAddr = bb.getInt();		
+		//interfaceAddr = bb.getInt();		
 	}
 
 	/**
@@ -37,17 +37,19 @@ public class ObjectRef {
 	 */
 	public ObjectRef(ByteBuffer bb) {
 		dataAddr = bb.getInt();
-		interfaceAddr = bb.getInt();		
+		//interfaceAddr = bb.getInt();		
+		//interfaceAddr = 0;		
 	}
 
 	public ObjectRef(int dataAddr, int ifAddr ) {
 		this.dataAddr = dataAddr;
-		this.interfaceAddr = ifAddr;		
+		//this.interfaceAddr = ifAddr;		
 	}
 
 	// TODO 64 bit problem
 	public long getDataAddr()      {		return 0xFFFFFFFF & (long)dataAddr;	}
-	public long getInterfaceAddr() {		return 0xFFFFFFFF & (long)interfaceAddr;	}
+	//public long getInterfaceAddr() {		return 0xFFFFFFFF & (long)interfaceAddr;	}
+	//public long getInterfaceAddr() {		return 0;	}
 
 	//public ObjectHeader getObject() { return Main.getPhantomObject(dataAddr); }
 	
@@ -61,6 +63,6 @@ public class ObjectRef {
 	// based on constructor
 	public void writeToByteBuffer(ByteBuffer byteBuffer){
 		byteBuffer.putInt((int) this.dataAddr);
-		byteBuffer.putInt((int) this.interfaceAddr);
+		//byteBuffer.putInt((int) this.interfaceAddr);
 	}
 }

@@ -1,15 +1,18 @@
-call jc src/java/lang/Class.java
-call jc src/java/lang/String.java
-call jc src/java/lang/Throwable.java 
-call jc src/java/lang/InterruptedException.java 
-call jc src/java/lang/CloneNotSupportedException.java 
+@sh makeall 
 
-call jc src/test/toPhantom/Assigns.java
+rem call jc src/java/lang/Class.java
+rem call jc src/java/lang/String.java
+rem call jc src/java/lang/Throwable.java 
+rem call jc src/java/lang/InterruptedException.java 
+rem call jc src/java/lang/CloneNotSupportedException.java 
 
-call jpc -cbin;class java.lang.Class
-call jpc -cbin;class java.lang.String
-call jpc -cbin;class java.lang.Throwable
-call jpc -cbin;class java.lang.InterruptedException
-call jpc -cbin;class java.lang.CloneNotSupportedException
+rem call jc src/test/toPhantom/Assigns.java
 
-call jpc -cbin;class test.toPhantom.Assigns
+rem call jpc -cbin;class java.lang.Class
+rem call jpc -cbin;class java.lang.String
+rem call jpc -cbin;class java.lang.Throwable
+rem call jpc -cbin;class java.lang.InterruptedException
+rem call jpc -cbin;class java.lang.CloneNotSupportedException
+
+rem call jpc -cbin;class test.toPhantom.Assigns
+

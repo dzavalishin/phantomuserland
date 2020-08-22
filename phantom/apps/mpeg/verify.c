@@ -86,7 +86,7 @@ int Sequence_Framenum;
   static double previous_Bn;
   static double E;      /* maximum quantization error or mismatch */
 
-  
+  I = 0; // codacy whines
 
   if((Sequence_Framenum==0)&&(!Second_Field)) 
   {  /* first coded picture of sequence */

@@ -27,6 +27,8 @@ public class TestCommons {
 	{
 		String[] args = new String[4];
 		
+		System.out.println(String.format("Compiling %s", src));
+		
 		args[0] = "-Itest/pc";
 		args[1] = "-I" + System.getenv("PHANTOM_HOME") + "plib/bin"; //"-I../../plib/bin";
 		args[2] = "-otest/pc";

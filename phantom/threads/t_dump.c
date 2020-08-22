@@ -287,7 +287,7 @@ static void json_encode_thread( json_output *jo, void *el )
     //* Used to wake with timer, see hal_sleep_msec
     //timedcall_t                 sleep_event;
 
-    json_out_int( jo, "snap_lock", tp->snap_lock );
+    json_out_int( jo, "sub_from_pers_mem_lock_count", tp->sub_from_pers_mem_lock_count );
     json_out_delimiter( jo );
 
     json_out_int( jo, "preemption_disabled", tp->preemption_disabled );

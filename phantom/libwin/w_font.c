@@ -18,6 +18,11 @@
 #include <string.h>
 #include <phantom_libc.h>
 
+// Kills kernel - needs big stack (256 kb or more), calls malloc - must
+// be called out of spinlock, trapno 0: Divide error, error 00000000 EIP 1f5ae0: _gray_render_line
+
+#define TTF_TTY 0
+
 //! Bytes per char
 static __inline__ int _bpc(const drv_video_font_t *font)
 {
@@ -62,7 +67,7 @@ __inline__ int w_font_draw_char(
     // One char is used for width
     //if( p ) yafter--;
 
-    int bpcx = 1 + ((font->xsize-1) / 8); // Pytes per Character for X coord (for example, 2 bytes for 16 pixels wide)
+    int bpcx = 1 + ((font->xsize-1) / 8); // Bytes per Character for X coord (for example, 2 bytes for 16 pixels wide)
 
     if( xafter <= 0 || yafter <= 0
         || x >= win->xsize || y >= win->ysize )
@@ -230,28 +235,34 @@ void w_font_tty_string(
 {
     rgba_t color = _color;
     rgba_t back  = _back;
-    int nc = strlen(s);
+    //int nc = strlen(s);
     int bright = 0;
     //int startx = *x;
 
-    while(nc--)
+#if TTF_TTY
+    // temp
+    font_handle_t ttfont = w_get_system_mono_font();
+
+    unsigned utf_getc()
+    {
+        return 0;
+    }
+#endif
+
+    for( ; *s ; s++ )
     {
         if( *s == '\n' )
         {
             if( *y <= font->ysize )
-            {
                 w_font_scroll_line( win, font, back );
-            }
             else
                 *y -= font->ysize; // Step down a line
             *x = 0;
-            s++;
             continue;
         }
         else if( *s == '\r' )
         {
             *x = 0;
-            s++;
             continue;
         }
         else if( *s == '\t' )
@@ -259,48 +270,50 @@ void w_font_tty_string(
             (*x)++; // or else \t\t == \t
             while( *x % 8 )
                 (*x)++;
-            s++;
             continue;
         }
         else if( *s == 0x1B ) // esc
         {
-            s++; nc--;
-            if( *s != '[' )
-                continue;
-            s++; nc--;
 
-            if( *s == 0 )
-                continue;
+            s++; 
+            // checks for '*s == 0' too
+            if( *s != '[' )                continue;
 
+            s++; 
+            if( *s == 0 )                  continue;
             int v = 0;
             while( isdigit(*s) )
             {
                 v *= 10;
                 v += (*s - '0');
-                s++; nc--;
+                s++; 
             }
 
-            if( *s == 0 )
+            if( *s == 0 )                continue;
+            switch(*s)
+            {
+            case 'm':  
+                set_ansi_color( v, &bright, &color, &back, _color, _back );
                 continue;
 
-            switch(*s++)
-            {
-            case 'm':
-#if 1
-                set_ansi_color( v, &bright, &color, &back, _color, _back );
-#else
-                v -= 30;
-                if( (v < 0) || (v > 7) )
-                    color = COLOR_LIGHTGRAY;
-                else
-                    color = cmap[v];
-#endif
             default:
                 continue;
             }
 
-
         }
+#if TTF_TTY
+        if( (*x + 8 > win->xsize) && (*y <= 16) )
+        {
+            w_scroll_up( win, 16, back );
+            *y -= 16; // Step down a line
+            *x = 0;
+        }
+
+        w_ttfont_draw_char( win, ttfont, s, color, *x, *y );
+        *x += 8;
+
+#else
+
         else if( w_font_draw_char( win, font, *s, color, back, *x, *y ) )
         {
             if( *y <= font->ysize )
@@ -312,10 +325,13 @@ void w_font_tty_string(
             *x = 0;
             w_font_draw_char( win, font, *s, color, back, *x, *y );
         }
-        s++;
         *x += font->xsize;
+#endif
     }
 
+#if TTF_TTY
+    w_release_tt_font( ttfont );
+#endif
 }
 
 /*

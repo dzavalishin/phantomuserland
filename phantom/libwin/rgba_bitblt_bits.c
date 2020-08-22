@@ -192,7 +192,9 @@ void rgba2rgb_zbmove( struct rgb_t *dest, const struct rgba_t *src, zbuf_t *zb, 
 #else
         // BUG don't update zbuf if alpha is zero?
 
-        if( !(*isrc>>24) || *zb > zpos ) { zb++; dest++; isrc++; continue; }
+        if( (!(*isrc & 0xFF000000)) || (*zb > zpos) ) { zb++; dest++; isrc++; continue; }
+        //if( (!(*isrc>>24)) || (*zb > zpos) ) { zb++; dest++; isrc++; continue; }
+        //if( !(*isrc>>24) || *zb > zpos ) { zb++; dest++; isrc++; continue; }
         *zb++ = zpos;
         //if( !(src->a) ) { dest++; src++; continue; }
 
@@ -445,16 +447,24 @@ void int565_to_rgba_move( struct rgba_t *dest, const short int *src, int nelem )
 
 
 void
-drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
+w_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
 {
     bitmap2bitmap(
                   w->w_pixel, w->xsize, w->ysize, x, y,
                   bmp->pixel, bmp->xsize, bmp->ysize, 0, 0,
                   bmp->xsize, bmp->ysize
                  );
-
 }
 
+/// blend bitmap to window
+void w_draw_blend_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
+{
+    bitmap2bitmap_blend(
+                  w->w_pixel, w->xsize, w->ysize, x, y,
+                  bmp->pixel, bmp->xsize, bmp->ysize, 0, 0,
+                  bmp->xsize, bmp->ysize
+                 );
+}
 
 
 

@@ -55,21 +55,18 @@ abstract public class BiNode extends Node {
 		return _l != null && _l.is_const() && _r != null && _r.is_const();
 	}
 
-	public void find_out_my_type() throws PlcException
+	public PhantomType find_out_my_type() throws PlcException
 	{
-		if( type != null && !(type.is_unknown())) return;
 		PhantomType l_type = null, r_type = null;
 
 		if( _l != null ) l_type = _l.getType();
 		if( _r != null ) r_type = _r.getType();
 
-		if( l_type != null && l_type.equals( r_type ) ) type = l_type;
+		if( l_type != null && l_type.equals( r_type ) ) return l_type;
 		//TODO hack, need to remove and refactor [
-		else if( l_type != null &&  r_type instanceof PhTypeUnknown ) type = l_type;
+		else if( l_type != null &&  r_type instanceof PhTypeUnknown ) return l_type;
 		//todo ]
-		else type = new PhTypeUnknown();
-
-		checkPresetType();
+		else return new PhTypeUnknown();
 	}
 
 	public void preprocess( ParseState s ) throws PlcException
@@ -81,6 +78,24 @@ abstract public class BiNode extends Node {
 
 	public void preprocess_me( ParseState s ) throws PlcException {}
 
+	/** Override in class if you want to tell children that you don't need their results. */
+	public void propagateVoidParents()
+	{
+		if( _l != null )
+		{
+			//_l.setParentIsVoid();
+			_l.propagateVoidParents();
+		}
+		
+		if( _r != null )
+		{
+			//_r.setParentIsVoid();
+			_r.propagateVoidParents();
+		}
+	}
+	
+	
+	
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
 	{
 		if( _l != null ) 

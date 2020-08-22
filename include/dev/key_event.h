@@ -1,3 +1,4 @@
+#if 0
 /*
 ** Copyright 2002, Travis Geiselbrecht. All rights reserved.
 ** Distributed under the terms of the NewOS License.
@@ -128,3 +129,6 @@ void handle_keycode(unsigned char key);
 
 
 #endif
+
+#endif
+

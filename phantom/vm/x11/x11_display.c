@@ -141,13 +141,15 @@ static unsigned long black;
 
 void * win_x11_update(const char *src)
 {
+/** dst == ??
     int pixels = xsize * ysize;
-
+ 
     int *dst;
     while(pixels--)
         *dst = *src;
 
-    XPutImage(display, win, gc, image, 0, 0, 0, 0, xsize, ysize);
+        XPutImage(display, win, gc, image, 0, 0, 0, 0, xsize, ysize);
+*/
 }
 
 

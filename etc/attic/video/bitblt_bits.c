@@ -447,7 +447,7 @@ void int565_to_rgba_move( struct rgba_t *dest, const short int *src, int nelem )
 
 
 void
-drv_video_window_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
+w_draw_bitmap( drv_video_window_t *w, int x, int y, drv_video_bitmap_t *bmp )
 {
     bitmap2bitmap(
                   w->pixel, w->xsize, w->ysize, x, y,

@@ -1,0 +1,36 @@
+<mxfile host="www.draw.io" modified="2019-11-05T21:18:01.778Z" agent="Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 YaBrowser/19.10.1.238 Yowser/2.5 Safari/537.36" etag="Q13phKR7948WSfb9FMhD" version="12.2.0" type="github" pages="1">
+  <diagram id="z-yqm8LK_ysaAi4pESjv" name="Page-1">
+    <mxGraphModel dx="1550" dy="600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="583" pageHeight="413" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="VQEeNGIACDoFzXtkc-uq-13" value="" style="shape=internalStorage;whiteSpace=wrap;html=1;backgroundOutline=1;dx=20;dy=59;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="20" y="40" width="240" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="VQEeNGIACDoFzXtkc-uq-15" value="&lt;ol style=&quot;font-size: 18px;&quot;&gt;&lt;li style=&quot;font-size: 18px;&quot;&gt;Field: object reference&lt;/li&gt;&lt;li style=&quot;font-size: 18px;&quot;&gt;Field: object reference&lt;/li&gt;&lt;li style=&quot;font-size: 18px;&quot;&gt;Field: object reference&lt;/li&gt;&lt;li style=&quot;font-size: 18px;&quot;&gt;Field: object reference&lt;/li&gt;&lt;li style=&quot;font-size: 18px;&quot;&gt;Field: object reference&lt;/li&gt;&lt;/ol&gt;" style="text;strokeColor=none;fillColor=none;html=1;whiteSpace=wrap;verticalAlign=middle;overflow=hidden;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="30" y="100" width="230" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="VQEeNGIACDoFzXtkc-uq-16" value="Object Header" style="text;html=1;resizable=0;autosize=1;align=center;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="70" y="60" width="90" height="20" as="geometry"/>
+        </mxCell>
+        <mxCell id="VQEeNGIACDoFzXtkc-uq-17" value="" style="shape=internalStorage;whiteSpace=wrap;html=1;backgroundOutline=1;dx=20;dy=59;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="320" y="40" width="240" height="280" as="geometry"/>
+        </mxCell>
+        <mxCell id="VQEeNGIACDoFzXtkc-uq-19" value="Object Header" style="text;html=1;resizable=0;autosize=1;align=center;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="370" y="60" width="90" height="20" as="geometry"/>
+        </mxCell>
+        <UserObject label="&lt;div style=&quot;font-size: 18px;&quot;&gt;struct data_area_4_string&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;{&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&amp;nbsp; &amp;nbsp; int&amp;nbsp; length;&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&amp;nbsp; &amp;nbsp; unsigned char data[];&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;};&lt;/div&gt;&lt;div style=&quot;font-size: 18px;&quot;&gt;&lt;br style=&quot;font-size: 18px;&quot;&gt;&lt;/div&gt;" placeholders="1" name="Variable" id="VQEeNGIACDoFzXtkc-uq-20">
+          <mxCell style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;overflow=hidden;fontSize=18;" vertex="1" parent="1">
+            <mxGeometry x="350" y="110" width="200" height="160" as="geometry"/>
+          </mxCell>
+        </UserObject>
+        <mxCell id="VQEeNGIACDoFzXtkc-uq-21" value="Regular object" style="text;html=1;resizable=0;autosize=1;align=center;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="20" y="10" width="130" height="30" as="geometry"/>
+        </mxCell>
+        <mxCell id="VQEeNGIACDoFzXtkc-uq-22" value="Internal class object" style="text;html=1;resizable=0;autosize=1;align=center;verticalAlign=middle;points=[];fillColor=none;strokeColor=none;rounded=0;fontSize=18;" vertex="1" parent="1">
+          <mxGeometry x="320" y="10" width="170" height="30" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -15,8 +15,6 @@
 #include <video/vconfig.h>
 #endif // VCONFIG_H
 
-
-
 #include <errno.h>
 
 #include <video/color.h>
@@ -209,7 +207,7 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 
 
 
-// These are special for mouse pointer code - they're not try to disable mouse
+// These are special for mouse pointer code - they're not trying to disable mouse
 #define scr_readblt_ms(from, xpos, ypos, xsize,ysize) video_drv->readblt(from, xpos, ypos, xsize,ysize )
 #define scr_bitblt_ms(from, xpos, ypos, xsize, ysize) video_drv->bitblt(from, xpos, ypos, xsize, ysize, ZBUF_TOP, 0)
 
@@ -221,6 +219,11 @@ extern struct drv_video_screen_t        video_driver_gen_clone;
 #define scr_mouse_on()                  video_drv->mouse_enable()
 
 
+// Convert y coordinate from Phantom style (grow up) to usual style (grow down)
+//#define Y_PHANTOM_TO_HOST(y) (scr_get_ysize() - (y))
+//#define Y_HOST_TO_PHANTOM(y) (scr_get_ysize() - (y))
+#define Y_PHANTOM_TO_HOST(y) ((video_drv->ysize) - (y) - 1)
+#define Y_HOST_TO_PHANTOM(y) ((video_drv->ysize) - (y) - 1)
 
 
 

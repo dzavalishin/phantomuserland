@@ -27,3 +27,19 @@ source -v ./.gdb-local
 
 #watch usec_per_tick
 
+#break phantom_paging_init
+#break hal_PIC_interrupt_dispatcher
+#break arch_adjust_after_thread_switch
+#break pvm_root_init
+
+#break scr_painter.c:213
+#break w_clear_control
+#break w_add_control
+#break find_visible_text_len
+
+#break ctl_text_field_paint
+#break ctl_text_field_events
+
+break ctl_text_field_events
+
+

@@ -114,23 +114,23 @@ protected static final byte opcode_froml = (byte)0x75; // cast from long
 protected static final byte opcode_fromf = (byte)0x76; // cast from float
 protected static final byte opcode_fromd = (byte)0x77; // cast from double
 // 73-7f
-// TODO kill shortcuts for we will have JIT anyway and bytecode size does not matter
-protected static final byte opcode_sys_0 = (byte)0x80; // shortcut for syscall 0
-protected static final byte opcode_sys_1 = (byte)0x81;
-protected static final byte opcode_sys_2 = (byte)0x82;
-protected static final byte opcode_sys_3 = (byte)0x83;
-protected static final byte opcode_sys_4 = (byte)0x84;
-protected static final byte opcode_sys_5 = (byte)0x85;
-protected static final byte opcode_sys_6 = (byte)0x86;
-protected static final byte opcode_sys_7 = (byte)0x87;
-protected static final byte opcode_sys_8 = (byte)0x88;
-protected static final byte opcode_sys_9 = (byte)0x89;
-protected static final byte opcode_sys_A = (byte)0x8A;
-protected static final byte opcode_sys_B = (byte)0x8B;
-protected static final byte opcode_sys_C = (byte)0x8C;
-protected static final byte opcode_sys_D = (byte)0x8D;
-protected static final byte opcode_sys_E = (byte)0x8E;
-protected static final byte opcode_sys_F = (byte)0x8F;
+// We can't have sys shortcuts because of syscall restart needs fixed sycall instr size for restart 
+//id(opcode_sys_0,0x80) // shortcut for syscall 0
+//id(opcode_sys_1,0x81)
+//id(opcode_sys_2,0x82)
+//id(opcode_sys_3,0x83)
+//id(opcode_sys_4,0x84)
+//id(opcode_sys_5,0x85)
+//id(opcode_sys_6,0x86)
+//id(opcode_sys_7,0x87)
+//id(opcode_sys_8,0x88)
+//id(opcode_sys_9,0x89)
+//id(opcode_sys_A,0x8A)
+//id(opcode_sys_B,0x8B)
+//id(opcode_sys_C,0x8C)
+//id(opcode_sys_D,0x8D)
+//id(opcode_sys_E,0x8E)
+//id(opcode_sys_F,0x8F)
 protected static final byte opcode_call_00 = (byte)0xA0; // shortcut for call 0
 protected static final byte opcode_call_01 = (byte)0xA1;
 protected static final byte opcode_call_02 = (byte)0xA2;

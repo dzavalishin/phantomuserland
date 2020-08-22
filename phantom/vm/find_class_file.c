@@ -25,7 +25,7 @@
 
 #define DEBUG 0
 
-static int do_load_class_from_file(const char *fn, struct pvm_object *out)
+static int do_load_class_from_file(const char *fn, pvm_object_t *out)
 {
     void *code;
     unsigned int size;
@@ -34,7 +34,7 @@ static int do_load_class_from_file(const char *fn, struct pvm_object *out)
     if(rc)
         return rc;
 
-    //struct pvm_object out;
+    //pvm_object_t out;
     rc = pvm_load_class_from_memory( code, size, out );
 
     free(code);
@@ -42,7 +42,7 @@ static int do_load_class_from_file(const char *fn, struct pvm_object *out)
 }
 
 
-int load_class_from_file(const char *cn, struct pvm_object *out)
+int load_class_from_file(const char *cn, pvm_object_t *out)
 {
     char * have_suffix = (char *)strstr( cn, ".pc" );
 

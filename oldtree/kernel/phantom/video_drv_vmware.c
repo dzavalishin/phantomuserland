@@ -12,7 +12,7 @@
 
 #define DEBUG_MSG_PREFIX "vmware"
 #include <debug_ext.h>
-#define debug_level_flow 8
+#define debug_level_flow 10
 #define debug_level_error 10
 #define debug_level_info 10
 
@@ -33,16 +33,19 @@
 #include <dev/pci/vmware/svga.h>
 
 
-#define VMWARE_VIDEO_DRV_DEFAULT_X_SIZE 1024
-#define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 768
+//#define VMWARE_VIDEO_DRV_DEFAULT_X_SIZE 1024
+//#define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 768
+#define VMWARE_VIDEO_DRV_DEFAULT_X_SIZE 1280
+//#define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 960
+#define VMWARE_VIDEO_DRV_DEFAULT_Y_SIZE 900
 
 static void dump_bits( u_int8_t *bits, size_t noutbytes ) __attribute__((unused));
 
 
-void vmware_draw_mouse_bp2(void);
-void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor );
-void vmware_mouse_on_bp2(void);
-void vmware_mouse_off_bp2(void);
+static void vmware_draw_mouse_bp2(void);
+static void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor );
+static void vmware_mouse_on_bp2(void);
+static void vmware_mouse_off_bp2(void);
 
 
 static int vmware_video_probe();
@@ -50,6 +53,10 @@ static int vmware_video_start();
 static int vmware_video_stop();
 static void vmware_video_update(void);
 static errno_t vmware_accel_start(void);
+
+static void vmware_accel_copy(int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize ); // Screen to screen copy    
+static void vmware_accel_clear(int xpos, int ypos, int xsize, int ysize ); // Screen rect clear
+
 
 static void vmware_detect2(int xsize, int ysize, int bpp);
 
@@ -66,6 +73,7 @@ void SVGA_Panic(const char *s) { panic("VmWare SVGA: %s", s); }
 
 SVGADevice gSVGA; // TODO rename
 
+static hal_mutex_t fifo_mutex;
 
 struct drv_video_screen_t        video_driver_vmware_svga =
 {
@@ -82,11 +90,11 @@ struct drv_video_screen_t        video_driver_vmware_svga =
 .screen		=	0,
 
 .probe	        =	vmware_video_probe,
-.start		= 	vmware_video_start,
-.accel		=	vmware_accel_start,
-.stop		=	vmware_video_stop,
+.start          = 	vmware_video_start,
+.accel          =	vmware_accel_start,
+.stop           =	vmware_video_stop,
 
-.update		=	vmware_video_update,
+.update         =	vmware_video_update,
 
 // todo hw mouse!
 #if 0
@@ -111,22 +119,24 @@ static int vmware_video_probe()
 
 
 // need 4Mbytes aperture
-#define N_PAGES 1024
+//#define N_PAGES 1024
+//#define N_PAGES 2048
 
 static void vmware_map_video(int on_off)
 {
+    int n_pages = BYTES_TO_PAGES(gSVGA.fbSize);
 
     if( video_driver_vmware_svga.screen == 0 )
     {
         void *vva;
 
-        if( hal_alloc_vaddress(&vva, N_PAGES) )
-            panic("Can't alloc vaddress for %d videmem pages", N_PAGES);
+        if( hal_alloc_vaddress(&vva, n_pages) )
+            panic("Can't alloc vaddress for %d videmem pages", n_pages);
 
         video_driver_vmware_svga.screen = vva;
     }
 
-    hal_pages_control( gSVGA.fbMem, video_driver_vmware_svga.screen, N_PAGES, on_off ? page_map_io : page_unmap, page_rw );
+    hal_pages_control( gSVGA.fbMem, video_driver_vmware_svga.screen, n_pages, on_off ? page_map_io : page_unmap, page_rw );
 
 }
 
@@ -204,12 +214,13 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
 {
     (void) stage;
     // TODO why?
-#if 1
+#if 0
     (void) pci;
     return 0;
 #else
     SHOW_FLOW0( 0, "Init" );
 
+    hal_mutex_init( &fifo_mutex, "vmware fifo" );
     /*
      * Use the default base address for each memory region.
      * We must map at least ioBase before using ReadReg/WriteReg.
@@ -218,13 +229,11 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
     //PCI_SetMemEnable(&gSVGA.pciAddr, 1);
     phantom_pci_enable( pci, 1 );
 
-    //gSVGA.ioBase = PCI_GetBARAddr(&gSVGA.pciAddr, 0);
-    //gSVGA.fbMem = (void*) PCI_GetBARAddr(&gSVGA.pciAddr, 1);
-    //gSVGA.fifoMem = (void*) PCI_GetBARAddr(&gSVGA.pciAddr, 2);
-
     gSVGA.ioBase =  pci->base[0];
     gSVGA.fbMem =   pci->base[1];
     gSVGA.fifoPhys = pci->base[2];
+
+    //gSVGA.fbMemSize =   pci->size[1];
 
     SHOW_FLOW( 1, "io %p, framebuf %p, fifo %p", (void *)gSVGA.ioBase, (void *)gSVGA.fbMem, (void *)gSVGA.fifoPhys );
 
@@ -270,12 +279,16 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
 
         if( gSVGA.capabilities & SVGA_CAP_RECT_FILL )
         {
+            // QEMU does it, TODO
+            video_driver_vmware_svga.clear = &vmware_accel_clear;
             SHOW_FLOW0( 2, "capas: rect fill" );
         }
 
         if( gSVGA.capabilities & SVGA_CAP_RECT_COPY )
         {
+            // QEMU does it, TODO
             SHOW_FLOW0( 2, "capas: rect copy" );
+            video_driver_vmware_svga.copy = &vmware_accel_copy;
         }
 
         if( gSVGA.capabilities & SVGA_CAP_RECT_PAT_FILL )
@@ -340,14 +353,14 @@ phantom_device_t * driver_vmware_svga_pci_probe( pci_cfg_t *pci, int stage )
         /* Enable the IRQ */
         //Intr_SetHandler(IRQ_VECTOR(irq), SVGAInterruptHandler);
         //Intr_SetMask(irq, TRUE);
-
+        /*
         if( hal_irq_alloc( irq, &SVGAInterruptHandler, 0, HAL_IRQ_SHAREABLE ) )
         {
             SHOW_ERROR( 0, "IRQ %d is busy", irq );
             return 0;
-        }
+        }*/
 
-        SHOW_FLOW( 1, "took urq %d", irq );
+        SHOW_FLOW( 1, "(unused) irq %d", irq );
     }
 
     gSVGA.found = 1;
@@ -496,10 +509,6 @@ SVGA_WriteReg(u_int32_t index, u_int32_t value)
 
 u_int32_t SVGA_ClearIRQ(void)
 {
-    //u_int32_t flags = 0;
-    //Atomic_Exchange(gSVGA.irq.pending, flags);
-    //return flags;
-    //return atomic_set( (int *) &gSVGA.irq.pending, 0 );
     return ATOMIC_FETCH_AND_SET( (int *) &gSVGA.irq.pending, 0 );
 }
 
@@ -769,7 +778,7 @@ SVGA_HasFIFOCap(int cap)
  *
  *-----------------------------------------------------------------------------
  */
-
+// TODO spinlock or mutex me
 void *
 SVGA_FIFOReserve(u_int32_t bytes)  // IN
 {
@@ -778,6 +787,8 @@ SVGA_FIFOReserve(u_int32_t bytes)  // IN
    u_int32_t min = fifo[SVGA_FIFO_MIN];
    u_int32_t nextCmd = fifo[SVGA_FIFO_NEXT_CMD];
    Bool reserveable = SVGA_HasFIFOCap(SVGA_FIFO_CAP_RESERVE);
+
+   hal_mutex_lock( &fifo_mutex );
 
    /*
     * This example implementation uses only a statically allocated
@@ -1005,6 +1016,8 @@ SVGA_FIFOCommit(u_int32_t bytes)  // IN
    if (reserveable) {
       fifo[SVGA_FIFO_RESERVED] = 0;
    }
+
+   hal_mutex_unlock( &fifo_mutex );
 }
 
 
@@ -1168,7 +1181,7 @@ SVGAFIFOFull(void)
        * for an arbitrary amount of time, then returns control back to
        * the guest CPU.
        */
-
+      //lprintf("vmware SVGA FIFO full\n");
       SVGA_WriteReg(SVGA_REG_SYNC, 1);
       SVGA_ReadReg(SVGA_REG_BUSY);
    }
@@ -1288,7 +1301,7 @@ SVGA_Update(u_int32_t x,       // IN
    SVGA_FIFOCommitAll();
 }
 
-
+// TODO can update not all the screen each time
 static void vmware_video_update(void)
 {
     if(!gSVGA.found) return;
@@ -1326,7 +1339,8 @@ static void vmware_video_update(void)
 void vmware_draw_mouse_bp2(void)
 {
     SVGA_WriteReg(SVGA_REG_CURSOR_X, video_driver_vmware_svga.mouse_x );
-    SVGA_WriteReg(SVGA_REG_CURSOR_Y, scr_get_ysize() - video_driver_vmware_svga.mouse_y );
+    //SVGA_WriteReg(SVGA_REG_CURSOR_Y, scr_get_ysize() - video_driver_vmware_svga.mouse_y );
+    SVGA_WriteReg(SVGA_REG_CURSOR_Y, Y_PHANTOM_TO_HOST(video_driver_vmware_svga.mouse_y) );
     SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_SHOW);
     SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_REMOVE_FROM_FB);
 }
@@ -1350,13 +1364,13 @@ static void alpha_to_bits_line( u_int8_t *bits, size_t noutbytes, rgba_t *pixels
         *bits >>= 1;
 
         //if( pixels->a )
-        if( (!!(*((int*)pixels) & mask)) ^ !!invert )
+        if( (!!(*((int*)pixels) & mask)) ^ (!!invert) )
             *bits |= 0x80;
 #else
         *bits <<= 1;
 
         //if( pixels->a )
-        if( (!!(*((int*)pixels) & mask)) ^ !!invert )
+        if( (!!(*((int*)pixels) & mask)) ^ (!!invert) )
             *bits |= 1;
 #endif
         pixels++;
@@ -1453,8 +1467,10 @@ void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
     memset(xorMask, 0xFF, xorSize);
 
     alpha_to_bits( andMask, andSize, cursor, 0xFF000000, 1 );
-#if !CUR32
+    //alpha_to_bits( xorMask, andSize, cursor, 0xFF000000, 1 );
     alpha_to_bits( xorMask, xorSize, cursor, 0x00FFFFFF, 0 );
+#if !CUR32
+//    alpha_to_bits( xorMask, xorSize, cursor, 0x00FFFFFF, 0 );
 #endif
 
 
@@ -1472,15 +1488,66 @@ void vmware_set_mouse_cursor_bp2( drv_video_bitmap_t *cursor )
 
 
 
-
 void vmware_mouse_off_bp2(void)
 {
-    SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_REMOVE_FROM_FB);
+    //SHOW_FLOW0( 0, "cursor off" );
+    //SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_REMOVE_FROM_FB);
 }
 
 void vmware_mouse_on_bp2(void)
 {
+    //SHOW_FLOW0( 0, "cursor on" );
     //SVGA_WriteReg(SVGA_REG_CURSOR_ON, SVGA_CURSOR_ON_RESTORE_TO_FB);
 }
+
+// there is no such bit in distributed header, but QEMU reports and, supposedly, does it
+static const int SVGA_CMD_RECT_FILL = 2;
+
+typedef
+struct {
+   uint32 color;
+   uint32 x;
+   uint32 y;
+   uint32 width;
+   uint32 height;
+} __packed
+SVGAFifoCmdFill;
+
+
+static void vmware_accel_clear(int xpos, int ypos, int xsize, int ysize ) // Screen rect clear
+{
+   SVGAFifoCmdFill *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_RECT_FILL, sizeof *cmd);
+   cmd->x = xpos;
+   cmd->y = Y_PHANTOM_TO_HOST(ypos) - ysize;
+   cmd->width = xsize;
+   cmd->height = ysize;
+   cmd->color = 0; // TODO add parameter and test
+   SVGA_FIFOCommitAll();
+}
+
+static void vmware_accel_copy(int src_xpos, int src_ypos, int dst_xpos, int dst_ypos, int xsize, int ysize ) // Screen to screen copy                
+{  
+    // TODO coord sanity check and clip, QEMU does not accept out of screen coords (negative at least)      
+   SVGAFifoCmdRectCopy *cmd = SVGA_FIFOReserveCmd(SVGA_CMD_RECT_COPY, sizeof *cmd);
+   cmd->srcX = src_xpos;
+   cmd->srcY = Y_PHANTOM_TO_HOST(src_ypos) - ysize;
+   cmd->destX = dst_xpos;
+   cmd->destY = Y_PHANTOM_TO_HOST(dst_ypos) - ysize;
+   cmd->width = xsize;
+   cmd->height = ysize;
+   SVGA_FIFOCommitAll();
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 #endif // ARCH_ia32

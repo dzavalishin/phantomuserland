@@ -1,3 +1,4 @@
+#!/bin/sh
 rm phantom.img
 touch phantom.img
 # 112 mb

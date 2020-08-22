@@ -454,13 +454,14 @@ fs_read_vnode(void *_ns, vnode_id vnid, char reenter, void **node)
 				result = InitNode(newNode, blockData + pos, NULL, ns->joliet_level);
 				newNode->id = vnid;
 				//dprintf("fs_read_vnode - init result is %s\n", strerror(result));
-								*node = (void*)newNode;
+                                *node = (void*)newNode;
 				//dprintf("fs_read_vnode - new file %s, size %ld\n", newNode->fileIDString, newNode->dataLen[FS_DATA_FORMAT]);
 				release_block(ns->fd, cachedBlock);
 			}
 		}
 	}
-	else result = ENOMEM;
+        else
+            result = ENOMEM;
 	
 	//dprintf("fs_read_vnode - EXIT, result is %s\n", strerror(result));
 	return result;
@@ -710,7 +711,7 @@ fs_readlink(void *_ns, void *_node, char *buf, size_t *bufsize)
 	#pragma unused(_ns)
 	int		result = EINVAL;
 	vnode*	node = (vnode*)_node;
-	size_t	length;
+	size_t	length = 0;
 	
 	if (S_ISLNK(node->attr.stat[FS_DATA_FORMAT].st_mode))
 	{

@@ -4,17 +4,14 @@
  *
  * Copyright (C) 2005-2009 Dmitry Zavalishin, dz@dz.ru
  *
- * Internal: No
- * Preliminary: Yes
- *
+ * User boot code.
  *
 **/
 
 package .ru.dz.phantom.system;
 
-// This is the first class ever loaded by Phantom.
-// 8-th method of it will be called and some special
-// boot object will be passed in.
+// This is the first class ever loaded by Phantom. An 8-th method of it
+// will be called and some special boot object will be passed in.
 
 // It is worth to mention that this code runs just ONCE in the
 // any Phantom instance's LIFE. At the very first OS instance start.
@@ -140,10 +137,6 @@ class boot
 
         runJavaTests();
 
-//print("Wait for 1 sec...\n");
-//sleep(); //sleep(); sleep();
-//print("Wait for 1 sec done\n");
-
         // TODO: This is temporary and is working only on first boot
         //setScreenBackgroud();
 
@@ -217,7 +210,6 @@ class boot
 
         // TODO: This is temporary and is working only on first boot
         setScreenBackgroud();
-
     }
 
 
@@ -237,14 +229,6 @@ class boot
 
         // Now set background!
         boot_object.20(bmp);
-        /*
-		var win : .internal.window;
-
-		win = new .internal.window();
-		win.setWinPosition(0,0);
-		win.setTitle("Background");
-		win.drawImage( 0, 0, bmp );
-		*/
     }
 
 

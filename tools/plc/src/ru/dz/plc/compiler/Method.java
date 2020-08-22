@@ -27,7 +27,7 @@ import ru.dz.plc.util.PlcException;
 public class Method
 {
 	public final static String CONSTRUCTOR_M_NAME = "<init>";
-	
+
 	private boolean		    constructor;
 	private int			    ordinal;
 	public Node             code;
@@ -64,7 +64,7 @@ public class Method
 			throw new PlcException("Method add_arg", "null type of arg", name);
 
 		args_def.add(new ArgDefinition(name, type));
-		svars.add_stack_var( new PhantomVariable(name, type ) );
+		svars.addStackVar( new PhantomVariable(name, type ) );
 	}
 
 
@@ -95,26 +95,38 @@ public class Method
 
 		// check number of args
 		int n_args = args_def.size();
-		String good_args_label = c.getLabel();
+		if(n_args < Byte.MAX_VALUE)
+		{
+			c.emit_arg_count_check(n_args);
+		}
+		else
+		{
+			String good_args_label = c.getLabel();
 
-		c.emitIConst_32bit(n_args);
-		c.emitISubLU();
-		c.emitJz(good_args_label);
+			c.emitIConst_32bit(n_args);
+			c.emitISubLU();
+			c.emitJz(good_args_label);
 
-		// TODO throw not string, but some meaningful class
-		// wrong count - throw string
-		// BUG! Need less consuming way of reporting this. Maybe by
-		// calling class object Method? Or by summoning something?
-		c.emitString("arg count: "+name + " in " + s.get_class().getName());
-		c.emitThrow();
+			// TODO throw not string, but some meaningful class
+			// wrong count - throw string
+			
+			String msg = "arg count: "+name + " in " + s.get_class().getName();
+			
+			//c.emitString(msg);
+			
+			int const_id = s.get_class().addStringConst(msg);
+			c.emitConstantPool(const_id);
+			
+			c.emitThrow();
 
-		c.markLabel(good_args_label);
+			c.markLabel(good_args_label);
+		}
 
 		if(requestDebug) c.emitDebug((byte)0x1,"Enabled debug");
 
 		if( (n_int_auto_vars > 0) || (n_auto_vars > 0) )
 			c.emitStackReserve(n_auto_vars, n_int_auto_vars);
-		
+
 		/*{
 		// push nulls to reserve stack space for autovars
 		// BUG! We can execute vars initialization code here, can we?
@@ -131,7 +143,7 @@ public class Method
 		}*/
 		// TODO we can provide const pool binary blob with init data and load it with one 
 		// big instruction
-		
+
 		// ------------------------------------------
 
 
@@ -459,6 +471,11 @@ public class Method
 		return s.toString();
 	}
 
+	public void propagateVoid() {
+		if( code != null )
+			code.propagateVoidParents();		
+	}
+	
 
 	private boolean preprocessed = false;
 	public void preprocess( PhantomClass myClass ) throws PlcException 
@@ -473,6 +490,9 @@ public class Method
 
 	private void preprocessParentConstructor(PhantomClass myClass) throws PlcException 
 	{
+		// TODO will fail on empty constructors in intermediate classed - code == null
+		//System.out.println("preprocessParentConstructor for "+myClass.getName());
+		
 		// don't call constructor for parent of all classes
 		if( myClass.getParent().equals(".internal.object") )
 			return;
@@ -480,27 +500,29 @@ public class Method
 		// And for itself
 		if( myClass.getName().equals(".internal.object") )
 			return;
-		
+
 		if( checkConstructorCall( code, myClass ) == SearchResult.Ok )
 			return;
 
-		// No base class c'tor call found, add call to default c'tor
+		// No base class c'tor call found
+		// Create call to default c'tor
+		//System.out.println("create parent constructor call "+myClass.getName());
 
 		String parentClassName = myClass.getParent();
-		
+
 		if( (parentClassName == null) || (parentClassName.equals(".internal.object")) )
 			return;
-		
+
 		PhantomClass parentClass = ClassMap.get_map().get(parentClassName, true, null);
-		
+
 		if( parentClass == null )
-				throw new PlcException("preprocessParentConstructor", "parent class not found: "+parentClassName, myClass.getName());
-		
+			throw new PlcException("preprocessParentConstructor", "parent class not found: "+parentClassName, myClass.getName());
+
 		Method defCtor = parentClass.getDefaultConstructor();
 
 		if( defCtor == null )
 			throw new PlcException("preprocessParentConstructor", "parent class ("+parentClassName+") has no default constructor", myClass.getName());
-		
+
 		Node ctorCall = new OpStaticMethodCallNode(
 				new ThisNode(myClass),
 				defCtor.getOrdinal(),
@@ -508,29 +530,29 @@ public class Method
 				// myClass // No!!
 				parentClass
 				);
-		ctorCall.setType(PhantomType.getVoid());
+		ctorCall.presetType(PhantomType.getVoid());
 		Node newRoot = new SequenceNode(ctorCall, code);
-		
+
 		code = newRoot;
 	}
 
 	static private enum SearchResult {
 		Continue, Ok, Fail
 	};
-	
+
 	private SearchResult checkConstructorCall(Node n, final PhantomClass myClass) throws PlcException {
 		// Find first meaningful node, check if it is static call of parent's c'tor
 
 		if( n == null ) return SearchResult.Continue;
-		
+
 		if (n instanceof SequenceNode) {
 			SequenceNode sn = (SequenceNode) n;
-			
+
 			SearchResult r;
-			
+
 			r = checkConstructorCall( sn.getLeft(), myClass );
 			if( r != SearchResult.Continue ) return r;
-			
+
 			return checkConstructorCall( sn.getRight(), myClass );				
 		}
 
@@ -539,41 +561,41 @@ public class Method
 			StatementsNode sn = (StatementsNode) n;
 
 			List<Node> nodes = sn.getNodeList();
-			
+
 			for( Node t : nodes )
 			{			
 				SearchResult r = checkConstructorCall( t, myClass );
 				if( r != SearchResult.Continue ) return r;
 			}
-			
+
 			return SearchResult.Continue;
 		}
 
 		// not sequence - now check it
-		
+
 		if (n instanceof OpStaticMethodCallNode) {
 			OpStaticMethodCallNode mc = (OpStaticMethodCallNode) n;
-			
+
 			// got static call - supposedly it calls base class constructor, check it
-			
+
 			Node new_this = mc.getLeft(); // This for static call
-			
+
 			if (!(new_this instanceof ThisNode)) {			
 				throw new PlcException("checkConstructorCall", "first call is not for 'this', so it is not a base class constructor");
 			}
-			
+
 			PhantomClass cc = mc.getCallClass();
-			
+
 			if( !cc.getName().equals(myClass.getParent()) )
 				throw new PlcException("checkConstructorCall", "our parent is "+myClass.getParent()+", but c'tor call is for "+cc.getName());
-				//throw new PlcException("checkConstructorCall", "our base is "+myClass.getName()+", but c'tor call is for "+cc.getName());
+			//throw new PlcException("checkConstructorCall", "our base is "+myClass.getName()+", but c'tor call is for "+cc.getName());
 
 			int ord = mc.getOrdinal();
-			
+
 			Method ctor = cc.getMethod(ord);
 			if( ctor == null )
-				throw new PlcException("checkConstructorCall", "base c'tor is null" );
-			
+				throw new PlcException("checkConstructorCall", "base c'tor is null", cc.getName() );
+
 			if( !ctor.isConstructor() )
 				throw new PlcException("checkConstructorCall", "base c'tor is not really c'tor" );
 
@@ -581,14 +603,15 @@ public class Method
 				throw new PlcException("checkConstructorCall", "base c'tor method name is not "+Method.CONSTRUCTOR_M_NAME );
 
 			// Seems we checked it all
-			
+
 			return SearchResult.Ok;
 		}
-		
+
 		// First found code is not base c'tor call - fail
-		
+
 		return SearchResult.Fail;
 	}
+
 }
 
 

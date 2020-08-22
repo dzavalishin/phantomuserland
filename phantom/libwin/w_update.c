@@ -26,12 +26,12 @@
 #if !USE_ONLY_INDIRECT_PAINT
 
 	
-void drv_video_winblt( drv_video_window_t *from );
+//void drv_video_winblt( drv_video_window_t *from );
 
 void w_update( drv_video_window_t *w ) 
 { 
 #if 0
-    w_switch_buffers(w); 
+    iw_switch_buffers(w); 
 #else
     rect_t r;
     w_get_bounds( w, &r );
@@ -41,10 +41,9 @@ void w_update( drv_video_window_t *w )
 }
 
 #else
-// TODO rename to w_update
 void w_update( drv_video_window_t *w ) 
 {
-    w_switch_buffers(w); 
+    iw_switch_buffers(w); 
     ev_q_put_win( 0, 0, UI_EVENT_WIN_REPAINT, w );
 }
 

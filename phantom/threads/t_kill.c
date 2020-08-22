@@ -173,11 +173,15 @@ static errno_t t_do_kill_thread( phantom_thread_t * t )
     // If any timed call is scheduled - kill it
     phantom_undo_timed_call( &t->sleep_event );
 
-#if NEW_SNAP_SYNC
-    t_release_snap_locks();
-#endif
+//#if NEW_SNAP_SYNC
+//#warning makes sense - if thread is killed while holding obj mem lock, snaps will stop forever
+//    t_release_snap_locks();
+//#endif
+    //atomic_add( &vm_persistent_memory_lock_count, - (t->sub_from_pers_mem_lock_count) );
+    vm_release_snap_lock( t->sub_from_pers_mem_lock_count );
 
-    errno_t rc = port_delete_owned_ports( tid, 0 );
+
+    errno_t rc = phantom_port_delete_owned_ports( tid, 0 );
     if( rc )
         SHOW_ERROR( 0, "Can't kill thread ports: %d", rc );
 

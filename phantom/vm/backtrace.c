@@ -109,7 +109,7 @@ void pvm_backtrace_current_thread(void)
 
     struct data_area_4_thread *tda = (struct data_area_4_thread *)&_ow->da;
 
-    if( _ow->_class.data != pvm_get_thread_class().data )
+    if( _ow->_class != pvm_get_thread_class() )
     {
         printf("pvm_backtrace - not thread in owner!\n");
         return;
@@ -139,9 +139,8 @@ void pvm_backtrace(struct data_area_4_thread *tda)
         return;
     }
 
-    printf("pvm_backtrace thread IP %d\n", code->IP);
-
-    printf("pvm_backtrace thread this:\n");
+    printf("backtrace thread IP %d, this: ", code->IP);
+    //printf(", this:\n");
     pvm_object_dump(tda->_this_object);
     printf("\n\n");
 
@@ -153,33 +152,29 @@ void pvm_backtrace(struct data_area_4_thread *tda)
 
         struct data_area_4_call_frame *fda = pvm_object_da(sframe,call_frame);
 
-        printf("pvm_backtrace frame:\n");
-        pvm_object_dump(sframe);
-        printf("\n");
+        //printf("pvm_backtrace frame:\n");        pvm_object_dump(sframe);        printf("\n");
 
-        printf("pvm_backtrace frame this:\n");
+        printf("frame this:\n");
         pvm_object_t thiso = fda->this_object;
         pvm_object_dump(thiso);
         printf("\n");
 
-        pvm_object_t tclass = thiso.data->_class;
+        pvm_object_t tclass = thiso->_class;
         int ord = fda->ordinal;
 
-        printf("pvm_backtrace frame IP: %d Method ordinal %d\n", fda->IP, ord );
+        printf("frame IP: %d Method ordinal %d\n", fda->IP, ord );
+        
+        pvm_object_t mname = pvm_get_method_name( tclass, ord );
+        pvm_object_print(mname);
 
         int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
-        if( lineno >= 0 )
-        {
-            pvm_object_t mname = pvm_get_method_name( tclass, ord );
-
-            pvm_object_print(mname);
-            printf(":%d\n", lineno);
-        }
+        //if( lineno >= 0 )
+        printf(":%d\n", lineno);
 
         printf("\n\n");
         sframe = fda->prev;
     }
-
+    printf("--- backtrace END\n" );
 }
 
 
@@ -198,7 +193,7 @@ void pvm_trace_here(struct data_area_4_thread *tda)
     //printf("pvm_trace_here thread this:\n");
     printf("%% ");
 #if 1
-    struct pvm_object cn = pvm_get_class_name( tda->_this_object );
+    pvm_object_t cn = pvm_get_class_name( tda->_this_object );
     pvm_object_print( cn );
 #else
     pvm_object_dump(tda->_this_object);
@@ -217,16 +212,13 @@ void pvm_trace_here(struct data_area_4_thread *tda)
     //if( !pvm_object_class_is(sframe, pvm_get_stack_frame_class()) ) ??!
 
     struct data_area_4_call_frame *fda = pvm_object_da(sframe,call_frame);
-
     //printf("pvm_backtrace frame:\n");    pvm_object_dump(sframe);    printf("\n");
 
-    pvm_object_t thiso = fda->this_object;
-
-    //printf("pvm_backtrace frame this:\n");    pvm_object_dump(thiso);    printf("\n");
-
-    pvm_object_t tclass = thiso.data->_class;
     int ord = fda->ordinal;
 /*
+    pvm_object_t thiso = fda->this_object;
+    //printf("pvm_backtrace frame this:\n");    pvm_object_dump(thiso);    printf("\n");
+    pvm_object_t tclass = thiso->_class;
     printf("pvm_backtrace frame IP: %d Method ordinal %d\n", fda->IP, ord );
 
     int lineno = pvm_ip_to_linenum(tclass, ord, fda->IP);
@@ -264,7 +256,7 @@ int pvm_ip_to_linenum(pvm_object_t tclass, int method_ordinal, int ip)
 
     struct data_area_4_binary * bin = pvm_object_da( map, binary );
 
-    int nrecords = (map.data->_da_size)/sizeof(struct vm_code_linenum);
+    int nrecords = (map->_da_size)/sizeof(struct vm_code_linenum);
 
     struct vm_code_linenum *sp = (void *)bin->data;
 
@@ -297,7 +289,7 @@ pvm_object_t pvm_get_method_name( pvm_object_t tclass, int method_ordinal )
     struct data_area_4_class *cda= pvm_object_da( tclass, class );
     pvm_object_t mnames = cda->method_names;
 
-    if( pvm_is_null(mnames))
+    if( pvm_is_null(mnames) )
         return pvm_get_null_object();
 
     pvm_object_t name = pvm_get_ofield( mnames, method_ordinal );
@@ -312,7 +304,7 @@ int pvm_get_method_name_count( pvm_object_t tclass )
     if( pvm_is_null(mnames))
         return 0;
 
-    return get_array_size( mnames.data );
+    return get_array_size( mnames );
 }
 
 // returns ord or -1
@@ -331,7 +323,7 @@ int pvm_get_method_ordinal( pvm_object_t tclass, pvm_object_t mname )
         return -1;
 
 
-    int nitems = get_array_size( mnames.data );
+    int nitems = get_array_size( mnames );
     int i;
 
     for( i = 0; i < nitems; i++ )
@@ -373,7 +365,7 @@ int pvm_get_field_name_count( pvm_object_t tclass )
     if( pvm_is_null(fnames))
         return 0;
 
-    return get_array_size( fnames.data );
+    return get_array_size( fnames );
 }
 
 
@@ -389,5 +381,5 @@ pvm_object_t pvm_get_class( pvm_object_t o )
     if( pvm_is_null(o))
         return o;
 
-    return o.data->_class;
+    return o->_class;
 }

@@ -1,4 +1,7 @@
 Class .ru.dz.phantom.system.iterable
+  C'tor  void <init>(  ):
+    empty : void
+
   Method int hasNext(  ):
   -- No code!
 

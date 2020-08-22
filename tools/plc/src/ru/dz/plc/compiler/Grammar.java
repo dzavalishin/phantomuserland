@@ -61,7 +61,7 @@ extends GrammarHelper {
 	}
 
 	public void print() throws PlcException { classes.print(); }
-	public void codegen() throws PlcException, IOException { classes.codegen(); }
+	//public void codegen() throws PlcException, IOException { classes.codegen(); }
 
 
 	public Node parse() throws PlcException, IOException {
@@ -91,7 +91,8 @@ extends GrammarHelper {
 			l.commit(); // no unget after this point
 		}
 
-		out.preprocess(ps);
+		// No, do it in driver
+		//out.preprocess(ps);
 
 		return out;
 	}
@@ -433,8 +434,8 @@ extends GrammarHelper {
 		PhantomClass c;
 		c = classes.get( cn, true, null);
 		if( c == null ) return null;
-		t = new PhantomType(c);
-		t.set_is_container(is_container);
+		t = new PhantomType(c).toContainer();
+		//t.set_is_container(is_container);
 		return t;
 	}
 
@@ -444,6 +445,12 @@ extends GrammarHelper {
 		return null;
 	}*/
 
+	/**
+	 * Check if given method name is constructor name.
+	 * @param me current class
+	 * @param mname method name
+	 * @return True if name is equal to class name
+	 */
 	private boolean checkConstructorName(PhantomClass me, String mname) 
 	{
 		//System.err.println(String.format("!!! is ctor? nmame=%s, me.name = %s", mname, me.getName()));
@@ -515,7 +522,10 @@ extends GrammarHelper {
 			String cln = parseClassName(false);
 
 			if( cln.equals("int") ) main_type = new PhTypeInt();
-			else if( cln.equals("string") ) main_type = new PhTypeString();
+			else if( cln.equals("long") ) main_type = new PhTypeLong();
+			else if( cln.equals("float") ) main_type = new PhTypeFloat();
+			else if( cln.equals("double") ) main_type = new PhTypeDouble();
+			else if( cln.equals("string") ) main_type = PhantomType.getString();
 			else
 			{
 				PhantomClass c = classes.get(cln, false, ps);
@@ -532,11 +542,13 @@ extends GrammarHelper {
 		{
 			if( testAndEat( id_rbracket ) )
 			{
-				main_type.set_is_container(true);
+				//main_type.set_is_container(true);
+				main_type = main_type.toContainer();
 			}
 			else
 			{
-				main_type.set_is_container(true);
+				//main_type.set_is_container(true);
+				main_type = main_type.toContainer();
 
 				if( testAndEat( id_aster ) )
 					main_type._container_class_expression = parseExpression(false);
@@ -550,7 +562,8 @@ extends GrammarHelper {
 		// atrrs
 		parse_attributes( false );
 
-		main_type.setStatic(iAmStatic);
+		//main_type.setStatic(iAmStatic);
+		if(iAmStatic) main_type = main_type.toStatic();
 		
 		return main_type;
 	}
@@ -709,10 +722,10 @@ extends GrammarHelper {
 		String ident = getIdent();
 		expect(id_colon);
 		PhantomType t = parseType();
-		if( t.is_int() )
-			ps.get_method().isvars.add_stack_var(new PhantomVariable(ident, t));
+		if( t.is_on_int_stack() )
+			ps.get_method().isvars.addStackVar(new PhantomVariable(ident, t));
 		else
-			ps.get_method().svars.add_stack_var(new PhantomVariable(ident, t));
+			ps.get_method().svars.addStackVar(new PhantomVariable(ident, t));
 		expect( id_semicolon);
 		return null;
 	}
@@ -795,7 +808,7 @@ extends GrammarHelper {
 		expect(id_rparen);
 		Node catcher = parseOperator();
 
-		ps.get_method().svars.add_stack_var(new PhantomVariable(id_name,t));
+		ps.get_method().svars.addStackVar(new PhantomVariable(id_name,t));
 
 		return new CatchNode( t, id_name, code, catcher ).setContext( l );
 	}
@@ -859,10 +872,10 @@ extends GrammarHelper {
 		Node code = parseOperator();
 
 		// TODO Must have type of expression!
-		ps.get_method().svars.add_stack_var(new PhantomVariable(ident.value(),new PhTypeUnknown()));
+		ps.get_method().svars.addStackVar(new PhantomVariable(ident.value(),new PhTypeUnknown()));
 
 		// secondary (internal) var to keep iterator
-		ps.get_method().svars.add_stack_var(new PhantomVariable(ident.value()+"$iterator",new PhTypeUnknown()));
+		ps.get_method().svars.addStackVar(new PhantomVariable(ident.value()+"$iterator",new PhTypeUnknown()));
 
 		return new ForeachNode( ident.value(), expr, code ).setContext( l );
 	}
@@ -1233,7 +1246,7 @@ extends GrammarHelper {
 				{
 					String mname = getIdent();
 
-					ps.get_method().svars.add_stack_var(new PhantomVariable(mname, td));
+					ps.get_method().svars.addStackVar(new PhantomVariable(mname, td));
 					return new EmptyNode();
 				}
 				/*

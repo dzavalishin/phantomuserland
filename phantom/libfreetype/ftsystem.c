@@ -223,9 +223,10 @@
   FT_Stream_Open( FT_Stream    stream,
                   const char*  filepathname )
   {
-    struct stat st;
+    //struct stat st;
+    unsigned size;
 
-    if( k_stat( filepathname, &st, 0 ) )
+    if( k_stat_size( filepathname, &size ) )
     {
       FT_ERROR(( "FT_Stream_Open:" ));
       FT_ERROR(( " could not stat `%s'\n", filepathname ));
@@ -233,7 +234,7 @@
       return FT_Err_Cannot_Open_Resource;
     }
 
-    stream->size = st.st_size;
+    stream->size = size;
 
     int fd;
 
@@ -255,9 +256,8 @@
     stream->read  = ft_ansi_stream_io;
     stream->close = ft_ansi_stream_close;
 
-    FT_TRACE1(( "FT_Stream_Open:" ));
-    FT_TRACE1(( " opened `%s' (%d bytes) successfully\n",
-                filepathname, stream->size ));
+    //FT_TRACE1(( "FT_Stream_Open:" ));
+    //FT_TRACE1(( " opened `%s' (%d bytes) successfully\n",                filepathname, stream->size ));
 
     return FT_Err_Ok;
   }
@@ -372,9 +372,8 @@
     stream->read  = ft_ansi_stream_io;
     stream->close = ft_ansi_stream_close;
 
-    FT_TRACE1(( "FT_Stream_Open:" ));
-    FT_TRACE1(( " opened `%s' (%d bytes) successfully\n",
-                filepathname, stream->size ));
+    //FT_TRACE1(( "FT_Stream_Open:" ));
+    //FT_TRACE1(( " opened `%s' (%d bytes) successfully\n",                filepathname, stream->size ));
 
     return FT_Err_Ok;
   }

@@ -24,7 +24,8 @@ import ru.dz.plc.util.PlcException;
  */
 
 
-public class OpMethodCallNode extends TriNode {
+public class OpMethodCallNode extends TriNode 
+{
 	PhantomType obj_type = null; // type of object, which is used as 'this' in call
 
 	public OpMethodCallNode(Node object, Node method, Node args) 
@@ -48,7 +49,7 @@ public class OpMethodCallNode extends TriNode {
 		MethodSignature sig = new MethodSignature(method.getIdent(), _r);
 		method.setSignature(sig);
 
-		type = method.get_return_type(obj_type);
+		presetType(method.get_return_type(obj_type));
 	}
 
 	public void generate_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
@@ -65,13 +66,9 @@ public class OpMethodCallNode extends TriNode {
 		generate_my_code(c,s);
 	}
 
-	public void find_out_my_type() throws PlcException {
-		if( type == null )
-		{
-			print_error("return type is not set");
-			throw new PlcException("Method call Node","return type is not set");
-		}
-		//type = new ph_type_unknown(); // BUG! Wrong!
+	public PhantomType find_out_my_type() throws PlcException {
+		print_error("return type is not set");
+		throw new PlcException("Method call Node","return type is not set");
 	}
 
 	public void generate_my_code(Codegen c, CodeGeneratorState s) throws IOException, PlcException
