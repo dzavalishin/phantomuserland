@@ -55,7 +55,7 @@ More screenshots:  <https://github.com/dzavalishin/phantomuserland/wiki/ScreenSh
   Select, at least: gcc4, subversion, binutils, make, gdb
   (see etc/cygwin_get.cmd)
   
-  See also [TOOLCHAIN](https://github.com/dzavalishin/phantomuserland/blob/master/TOOLCHAIN)
+  See also [TOOLCHAIN](https://github.com/dzavalishin/phantomuserland/blob/master/TOOLCHAIN.md)
 
 ## Run ##
 
