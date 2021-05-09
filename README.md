@@ -1,9 +1,9 @@
 # Welcome to Phantom OS #
 
 Phantom OS is a persistent operating system. Its primary goal
-is to provide environment for programs that does survive OS
+is to provide an environment for programs which survives the OS
 reboot. Such an environment greatly simplifies software development
-and makes it possible to write programs that, for example, do not need filesystem.
+and makes it possible to write programs that, for example, do not need a filesystem.
 
 Nevertheless, Phantom supports filesystems and all of the modern OS features.
 
