@@ -11,6 +11,8 @@ For the details please refer to the [Phantom OS Programmer's guide](https://phan
 
 For the questions and discussion please visit [chat](https://gitter.im/PhantomOS/HowTo) or [Google Group](https://groups.google.com/forum/?pli=1#!forum/phantom-os).
 
+See also: https://gitverse.ru/dzavalishin/phantom
+
 ## What Phantom OS is ##
 
 * [Phantom OS Programmer's guide](https://phantomdox.readthedocs.io/en/latest/)
