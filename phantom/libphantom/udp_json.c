@@ -146,6 +146,11 @@ static int new_value (json_state * state,
             if (value->u.array.length == 0)
                break;
 
+            if ((unsigned long) value->u.array.length > state->ulong_max / sizeof (json_value *))
+            {
+               return 0;
+            }
+
             if (! (value->u.array.values = (json_value **) json_alloc
                (state, value->u.array.length * sizeof (json_value *), 0)) )
             {
@@ -159,6 +164,11 @@ static int new_value (json_state * state,
 
             if (value->u.object.length == 0)
                break;
+
+            if (value->u.object.length > (int) (INT_MAX / sizeof (*value->u.object.values)))
+            {
+               return 0;
+            }
 
             values_size = sizeof (*value->u.object.values) * value->u.object.length;
 
